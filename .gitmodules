@@ -4,6 +4,3 @@
 [submodule "submodules/MinHook"]
 	path = submodules/MinHook
 	url = https://github.com/TsudaKageyu/minhook
-[submodule "submodules/gd"]
-	path = submodules/gd
-	url = https://github.com/poweredbypie/gd.h
