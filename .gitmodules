@@ -1,9 +1,0 @@
-[submodule "submodules/Cappuccino"]
-	path = submodules/Cappuccino
-	url = https://github.com/AndreNIH/CappuccinoSDK/
-[submodule "submodules/MinHook"]
-	path = submodules/MinHook
-	url = https://github.com/TsudaKageyu/minhook
-[submodule "submodules/gd"]
-	path = submodules/gd
-	url = https://github.com/HJfod/gd.h
