@@ -5,7 +5,7 @@ using namespace gdmake;
 
 int strToInt(const char* str) {
     bool isStr = true;
-    for (int i = 0; i < strlen(str); i++)
+    for (auto i = 0u; i < strlen(str); i++)
         if (!isdigit(str[i]))
             isStr = false;
 
@@ -118,7 +118,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     spr->setScale(.5f);
     spr->setColor({ 0, 0, 0 });
     spr->setOpacity(100);
-    spr->setContentSize({ 70.0f, 50.0f });
+    spr->setContentSize({ 70.0f, 40.0f });
     spr->setPosition(self->m_pCurrentLayerLabel->getPosition());
 
     auto eLayerInput = gd::CCTextInputNode::create("All", ed, "bigFont.fnt", 40.0f, 30.0f);
