@@ -115,10 +115,10 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
         "square02b_001.png", { 0.0f, 0.0f, 80.0f, 80.0f }
     );
 
-    spr->setScale(.5f);
+    spr->setScale(.3f);
     spr->setColor({ 0, 0, 0 });
     spr->setOpacity(100);
-    spr->setContentSize({ 70.0f, 40.0f });
+    spr->setContentSize({ 115.0f, 75.0f });
     spr->setPosition(self->m_pCurrentLayerLabel->getPosition());
 
     auto eLayerInput = gd::CCTextInputNode::create("All", ed, "bigFont.fnt", 40.0f, 30.0f);
