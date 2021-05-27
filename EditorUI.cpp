@@ -1,16 +1,8 @@
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
+#include "utils.hpp"
 
 using namespace gdmake;
-
-int strToInt(const char* str) {
-    bool isStr = true;
-    for (auto i = 0u; i < strlen(str); i++)
-        if (!isdigit(str[i]))
-            isStr = false;
-
-    return isStr ? std::atoi(str) : -1;
-}
 
 class EUITextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
     public:

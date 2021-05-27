@@ -37,13 +37,14 @@ class AddHSVTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate 
             float val = 0.0f;
 
             if (input->getString() && strlen(input->getString()))
-                val = std::atof(input->getString());
+                val = static_cast<float>(std::atof(input->getString()));
 
             switch (reinterpret_cast<int>(input->getUserData())) {
                 case 5:
                     m_pGIL->m_pHueSlider->setValue((val + 180.0f) / 360.0f);
                     m_pGIL->m_fHueValue = val;
                     break;
+
                 case 6:
                     if (m_pGIL->m_bAbsoluteSaturation)
                         m_pGIL->m_pSaturationSlider->setValue((val + 1.0f) / 2);
@@ -51,6 +52,7 @@ class AddHSVTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate 
                         m_pGIL->m_pSaturationSlider->setValue(val / 2);
                     m_pGIL->m_fSaturationValue = val;
                     break;
+
                 case 7:
                     if (m_pGIL->m_bAbsoluteBrightness)
                         m_pGIL->m_pBrightnessSlider->setValue((val + 1.0f) / 2);

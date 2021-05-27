@@ -1,5 +1,6 @@
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
+#include "utils.hpp"
 
 using namespace gdmake;
 
@@ -100,26 +101,29 @@ void __fastcall SetGroupIDLayer_onZOrder(SetGroupIDLayer* self, edx_t edx, cocos
 GDMAKE_HOOK(0x22d610)
 void __fastcall SetGroupIDLayer_textChanged(SetGroupIDLayer* self, edx_t edx, gd::CCTextInputNode* input) {
     int val = 0;
+    bool isInt = true;
+
+    if (input->getString() && strlen(input->getString()) > 0)
+        val = strToInt(input->getString(), &isInt);
 
     switch (reinterpret_cast<int>(input->getUserData())) {
         case 5:
-            if (input->getString() && strlen(input->getString()) > 0)
-                val = std::atoi(input->getString());
+            if (!isInt) return;
 
             self->m_nEditorLayer = val;
             self->updateEditorLayerID();
             break;
-        case 6:
-            if (input->getString() && strlen(input->getString()) > 0)
-                val = std::atoi(input->getString());
 
+        case 6:
+            if (!isInt) return;
+            
             self->m_nEditorLayer2 = val;
             self->updateEditorLayerID2();
             break;
-        case 7:
-            if (input->getString() && strlen(input->getString()) > 0)
-                val = std::atoi(input->getString());
 
+        case 7:
+            if (!isInt) return;
+            
             self->m_nZOrder = val;
             self->updateZOrder();
             break;
@@ -134,7 +138,7 @@ void turnLabelIntoInput(
     cocos2d::CCLabelBMFont* text,
     AddTextDelegate* ad,
     int id,
-    int ov,
+    const char* ov,
     std::string const& ac = "0123456789"
 ) {
     text->setVisible(false);
@@ -159,7 +163,7 @@ void turnLabelIntoInput(
     eLayerInput->setDelegate(ad);
     eLayerInput->setUserData(reinterpret_cast<void*>(id));
     eLayerInput->setTag(id + 64);
-    eLayerInput->setString(std::to_string(ov).c_str());
+    eLayerInput->setString(ov);
 
     self->addChild(spr);
     self->addChild(eLayerInput);
@@ -177,9 +181,9 @@ bool __fastcall SetGroupIDLayer_initHook(
 
     auto inp = AddTextDelegate::create(self);
 
-    turnLabelIntoInput(self, self->m_pEditorLayerText, inp, 5, self->m_nEditorLayer);
-    turnLabelIntoInput(self, self->m_pEditorLayer2Text, inp, 6, self->m_nEditorLayer2);
-    turnLabelIntoInput(self, self->m_pZOrderText, inp, 7, self->m_nZOrder, "-0123456789");
+    turnLabelIntoInput(self, self->m_pEditorLayerText, inp, 5, self->m_pEditorLayerText->getString());
+    turnLabelIntoInput(self, self->m_pEditorLayer2Text, inp, 6, self->m_pEditorLayer2Text->getString());
+    turnLabelIntoInput(self, self->m_pZOrderText, inp, 7, self->m_pZOrderText->getString(), "-0123456789");
 
     self->addChild(inp);
 
