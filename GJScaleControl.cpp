@@ -1,21 +1,8 @@
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
-#include "GJScaleControl.hpp"
+#include "passTouch.hpp"
 
 using namespace gdmake;
-
-cocos2d::CCSprite* createLockSprite(const char* bg, const char* spr) {
-    auto lockSpr = cocos2d::CCSprite::create(bg);
-
-    auto lockSpr_lock = cocos2d::CCSprite::createWithSpriteFrameName(spr);
-    lockSpr_lock->setPosition(lockSpr->getContentSize() / 2);
-
-    lockSpr->addChild(lockSpr_lock);
-    lockSpr->setScale(.45f);
-    lockSpr->setContentSize(lockSpr->getScaledContentSize());
-
-    return lockSpr;
-}
 
 class ScaleTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
     public:
@@ -104,11 +91,13 @@ bool pointIntersectsScaleControls(gd::EditorUI* self, cocos2d::CCTouch* touch, c
     }
 
     if (std) {
-        auto inputNodeSize = std->m_pInputNode->getScaledContentSize() * 1.1f;
+        auto inputNodeSize = std->m_pInputNode->getScaledContentSize();
+        inputNodeSize.width *= 2;
+        inputNodeSize.height *= 1.5f;
 
         auto inputRect = cocos2d::CCRect {
             self->m_pScaleControl->getPositionX() + std->m_pInputNode->getPositionX() - inputNodeSize.width / 2,
-            self->m_pScaleControl->getPositionY() + std->m_pInputNode->getPositionY() - inputNodeSize.height / 2,
+            self->m_pScaleControl->getPositionY() + std->m_pInputNode->getPositionY(),
             inputNodeSize.width,
             inputNodeSize.height
         };

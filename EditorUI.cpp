@@ -1,7 +1,7 @@
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
 #include "utils.hpp"
-#include "GJScaleControl.hpp"
+#include "passTouch.hpp"
 
 using namespace gdmake;
 
@@ -62,9 +62,11 @@ bool __fastcall EditorUI_ccTouchBegan(gd::EditorUI* self, edx_t edx, cocos2d::CC
 
         if (!rect.containsPoint(touch->getLocation()))
             reinterpret_cast<gd::CCTextInputNode*>(i)->getTextField()->detachWithIME();
+        else
+            return true;
     }
     
-    if (pointIntersectsScaleControls(self_, touch, event))
+    if (pointIntersectsControls(self_, touch, event))
         return true;
 
     return GDMAKE_ORIG(self, edx, touch, event);
