@@ -1,6 +1,7 @@
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
 #include "utils.hpp"
+#include "GJScaleControl.hpp"
 
 using namespace gdmake;
 
@@ -29,6 +30,20 @@ class EUITextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
         }
 };
 
+GDMAKE_HOOK(0x886b0)
+void __fastcall EditorUI_onGoToLayer(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
+    GDMAKE_ORIG_V(self, edx, pSender);
+
+    auto i = self->getChildByTag(6978);
+
+    self->m_pCurrentLayerLabel->setVisible(false);
+
+    if (i)
+        reinterpret_cast<gd::CCTextInputNode*>(i)->setString(
+            self->m_pCurrentLayerLabel->getString()
+        );
+}
+
 GDMAKE_HOOK(0x907b0)
 bool __fastcall EditorUI_ccTouchBegan(gd::EditorUI* self, edx_t edx, cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
     auto self_ = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self) - 0xEC);
@@ -48,6 +63,9 @@ bool __fastcall EditorUI_ccTouchBegan(gd::EditorUI* self, edx_t edx, cocos2d::CC
         if (!rect.containsPoint(touch->getLocation()))
             reinterpret_cast<gd::CCTextInputNode*>(i)->getTextField()->detachWithIME();
     }
+    
+    if (pointIntersectsScaleControls(self_, touch, event))
+        return true;
 
     return GDMAKE_ORIG(self, edx, touch, event);
 }

@@ -2,32 +2,7 @@
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
 
 using namespace gdmake;
-
-class ConfigureHSVWidget;
-class HSVWidgetPopup;
-
-struct _ccHSVValue {
-    int unknown;
-    int h, s, v;
-};
-
-class ConfigureHSVWidget : public cocos2d::CCNode {
-    public:
-        cocos2d::CCLabelBMFont* m_pHueLabel;
-        cocos2d::CCLabelBMFont* m_pSaturationLabel;
-        cocos2d::CCLabelBMFont* m_pBrightnessLabel;
-
-        gd::Slider* m_pHueSlider;
-        gd::Slider* m_pSaturationSlider;
-        gd::Slider* m_pBrightnessSlider;
-
-        float m_fHueValue;
-        float m_fSaturationValue;
-        float m_fBrightnessValue;
-
-        bool m_bAbsoluteSaturation;
-        bool m_bAbsoluteBrightness;
-};
+using namespace gd;
 
 class AddHSVTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
     public:
@@ -77,16 +52,6 @@ class AddHSVTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate 
         }
 };
 
-class HSVWidgetPopupDelegate {
-    public:
-        virtual void hsvPopupClosed(HSVWidgetPopup *, _ccHSVValue);
-};
-
-class HSVWidgetPopup : public gd::FLAlertLayer {
-    public:
-        ConfigureHSVWidget* m_pConfigureWidget;
-};
-
 void updateInputText(gd::CCTextInputNode* upd, float val) {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(2) << val;
@@ -101,6 +66,7 @@ void turnLabelIntoInput(
     AddHSVTextDelegate* ad,
     int id,
     float ov,
+    const char* title,
     std::string const& ac = "-0123456789."
 ) {
     text->setVisible(false);
@@ -113,11 +79,11 @@ void turnLabelIntoInput(
     spr->setColor({ 0, 0, 0 });
     spr->setOpacity(100);
     spr->setContentSize({ 235.0f, 70.0f });
-    spr->setPosition(text->getPosition());
+    spr->setPosition(text->getPosition() + cocos2d::CCPoint { 50.0f, 0.0f });
 
     auto eLayerInput = gd::CCTextInputNode::create("0", ad, "bigFont.fnt", 70.0f, 20.0f);
 
-    eLayerInput->setPosition(text->getPosition());
+    eLayerInput->setPosition(text->getPosition() + cocos2d::CCPoint { 50.0f, 0.0f });
     eLayerInput->setLabelPlaceholderColor({ 120, 120, 120 });
     eLayerInput->setAllowedChars(ac);
     eLayerInput->setAnchorPoint({ 0, 0 });
@@ -128,8 +94,13 @@ void turnLabelIntoInput(
     eLayerInput->setTag(id + 64);
     updateInputText(eLayerInput, ov);
 
+    auto txt = cocos2d::CCLabelBMFont::create(title, "goldFont.fnt");
+    txt->limitLabelWidth(85.0f, 1.0f, .3f);
+    txt->setPosition(text->getPosition() - cocos2d::CCPoint { 35.0f, 0.0f });
+
     self->addChild(spr);
     self->addChild(eLayerInput);
+    self->addChild(txt);
 }
 
 GDMAKE_HOOK(0x4adf0)
@@ -145,7 +116,7 @@ void __fastcall ConfigureHSVWidget_updateLabels(ConfigureHSVWidget* self) {
 }
 
 GDMAKE_HOOK(0x4a3f0)
-bool __fastcall ConfigureHSVWidget_init(ConfigureHSVWidget* self, edx_t edx, _ccHSVValue val, bool idk) {
+bool __fastcall ConfigureHSVWidget_init(ConfigureHSVWidget* self, edx_t edx, cocos2d::ccHSVValue val, bool idk) {
     if (!GDMAKE_ORIG(self, edx, val, idk))
         return false;
     
@@ -156,21 +127,24 @@ bool __fastcall ConfigureHSVWidget_init(ConfigureHSVWidget* self, edx_t edx, _cc
         self->m_pHueLabel,
         hsva,
         5,
-        self->m_fHueValue
+        self->m_fHueValue,
+        "Hue"
     );
     turnLabelIntoInput(
         self,
         self->m_pSaturationLabel,
         hsva,
         6,
-        self->m_fSaturationValue
+        self->m_fSaturationValue,
+        "Saturation"
     );
     turnLabelIntoInput(
         self,
         self->m_pBrightnessLabel,
         hsva,
         7,
-        self->m_fBrightnessValue
+        self->m_fBrightnessValue,
+        "Brightness"
     );
 
     self->addChild(hsva);

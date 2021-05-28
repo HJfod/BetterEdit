@@ -4,51 +4,17 @@
 
 using namespace gdmake;
 
-class SetGroupIDLayer : public gd::FLAlertLayer, public gd::TextInputDelegate {
-    public:
-        gd::GameObject* m_pObj;
-        PAD(0x4)
-        cocos2d::CCArray* m_pArray0;
-        cocos2d::CCArray* m_pArray1;
-        cocos2d::CCLabelBMFont* m_pEditorLayerText;
-        cocos2d::CCLabelBMFont* m_pEditorLayer2Text;
-        cocos2d::CCLabelBMFont* m_pZOrderText;
-        gd::CCTextInputNode* m_pGroupIDInput;
-        int m_nGroupID;
-        int m_nEditorLayer;
-        int m_nEditorLayer2;
-        int m_nZOrder;
-
-        void updateEditorLayerID() {
-            reinterpret_cast<void(__fastcall*)(SetGroupIDLayer*)>(
-                gd::base + 0x22e0b0
-            )( this );
-        }
-
-        void updateEditorLayerID2() {
-            reinterpret_cast<void(__fastcall*)(SetGroupIDLayer*)>(
-                gd::base + 0x22e110
-            )( this );
-        }
-
-        void updateZOrder() {
-            reinterpret_cast<void(__fastcall*)(SetGroupIDLayer*)>(
-                gd::base + 0x22e3d0
-            )( this );
-        }
-};
-
 class AddTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
     public:
-        SetGroupIDLayer* m_pGIL;
+        gd::SetGroupIDLayer* m_pGIL;
 
         virtual void textChanged(gd::CCTextInputNode* input) override {
-            reinterpret_cast<void(__thiscall*)(SetGroupIDLayer*, gd::CCTextInputNode*)>(
+            reinterpret_cast<void(__thiscall*)(gd::SetGroupIDLayer*, gd::CCTextInputNode*)>(
                 gd::base + 0x22d610
             )(this->m_pGIL, input);
         }
 
-        static AddTextDelegate* create(SetGroupIDLayer* gil) {
+        static AddTextDelegate* create(gd::SetGroupIDLayer* gil) {
             auto ret = new AddTextDelegate();
 
             if (ret && ret->init()) {
@@ -63,7 +29,7 @@ class AddTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
 };
 
 GDMAKE_HOOK(0x22d690)
-void __fastcall SetGroupIDLayer_onEditorLayer(SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
+void __fastcall SetGroupIDLayer_onEditorLayer(gd::SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     auto i = self->getChildByTag(69);
@@ -75,7 +41,7 @@ void __fastcall SetGroupIDLayer_onEditorLayer(SetGroupIDLayer* self, edx_t edx, 
 }
 
 GDMAKE_HOOK(0x22d710)
-void __fastcall SetGroupIDLayer_onEditorLayer2(SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
+void __fastcall SetGroupIDLayer_onEditorLayer2(gd::SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     auto i = self->getChildByTag(70);
@@ -87,7 +53,7 @@ void __fastcall SetGroupIDLayer_onEditorLayer2(SetGroupIDLayer* self, edx_t edx,
 }
 
 GDMAKE_HOOK(0x22de80)
-void __fastcall SetGroupIDLayer_onZOrder(SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
+void __fastcall SetGroupIDLayer_onZOrder(gd::SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     auto i = self->getChildByTag(71);
@@ -99,7 +65,7 @@ void __fastcall SetGroupIDLayer_onZOrder(SetGroupIDLayer* self, edx_t edx, cocos
 }
 
 GDMAKE_HOOK(0x22d610)
-void __fastcall SetGroupIDLayer_textChanged(SetGroupIDLayer* self, edx_t edx, gd::CCTextInputNode* input) {
+void __fastcall SetGroupIDLayer_textChanged(gd::SetGroupIDLayer* self, edx_t edx, gd::CCTextInputNode* input) {
     int val = 0;
     bool isInt = true;
 
@@ -134,7 +100,7 @@ void __fastcall SetGroupIDLayer_textChanged(SetGroupIDLayer* self, edx_t edx, gd
 }
 
 void turnLabelIntoInput(
-    SetGroupIDLayer* self,
+    gd::SetGroupIDLayer* self,
     cocos2d::CCLabelBMFont* text,
     AddTextDelegate* ad,
     int id,
@@ -171,7 +137,7 @@ void turnLabelIntoInput(
 
 GDMAKE_HOOK(0x22b670)
 bool __fastcall SetGroupIDLayer_initHook(
-    SetGroupIDLayer* self,
+    gd::SetGroupIDLayer* self,
     edx_t edx,
     gd::GameObject* obj,
     cocos2d::CCArray* arr
