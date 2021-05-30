@@ -112,6 +112,7 @@ void __fastcall EditorUI_activateRotationControl(gd::EditorUI* self, edx_t edx, 
         angle -= 360.0f;
 
     std::cout << "setting angle to " << angle << "\n";
+    std::cout << "obj angle " << self->m_pRotationControl->m_fObjAngle << "\n";
 
     self->m_pRotationControl->setAngle(angle);
 }
@@ -136,7 +137,7 @@ bool __fastcall GJRotationControl_init(gd::GJRotationControl* self) {
     spr->setContentSize({ 115.0f, 75.0f });
     spr->setPosition(self->getPosition() + cocos2d::CCPoint { offset_w, offset_h });
 
-    auto eLayerInput = gd::CCTextInputNode::create("0.00", ed, "bigFont.fnt", 40.0f, 30.0f);
+    auto eLayerInput = gd::CCTextInputNode::create("0", ed, "bigFont.fnt", 40.0f, 30.0f);
 
     eLayerInput->setPosition(self->getPosition() + cocos2d::CCPoint { offset_w, offset_h });
     eLayerInput->setLabelPlaceholderColor({ 120, 120, 120 });
@@ -145,7 +146,7 @@ bool __fastcall GJRotationControl_init(gd::GJRotationControl* self) {
     eLayerInput->setScale(.7f);
     eLayerInput->setDelegate(ed);
     eLayerInput->setTag(6978);
-    eLayerInput->setString("0.00");
+    eLayerInput->setString("0");
 
     self->addChild(spr);
     self->addChild(eLayerInput, 999);
