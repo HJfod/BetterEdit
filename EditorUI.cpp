@@ -131,6 +131,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     spr->setColor({ 0, 0, 0 });
     spr->setOpacity(100);
     spr->setContentSize({ 115.0f, 75.0f });
+    spr->setTag(6977);
     spr->setPosition(self->m_pCurrentLayerLabel->getPosition());
 
     auto eLayerInput = gd::CCTextInputNode::create("All", ed, "bigFont.fnt", 40.0f, 30.0f);
@@ -150,4 +151,14 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     self->addChild(ed);
 
     return true;
+}
+
+GDMAKE_HOOK(0x87180)
+void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
+    GDMAKE_ORIG_V(self, edx, show);
+
+    self->m_pCurrentLayerLabel->setVisible(false);
+
+    if (self->getChildByTag(6978)) self->getChildByTag(6978)->setVisible(show);
+    if (self->getChildByTag(6977)) self->getChildByTag(6977)->setVisible(show);
 }
