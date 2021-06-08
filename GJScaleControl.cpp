@@ -55,7 +55,7 @@ class GJScaleControl_CB : public gd::GJScaleControl {
 
             reinterpret_cast<gd::CCMenuItemSpriteExtra*>(pSender)
                 ->setNormalImage(createLockSprite(
-                    std->m_bLockPosEnabled ? "GJ_button_02.png" : "GJ_button_01.png",
+                    std->m_bLockPosEnabled ? "GJ_button_02.png" : "GJ_button_04.png",
                     std->m_bLockPosEnabled ? "GJ_lock_001.png" : "GJ_lock_open_001.png"
                 ));
             
@@ -72,7 +72,7 @@ class GJScaleControl_CB : public gd::GJScaleControl {
 
             reinterpret_cast<gd::CCMenuItemSpriteExtra*>(pSender)
                 ->setNormalImage(createLockSprite(
-                    std->m_bUnlockScaleEnabled ? "GJ_button_02.png" : "GJ_button_04.png",
+                    std->m_bUnlockScaleEnabled ? "GJ_button_02.png" : "GJ_button_01.png",
                     std->m_bUnlockScaleEnabled ? "GJ_lock_open_001.png" : "GJ_lock_001.png"
                 ));
         }
