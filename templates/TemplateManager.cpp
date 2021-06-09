@@ -47,9 +47,7 @@ TemplateManager* TemplateManager::sharedState() {
     if (!g_templateManager) {
         g_templateManager = new TemplateManager();
 
-        if (g_templateManager && g_templateManager->init())
-            g_templateManager->autorelease();
-        else {
+        if (!(g_templateManager && g_templateManager->init())) {
             CC_SAFE_DELETE(g_templateManager);
             return nullptr;
         }
@@ -57,18 +55,3 @@ TemplateManager* TemplateManager::sharedState() {
 
     return g_templateManager;
 }
-
-GDMAKE_HOOK(0x3D5E0)
-void __fastcall AppDelegate_trySaveGame(cocos2d::CCObject* self) {
-    TemplateManager::sharedState()->save();
-
-    return GDMAKE_ORIG_V(self);
-}
-
-GDMAKE_HOOK(0xCC500)
-void __fastcall GameManager_dataLoadedHook(gd::GameManager* self, edx_t edx, DS_Dictionary* dict) {
-    TemplateManager::sharedState();
-
-    return GDMAKE_ORIG_V(self, edx, dict);
-}
-

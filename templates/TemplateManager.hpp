@@ -80,15 +80,15 @@ class Template : public cocos2d::CCObject {
         friend class TemplateManager;
 };
 
-class TemplateManager : public gd::GManager {
+class TemplateManager {
     std::vector<Template*> m_vTemplates;
 
-    virtual bool init() override;
-
-    virtual void encodeDataTo(DS_Dictionary* data);
-    virtual void dataLoaded(DS_Dictionary* data);
-    virtual void firstLoad();
+    bool init();
 
     public:
+        void encodeDataTo(DS_Dictionary* data);
+        void dataLoaded(DS_Dictionary* data);
+        void firstLoad();
+
         static TemplateManager* sharedState();
 };

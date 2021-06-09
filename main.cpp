@@ -2,6 +2,7 @@
 
 // include GDMake & submodules
 #include <GDMake.h>
+#include "BetterEdit.hpp"
 
 GDMAKE_MAIN {
     // main entrypoint for your mod.
@@ -38,7 +39,7 @@ GDMAKE_MAIN {
     //     0xe8, 0x43, 0x00, 0x00, 0x00    // CALL PauseLayer::goEdit
     // });
 
-    return true;
+    return BetterEdit::initGlobal();
 }
 
 GDMAKE_UNLOAD {

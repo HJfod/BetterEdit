@@ -1,6 +1,7 @@
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
 #include "passTouch.hpp"
+#include "../BetterEdit.hpp"
 
 using namespace gdmake;
 
@@ -128,9 +129,10 @@ void __fastcall GJScaleControl_ccTouchMoved(gd::GJScaleControl* self_, edx_t edx
         float val = roundf((self->m_pSlider->getValue() * 1.5f + .5f) * 100) / 100;
 
         auto std = reinterpret_cast<ScaleTextDelegate*>(self->getChildByTag(7777));
+        auto snap = BetterEdit::sharedState()->getKeyInt("scale-snap");
 
         if (std && !std->m_bUnlockScaleEnabled) {
-            val = floor((val * 4) + .25f) / 4;
+            val = roundf(val * snap) / snap;
         
             self->m_pSlider->setValue((val - .5f) / 1.5f);
         }

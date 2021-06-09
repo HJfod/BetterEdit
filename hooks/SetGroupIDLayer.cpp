@@ -1,6 +1,6 @@
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
-#include "utils.hpp"
+#include "../utils.hpp"
 
 using namespace gdmake;
 
