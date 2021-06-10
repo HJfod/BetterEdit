@@ -2,6 +2,7 @@
 
 #include <GDMake.h>
 #include "templates/TemplateManager.hpp"
+#include "utils.hpp"
 
 class BetterEdit : public gd::GManager {
     protected:
