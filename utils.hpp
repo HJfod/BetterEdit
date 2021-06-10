@@ -3,14 +3,30 @@
 #include <string>
 #include <GDMake.h>
 
-inline cocos2d::CCSprite* spriteFNWithScale(const char* name, float scale) {
-    auto ret = cocos2d::CCSprite::createWithSpriteFrameName(name);
-    if (!ret) return nullptr;
-
-    ret->setScale(scale);
-
-    return ret;
-}
+class CCSpriteConstructor : public cocos2d::CCSprite {
+    public:
+        inline static CCSpriteConstructor* fromFrameName(const char* fname) {
+            return reinterpret_cast<CCSpriteConstructor*>(
+                createWithSpriteFrameName(fname)
+            );
+        }
+        inline CCSpriteConstructor* flipX(bool flip = true) {
+            this->CCSprite::setFlipX(flip);
+            return this;
+        }
+        inline CCSpriteConstructor* flipY(bool flip = true) {
+            this->CCSprite::setFlipY(flip);
+            return this;
+        }
+        inline CCSpriteConstructor* rotate(float rot) {
+            this->CCSprite::setRotation(rot);
+            return this;
+        }
+        inline CCSpriteConstructor* scale(float scale) {
+            this->CCSprite::setScale(scale);
+            return this;
+        }
+};
 
 inline int strToInt(const char* str, bool* is = nullptr) {
     bool isStr = true;

@@ -46,14 +46,21 @@ void BetterEdit::firstLoad() {}
 
 
 int BetterEdit::getKeyInt(const char* key) {
-    return this->m_pSettingsDict->valueForKey(key)->intValue();
+    auto val = this->m_pSettingsDict->valueForKey(key);
+    if (val && val->length())
+        return val->intValue();
+    
+    return 0;
 }
 
 BetterEdit* BetterEdit::setKeyInt(const char* key, int val) {
-    this->m_pSettingsDict->setObject(
-        cocos2d::CCString::create(std::to_string(val)),
-        key
-    );
+    std::cout << "set " << key << " to " << val << "\n";
+
+    if (key && strlen(key))
+        this->m_pSettingsDict->setObject(
+            CCString::create(std::to_string(val)),
+            key
+        );
 
     return this;
 }

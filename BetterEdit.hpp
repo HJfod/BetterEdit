@@ -21,4 +21,6 @@ class BetterEdit : public gd::GManager {
 
         int getKeyInt(const char* key);
         BetterEdit* setKeyInt(const char* key, int val);
+
+        inline cocos2d::CCDictionary* getSettingsDict() { return m_pSettingsDict; }
 };
