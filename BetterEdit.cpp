@@ -19,7 +19,6 @@ BetterEdit* g_betterEdit;
 
 bool BetterEdit::init() {
     this->m_pTemplateManager = TemplateManager::sharedState();
-    this->m_pSettingsDict = cocos2d::CCDictionary::create();
     this->m_sFileName = "BetterEdit.dat";
 
     this->setKeyInt("scale-snap", 4);
@@ -45,22 +44,21 @@ void BetterEdit::firstLoad() {}
 
 
 
-int BetterEdit::getKeyInt(const char* key) {
-    auto val = this->m_pSettingsDict->valueForKey(key);
-    if (val && val->length())
-        return val->intValue();
+int BetterEdit::getKeyInt(std::string const& key) {
+    auto si = this->m_mSettingsDict.find(key);
+    if (si != this->m_mSettingsDict.end()) {
+        auto val = this->m_mSettingsDict[key];
+
+        if (val.type == BESetting::Int)
+            return val.data_n;
+    }
     
     return 0;
 }
 
-BetterEdit* BetterEdit::setKeyInt(const char* key, int val) {
-    std::cout << "set " << key << " to " << val << "\n";
-
-    if (key && strlen(key))
-        this->m_pSettingsDict->setObject(
-            CCString::create(std::to_string(val)),
-            key
-        );
+BetterEdit* BetterEdit::setKeyInt(std::string const& key, int val) {
+    if (key.size())
+        this->m_mSettingsDict[key] = BESetting(val);
 
     return this;
 }

@@ -4,10 +4,48 @@
 #include "templates/TemplateManager.hpp"
 #include "utils.hpp"
 
+struct BESetting {
+    enum SType { Int, String };
+    SType type;
+    union {
+        int data_n;
+        std::string data_s;
+    };
+
+    BESetting() {}
+    BESetting(BESetting const& sett) {
+        this->type = sett.type;
+        switch (sett.type) {
+            case SType::Int: this->data_n = sett.data_n; break;
+            case SType::String: this->data_s = sett.data_s; break;
+        }
+    }
+    BESetting& operator=(BESetting const& sett) {
+        this->type = sett.type;
+        switch (sett.type) {
+            case SType::Int: this->data_n = sett.data_n; break;
+            case SType::String: this->data_s = sett.data_s; break;
+        }
+
+        return *this;
+    }
+    ~BESetting() {}
+
+    BESetting(int x) {
+        this->data_n = x;
+        this->type = SType::Int;
+    }
+
+    BESetting(std::string x) {
+        this->data_s = x;
+        this->type = SType::String;
+    }
+};
+
 class BetterEdit : public gd::GManager {
     protected:
         TemplateManager* m_pTemplateManager;
-        cocos2d::CCDictionary* m_pSettingsDict;
+        std::map<std::string, BESetting> m_mSettingsDict;
 
         virtual bool init() override;
 
@@ -19,8 +57,8 @@ class BetterEdit : public gd::GManager {
         static BetterEdit* sharedState();
         static bool initGlobal();
 
-        int getKeyInt(const char* key);
-        BetterEdit* setKeyInt(const char* key, int val);
+        int getKeyInt(std::string const& key);
+        BetterEdit* setKeyInt(std::string const& key, int val);
 
-        inline cocos2d::CCDictionary* getSettingsDict() { return m_pSettingsDict; }
+        inline std::map<std::string, BESetting> getSettingsDict() { return m_mSettingsDict; }
 };

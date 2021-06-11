@@ -2,6 +2,7 @@
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
 #include "../utils.hpp"
 #include "passTouch.hpp"
+#include "../tools/GroupIDFilter/groupfilter.hpp"
 
 using namespace gdmake;
 
@@ -149,6 +150,8 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     self->addChild(eLayerInput);
 
     self->addChild(ed);
+
+    setupGroupFilterButton(self);
 
     return true;
 }

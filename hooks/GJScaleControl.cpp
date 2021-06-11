@@ -130,6 +130,7 @@ void __fastcall GJScaleControl_ccTouchMoved(gd::GJScaleControl* self_, edx_t edx
 
         auto std = reinterpret_cast<ScaleTextDelegate*>(self->getChildByTag(7777));
         auto snap = BetterEdit::sharedState()->getKeyInt("scale-snap");
+        if (snap < 1) snap = 1;
 
         if (std && !std->m_bUnlockScaleEnabled) {
             val = roundf(val * snap) / snap;

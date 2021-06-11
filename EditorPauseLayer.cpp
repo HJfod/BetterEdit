@@ -25,14 +25,18 @@ bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, gd::Lev
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
     auto btn = gd::CCMenuItemSpriteExtra::create(
-        CCSpriteConstructor::fromFrameName("GJ_optionsBtn_001.png")->scale(.6f),
+        CCNodeConstructor()
+            .fromFrameName("GJ_optionsBtn02_001.png")
+            .scale(.8f)
+            .done(),
         self,
         (cocos2d::SEL_MenuHandler)&EditorPauseLayer::onBESettings
     );
-
-    btn->setPosition(winSize.width / 2 - 85, winSize.height - 73);
-
+    btn->setPosition(winSize.width / 2 - 70, winSize.height - 73);
     menu->addChild(btn);
+
+    extra::getChild<cocos2d::CCMenu*>(menu, menu->getChildrenCount() - 2)
+        ->setPositionX(winSize.width / 2 - 30);
 
     return true;
 }
