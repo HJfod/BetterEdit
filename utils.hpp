@@ -65,6 +65,10 @@ class CCNodeConstructor {
             node->addChild(func(node));
             return *this;
         }
+        inline CCNodeConstructor<T> & exec(std::function<void(T)> func) {
+            func(node);
+            return *this;
+        }
         inline CCNodeConstructor<T> & save(T* another) {
             *another = node;
             return *this;

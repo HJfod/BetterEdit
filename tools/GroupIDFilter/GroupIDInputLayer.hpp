@@ -8,38 +8,92 @@
 class GroupIDInputLayer : public BrownAlertDelegate {
     public:
         struct IDFilter {
-            struct Match {
-                int startID;
-                int endID;  // only used in range
-                bool negate;
+            enum MatchResult { resMatch, resNoMatch, resOutsideMatch };
 
-                bool match(int id) {
-                    if (startID == endID)
-                        return (startID == endID) == !negate;
-                    
+            struct Match {
+                int startID = -1;
+                int endID = -1;  // only used in range
+                bool negate = false;
+                bool optional = false;
+
+                inline MatchResult match(int id) {
+                    std::cout << startID << " <= " << id << " <= " << endID << ";" << negate << optional << "\n";
+
                     if (startID <= id && id <= endID)
-                        return !negate;
+                        return negate ? resNoMatch : resMatch;
                     
-                    return false;
+                    return optional ? resOutsideMatch : resNoMatch;
+                }
+
+                inline Match(std::string const& str) {
+                    std::string num1 = "", num2 = "";
+                    bool nextNum = false;
+
+                    for (auto c : str)
+                        switch (c) {
+                            case '-': nextNum = true; break;
+                            case '!': this->negate = true; break;
+                            case '?': this->optional = true; break;
+                            case '+': this->endID = 9999; break;
+                            default: if (nextNum) num2 += c; else num1 += c;
+                        }
+                    
+                    if (num1 != "") this->startID = std::stoi(num1);
+                    if (num2 != "") this->endID = std::stoi(num2);
+                    if (this->startID == -1) this->startID = 0;
+                    if (this->endID == -1) this->endID = this->startID;
                 }
             };
 
-            bool strict;
+            bool strict = false;
             std::vector<std::vector<Match>> filters;
+            std::string filterString = "";
 
-            bool match(int id) {
-                bool res = true;
+            inline void parse(std::string const& str, bool sc) {
+                this->strict = sc;
+                this->filters.clear();
+                this->filterString = "";
+
+                for (auto f : splitString(str, ',')) {
+                    std::vector<IDFilter::Match> matches;
+
+                    if (f.find('|') != std::string::npos)
+                        for (auto m : splitString(f, '|'))
+                            matches.push_back(IDFilter::Match(m));
+                    else
+                        matches.push_back(IDFilter::Match(f));
+                    
+                    this->filters.push_back(matches);
+                }
+
+                this->filterString = str;
+            }
+
+            inline bool match(int id) {
+                auto res = false;
+
+                if (filters.empty())
+                    return true;
 
                 for (auto f : filters) {
-                    bool mc = true;
-
-                    for (auto m : f)
-                        if (m.match(id))
-                            mc = false;
+                    auto any = resMatch;
                     
-                    if (!mc)
-                        res = false;  // i did not think this logic through
-                                      // i have zero clue if it works
+                    for (auto m : f) {
+                        auto mm = m.match(id);
+                        std::cout << mm << "!!\n";
+                        switch (mm) {
+                            case resMatch: any = resMatch; goto break_for;
+                            case resNoMatch: any = resNoMatch; break;
+                            case resOutsideMatch: if (any != resNoMatch) any = resOutsideMatch; break;
+                        }
+                    }
+                
+                break_for:
+                    switch (any) {
+                        case resNoMatch: if (strict) return false;
+                        case resOutsideMatch: if (strict) return false;
+                        case resMatch: res = true;
+                    }
                 }
 
                 return res;
@@ -56,13 +110,14 @@ class GroupIDInputLayer : public BrownAlertDelegate {
 
         void reset(cocos2d::CCObject*);
         void onClose(cocos2d::CCObject*);
+        void onStrict(cocos2d::CCObject*);
 
         static std::vector<std::string> splitString(std::string const& str, char split);
-        static IDFilter parseString(std::string const& str, bool strict);
     
     public:
-        static IDFilter const& getGroupFilter();
-        static IDFilter const& getColorFilter();
+        static IDFilter* getGroupFilter();
+        static IDFilter* getColorFilter();
+        static bool noFilters();
 
         static GroupIDInputLayer* create();
 };

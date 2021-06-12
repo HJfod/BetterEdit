@@ -5,27 +5,22 @@ using namespace cocos2d;
 using namespace gdmake;
 using namespace gdmake::extra;
 
-GroupIDInputLayer::IDFilter g_vGroupFilter;
-GroupIDInputLayer::IDFilter g_vColorFilter;
-
-static std::vector<int> vsti(std::vector<std::string> const& v) {
-    std::vector<int> res;
-
-    for (auto i : v)
-        res.push_back(std::stoi(i));
-    
-    return res;
-}
+GroupIDInputLayer::IDFilter* g_pGroupFilter;
+GroupIDInputLayer::IDFilter* g_pColorFilter;
 
 void GroupIDInputLayer::setup() {
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
+    constexpr const char* inputFilter = "0123456789,|!-+? ";
+
+    if (!g_pGroupFilter) g_pGroupFilter = new GroupIDInputLayer::IDFilter;
+    if (!g_pColorFilter) g_pColorFilter = new GroupIDInputLayer::IDFilter;
 
     this->m_pButtonMenu->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
             .fromNode(CCMenuItemSpriteExtra::create(
                 CCNodeConstructor()
                     .fromFrameName("GJ_resetBtn_001.png")
-                    .scale(.7f)
+                    .scale(.8f)
                     .done(),
                 this,
                 (SEL_MenuHandler)&GroupIDInputLayer::reset
@@ -38,12 +33,13 @@ void GroupIDInputLayer::setup() {
         CCNodeConstructor<CCLabelBMFont*>()
             .fromText("Has Groups:", "bigFont.fnt")
             .scale(.5f)
-            .move(winSize.width / 2, winSize.height / 2 + 50.0f)
+            .move(winSize.width / 2 - 50.0f, winSize.height / 2 + 50.0f)
             .done()
     );
     this->m_pLayer->addChild(
         CCNodeConstructor<InputNode*>()
-            .fromNode(InputNode::create(this->m_pLrSize.width - 60.0f, "1,2,3,...", "chatFont.fnt", "0123456789,/! ", 50))
+            .fromNode(InputNode::create(this->m_pLrSize.width - 60.0f, "1,2,3,...", "chatFont.fnt", inputFilter, 50))
+            .exec([](auto t) -> void { t->setString(g_pGroupFilter->filterString.c_str()); })
             .move(winSize.width / 2, winSize.height / 2 + 20.0f)
             .save(&m_pGroupInput)
             .done()
@@ -52,7 +48,13 @@ void GroupIDInputLayer::setup() {
         CCNodeConstructor<CCMenu*>()
             .fromMenu()
             .add(CCNodeConstructor<CCMenuItemToggler*>()
-                .fromNode(CCMenuItemToggler::createWithStandardSprites(this, nullptr))
+                .fromNode(CCMenuItemToggler::createWithStandardSprites(
+                    this, (SEL_MenuHandler)&GroupIDInputLayer::onStrict
+                ))
+                .exec([](auto t) -> void {
+                    t->setUserData(&g_pGroupFilter->strict);
+                    t->toggle(g_pGroupFilter->strict);
+                })
                 .scale(.6f)
                 .save(&m_pGroupStrict)
                 .done())
@@ -66,12 +68,13 @@ void GroupIDInputLayer::setup() {
         CCNodeConstructor<CCLabelBMFont*>()
             .fromText("Has Colors:", "bigFont.fnt")
             .scale(.5f)
-            .move(winSize.width / 2, winSize.height / 2 - 15.0f)
+            .move(winSize.width / 2 - 50.0f, winSize.height / 2 - 15.0f)
             .done()
     );
     this->m_pLayer->addChild(
         CCNodeConstructor<InputNode*>()
-            .fromNode(InputNode::create(this->m_pLrSize.width - 60.0f, "1,2,3,...", "chatFont.fnt", "0123456789, ", 50))
+            .fromNode(InputNode::create(this->m_pLrSize.width - 60.0f, "1,2,3,...", "chatFont.fnt", inputFilter, 50))
+            .exec([](auto t) -> void { t->setString(g_pColorFilter->filterString.c_str()); })
             .move(winSize.width / 2, winSize.height / 2 - 45.0f)
             .save(&m_pColorInput)
             .done()
@@ -80,7 +83,13 @@ void GroupIDInputLayer::setup() {
         CCNodeConstructor<CCMenu*>()
             .fromMenu()
             .add(CCNodeConstructor<CCMenuItemToggler*>()
-                .fromNode(CCMenuItemToggler::createWithStandardSprites(this, nullptr))
+                .fromNode(CCMenuItemToggler::createWithStandardSprites(
+                    this, (SEL_MenuHandler)&GroupIDInputLayer::onStrict
+                ))
+                .exec([](auto t) -> void {
+                    t->setUserData(&g_pColorFilter->strict);
+                    t->toggle(g_pColorFilter->strict);
+                })
                 .scale(.6f)
                 .save(&m_pColorStrict)
                 .done())
@@ -110,9 +119,15 @@ void GroupIDInputLayer::setup() {
     );
 }
 
+void GroupIDInputLayer::onStrict(CCObject* pSender) {
+    auto toggle = as<CCMenuItemToggler*>(pSender);
+    
+    *as<bool*>(toggle->getUserData()) = toggle->isToggled();
+}
+
 void GroupIDInputLayer::onClose(CCObject*) {
-    g_vGroupFilter = this->parseString(this->m_pGroupInput->getString(), this->m_pGroupStrict->isToggled());
-    g_vColorFilter = this->parseString(this->m_pColorInput->getString(), this->m_pColorStrict->isToggled());
+    g_pGroupFilter->parse(this->m_pGroupInput->getString(), this->m_pGroupStrict->isToggled());
+    g_pColorFilter->parse(this->m_pColorInput->getString(), this->m_pColorStrict->isToggled());
 
     BrownAlertDelegate::onClose(nullptr);
 }
@@ -120,18 +135,12 @@ void GroupIDInputLayer::onClose(CCObject*) {
 void GroupIDInputLayer::reset(CCObject*) {
     this->m_pColorInput->setString("");
     this->m_pGroupInput->setString("");
-}
 
-GroupIDInputLayer::IDFilter GroupIDInputLayer::parseString(std::string const& str, bool strict) {
-    IDFilter res;
+    g_pGroupFilter->filterString = "";
+    g_pColorFilter->filterString = "";
 
-    res.strict = strict;
-
-    for (auto f : splitString(str, ',')) {
-        
-    }
-
-    return res;
+    g_pGroupFilter->filters.clear();
+    g_pColorFilter->filters.clear();
 }
 
 std::vector<std::string> GroupIDInputLayer::splitString(std::string const& str, char split) {
@@ -153,12 +162,19 @@ std::vector<std::string> GroupIDInputLayer::splitString(std::string const& str, 
     return res;
 }
 
-GroupIDInputLayer::IDFilter const& GroupIDInputLayer::getGroupFilter() {
-    return g_vGroupFilter;
+GroupIDInputLayer::IDFilter* GroupIDInputLayer::getGroupFilter() {
+    return g_pGroupFilter;
 }
 
-GroupIDInputLayer::IDFilter const& GroupIDInputLayer::getColorFilter() {
-    return g_vColorFilter;
+GroupIDInputLayer::IDFilter* GroupIDInputLayer::getColorFilter() {
+    return g_pColorFilter;
+}
+
+bool GroupIDInputLayer::noFilters() {
+    if (!g_pGroupFilter || !g_pColorFilter)
+        return true;
+
+    return g_pGroupFilter->filters.empty() && g_pColorFilter->filters.empty();
 }
 
 GroupIDInputLayer* GroupIDInputLayer::create() {
