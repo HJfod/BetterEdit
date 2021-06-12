@@ -26,6 +26,24 @@ class GroupIDInputLayer : public BrownAlertDelegate {
 
             bool strict;
             std::vector<std::vector<Match>> filters;
+
+            bool match(int id) {
+                bool res = true;
+
+                for (auto f : filters) {
+                    bool mc = true;
+
+                    for (auto m : f)
+                        if (m.match(id))
+                            mc = false;
+                    
+                    if (!mc)
+                        res = false;  // i did not think this logic through
+                                      // i have zero clue if it works
+                }
+
+                return res;
+            }
         };
 
     protected:
