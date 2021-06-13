@@ -8,7 +8,7 @@
 class GroupIDInputLayer : public BrownAlertDelegate {
     public:
         struct IDFilter {
-            enum MatchResult { resMatch, resNoMatch, resOutsideMatch };
+            enum MatchResult { resMatch, resNegateMatch, resOptOutMatch, resOutsideMatch };
 
             struct Match {
                 int startID = -1;
@@ -17,12 +17,10 @@ class GroupIDInputLayer : public BrownAlertDelegate {
                 bool optional = false;
 
                 inline MatchResult match(int id) {
-                    std::cout << startID << " <= " << id << " <= " << endID << ";" << negate << optional << "\n";
-
                     if (startID <= id && id <= endID)
-                        return negate ? resNoMatch : resMatch;
+                        return negate ? resNegateMatch : resMatch;
                     
-                    return optional ? resOutsideMatch : resNoMatch;
+                    return optional ? resOptOutMatch : resOutsideMatch;
                 }
 
                 inline Match(std::string const& str) {
@@ -49,6 +47,18 @@ class GroupIDInputLayer : public BrownAlertDelegate {
             std::vector<std::vector<Match>> filters;
             std::string filterString = "";
 
+        private:
+            inline MatchResult filterMatch(std::vector<Match> const& filter, std::vector<int> const& ids) {
+                auto res = resOutsideMatch;
+
+                for (auto id : ids)
+                    for (auto option : filter)
+                        switch (option.match(id)) {
+
+                        }
+            }
+        public:
+
             inline void parse(std::string const& str, bool sc) {
                 this->strict = sc;
                 this->filters.clear();
@@ -69,34 +79,26 @@ class GroupIDInputLayer : public BrownAlertDelegate {
                 this->filterString = str;
             }
 
-            inline bool match(int id) {
-                auto res = false;
-
+            inline bool match(std::vector<int> const& ids) {
+                // if there are no filters, all matches are succesful
                 if (filters.empty())
                     return true;
 
-                for (auto f : filters) {
-                    auto any = resMatch;
-                    
-                    for (auto m : f) {
-                        auto mm = m.match(id);
-                        std::cout << mm << "!!\n";
-                        switch (mm) {
-                            case resMatch: any = resMatch; goto break_for;
-                            case resNoMatch: any = resNoMatch; break;
-                            case resOutsideMatch: if (any != resNoMatch) any = resOutsideMatch; break;
-                        }
-                    }
-                
-                break_for:
-                    switch (any) {
-                        case resNoMatch: if (strict) return false;
-                        case resOutsideMatch: if (strict) return false;
-                        case resMatch: res = true;
-                    }
-                }
+                std::vector<MatchResult> matches;
 
-                return res;
+                for (auto filter : filters)
+                    matches.push_back(filterMatch(filter, ids));
+
+                auto matchc = 0u;
+                auto maxc = matches.size() - 1u;
+                for (auto match : matches)
+                    switch (match) {
+                        case resNegateMatch: return false;
+                        case resMatch: matchc++; break;
+                        case resOutsideMatch: if (strict) return false; maxc--;
+                    }
+
+                return matchc == maxc;
             }
         };
 
