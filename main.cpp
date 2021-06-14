@@ -3,6 +3,8 @@
 // include GDMake & submodules
 #include <GDMake.h>
 #include "BetterEdit.hpp"
+#include "templates/templates.hpp"
+#include "tools/Favourites/favourite.hpp"
 
 GDMAKE_MAIN {
     // main entrypoint for your mod.
@@ -39,7 +41,13 @@ GDMAKE_MAIN {
     //     0xe8, 0x43, 0x00, 0x00, 0x00    // CALL PauseLayer::goEdit
     // });
 
-    return BetterEdit::initGlobal();
+    if (!BetterEdit::initGlobal())
+        return false;
+    
+    loadTemplates();
+    loadFavouriteTab();
+
+    return true;
 }
 
 GDMAKE_UNLOAD {

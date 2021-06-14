@@ -51,11 +51,13 @@ class GroupIDInputLayer : public BrownAlertDelegate {
             inline MatchResult filterMatch(std::vector<Match> const& filter, std::vector<int> const& ids) {
                 auto res = resOutsideMatch;
 
-                for (auto id : ids)
-                    for (auto option : filter)
-                        switch (option.match(id)) {
+                // for (auto id : ids)
+                //     for (auto option : filter)
+                //         switch (option.match(id)) {
 
-                        }
+                //         }
+                
+                return res;
             }
         public:
 
