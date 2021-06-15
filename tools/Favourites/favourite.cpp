@@ -20,7 +20,7 @@ inline cocos2d::CCSprite* make_bspr(char c, const char* bg = "GJ_button_01.png")
 
 class EditorUI_CB : public EditorUI {
     public:
-        void addFavourite(CCObject*) {
+        void addFavourite(CCObject* pSender) {
             auto objs = this->getSelectedObjects();
             
             if (!objs->count())
@@ -36,6 +36,11 @@ class EditorUI_CB : public EditorUI {
                     "OK", nullptr,
                     "Select <co>one</c> object to favourite!"
                 )->show();
+
+            as<EditButtonBar*>(as<CCNode*>(pSender)->getUserData())
+                ->addButton(this->getCreateBtn(
+                    as<GameObject*>(objs->objectAtIndex(0))->m_nObjectID, 4
+                ));
         }
 
         void removeFavourite(CCObject*) {
@@ -44,25 +49,32 @@ class EditorUI_CB : public EditorUI {
 };
 
 void loadFavouriteTab() {
-    addEditorTab("GJ_starsIcon_001.png", [](auto self) -> EditButtonBar* {
+    addEditorTab("GJ_bigStar_noShadow_001.png", [](auto self) -> EditButtonBar* {
         auto btns = CCArray::create();
         
-        btns->addObject(CCMenuItemSpriteExtra::create(
+        auto addBtn = CCMenuItemSpriteExtra::create(
             make_bspr('+'),
             self,
             (SEL_MenuHandler)&EditorUI_CB::addFavourite
-        ));
+        );
+        btns->addObject(addBtn);
         
-        btns->addObject(CCMenuItemSpriteExtra::create(
+        auto remBtn = CCMenuItemSpriteExtra::create(
             make_bspr('-', "GJ_button_06.png"),
             self,
             (SEL_MenuHandler)&EditorUI_CB::removeFavourite
-        ));
+        );
+        btns->addObject(remBtn);
 
-        return gd::EditButtonBar::create(
+        auto bbar = gd::EditButtonBar::create(
             btns, { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f }, self->m_pTabsArray->count(), false,
             GameManager::sharedState()->getIntGameVariable("0049"),
             GameManager::sharedState()->getIntGameVariable("0050")
         );
+
+        addBtn->setUserData(bbar);
+        remBtn->setUserData(bbar);
+
+        return bbar;
     });
 }
