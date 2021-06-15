@@ -44,7 +44,7 @@ class EditorUI_CB : public EditorUI {
         }
 
         void removeFavourite(CCObject*) {
-
+            
         }
 };
 
