@@ -108,7 +108,6 @@ class GroupIDInputLayer : public BrownAlertDelegate {
                         }
 
                 filter_done:
-
                     std::cout << "> " << resToString(match) << "\n";
 
                     switch (match) {
