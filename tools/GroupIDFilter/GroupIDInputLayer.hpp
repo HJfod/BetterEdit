@@ -9,6 +9,15 @@ class GroupIDInputLayer : public BrownAlertDelegate {
     public:
         struct IDFilter {
             enum MatchResult { resMatch, resNegateMatch, resOptOutMatch, resOutsideMatch };
+            constexpr const char* resToString(MatchResult m) {
+                switch (m) {
+                    case resMatch: return "resMatch";
+                    case resNegateMatch: return "resNegateMatch";
+                    case resOptOutMatch: return "resOptOutMatch";
+                    case resOutsideMatch: return "resOutsideMatch";
+                }
+                return "";
+            }
 
             struct Match {
                 int startID = -1;
@@ -47,20 +56,6 @@ class GroupIDInputLayer : public BrownAlertDelegate {
             std::vector<std::vector<Match>> filters;
             std::string filterString = "";
 
-        private:
-            inline MatchResult filterMatch(std::vector<Match> const& filter, std::vector<int> const& ids) {
-                auto res = resOutsideMatch;
-
-                // for (auto id : ids)
-                //     for (auto option : filter)
-                //         switch (option.match(id)) {
-
-                //         }
-                
-                return res;
-            }
-        public:
-
             inline void parse(std::string const& str, bool sc) {
                 this->strict = sc;
                 this->filters.clear();
@@ -86,21 +81,48 @@ class GroupIDInputLayer : public BrownAlertDelegate {
                 if (filters.empty())
                     return true;
 
-                std::vector<MatchResult> matches;
+                std::cout << "\n";
 
-                for (auto filter : filters)
-                    matches.push_back(filterMatch(filter, ids));
+                auto idsMatched = 0u;
 
-                auto matchc = 0u;
-                auto maxc = matches.size() - 1u;
-                for (auto match : matches)
+                for (auto id : ids) {
+                    std::cout << "id: " << id << "\n";
+                    auto match = resOutsideMatch;
+
+                    for (auto filter : this->filters)
+                        for (auto option : filter) {
+                            auto m = option.match(id);
+
+                            std::cout << option.startID << ".." << option.endID << "\n";
+                            std::cout << option.optional << "? " << option.negate << "!\n";
+                            std::cout << resToString(m) << "\n";
+
+                            switch (m) {
+                                case resMatch: match = resMatch; goto filter_done;
+                                case resNegateMatch: return false;
+                                case resOptOutMatch: match = resOptOutMatch; break;
+                                case resOutsideMatch: break; // it's already resOutsideMatch
+                                                             // if we reach this point and it
+                                                             // isn't optional
+                            }
+                        }
+
+                filter_done:
+
+                    std::cout << "> " << resToString(match) << "\n";
+
                     switch (match) {
+                        case resMatch: idsMatched++; break;
                         case resNegateMatch: return false;
-                        case resMatch: matchc++; break;
-                        case resOutsideMatch: if (strict) return false; maxc--;
+                        case resOptOutMatch: if (this->strict) idsMatched++; break;
+                        case resOutsideMatch: break;
                     }
+                }
+                
+                std::cout << "=> " << idsMatched << " == " << ids.size() << "\n";
 
-                return matchc == maxc;
+                if (this->strict) return idsMatched == ids.size();
+                return idsMatched > 0;
             }
         };
 
