@@ -39,7 +39,7 @@ void __fastcall EditorUI_selectObjects(gd::EditorUI* self, edx_t edx, cocos2d::C
 
     CCARRAY_FOREACH_B_BASE(objs, obj, gd::GameObject*, ix)
         if (!matchObject(obj))
-            objs->removeObject(obj);
+            objs->removeObjectAtIndex(ix--);
     
     return GDMAKE_ORIG_V(self, edx, objs, idk);
 }

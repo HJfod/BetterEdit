@@ -42,7 +42,7 @@ void BESettingsLayer::setup() {
     this->addTitle("Special Thanks:", "bigFont.fnt")->setScale(.6f);
     this->addSubtitle("Mat", true);
     this->addSubtitle("Figment", true);
-    this->addSubtitle("cos8o", true);
+    this->addSubtitle("cos8oih", true);
     this->addSubtitle("Brittank88", true);
 }
 

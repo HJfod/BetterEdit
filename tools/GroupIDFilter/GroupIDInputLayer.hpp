@@ -9,15 +9,6 @@ class GroupIDInputLayer : public BrownAlertDelegate {
     public:
         struct IDFilter {
             enum MatchResult { resMatch, resNegateMatch, resOptOutMatch, resOutsideMatch };
-            constexpr const char* resToString(MatchResult m) {
-                switch (m) {
-                    case resMatch: return "resMatch";
-                    case resNegateMatch: return "resNegateMatch";
-                    case resOptOutMatch: return "resOptOutMatch";
-                    case resOutsideMatch: return "resOutsideMatch";
-                }
-                return "";
-            }
 
             struct Match {
                 int startID = -1;
@@ -26,10 +17,12 @@ class GroupIDInputLayer : public BrownAlertDelegate {
                 bool optional = false;
 
                 inline MatchResult match(int id) {
-                    if (startID <= id && id <= endID)
+                    if (startID <= id && id <= endID) {
+                        if (optional) return resOptOutMatch;
                         return negate ? resNegateMatch : resMatch;
+                    }
                     
-                    return optional ? resOptOutMatch : resOutsideMatch;
+                    return resOutsideMatch;
                 }
 
                 inline Match(std::string const& str) {
@@ -55,11 +48,13 @@ class GroupIDInputLayer : public BrownAlertDelegate {
             bool strict = false;
             std::vector<std::vector<Match>> filters;
             std::string filterString = "";
+            unsigned int requiredMatches = 0u;
 
             inline void parse(std::string const& str, bool sc) {
                 this->strict = sc;
                 this->filters.clear();
                 this->filterString = "";
+                this->requiredMatches = 0u;
 
                 for (auto f : splitString(str, ',')) {
                     std::vector<IDFilter::Match> matches;
@@ -73,6 +68,18 @@ class GroupIDInputLayer : public BrownAlertDelegate {
                     this->filters.push_back(matches);
                 }
 
+                // this is stupid
+                for (auto filter : this->filters) {
+                    bool isOptional = false;
+
+                    for (auto option : filter)
+                        if (option.optional)
+                            isOptional = true;
+                    
+                    if (!isOptional)
+                        requiredMatches++;
+                }
+
                 this->filterString = str;
             }
 
@@ -81,47 +88,29 @@ class GroupIDInputLayer : public BrownAlertDelegate {
                 if (filters.empty())
                     return true;
 
-                std::cout << "\n";
-
                 auto idsMatched = 0u;
+                auto matches = 0u;
 
                 for (auto id : ids) {
-                    std::cout << "id: " << id << "\n";
-                    auto match = resOutsideMatch;
-
                     for (auto filter : this->filters)
-                        for (auto option : filter) {
-                            auto m = option.match(id);
-
-                            std::cout << option.startID << ".." << option.endID << "\n";
-                            std::cout << option.optional << "? " << option.negate << "!\n";
-                            std::cout << resToString(m) << "\n";
-
-                            switch (m) {
-                                case resMatch: match = resMatch; goto filter_done;
+                        for (auto option : filter) 
+                            switch (option.match(id)) {
+                                case resMatch: matches++; idsMatched++; goto filter_done;
                                 case resNegateMatch: return false;
-                                case resOptOutMatch: match = resOptOutMatch; break;
+                                case resOptOutMatch: idsMatched++; goto filter_done;
                                 case resOutsideMatch: break; // it's already resOutsideMatch
                                                              // if we reach this point and it
                                                              // isn't optional
                             }
-                        }
 
                 filter_done:
-                    std::cout << "> " << resToString(match) << "\n";
-
-                    switch (match) {
-                        case resMatch: idsMatched++; break;
-                        case resNegateMatch: return false;
-                        case resOptOutMatch: if (this->strict) idsMatched++; break;
-                        case resOutsideMatch: break;
-                    }
+                    true;
+                    // because for some reason MSVC
+                    // doesn't allow empty labels
                 }
-                
-                std::cout << "=> " << idsMatched << " == " << ids.size() << "\n";
 
-                if (this->strict) return idsMatched == ids.size();
-                return idsMatched > 0;
+                if (this->strict) return (matches >= this->requiredMatches) && (idsMatched >= ids.size());
+                return matches >= this->requiredMatches;
             }
         };
 
@@ -129,7 +118,6 @@ class GroupIDInputLayer : public BrownAlertDelegate {
         InputNode* m_pGroupInput;
         InputNode* m_pColorInput;
         gd::CCMenuItemToggler* m_pGroupStrict;
-        gd::CCMenuItemToggler* m_pColorStrict;
 
         void setup() override;
 

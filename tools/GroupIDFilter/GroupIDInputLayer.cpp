@@ -79,25 +79,6 @@ void GroupIDInputLayer::setup() {
             .save(&m_pColorInput)
             .done()
     );
-    this->m_pLayer->addChild(
-        CCNodeConstructor<CCMenu*>()
-            .fromMenu()
-            .add(CCNodeConstructor<CCMenuItemToggler*>()
-                .fromNode(CCMenuItemToggler::createWithStandardSprites(
-                    this, (SEL_MenuHandler)&GroupIDInputLayer::onStrict
-                ))
-                .exec([](auto t) -> void {
-                    t->setUserData(&g_pColorFilter->strict);
-                    t->toggle(g_pColorFilter->strict);
-                })
-                .scale(.6f)
-                .save(&m_pColorStrict)
-                .done())
-            .add(CCNodeConstructor<CCLabelBMFont*>()
-                .fromText("Strict", "bigFont.fnt")
-                .move(50.0f, 0.0f).scale(.55f).done()
-            ).move(winSize.width / 2 + 30.0f, winSize.height / 2 - 15.0f).done()
-    );
 
     this->registerWithTouchDispatcher();
     CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
@@ -127,7 +108,7 @@ void GroupIDInputLayer::onStrict(CCObject* pSender) {
 
 void GroupIDInputLayer::onClose(CCObject*) {
     g_pGroupFilter->parse(this->m_pGroupInput->getString(), this->m_pGroupStrict->isToggled());
-    g_pColorFilter->parse(this->m_pColorInput->getString(), this->m_pColorStrict->isToggled());
+    g_pColorFilter->parse(this->m_pColorInput->getString(), false);
 
     BrownAlertDelegate::onClose(nullptr);
 }

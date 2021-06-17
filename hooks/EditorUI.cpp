@@ -49,6 +49,8 @@ GDMAKE_HOOK(0x907b0)
 bool __fastcall EditorUI_ccTouchBegan(gd::EditorUI* self, edx_t edx, cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
     auto self_ = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self) - 0xEC);
     auto i = self_->getChildByTag(6978);
+
+    g_bHoldingDownTouch = true;
     
     if (i) {
         auto inp = reinterpret_cast<gd::CCTextInputNode*>(i);
@@ -71,6 +73,13 @@ bool __fastcall EditorUI_ccTouchBegan(gd::EditorUI* self, edx_t edx, cocos2d::CC
         return true;
 
     return GDMAKE_ORIG(self, edx, touch, event);
+}
+
+GDMAKE_HOOK(0x911a0)
+void __fastcall EditorUI_ccTouchEnded(gd::EditorUI* self, edx_t edx, cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
+    g_bHoldingDownTouch = false;
+
+    GDMAKE_ORIG_V(self, edx, touch, event);
 }
 
 GDMAKE_HOOK(0x8d7e0)
