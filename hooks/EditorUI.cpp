@@ -3,8 +3,11 @@
 #include "../utils.hpp"
 #include "passTouch.hpp"
 #include "../tools/GroupIDFilter/groupfilter.hpp"
+#include "../BetterEdit.hpp"
 
 using namespace gdmake;
+
+#define CATCH_NULL(x) if (x) x
 
 class EUITextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
     public:
@@ -71,6 +74,9 @@ bool __fastcall EditorUI_ccTouchBegan(gd::EditorUI* self, edx_t edx, cocos2d::CC
     
     if (pointIntersectsControls(self_, touch, event))
         return true;
+    
+    if (BetterEdit::sharedState()->m_bHookConflictFound)
+        BetterEdit::showHookConflictMessage();
 
     return GDMAKE_ORIG(self, edx, touch, event);
 }
@@ -162,6 +168,8 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
 
     setupGroupFilterButton(self);
 
+    BetterEdit::sharedState()->m_bHookConflictFound = false;
+
     return true;
 }
 
@@ -171,6 +179,7 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
 
     self->m_pCurrentLayerLabel->setVisible(false);
 
-    if (self->getChildByTag(6978)) self->getChildByTag(6978)->setVisible(show);
-    if (self->getChildByTag(6977)) self->getChildByTag(6977)->setVisible(show);
+    CATCH_NULL(self->getChildByTag(6978))->setVisible(show);
+    CATCH_NULL(self->getChildByTag(6977))->setVisible(show);
+    CATCH_NULL(self->m_pCopyBtn->getParent()->getChildByTag(7777))->setVisible(show);
 }

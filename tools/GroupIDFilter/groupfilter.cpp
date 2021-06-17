@@ -34,6 +34,7 @@ void setupGroupFilterButton(gd::EditorUI* self) {
         self->m_pCopyBtn->getPositionX() - 75.0f,
         self->m_pCopyBtn->getPositionY()
     );
+    btn->setTag(7777);
 
     self->m_pCopyBtn->getParent()->addChild(btn, 100);
 }

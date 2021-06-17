@@ -54,6 +54,8 @@ class BetterEdit : public gd::GManager {
         virtual void firstLoad();
     
     public:
+        bool m_bHookConflictFound = true;
+        
         static BetterEdit* sharedState();
         static bool initGlobal();
 
@@ -61,4 +63,5 @@ class BetterEdit : public gd::GManager {
         BetterEdit* setKeyInt(std::string const& key, int val);
 
         inline std::map<std::string, BESetting> getSettingsDict() { return m_mSettingsDict; }
+        static void showHookConflictMessage();
 };

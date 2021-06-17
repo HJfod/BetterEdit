@@ -27,4 +27,4 @@ inline bool pointIntersectsControls(gd::EditorUI* ui, cocos2d::CCTouch* touch, c
     return false;
 }
 
-bool g_bHoldingDownTouch = false;
+inline bool g_bHoldingDownTouch = false;

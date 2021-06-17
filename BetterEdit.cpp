@@ -80,6 +80,23 @@ bool BetterEdit::initGlobal() {
 }
 
 
+void BetterEdit::showHookConflictMessage() {
+    gd::FLAlertLayer::create(
+        nullptr,
+        "Hook Conflict Detected",
+        "OK", nullptr,
+        380.0f,
+        "It appears that you have other <cp>mods</c> installed which "
+        "are <cy>conflicting</c> with <cl>BetterEdit</c>.\n\n"
+
+        "Mods that may have caused this include <co>GroupIDFilter</c>, "
+        "<co>Global Clipboard</c>, and other editor mods.\n\n"
+
+        "Please <cr>remove</c> or <cg>load</c> the mods at a different "
+        "loading phase. Contact <cy>HJfod#1795</c> for help."
+    )->show();
+}
+
 
 GDMAKE_HOOK(0x3D5E0)
 void __fastcall AppDelegate_trySaveGame(cocos2d::CCObject* self) {
