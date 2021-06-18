@@ -98,17 +98,17 @@ void BetterEdit::showHookConflictMessage() {
 }
 
 
-GDMAKE_HOOK(0x3D5E0)
-void __fastcall AppDelegate_trySaveGame(cocos2d::CCObject* self) {
-    BetterEdit::sharedState()->save();
+// GDMAKE_HOOK(0x3D5E0)
+// void __fastcall AppDelegate_trySaveGame(cocos2d::CCObject* self) {
+//     BetterEdit::sharedState()->save();
 
-    return GDMAKE_ORIG_V(self);
-}
+//     return GDMAKE_ORIG_V(self);
+// }
 
-GDMAKE_HOOK(0xCC500)
-void __fastcall GameManager_dataLoadedHook(gd::GameManager* self, edx_t edx, DS_Dictionary* dict) {
-    BetterEdit::sharedState();
+// GDMAKE_HOOK(0xCC500)
+// void __fastcall GameManager_dataLoadedHook(gd::GameManager* self, edx_t edx, DS_Dictionary* dict) {
+//     BetterEdit::sharedState();
 
-    return GDMAKE_ORIG_V(self, edx, dict);
-}
+//     return GDMAKE_ORIG_V(self, edx, dict);
+// }
 
