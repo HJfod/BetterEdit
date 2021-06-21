@@ -69,6 +69,10 @@ class CCNodeConstructor {
             func(node);
             return *this;
         }
+        inline CCNodeConstructor<T> & uobj(cocos2d::CCObject* obj) {
+            node->setUserObject(obj);
+            return *this;
+        }
         inline CCNodeConstructor<T> & save(T* another) {
             *another = node;
             return *this;

@@ -3,25 +3,25 @@
 
 using namespace gdmake;
 
-// GDMAKE_HOOK(ProfilePage::init)
-// bool __fastcall ProfilePage_init(gd::ProfilePage* self, edx_t edx, int accountID, bool idk) {
-//     if (!GDMAKE_ORIG(self, edx, accountID, idk))
-//         return false;
+GDMAKE_HOOK(ProfilePage::init)
+bool __fastcall ProfilePage_init(gd::ProfilePage* self, edx_t edx, int accountID, bool idk) {
+    if (!GDMAKE_ORIG(self, edx, accountID, idk))
+        return false;
     
-//     if (accountID == 104257) {
-//         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
+    if (accountID == 104257) {
+        auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
-//         auto discordText = cocos2d::CCLabelBMFont::create("My Discord is HJfod#1795 :)", "chatFont.fnt");
+        auto discordText = cocos2d::CCLabelBMFont::create("My Discord is HJfod#1795 :)", "chatFont.fnt");
 
-//         discordText->setScale(.6f);
-//         discordText->setColor({ 90, 255, 200 });
-//         discordText->setPosition(winSize.width / 2, winSize.height / 2 + 8.0f);
+        discordText->setScale(.6f);
+        discordText->setColor({ 90, 255, 200 });
+        discordText->setPosition(winSize.width / 2, winSize.height / 2 + 8.0f);
 
-//         self->getLayer()->addChild(discordText);
-//     }
+        self->getLayer()->addChild(discordText);
+    }
 
-//     return true;
-// }
+    return true;
+}
 
 GDMAKE_HOOK(0x5f3d0)
 void __fastcall CommentCell_loadFromComment(gd::CommentCell* self, edx_t edx, gd::GJComment* comment) {
