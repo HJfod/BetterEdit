@@ -73,6 +73,11 @@ class CCNodeConstructor {
             node->setUserObject(obj);
             return *this;
         }
+        template<typename T2>
+        inline CCNodeConstructor<T> & udata(T2 data) {
+            node->setUserData(reinterpret_cast<void*>(data));
+            return *this;
+        }
         inline CCNodeConstructor<T> & save(T* another) {
             *another = node;
             return *this;

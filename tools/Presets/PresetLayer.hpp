@@ -9,6 +9,7 @@ class PresetLayer : public BrownAlertDelegate {
         void setup() override;
     
         void onCreate(cocos2d::CCObject* pSender);
+        void onRemove(cocos2d::CCObject* pSender);
         
     public:
         static PresetLayer* create();

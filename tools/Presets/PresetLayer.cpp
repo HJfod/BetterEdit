@@ -17,18 +17,36 @@ void PresetLayer::setup() {
         .move(0.0f, this->m_pLrSize.height / 2 - 30.0f)
         .done()
     );
-    this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
-        .fromNode(CCMenuItemSpriteExtra::create(
-            ButtonSprite::create(
-                "With Alpha Trigger", 0, 0, "goldFont.fnt", "GJ_button_01.png", 0, .8f
-            ),
-            this,
-            (SEL_MenuHandler)&PresetLayer::onCreate
-        ))
-        .uobj(CCString::create("H4sIAAAAAAAACqWQ2w3DMAhFFyISF4zjKF-ZoQPcAbJCh69t-tmoqfrDMa8j5PPhTcCiNMKCTosgkLBEFgsXsBKqypUgYoRGZSOe4FSo3VPgf8X2UTFmcuGWxDj2r0XaNeNfvmjiUqO_XFMvNHIecNGBSNREkR7zvWbljTbw8G1mNmMKZuMoM2YXmoDoDulXrGKy2CYuC5qKRc-9CiR6W-a49zP2F0g-5bc8AgAA"))
-        .move(0.0f, 0.0f)
-        .done()
-    );
+
+    auto ix = 0u;
+    for (auto preset : BetterEdit::sharedState()->getPresets()) {
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor<CCLabelBMFont*>()
+                    .fromText(preset.name.c_str(), "goldFont.fnt")
+                    .scale(.7f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&PresetLayer::onCreate
+            ))
+            .uobj(CCString::create(preset.data))
+            .move(0.0f, this->m_pLrSize.height / 2 - 60.0f - ix * 30.0f)
+            .done()
+        );
+
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCSprite::createWithSpriteFrameName("GJ_deleteIcon_001.png"),
+                this,
+                (SEL_MenuHandler)&PresetLayer::onRemove
+            ))
+            .udata(ix)
+            .move(this->m_pLrSize.width / 2 - 25.0f, this->m_pLrSize.height / 2 - 30.0f - ix * 30.0f)
+            .done()
+        );
+
+        ix++;
+    }
 }
 
 void PresetLayer::onCreate(CCObject* pSender) {
@@ -39,6 +57,12 @@ void PresetLayer::onCreate(CCObject* pSender) {
         level->setLevelData(lvlStr->getCString());
 
     EditLevelLayer::scene(level);
+}
+
+void PresetLayer::onRemove(CCObject* pSender) {
+    BetterEdit::sharedState()->removePreset(
+        as<unsigned int>(as<CCNode*>(pSender)->getUserData())
+    );
 }
 
 PresetLayer* PresetLayer::create() {

@@ -1,4 +1,5 @@
 #include <GDMake.h>
+#include "../tools/Presets/browserHook.hpp"
 
 using namespace gdmake;
 
@@ -21,6 +22,8 @@ bool __fastcall EditLevelLayer_init(gd::EditLevelLayer* self, edx_t edx, gd::GJG
     garageRope->setDestination({ 0.0f, -8.0f });
 
     self->m_pSomeMenu->addChild(garageRope);
+
+    setupCreatePresetButton(self, level);
 
     return true;
 }

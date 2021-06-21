@@ -43,9 +43,16 @@ struct BESetting {
 };
 
 class BetterEdit : public gd::GManager {
+    public:
+        struct Preset {
+            std::string name;
+            std::string data;
+        };
+    
     protected:
         TemplateManager* m_pTemplateManager;
         std::map<std::string, BESetting> m_mSettingsDict;
+        std::vector<Preset> m_vPresets;
 
         virtual bool init() override;
 
@@ -64,4 +71,16 @@ class BetterEdit : public gd::GManager {
 
         inline std::map<std::string, BESetting> getSettingsDict() { return m_mSettingsDict; }
         static void showHookConflictMessage();
+
+        inline std::vector<Preset> getPresets() { return m_vPresets; }
+        inline BetterEdit* addPreset(Preset const& preset) { m_vPresets.push_back(preset); return this; }
+        inline BetterEdit* removePreset(unsigned int index) { m_vPresets.erase(m_vPresets.begin() + index); return this; }
+        inline BetterEdit* removePreset(std::string const& name) {
+            auto ix = 0u;
+            for (auto preset : m_vPresets)
+                if (preset.name == name)
+                    removePreset(ix);
+                else ix++;
+            return this;
+        }
 };
