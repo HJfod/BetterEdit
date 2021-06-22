@@ -11,13 +11,12 @@ class EditLevelLayer_CB : public gd::EditLevelLayer {
                 extra::as<cocos2d::CCNode*>(pSender)->getUserObject()
             );
 
-            InputPrompt::create("Save Preset", "Preset Name", [&lvl](const char* name) -> void {
-                std::cout << name << "\n";
-                std::cout << gd::LevelString(lvl->levelString).pData << "\n";
-
+            InputPrompt::create("Save Preset", "Preset Name", [this, lvl](const char* name) -> void {
                 BetterEdit::sharedState()->addPreset({
                     name, lvl->levelString
                 });
+
+                this->addChild(gd::TextAlertPopup::create("Preset Created!", .5f, .6f), 100);
             }, "Save")->show();
         }
 };
@@ -46,5 +45,8 @@ void setupCreatePresetButton(gd::EditLevelLayer* self, gd::GJGameLevel* level) {
 
 GDMAKE_HOOK(0x15cbf0)
 void __fastcall LevelBrowserLayer_onNew(gd::LevelBrowserLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
-    PresetLayer::create()->show();
+    if (BetterEdit::sharedState()->getPresets().size())
+        PresetLayer::create()->show();
+    else
+        GDMAKE_ORIG_V(self, edx, pSender);
 }

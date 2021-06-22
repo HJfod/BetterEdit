@@ -4,14 +4,22 @@ using namespace gdmake;
 using namespace gd;
 using namespace cocos2d;
 
+#define STEP_SUBDICT_NC(dict, key, ...)         \
+    if (dict->stepIntoSubDictWithKey(key)) {    \
+        __VA_ARGS__                             \
+        dict->stepOutOfSubDict();               \
+    }
+
 #define STEP_SUBDICT(dict, key, ...)            \
+    {                                           \
     if (!dict->stepIntoSubDictWithKey(key)) {   \
         dict->setSubDictForKey(key);            \
         if (!dict->stepIntoSubDictWithKey(key)) \
             return;                             \
     }                                           \
     __VA_ARGS__                                 \
-    dict->stepOutOfSubDict();
+    dict->stepOutOfSubDict();                   \
+    }
 
 BetterEdit* g_betterEdit;
 
@@ -32,11 +40,31 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
     STEP_SUBDICT(data, "templates",
         m_pTemplateManager->encodeDataTo(data);
     );
+
+    STEP_SUBDICT(data, "presets",
+        auto ix = 0u;
+        for (auto preset : m_vPresets)
+            STEP_SUBDICT(data, ("k" + std::to_string(ix)).c_str(),
+                data->setStringForKey("name", preset.name);
+                data->setStringForKey("data", preset.data);
+                ix++;
+            );
+    );
 }
 
 void BetterEdit::dataLoaded(DS_Dictionary* data) {
-    STEP_SUBDICT(data, "templates",
+    STEP_SUBDICT_NC(data, "templates",
         m_pTemplateManager->dataLoaded(data);
+    );
+
+    STEP_SUBDICT_NC(data, "presets",
+        for (auto key : data->getAllKeys())
+            STEP_SUBDICT_NC(data, key.c_str(),
+                m_vPresets.push_back({
+                    data->getStringForKey("name"),
+                    data->getStringForKey("data")
+                });
+            );
     );
 }
 
@@ -98,17 +126,10 @@ void BetterEdit::showHookConflictMessage() {
 }
 
 
-// GDMAKE_HOOK(0x3D5E0)
-// void __fastcall AppDelegate_trySaveGame(cocos2d::CCObject* self) {
-//     BetterEdit::sharedState()->save();
+GDMAKE_HOOK(0x3D5E0)
+void __fastcall AppDelegate_trySaveGame(cocos2d::CCObject* self) {
+    BetterEdit::sharedState()->save();
 
-//     return GDMAKE_ORIG_V(self);
-// }
-
-// GDMAKE_HOOK(0xCC500)
-// void __fastcall GameManager_dataLoadedHook(gd::GameManager* self, edx_t edx, DS_Dictionary* dict) {
-//     BetterEdit::sharedState();
-
-//     return GDMAKE_ORIG_V(self, edx, dict);
-// }
+    return GDMAKE_ORIG_V(self);
+}
 
