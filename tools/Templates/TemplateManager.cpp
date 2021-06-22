@@ -12,10 +12,6 @@ void TemplateManager::dataLoaded(DS_Dictionary* data) {
 
 }
 
-void TemplateManager::firstLoad() {
-
-}
-
 void TemplateManager::encodeDataTo(DS_Dictionary* data) {
     data->setIntegerForKey("version", 1);
     data->setIntegerForKey("count", this->m_vTemplates.size());

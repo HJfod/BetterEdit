@@ -5,9 +5,13 @@
 #include <BrownAlertDelegate.hpp>
 #include <InputNode.hpp>
 
-class GroupIDInputLayer : public BrownAlertDelegate {
+class AdvancedFilterLayer : public BrownAlertDelegate {
     public:
-        struct IDFilter {
+        struct Parseable {
+            virtual void parse(std::string const&) = 0;
+        };
+
+        struct IDFilter : Parseable {
             enum MatchResult { resMatch, resNegateMatch, resOptOutMatch, resOutsideMatch };
 
             struct Match {
@@ -114,10 +118,97 @@ class GroupIDInputLayer : public BrownAlertDelegate {
             }
         };
 
+        struct ObjFilter {
+            template<typename T>
+            struct Range : Parseable {
+                bool none = true;
+                T start = 0;
+                T end = -1;
+
+                bool in(T val) {
+                    if (none) return true;
+                    return start <= val <= end;
+                }
+
+                void parse(std::string const& text) {
+                    if (!text.size()) {
+                        this->none = true;
+                        return;
+                    }
+
+                    this->none = false;
+                    std::string clct = "";
+                    bool clctb = false;
+                    for (auto c : text)
+                        switch (c) {
+                            case '-':
+                                clctb = true;
+                                if (clct.size())
+                                    this->start = std::stoi(clct);
+                                break;
+                            default:
+                                clct += c;
+                        }
+                    
+                    if (clct.size()) this->end = std::stoi(clct);
+                    if (this->end == -1) this->end = this->start;
+                }
+            };
+
+            IDFilter* groups;
+            Range<float> scale;
+            Range<int> zOrder;
+            Range<int> color1;
+            Range<int> color2;
+            enum { None, Low, High } detail;
+
+            bool isEmpty() {
+                if (groups->filters.size()) return false;
+                
+                if (!scale.none) return false;
+                if (!zOrder.none) return false;
+                if (!color1.none) return false;
+                if (!color2.none) return false;
+                if (detail != None) return false;
+
+                return true;
+            }
+
+            void clearFilters() {
+                groups->filters.clear();
+                groups->filterString = "";
+
+                scale.none = true;
+                zOrder.none = true;
+                color1.none = true;
+                color2.none = true;
+                
+                detail = None;
+            }
+
+            bool match(gd::GameObject* obj) {
+                auto gids = obj->getGroupIDs();
+                if (!groups->match(std::vector<int> ( gids.begin(), gids.end() )))
+                    return false;
+                
+                if (!(scale.in(obj->m_fScale))) return false;
+                if (!(zOrder.in(obj->getZOrder()))) return false;
+                if (!(color1.in(obj->getBaseColor()->colorID))) return false;
+                
+                if (obj->getDetailColor())
+                    if (!(color2.in(obj->getDetailColor()->colorID))) return false;
+                
+                if (detail == Low && obj->m_bHighDetail) return false;
+                if (detail == High && !obj->m_bHighDetail) return false;
+
+                return true;
+            }
+        };
+
     protected:
-        InputNode* m_pGroupInput;
-        InputNode* m_pColorInput;
+        std::vector<std::function<void(Parseable&)>> m_vInputs;
         gd::CCMenuItemToggler* m_pGroupStrict;
+        gd::CCMenuItemSpriteExtra* m_pSenderBtn;
 
         void setup() override;
 
@@ -128,9 +219,8 @@ class GroupIDInputLayer : public BrownAlertDelegate {
         static std::vector<std::string> splitString(std::string const& str, char split);
     
     public:
-        static IDFilter* getGroupFilter();
-        static IDFilter* getColorFilter();
-        static bool noFilters();
+        static ObjFilter* getFilter();
+        static bool noFilter();
 
-        static GroupIDInputLayer* create();
+        static AdvancedFilterLayer* create(gd::CCMenuItemSpriteExtra* pSender = nullptr);
 };

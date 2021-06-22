@@ -88,7 +88,6 @@ class TemplateManager {
     public:
         void encodeDataTo(DS_Dictionary* data);
         void dataLoaded(DS_Dictionary* data);
-        void firstLoad();
 
         static TemplateManager* sharedState();
 };

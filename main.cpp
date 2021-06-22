@@ -3,7 +3,7 @@
 // include GDMake & submodules
 #include <GDMake.h>
 #include "BetterEdit.hpp"
-#include "templates/templates.hpp"
+#include "tools/Templates/templates.hpp"
 #include "tools/Favourites/favourite.hpp"
 
 GDMAKE_MAIN {

@@ -1,6 +1,6 @@
 #include <GDMake.h>
 #include "TemplateMenu.hpp"
-#include "../utils/addTab.hpp"
+#include "../../utils/addTab.hpp"
 #include "templates.hpp"
 
 using namespace gdmake;

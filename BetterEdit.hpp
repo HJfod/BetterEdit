@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GDMake.h>
-#include "templates/TemplateManager.hpp"
+#include "tools/Templates/TemplateManager.hpp"
 #include "utils.hpp"
 
 struct BESetting {
