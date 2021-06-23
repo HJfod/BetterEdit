@@ -37,6 +37,7 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
 
         void addToggle(const char* text, const char* desc, const char* key);
         void addInput(const char* text, const char* key, std::string const& filter = "0123456789");
+        void addSlider(const char* text, cocos2d::SEL_MenuHandler onChange, float val = 0.0f);
         cocos2d::CCLabelBMFont* addTitle(const char* text, const char* font = "goldFont.fnt");
         cocos2d::CCLabelBMFont* addSubtitle(const char* text, bool centered = false);
         gd::CCMenuItemSpriteExtra* addButton(cocos2d::CCNode* sprite, cocos2d::SEL_MenuHandler callback, bool large = false);

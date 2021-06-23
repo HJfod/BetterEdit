@@ -4,11 +4,16 @@
 #include "../../BetterEdit.hpp"
 #include <BrownAlertDelegate.hpp>
 #include <InputNode.hpp>
+#include <type_traits>
+
+#define AFL_IORF(T, c1) \
+    std::is_same<T, int>::value ? static_cast<T>(std::stoi(c1)) : static_cast<T>(std::stof(c1))
 
 class AdvancedFilterLayer : public BrownAlertDelegate {
     public:
         struct Parseable {
             virtual void parse(std::string const&) = 0;
+            std::string parseString = "";
         };
 
         struct IDFilter : Parseable {
@@ -51,14 +56,18 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
 
             bool strict = false;
             std::vector<std::vector<Match>> filters;
-            std::string filterString = "";
             unsigned int requiredMatches = 0u;
 
-            inline void parse(std::string const& str, bool sc) {
+            void setStrict(bool sc) {
                 this->strict = sc;
+            }
+
+            void parse(std::string const& str) override {
                 this->filters.clear();
-                this->filterString = "";
+                this->parseString = "";
                 this->requiredMatches = 0u;
+                
+                if (!str.size()) return;
 
                 for (auto f : splitString(str, ',')) {
                     std::vector<IDFilter::Match> matches;
@@ -84,7 +93,12 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                         requiredMatches++;
                 }
 
-                this->filterString = str;
+                this->parseString = str;
+            }
+
+            void parse(std::string const& str, bool sc) {
+                this->setStrict(sc);
+                this->parse(str);
             }
 
             inline bool match(std::vector<int> const& ids) {
@@ -125,16 +139,39 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                 T start = 0;
                 T end = -1;
 
-                bool in(T val) {
-                    if (none) return true;
-                    return start <= val <= end;
+                void clear() {
+                    this->none = true;
+                    this->parseString = "";
+                    this->start = 0;
+                    this->end = -1;
                 }
 
-                void parse(std::string const& text) {
-                    if (!text.size()) {
-                        this->none = true;
+                bool in(T val) {
+                    if (none) return true;
+                    return start <= val && val <= end;
+                }
+
+                void parse(std::string const& rtext) {
+                    this->clear();
+
+                    if (!rtext.size())
                         return;
-                    }
+
+                    this->parseString = rtext;
+
+                    auto text = stringToLower(rtext);
+                    text = stringReplace(text, "lbg", "1007");
+                    text = stringReplace(text, "bg", "1000");
+                    text = stringReplace(text, "g1", "1001");
+                    text = stringReplace(text, "line", "1002");
+                    text = stringReplace(text, "3dl", "1003");
+                    text = stringReplace(text, "obj", "1004");
+                    text = stringReplace(text, "p1", "1005");
+                    text = stringReplace(text, "p2", "1006");
+                    text = stringReplace(text, "g2", "1009");
+                    text = stringReplace(text, "black", "1010");
+                    text = stringReplace(text, "white", "1011");
+                    text = stringReplace(text, "lighter", "1012");
 
                     this->none = false;
                     std::string clct = "";
@@ -144,13 +181,21 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                             case '-':
                                 clctb = true;
                                 if (clct.size())
-                                    this->start = std::stoi(clct);
+                                    this->start = AFL_IORF(T, clct);
                                 break;
-                            default:
+                                
+                            case '0': case '1': case '2': case '3': case '4':
+                            case '5': case '6': case '7': case '8': case '9':
                                 clct += c;
+                                break;
                         }
                     
-                    if (clct.size()) this->end = std::stoi(clct);
+                    if (clct.size())
+                        if (clctb)
+                            this->end = AFL_IORF(T, clct);
+                        else
+                            this->start = AFL_IORF(T, clct);
+
                     if (this->end == -1) this->end = this->start;
                 }
             };
@@ -160,7 +205,11 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
             Range<int> zOrder;
             Range<int> color1;
             Range<int> color2;
-            enum { None, Low, High } detail;
+            enum EDetail : int { None=0, High=1, Low=2 } detail;
+
+            ObjFilter() {
+                groups = new IDFilter;
+            }
 
             bool isEmpty() {
                 if (groups->filters.size()) return false;
@@ -176,12 +225,12 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
 
             void clearFilters() {
                 groups->filters.clear();
-                groups->filterString = "";
+                groups->parseString = "";
 
-                scale.none = true;
-                zOrder.none = true;
-                color1.none = true;
-                color2.none = true;
+                scale.clear();
+                zOrder.clear();
+                color1.clear();
+                color2.clear();
                 
                 detail = None;
             }
@@ -206,7 +255,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
         };
 
     protected:
-        std::vector<std::function<void(Parseable&)>> m_vInputs;
+        std::vector<InputNode*> m_vInputs;
         gd::CCMenuItemToggler* m_pGroupStrict;
         gd::CCMenuItemSpriteExtra* m_pSenderBtn;
 
@@ -215,6 +264,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
         void reset(cocos2d::CCObject*);
         void onClose(cocos2d::CCObject*);
         void onStrict(cocos2d::CCObject*);
+        void onDetails(cocos2d::CCObject*);
 
         static std::vector<std::string> splitString(std::string const& str, char split);
     

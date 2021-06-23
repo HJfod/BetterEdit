@@ -87,6 +87,24 @@ class CCNodeConstructor {
         }
 };
 
+inline std::string stringToLower(std::string const& orig) {
+    auto res = orig;
+    std::transform(res.begin(), res.end(), res.begin(), [](unsigned char c){ return std::tolower(c); });
+    return res;
+}
+
+inline std::string stringReplace(std::string const& orig, std::string const& subs, std::string const& reps) {
+    std::string::size_type n = 0;
+    std::string res = orig;
+
+    while ( ( n = res.find( subs, n ) ) != std::string::npos ) {
+        res.replace( n, subs.size(), reps );
+        n += reps.size();
+    }
+
+    return res;
+}
+
 inline int strToInt(const char* str, bool* is = nullptr) {
     bool isStr = true;
     for (auto i = 0u; i < strlen(str); i++)

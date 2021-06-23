@@ -28,6 +28,16 @@ void BESettingsLayer::setup() {
     this->m_pButtonMenu->addChild(this->m_pNextPageBtn, 150);
 
     this->addInput("Scale Snap:", "scale-snap");
+    this->addSlider(
+        "Music",
+        (SEL_MenuHandler)&PauseLayer::musicSliderChanged,
+        FMODAudioEngine::sharedEngine()->getMusicVolume()
+    );
+    this->addSlider(
+        "SFX",
+        (SEL_MenuHandler)&PauseLayer::sfxSliderChanged,
+        FMODAudioEngine::sharedEngine()->getSFXVolume()
+    );
 
     this->incrementPageCount(true);
     this->addButton(
@@ -103,6 +113,29 @@ void BESettingsLayer::addInput(const char* text, const char* key, std::string co
 
     this->addItem(scaleSnapInput);
     this->addItem(scaleSnapLabel);
+    this->incrementPageCount();
+}
+
+void BESettingsLayer::addSlider(const char* text, cocos2d::SEL_MenuHandler onChange, float val) {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    
+    auto y = getItemPos(true).y;
+
+    auto slider = Slider::create(this, onChange, .8f);
+    auto label = CCLabelBMFont::create(text, "goldFont.fnt");
+    label->limitLabelWidth(this->m_pLrSize.width / 3, .7f, .2f);
+
+    slider->setPosition(winSize.width / 2 + 40.0f, winSize.height / 2 + y);
+    label->setPosition(winSize.width / 2 - 100.0f, winSize.height / 2 + y);
+
+    slider->setValue(val);
+    slider->updateBar();
+
+    this->m_pLayer->addChild(label);
+    this->m_pLayer->addChild(slider);
+
+    this->addItem(label);
+    this->addItem(slider);
     this->incrementPageCount();
 }
 
