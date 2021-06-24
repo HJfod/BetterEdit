@@ -226,6 +226,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
             void clearFilters() {
                 groups->filters.clear();
                 groups->parseString = "";
+                groups->strict = false;
 
                 scale.clear();
                 zOrder.clear();
@@ -256,7 +257,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
 
     protected:
         std::vector<InputNode*> m_vInputs;
-        gd::CCMenuItemToggler* m_pGroupStrict;
+        std::vector<gd::CCMenuItemToggler*> m_vToggles;
         gd::CCMenuItemSpriteExtra* m_pSenderBtn;
 
         void setup() override;

@@ -10,6 +10,8 @@ AdvancedFilterLayer::ObjFilter* g_pFilter;
 
 #define VOIDP_AS(T, v) static_cast<T>(reinterpret_cast<intptr_t>(v))
 
+static constexpr const int DETAIL_CB_TAG = 4;
+
 void AdvancedFilterLayer::setup() {
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
     constexpr const char* rangeFilter  = "0123456789- ";
@@ -35,7 +37,10 @@ void AdvancedFilterLayer::setup() {
                 ))
                 .move(75.0f, this->m_pLrSize.height / 2 - 60.0f)
                 .udata(&g_pFilter->groups->strict)
-                .exec([](auto self) -> void { self->toggle(g_pFilter->groups->strict); })
+                .exec([this](auto self) -> void {
+                    self->toggle(g_pFilter->groups->strict);
+                    this->m_vToggles.push_back(self);
+                })
                 .done()
         );
         this->m_pButtonMenu->addChild(
@@ -91,10 +96,11 @@ void AdvancedFilterLayer::setup() {
                 .fromNode(CCMenuItemToggler::createWithStandardSprites(
                     this, (SEL_MenuHandler)&AdvancedFilterLayer::onDetails, .7f
                 ))
-                .move(-100.0f, this->m_pLrSize.height / 2 - 180.0f)
-                .exec([](auto self) -> void {
+                .move(-130.0f, this->m_pLrSize.height / 2 - 180.0f)
+                .exec([this](auto self) -> void {
                     self->toggle(g_pFilter->detail == AdvancedFilterLayer::ObjFilter::Low);
-                    self->setTag(4);
+                    self->setTag(DETAIL_CB_TAG);
+                    this->m_vToggles.push_back(self);
                 })
                 .udata(AdvancedFilterLayer::ObjFilter::Low)
                 .done()
@@ -102,7 +108,7 @@ void AdvancedFilterLayer::setup() {
         this->m_pButtonMenu->addChild(
             CCNodeConstructor<CCLabelBMFont*>()
                 .fromText("Low Detail", "bigFont.fnt")
-                .move(-50.0f, this->m_pLrSize.height / 2 - 180.0f)
+                .move(-65.0f, this->m_pLrSize.height / 2 - 180.0f)
                 .scale(.525f)
                 .done()
         );
@@ -112,10 +118,11 @@ void AdvancedFilterLayer::setup() {
                 .fromNode(CCMenuItemToggler::createWithStandardSprites(
                     this, (SEL_MenuHandler)&AdvancedFilterLayer::onDetails, .7f
                 ))
-                .move(0.0f, this->m_pLrSize.height / 2 - 180.0f)
-                .exec([](auto self) -> void {
+                .move(20.0f, this->m_pLrSize.height / 2 - 180.0f)
+                .exec([this](auto self) -> void {
                     self->toggle(g_pFilter->detail == AdvancedFilterLayer::ObjFilter::High);
-                    self->setTag(4);
+                    self->setTag(DETAIL_CB_TAG);
+                    this->m_vToggles.push_back(self);
                 })
                 .udata(AdvancedFilterLayer::ObjFilter::High)
                 .done()
@@ -123,7 +130,7 @@ void AdvancedFilterLayer::setup() {
         this->m_pButtonMenu->addChild(
             CCNodeConstructor<CCLabelBMFont*>()
                 .fromText("High Detail", "bigFont.fnt")
-                .move(50.0f, this->m_pLrSize.height / 2 - 180.0f)
+                .move(90.0f, this->m_pLrSize.height / 2 - 180.0f)
                 .scale(.525f)
                 .done()
         );
@@ -168,19 +175,19 @@ void AdvancedFilterLayer::setup() {
 void AdvancedFilterLayer::onStrict(CCObject* pSender) {
     auto toggle = as<CCMenuItemToggler*>(pSender);
     
-    *as<bool*>(toggle->getUserData()) = toggle->isToggled();
+    *as<bool*>(toggle->getUserData()) = !toggle->isToggled();
 }
 
 void AdvancedFilterLayer::onDetails(CCObject* pSender) {
     auto pSenderT = as<CCMenuItemToggler*>(pSender);
-    auto toggled = pSenderT->isToggled();
+    auto toggled = !pSenderT->isToggled();
 
-    CCARRAY_FOREACH_B_TYPE(this->getChildren(), c, CCMenuItemToggler)
-        if (c->getTag() == 4)
+    CCARRAY_FOREACH_B_TYPE(this->m_pButtonMenu->getChildren(), c, CCMenuItemToggler)
+        if (c->getTag() == DETAIL_CB_TAG)
             c->toggle(false);
 
-    pSenderT->toggle(toggled);
-    
+    pSenderT->toggle(!toggled);
+
     if (toggled)
         g_pFilter->detail = VOIDP_AS(AdvancedFilterLayer::ObjFilter::EDetail, pSenderT->getUserData());
     else
@@ -201,6 +208,9 @@ void AdvancedFilterLayer::onClose(CCObject* pSender) {
 void AdvancedFilterLayer::reset(CCObject*) {
     for (auto input : this->m_vInputs)
         input->setString("");
+    
+    for (auto toggle : this->m_vToggles)
+        toggle->toggle(false);
 
     g_pFilter->clearFilters();
 }
