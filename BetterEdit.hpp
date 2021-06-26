@@ -3,6 +3,7 @@
 #include <GDMake.h>
 #include "tools/Templates/TemplateManager.hpp"
 #include "utils.hpp"
+#include <set>
 
 struct BESetting {
     enum SType { Int, String };
@@ -49,10 +50,13 @@ class BetterEdit : public gd::GManager {
             std::string data;
         };
     
+        using FavoritesList = std::set<int>;
+    
     protected:
         TemplateManager* m_pTemplateManager;
         std::map<std::string, BESetting> m_mSettingsDict;
         std::vector<Preset> m_vPresets;
+        FavoritesList m_vFavorites;
 
         virtual bool init() override;
 
@@ -82,5 +86,18 @@ class BetterEdit : public gd::GManager {
                     removePreset(ix);
                 else ix++;
             return this;
+        }
+
+        inline FavoritesList & getFavorites() { return m_vFavorites; }
+        inline bool addFavorite(int id) {
+            if (m_vFavorites.count(id))
+                return false;
+            m_vFavorites.insert(id);
+            return true;
+        }
+        inline bool removeFavorite(int id) {
+            auto res = m_vFavorites.count(id);
+            m_vFavorites.erase(id);
+            return res;
         }
 };

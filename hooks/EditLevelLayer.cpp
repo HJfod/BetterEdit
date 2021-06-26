@@ -21,7 +21,7 @@ bool __fastcall EditLevelLayer_init(gd::EditLevelLayer* self, edx_t edx, gd::GJG
     garageRope->setOffset({ .2f, .2f });
     garageRope->setDestination({ 0.0f, -8.0f });
 
-    self->m_pSomeMenu->addChild(garageRope);
+    self->m_pButtonMenu->addChild(garageRope);
 
     setupCreatePresetButton(self, level);
 

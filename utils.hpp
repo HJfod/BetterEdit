@@ -105,6 +105,23 @@ inline std::string stringReplace(std::string const& orig, std::string const& sub
     return res;
 }
 
+inline std::vector<std::string> stringSplit(std::string const& orig, std::string const& split) {
+    std::vector<std::string> res;
+
+    if (orig.size()) {
+        auto s = orig;
+
+        size_t pos = 0;
+
+        while ((pos = s.find(split)) != std::string::npos) {
+            res.push_back(s.substr(0, pos));
+            s.erase(0, pos + split.length());
+        }
+    }
+
+    return res;
+}
+
 inline int strToInt(const char* str, bool* is = nullptr) {
     bool isStr = true;
     for (auto i = 0u; i < strlen(str); i++)

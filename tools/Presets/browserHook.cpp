@@ -32,7 +32,15 @@ void setupCreatePresetButton(gd::EditLevelLayer* self, gd::GJGameLevel* level) {
     );
     btn->setUserObject(level);
 
-    auto menu = extra::getChild<cocos2d::CCMenu*>(self, 13);
+    cocos2d::CCMenu* menu = nullptr;
+
+    CCARRAY_FOREACH_B_TYPE(self->getChildren(), obj, cocos2d::CCNode)
+        if (dynamic_cast<cocos2d::CCMenu*>(obj) && obj->getChildrenCount() > 4)
+            menu = extra::as<cocos2d::CCMenu*>(obj);
+        
+    if (!menu)
+        menu = self->m_pButtonMenu;
+
     auto folderBtn = extra::getChild<gd::CCMenuItemSpriteExtra*>(menu, -1);
 
     btn->setPosition(

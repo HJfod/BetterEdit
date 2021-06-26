@@ -200,12 +200,53 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                 }
             };
 
+            enum ELayer : int {
+                NA = 0,
+                B4 = 0b0000001,
+                B3 = 0b0000010,
+                B2 = 0b0000100,
+                B1 = 0b0001000,
+                T1 = 0b0010000,
+                T2 = 0b0100000,
+                T3 = 0b1000000,
+            };
+            ELayer fromZLayer(int z, int dz) {
+                switch (z) {
+                    case -3: return B4;
+                    case -1: return B3;
+                    case 1: return B2;
+                    case 3: return B1;
+                    case 5: return T1;
+                    case 7: return T2;
+                    case 9: return T3;
+                    case 0: return fromZLayer(dz, 999);
+                    default: return NA;
+                }
+            }
+
+            template<typename T>
+            struct BoolList {
+                static_assert(std::is_enum<T>::value, "BoolList requires an enum");
+                protected:
+                    int value = 0;
+
+                public:
+                    bool hasSet() { return value; }
+                    bool isSet(T bit) { return value & bit; }
+                    void set(T bit, bool set) {
+                        if (set) value |= bit; else value &= ~bit;
+                    }
+                    void set(T bit) { value ^= bit; }
+                    void clear() { value = 0; }
+            };
+
             IDFilter* groups;
             Range<float> scale;
             Range<int> zOrder;
             Range<int> color1;
             Range<int> color2;
-            enum EDetail : int { None=0, High=1, Low=2 } detail;
+            enum EDetail : int { None=0, High=1, Low=2 } detail = None;
+            BoolList<ELayer> layers;
 
             ObjFilter() {
                 groups = new IDFilter;
@@ -219,6 +260,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                 if (!color1.none) return false;
                 if (!color2.none) return false;
                 if (detail != None) return false;
+                if (layers.hasSet()) return false;
 
                 return true;
             }
@@ -234,6 +276,8 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                 color2.clear();
                 
                 detail = None;
+
+                layers.clear();
             }
 
             bool match(gd::GameObject* obj) {
@@ -251,6 +295,8 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                 if (detail == Low && obj->m_bHighDetail) return false;
                 if (detail == High && !obj->m_bHighDetail) return false;
 
+                if (layers.hasSet() && !layers.isSet(fromZLayer(obj->m_nZLayer, obj->m_nDefaultZLayer))) return false;
+
                 return true;
             }
         };
@@ -263,9 +309,13 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
         void setup() override;
 
         void reset(cocos2d::CCObject*);
+
         void onClose(cocos2d::CCObject*);
         void onStrict(cocos2d::CCObject*);
         void onDetails(cocos2d::CCObject*);
+        void onLayer(cocos2d::CCObject*);
+        void onInfo(cocos2d::CCObject*);
+        void onGroupInfo(cocos2d::CCObject*);
 
         static std::vector<std::string> splitString(std::string const& str, char split);
     

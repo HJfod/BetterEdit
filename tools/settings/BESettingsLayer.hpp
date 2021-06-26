@@ -46,7 +46,7 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
         void onToggle(cocos2d::CCObject*);
         void textChanged(gd::CCTextInputNode*) override;
 
-        void onShowHJLinks(cocos2d::CCObject*);
+        void onShowAccount(cocos2d::CCObject*);
 
     public:
         static BESettingsLayer* create();

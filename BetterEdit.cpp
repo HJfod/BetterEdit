@@ -50,6 +50,11 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
                 ix++;
             );
     );
+
+    std::string favStr = "";
+    for (auto fav : m_vFavorites)
+        favStr += std::to_string(fav) + ",";
+    data->setStringForKey("favorites", favStr);
 }
 
 void BetterEdit::dataLoaded(DS_Dictionary* data) {
@@ -66,6 +71,9 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
                 });
             );
     );
+
+    for (auto fav : stringSplit(data->getStringForKey("favorites"), ","))
+        try { this->addFavorite(std::stoi(fav)); } catch (...) {}
 }
 
 void BetterEdit::firstLoad() {}

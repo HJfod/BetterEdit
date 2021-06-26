@@ -12,6 +12,16 @@ AdvancedFilterLayer::ObjFilter* g_pFilter;
 
 static constexpr const int DETAIL_CB_TAG = 4;
 
+CCMenuItemToggler* createButtonToggle(const char* text, CCNode* target, SEL_MenuHandler onClick) {
+    auto onSpr  = gd::ButtonSprite::create(text, 0, 0, "bigFont.fnt", "GJ_button_04.png", 0, .8f);
+    auto offSpr = gd::ButtonSprite::create(text, 0, 0, "bigFont.fnt", "GJ_button_02.png", 0, .8f);
+
+    onSpr->setScale(.6f);
+    offSpr->setScale(.6f);
+
+    return CCMenuItemToggler::create(onSpr, offSpr, target, onClick);
+}
+
 void AdvancedFilterLayer::setup() {
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
     constexpr const char* rangeFilter  = "0123456789- ";
@@ -136,6 +146,30 @@ void AdvancedFilterLayer::setup() {
         );
     }
 
+    {   // B4, B3, B2, B1, T1, T2, T3
+        auto ix = 0u;
+        for (auto [text, cb] : std::vector<std::tuple<const char*, ObjFilter::ELayer>> {
+            { "B4", ObjFilter::B4 },
+            { "B3", ObjFilter::B3 },
+            { "B2", ObjFilter::B2 },
+            { "B1", ObjFilter::B1 },
+            { "T1", ObjFilter::T1 },
+            { "T2", ObjFilter::T2 },
+            { "T3", ObjFilter::T3 },
+        })
+            this->m_pButtonMenu->addChild(
+                CCNodeConstructor<CCMenuItemToggler*>()
+                    .fromNode(createButtonToggle(text, this, (SEL_MenuHandler)&AdvancedFilterLayer::onLayer))
+                    .move(-120.0f + 40.0f * ix++, this->m_pLrSize.height / 2 - 210.0f)
+                    .exec([this, c = cb](auto self) -> void {
+                        self->toggle(g_pFilter->layers.isSet(c));
+                        this->m_vToggles.push_back(self);
+                    })
+                    .udata(cb)
+                    .done()
+            );
+    }
+
     for (auto input : this->m_vInputs)
         input->setString(as<Parseable*>(input->getUserData())->parseString.c_str());
 
@@ -151,6 +185,34 @@ void AdvancedFilterLayer::setup() {
                     (SEL_MenuHandler)&AdvancedFilterLayer::reset
                 ))
                 .move(this->m_pLrSize / 2 - CCPoint { 25.0f, 25.0f })
+                .done()
+        );
+
+        this->m_pButtonMenu->addChild(
+            CCNodeConstructor<CCMenuItemSpriteExtra*>()
+                .fromNode(CCMenuItemSpriteExtra::create(
+                    CCNodeConstructor()
+                        .fromFrameName("GJ_infoIcon_001.png")
+                        .scale(.8f)
+                        .done(),
+                    this,
+                    (SEL_MenuHandler)&AdvancedFilterLayer::onInfo
+                ))
+                .move(CCPoint { 0, 0 } - this->m_pLrSize / 2 + CCPoint { 25.0f, 25.0f })
+                .done()
+        );
+
+        this->m_pButtonMenu->addChild(
+            CCNodeConstructor<CCMenuItemSpriteExtra*>()
+                .fromNode(CCMenuItemSpriteExtra::create(
+                    CCNodeConstructor()
+                        .fromFrameName("GJ_infoIcon_001.png")
+                        .scale(.8f)
+                        .done(),
+                    this,
+                    (SEL_MenuHandler)&AdvancedFilterLayer::onGroupInfo
+                ))
+                .move(CCPoint { 0, 0 } - this->m_pLrSize / 2 + CCPoint { 60.0f, 25.0f })
                 .done()
         );
 
@@ -194,6 +256,15 @@ void AdvancedFilterLayer::onDetails(CCObject* pSender) {
         g_pFilter->detail = AdvancedFilterLayer::ObjFilter::None;
 }
 
+void AdvancedFilterLayer::onLayer(CCObject* pSender) {
+    auto pSenderT = as<CCMenuItemToggler*>(pSender);
+
+    g_pFilter->layers.set(
+        VOIDP_AS(ObjFilter::ELayer, pSenderT->getUserData()),
+        !pSenderT->isToggled()
+    );
+}
+
 void AdvancedFilterLayer::onClose(CCObject* pSender) {
     for (auto input : this->m_vInputs)
         as<Parseable*>(input->getUserData())->parse(input->getString());
@@ -203,6 +274,33 @@ void AdvancedFilterLayer::onClose(CCObject* pSender) {
             ->updateBGImage(this->noFilter() ? "GJ_button_04.png" : "GJ_button_02.png");
 
     BrownAlertDelegate::onClose(nullptr);
+}
+
+void AdvancedFilterLayer::onInfo(CCObject*) {
+    FLAlertLayer::create(
+        nullptr,
+        "Info",
+        "OK", nullptr,
+        300.0f,
+        "When <cy>Advanced Filters</c> are enabled, you can only select objects that match "
+        "<cb>all</c> the selected filters.\n\n"
+        "You can enter either a <cp>specific value</c> (for example, <cg>23</c>) or a <co>range</c> "
+        "(<cg>23-50</c>) in inputs.\n"
+        "The <cl>group ID</c> filter is special, with more info in its own box."
+    )->show();
+}
+
+void AdvancedFilterLayer::onGroupInfo(CCObject*) {
+    FLAlertLayer::create(
+        nullptr,
+        "Group Filter Info",
+        "OK", nullptr,
+        320.0f,
+        "The <cl>group ID</c> filter uses a <cy>matching string</c> for objects.\n\n"
+        "For example: <cy>23,50-60,80|84</c> will <cb>match</c> any object that has "
+        "group IDs 23, any group between 50 and 60, and 80 and/or 84.\n\n"
+        "If <cp>strict</c> mode is enabled, all of the IDs of the object must match."
+    )->show();
 }
 
 void AdvancedFilterLayer::reset(CCObject*) {
@@ -248,7 +346,7 @@ bool AdvancedFilterLayer::noFilter() {
 AdvancedFilterLayer* AdvancedFilterLayer::create(CCMenuItemSpriteExtra* pSender) {
     auto ret = new AdvancedFilterLayer();
 
-    if (ret && ret->init(320.0f, 260.0f, "GJ_square01.png", "Advanced Filter")) {
+    if (ret && ret->init(320.0f, 270.0f, "GJ_square01.png", "Advanced Filter")) {
         ret->autorelease();
         ret->m_pSenderBtn = pSender;
         return ret;

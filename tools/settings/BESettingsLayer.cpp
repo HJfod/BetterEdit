@@ -5,6 +5,16 @@ using namespace gdmake::extra;
 using namespace gd;
 using namespace cocos2d;
 
+#define USER_LINK(name, gdid) \
+    addButton(                                                  \
+        CCNodeConstructor<CCLabelBMFont*>()                     \
+            .fromText(name, "goldFont.fnt")                     \
+            .scale(.75f)                                        \
+            .done(),                                            \
+        (SEL_MenuHandler)&BESettingsLayer::onShowAccount,       \
+        false                                                   \
+    )->setUserData(reinterpret_cast<void*>(gdid));
+
 void BESettingsLayer::setup() {
     this->m_pPrevPageBtn = CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"),
@@ -46,14 +56,14 @@ void BESettingsLayer::setup() {
             .color({ 4, 255, 255 })
             .scale(.75f)
             .done(),
-        (SEL_MenuHandler)&BESettingsLayer::onShowHJLinks,
+        (SEL_MenuHandler)&BESettingsLayer::onShowAccount,
         true
-    );
+    )->setUserData(as<void*>(104257));
     this->addTitle("Special Thanks:", "bigFont.fnt")->setScale(.6f);
-    this->addSubtitle("Mat", true);
-    this->addSubtitle("Figment", true);
-    this->addSubtitle("cos8oih", true);
-    this->addSubtitle("Brittank88", true);
+    this->USER_LINK("Mat", 5568872);
+    this->USER_LINK("Figment", 107269);
+    this->USER_LINK("cos8oih", 4504713);
+    this->USER_LINK("Brittank88", 93792);
 }
 
 
@@ -176,7 +186,7 @@ CCMenuItemSpriteExtra* BESettingsLayer::addButton(CCNode* sprite, SEL_MenuHandle
     auto [x, y] = getItemPos(large);
 
     auto btn = CCMenuItemSpriteExtra::create(sprite, this, callback);
-    btn->setPosition(x, y);
+    btn->setPosition(x + large ? 0 : this->m_pLrSize.width / 4, y);
     this->m_pButtonMenu->addChild(btn);
 
     this->addItem(btn);
@@ -249,8 +259,8 @@ void BESettingsLayer::textChanged(gd::CCTextInputNode* input) {
         );
 }
 
-void BESettingsLayer::onShowHJLinks(CCObject*) {
-    ProfilePage::create(104257, true)->show();
+void BESettingsLayer::onShowAccount(CCObject* pSender) {
+    ProfilePage::create(as<int>(as<CCNode*>(pSender)->getUserData()), true)->show();
 }
 
 BESettingsLayer* BESettingsLayer::create() {
