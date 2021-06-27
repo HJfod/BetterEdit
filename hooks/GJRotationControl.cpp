@@ -74,125 +74,125 @@ bool pointIntersectsRotateControls(gd::EditorUI* self, cocos2d::CCTouch* touch, 
     return false;
 }
 
-GDMAKE_HOOK(0x94020)
-void __fastcall GJRotationControl_updateSliderPosition(gd::GJRotationControl* self, edx_t edx, cocos2d::CCPoint pos) {
-    GDMAKE_ORIG_V(self, edx, pos);
+// GDMAKE_HOOK(0x94020)
+// void __fastcall GJRotationControl_updateSliderPosition(gd::GJRotationControl* self, edx_t edx, cocos2d::CCPoint pos) {
+//     GDMAKE_ORIG_V(self, edx, pos);
 
-    auto t = self->getChildByTag(6978);
+//     auto t = self->getChildByTag(6978);
 
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(2) << self->m_fAngle;
-    std::string s = stream.str();
+//     std::stringstream stream;
+//     stream << std::fixed << std::setprecision(2) << self->m_fAngle;
+//     std::string s = stream.str();
 
-    if (t)
-        reinterpret_cast<gd::CCTextInputNode*>(t)->setString(s.c_str());
-}
+//     if (t)
+//         reinterpret_cast<gd::CCTextInputNode*>(t)->setString(s.c_str());
+// }
 
-GDMAKE_HOOK(0x8fe70)
-void __fastcall EditorUI_activateRotationControl(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
-    GDMAKE_ORIG_V(self, edx, pSender);
+// GDMAKE_HOOK(0x8fe70)
+// void __fastcall EditorUI_activateRotationControl(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
+//     GDMAKE_ORIG_V(self, edx, pSender);
 
-    auto sel = self->getSelectedObjects();
+//     auto sel = self->getSelectedObjects();
 
-    float angle = 0.0f;
-    for (auto ix = 0u; ix < sel->count(); ix++) {
-        auto obj = reinterpret_cast<gd::GameObject*>(sel->objectAtIndex(ix));
+//     float angle = 0.0f;
+//     for (auto ix = 0u; ix < sel->count(); ix++) {
+//         auto obj = reinterpret_cast<gd::GameObject*>(sel->objectAtIndex(ix));
 
-        if (ix) {
-            if (obj->getRotation() != angle)
-                angle = 0.0f;
-        } else
-            angle = obj->getRotation();
-    }
+//         if (ix) {
+//             if (obj->getRotation() != angle)
+//                 angle = 0.0f;
+//         } else
+//             angle = obj->getRotation();
+//     }
 
-    while (angle < 0.0f)
-        angle += 360.0f;
+//     while (angle < 0.0f)
+//         angle += 360.0f;
     
-    while (angle >= 360.0f)
-        angle -= 360.0f;
+//     while (angle >= 360.0f)
+//         angle -= 360.0f;
 
-    std::cout << "setting angle to " << angle << "\n";
-    std::cout << "obj angle " << self->m_pRotationControl->m_fObjAngle << "\n";
+//     std::cout << "setting angle to " << angle << "\n";
+//     std::cout << "obj angle " << self->m_pRotationControl->m_fObjAngle << "\n";
 
-    self->m_pRotationControl->setAngle(angle);
-}
+//     self->m_pRotationControl->setAngle(angle);
+// }
 
-GDMAKE_HOOK(0x93f10)
-bool __fastcall GJRotationControl_init(gd::GJRotationControl* self) {
-    if (!GDMAKE_ORIG(self))
-        return false;
+// GDMAKE_HOOK(0x93f10)
+// bool __fastcall GJRotationControl_init(gd::GJRotationControl* self) {
+//     if (!GDMAKE_ORIG(self))
+//         return false;
 
-    constexpr float offset_w = 0.0f;
-    constexpr float offset_h = -80.0f;
+//     constexpr float offset_w = 0.0f;
+//     constexpr float offset_h = -80.0f;
 
-    auto ed = RotateTextDelegate::create(self);
+//     auto ed = RotateTextDelegate::create(self);
 
-    auto spr = cocos2d::extension::CCScale9Sprite::create(
-        "square02b_001.png", { 0.0f, 0.0f, 80.0f, 80.0f }
-    );
+//     auto spr = cocos2d::extension::CCScale9Sprite::create(
+//         "square02b_001.png", { 0.0f, 0.0f, 80.0f, 80.0f }
+//     );
 
-    spr->setScale(.3f);
-    spr->setColor({ 0, 0, 0 });
-    spr->setOpacity(100);
-    spr->setContentSize({ 115.0f, 75.0f });
-    spr->setPosition(self->getPosition() + cocos2d::CCPoint { offset_w, offset_h });
+//     spr->setScale(.3f);
+//     spr->setColor({ 0, 0, 0 });
+//     spr->setOpacity(100);
+//     spr->setContentSize({ 115.0f, 75.0f });
+//     spr->setPosition(self->getPosition() + cocos2d::CCPoint { offset_w, offset_h });
 
-    auto eLayerInput = gd::CCTextInputNode::create("0", ed, "bigFont.fnt", 40.0f, 30.0f);
+//     auto eLayerInput = gd::CCTextInputNode::create("0", ed, "bigFont.fnt", 40.0f, 30.0f);
 
-    eLayerInput->setPosition(self->getPosition() + cocos2d::CCPoint { offset_w, offset_h });
-    eLayerInput->setLabelPlaceholderColor({ 120, 120, 120 });
-    eLayerInput->setAllowedChars(".0123456789");
-    eLayerInput->setAnchorPoint({ 0, 0 });
-    eLayerInput->setScale(.7f);
-    eLayerInput->setDelegate(ed);
-    eLayerInput->setTag(6978);
-    eLayerInput->setString("0");
+//     eLayerInput->setPosition(self->getPosition() + cocos2d::CCPoint { offset_w, offset_h });
+//     eLayerInput->setLabelPlaceholderColor({ 120, 120, 120 });
+//     eLayerInput->setAllowedChars(".0123456789");
+//     eLayerInput->setAnchorPoint({ 0, 0 });
+//     eLayerInput->setScale(.7f);
+//     eLayerInput->setDelegate(ed);
+//     eLayerInput->setTag(6978);
+//     eLayerInput->setString("0");
 
-    self->addChild(spr);
-    self->addChild(eLayerInput, 999);
-    self->addChild(ed);
+//     self->addChild(spr);
+//     self->addChild(eLayerInput, 999);
+//     self->addChild(ed);
 
-    auto menu = cocos2d::CCMenu::create();
+//     auto menu = cocos2d::CCMenu::create();
 
-    /////////////////////////////////
+//     /////////////////////////////////
 
-    auto unlockScaleBtn = gd::CCMenuItemSpriteExtra::create(
-        cocos2d::CCSprite::create("GJ_button_01.png"),
-        self,
-        nullptr
-    );
+//     auto unlockScaleBtn = gd::CCMenuItemSpriteExtra::create(
+//         cocos2d::CCSprite::create("GJ_button_01.png"),
+//         self,
+//         nullptr
+//     );
 
-    unlockScaleBtn->setNormalImage(
-        createLockSprite("GJ_button_01.png", "GJ_lock_001.png")
-    );
-    unlockScaleBtn->setPosition({ 30.0f, 0.0f });
+//     unlockScaleBtn->setNormalImage(
+//         createLockSprite("GJ_button_01.png", "GJ_lock_001.png")
+//     );
+//     unlockScaleBtn->setPosition({ 30.0f, 0.0f });
 
-    menu->addChild(unlockScaleBtn);
+//     menu->addChild(unlockScaleBtn);
 
-    /////////////////////////////////
+//     /////////////////////////////////
 
-    auto lockPositionBtn = gd::CCMenuItemSpriteExtra::create(
-        cocos2d::CCSprite::create("GJ_button_01.png"),
-        self,
-        nullptr
-    );
+//     auto lockPositionBtn = gd::CCMenuItemSpriteExtra::create(
+//         cocos2d::CCSprite::create("GJ_button_01.png"),
+//         self,
+//         nullptr
+//     );
 
-    lockPositionBtn->setNormalImage(
-        createLockSprite("GJ_button_04.png", "GJ_lock_open_001.png")
-    );
-    lockPositionBtn->setPosition({ -30.0f, 0.0f });
+//     lockPositionBtn->setNormalImage(
+//         createLockSprite("GJ_button_04.png", "GJ_lock_open_001.png")
+//     );
+//     lockPositionBtn->setPosition({ -30.0f, 0.0f });
 
-    menu->addChild(lockPositionBtn);
+//     menu->addChild(lockPositionBtn);
 
-    /////////////////////////////////
+//     /////////////////////////////////
 
-    menu->setPosition(self->getPosition() + cocos2d::CCPoint { offset_w, offset_h });
-    self->addChild(menu);
+//     menu->setPosition(self->getPosition() + cocos2d::CCPoint { offset_w, offset_h });
+//     self->addChild(menu);
 
-    ed->m_pInputNode = eLayerInput;
-    ed->m_pLockPosBtn = lockPositionBtn;
-    ed->m_pLockScaleBtn = unlockScaleBtn;
-    ed->setTag(7777);
+//     ed->m_pInputNode = eLayerInput;
+//     ed->m_pLockPosBtn = lockPositionBtn;
+//     ed->m_pLockScaleBtn = unlockScaleBtn;
+//     ed->setTag(7777);
 
-    return true;
-}
+//     return true;
+// }

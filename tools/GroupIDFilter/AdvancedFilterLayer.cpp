@@ -106,7 +106,7 @@ void AdvancedFilterLayer::setup() {
                 .fromNode(CCMenuItemToggler::createWithStandardSprites(
                     this, (SEL_MenuHandler)&AdvancedFilterLayer::onDetails, .7f
                 ))
-                .move(-130.0f, this->m_pLrSize.height / 2 - 180.0f)
+                .move(-130.0f, this->m_pLrSize.height / 2 - 176.0f)
                 .exec([this](auto self) -> void {
                     self->toggle(g_pFilter->detail == AdvancedFilterLayer::ObjFilter::Low);
                     self->setTag(DETAIL_CB_TAG);
@@ -118,7 +118,7 @@ void AdvancedFilterLayer::setup() {
         this->m_pButtonMenu->addChild(
             CCNodeConstructor<CCLabelBMFont*>()
                 .fromText("Low Detail", "bigFont.fnt")
-                .move(-65.0f, this->m_pLrSize.height / 2 - 180.0f)
+                .move(-65.0f, this->m_pLrSize.height / 2 - 176.0f)
                 .scale(.525f)
                 .done()
         );
@@ -128,7 +128,7 @@ void AdvancedFilterLayer::setup() {
                 .fromNode(CCMenuItemToggler::createWithStandardSprites(
                     this, (SEL_MenuHandler)&AdvancedFilterLayer::onDetails, .7f
                 ))
-                .move(20.0f, this->m_pLrSize.height / 2 - 180.0f)
+                .move(20.0f, this->m_pLrSize.height / 2 - 176.0f)
                 .exec([this](auto self) -> void {
                     self->toggle(g_pFilter->detail == AdvancedFilterLayer::ObjFilter::High);
                     self->setTag(DETAIL_CB_TAG);
@@ -140,7 +140,7 @@ void AdvancedFilterLayer::setup() {
         this->m_pButtonMenu->addChild(
             CCNodeConstructor<CCLabelBMFont*>()
                 .fromText("High Detail", "bigFont.fnt")
-                .move(90.0f, this->m_pLrSize.height / 2 - 180.0f)
+                .move(90.0f, this->m_pLrSize.height / 2 - 176.0f)
                 .scale(.525f)
                 .done()
         );

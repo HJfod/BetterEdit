@@ -5,6 +5,7 @@
 #include <BrownAlertDelegate.hpp>
 #include <InputNode.hpp>
 #include <type_traits>
+#include <exception>
 
 #define AFL_IORF(T, c1) \
     std::is_same<T, int>::value ? static_cast<T>(std::stoi(c1)) : static_cast<T>(std::stof(c1))
@@ -58,6 +59,13 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
             std::vector<std::vector<Match>> filters;
             unsigned int requiredMatches = 0u;
 
+            void reset() {
+                this->filters.clear();
+                this->requiredMatches = 0u;
+                this->strict = false;
+                this->parseString = "";
+            }
+
             void setStrict(bool sc) {
                 this->strict = sc;
             }
@@ -69,16 +77,36 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                 
                 if (!str.size()) return;
 
-                for (auto f : splitString(str, ',')) {
-                    std::vector<IDFilter::Match> matches;
+                try {
+                    for (auto f : splitString(str, ',')) {
+                        std::vector<IDFilter::Match> matches;
 
-                    if (f.find('|') != std::string::npos)
-                        for (auto m : splitString(f, '|'))
-                            matches.push_back(IDFilter::Match(m));
-                    else
-                        matches.push_back(IDFilter::Match(f));
-                    
-                    this->filters.push_back(matches);
+                        if (f.find('|') != std::string::npos)
+                            for (auto m : splitString(f, '|'))
+                                matches.push_back(IDFilter::Match(m));
+                        else
+                            matches.push_back(IDFilter::Match(f));
+                        
+                        this->filters.push_back(matches);
+                    }
+                } catch (std::out_of_range &) {
+                    this->reset();
+
+                    return gd::FLAlertLayer::create(
+                        nullptr,
+                        "Error Parsing",
+                        "OK", nullptr,
+                        "Advanced Filters do not support <cc>Group IDs</c> that <cy>large</c>"
+                    )->show();
+                } catch (...) {
+                    this->reset();
+
+                    return gd::FLAlertLayer::create(
+                        nullptr,
+                        "Error Parsing",
+                        "OK", nullptr,
+                        "Unknown <cr>error</c> parsing"
+                    )->show();
                 }
 
                 // this is stupid
@@ -173,30 +201,50 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                     text = stringReplace(text, "white", "1011");
                     text = stringReplace(text, "lighter", "1012");
 
-                    this->none = false;
-                    std::string clct = "";
-                    bool clctb = false;
-                    for (auto c : text)
-                        switch (c) {
-                            case '-':
-                                clctb = true;
-                                if (clct.size())
-                                    this->start = AFL_IORF(T, clct);
-                                break;
-                                
-                            case '0': case '1': case '2': case '3': case '4':
-                            case '5': case '6': case '7': case '8': case '9':
-                                clct += c;
-                                break;
-                        }
-                    
-                    if (clct.size())
-                        if (clctb)
-                            this->end = AFL_IORF(T, clct);
-                        else
-                            this->start = AFL_IORF(T, clct);
+                    try {
+                        this->none = false;
+                        std::string clct = "";
+                        bool clctb = false;
+                        for (auto c : text)
+                            switch (c) {
+                                case '-':
+                                    clctb = true;
+                                    if (clct.size())
+                                        this->start = AFL_IORF(T, clct);
+                                    break;
+                                    
+                                case '0': case '1': case '2': case '3': case '4':
+                                case '5': case '6': case '7': case '8': case '9':
+                                    clct += c;
+                                    break;
+                            }
+                        
+                        if (clct.size())
+                            if (clctb)
+                                this->end = AFL_IORF(T, clct);
+                            else
+                                this->start = AFL_IORF(T, clct);
 
-                    if (this->end == -1) this->end = this->start;
+                        if (this->end == -1) this->end = this->start;
+                    } catch (std::out_of_range &) {
+                        this->clear();
+
+                        return gd::FLAlertLayer::create(
+                            nullptr,
+                            "Error Parsing",
+                            "OK", nullptr,
+                            "Ranges do not support <cb>IDs</c> that <cy>large</c>"
+                        )->show();
+                    } catch (...) {
+                        this->clear();
+
+                        return gd::FLAlertLayer::create(
+                            nullptr,
+                            "Error Parsing",
+                            "OK", nullptr,
+                            "Unknown <cr>error</c> parsing <cp>range</c>"
+                        )->show();
+                    }
                 }
             };
 
@@ -266,9 +314,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
             }
 
             void clearFilters() {
-                groups->filters.clear();
-                groups->parseString = "";
-                groups->strict = false;
+                groups->reset();
 
                 scale.clear();
                 zOrder.clear();

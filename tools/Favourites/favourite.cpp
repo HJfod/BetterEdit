@@ -8,15 +8,10 @@ using namespace gdmake;
 using namespace gdmake::extra;
 using namespace cocos2d;
 
-inline cocos2d::CCSprite* make_bspr(char c, const char* bg = "GJ_button_01.png") {
-    auto spr = cocos2d::CCSprite::create(bg);
-
-    auto label = cocos2d::CCLabelBMFont::create(std::string(1, c).c_str(), "bigFont.fnt");
-    label->setPosition(spr->getContentSize().width / 2, spr->getContentSize().height / 2 + 3.0f);
-
-    spr->addChild(label);
-
-    return spr;
+inline cocos2d::CCSprite* make_bspr(const char* sprName, const char* bg = "GJ_button_01.png") {
+    return ButtonSprite::create(
+        CCSprite::createWithSpriteFrameName(sprName), 0x20, true, 1.0f, 0, bg, true, 0x20
+    );
 }
 
 class EditorUI_CB : public EditorUI {
@@ -79,7 +74,7 @@ class EditorUI_CB : public EditorUI {
             }
 
             auto addBtn = CCMenuItemSpriteExtra::create(
-                make_bspr('+'),
+                make_bspr("edit_addCBtn_001.png"),
                 this,
                 (SEL_MenuHandler)&EditorUI_CB::addFavorite
             );
@@ -87,7 +82,7 @@ class EditorUI_CB : public EditorUI {
             bbar->addButton(addBtn, false);
             
             auto remBtn = CCMenuItemSpriteExtra::create(
-                make_bspr('-', "GJ_button_06.png"),
+                make_bspr("edit_delCBtn_001.png", "GJ_button_06.png"),
                 this,
                 (SEL_MenuHandler)&EditorUI_CB::removeFavorite
             );

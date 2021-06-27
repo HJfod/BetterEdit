@@ -183,10 +183,10 @@ CCLabelBMFont* BESettingsLayer::addSubtitle(const char* text, bool center) {
 }
 
 CCMenuItemSpriteExtra* BESettingsLayer::addButton(CCNode* sprite, SEL_MenuHandler callback, bool large) {
-    auto [x, y] = getItemPos(large);
+    auto [x, y] = getItemPos(large, true);
 
     auto btn = CCMenuItemSpriteExtra::create(sprite, this, callback);
-    btn->setPosition(x + large ? 0 : this->m_pLrSize.width / 4, y);
+    btn->setPosition(x + (large ? 0 : this->m_pLrSize.width / 4), y);
     this->m_pButtonMenu->addChild(btn);
 
     this->addItem(btn);
