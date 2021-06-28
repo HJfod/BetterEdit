@@ -15,31 +15,31 @@ GDMAKE_MAIN {
     // they are automatically enabled after
     // this method.
 
-    // gdmake::patchBytes(0x1e62a6,
-    //     {
-    //         0x90, 0x90,                                 // PUSH 0x0
-    //         0x90, 0x90, 0x90, 0x90, 0x90,               // PUSH PauseLayer::goEdit
-    //         0x90,                                       // PUSH EDI
-    //         0x90, 0x90, 0x90, 0x90, 0x90, 0x90,         // CALL dword ptr
-    //         0x90, 0x90, 0x90,                           // ADD ESP, 0x8
-    //         0x90,                                       // PUSH EAX
-    //         0x90,                                       // PUSH ECX
-    //         0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,   // MOV dword ptr
-    //         0x90, 0x90, 0x90, 0x90, 0x90, 0x90,         // CALL dword ptr
-    //         0x90, 0x90, 0x90,                           // ADD ESP, 0x4
-    //         0x90,                                       // PUSH EAX
-    //         0x90, 0x90, 0x90, 0x90, 0x90, 0x90,         // CALL dword ptr
-    //         0x90, 0x90, 0x90,                           // ADD ESP, 0xC
-    //         0x90, 0x90,                                 // MOV ECX, EDI
-    //         0x90,                                       // PUSH EAX
-    //         0x90, 0x90, 0x90, 0x90, 0x90, 0x90,         // CALL dword ptr
-    //     }
-    // );
+    gdmake::patchBytes(0x1e62a6,
+        {
+            0x90, 0x90,                                 // PUSH 0x0
+            0x90, 0x90, 0x90, 0x90, 0x90,               // PUSH PauseLayer::goEdit
+            0x90,                                       // PUSH EDI
+            0x90, 0x90, 0x90, 0x90, 0x90, 0x90,         // CALL dword ptr
+            0x90, 0x90, 0x90,                           // ADD ESP, 0x8
+            0x90,                                       // PUSH EAX
+            0x90,                                       // PUSH ECX
+            0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90,   // MOV dword ptr
+            0x90, 0x90, 0x90, 0x90, 0x90, 0x90,         // CALL dword ptr
+            0x90, 0x90, 0x90,                           // ADD ESP, 0x4
+            0x90,                                       // PUSH EAX
+            0x90, 0x90, 0x90, 0x90, 0x90, 0x90,         // CALL dword ptr
+            0x90, 0x90, 0x90,                           // ADD ESP, 0xC
+            0x90, 0x90,                                 // MOV ECX, EDI
+            0x90,                                       // PUSH EAX
+            0x90, 0x90, 0x90, 0x90, 0x90, 0x90,         // CALL dword ptr
+        }
+    );
 
-    // gdmake::patchBytes(0x1e62a6, {
-    //     0x8b, 0xcf,                     // MOV ECX, EDI
-    //     0xe8, 0x43, 0x00, 0x00, 0x00    // CALL PauseLayer::goEdit
-    // });
+    gdmake::patchBytes(0x1e62a6, {
+        0x8b, 0xcf,                     // MOV ECX, EDI
+        0xe8, 0x43, 0x00, 0x00, 0x00    // CALL PauseLayer::goEdit
+    });
 
     if (!BetterEdit::initGlobal())
         return false;

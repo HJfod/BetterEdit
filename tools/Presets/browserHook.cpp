@@ -12,11 +12,13 @@ class EditLevelLayer_CB : public gd::EditLevelLayer {
             );
 
             InputPrompt::create("Save Preset", "Preset Name", [this, lvl](const char* name) -> void {
-                BetterEdit::sharedState()->addPreset({
-                    name, lvl->levelString
-                });
+                if (name && strlen(name)) {
+                    BetterEdit::sharedState()->addPreset({
+                        name, lvl->levelString
+                    });
 
-                this->addChild(gd::TextAlertPopup::create("Preset Created!", .5f, .6f), 100);
+                    this->addChild(gd::TextAlertPopup::create("Preset Created!", .5f, .6f), 100);
+                }
             }, "Save")->show();
         }
 };

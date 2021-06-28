@@ -98,7 +98,7 @@ bool pointIntersectsScaleControls(gd::EditorUI* self, cocos2d::CCTouch* touch, c
 
         auto inputRect = cocos2d::CCRect {
             self->m_pScaleControl->getPositionX() + std->m_pInputNode->getPositionX() - inputNodeSize.width / 2,
-            self->m_pScaleControl->getPositionY() + std->m_pInputNode->getPositionY(),
+            self->m_pScaleControl->getPositionY() + std->m_pInputNode->getPositionY() - inputNodeSize.height / 2,
             inputNodeSize.width,
             inputNodeSize.height
         };
