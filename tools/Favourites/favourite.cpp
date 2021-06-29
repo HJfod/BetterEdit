@@ -57,6 +57,18 @@ class EditorUI_CB : public EditorUI {
             this->m_nSelectedCreateObjectID = 0;
         }
 
+        void moveFavoriteUp(CCObject* pSender) {
+            BetterEdit::sharedState()->moveFavorite(this->m_nSelectedCreateObjectID, -1);
+
+            this->loadItems(as<EditButtonBar*>(as<CCNode*>(pSender)->getUserData()));
+        }
+
+        void moveFavoriteDown(CCObject* pSender) {
+            BetterEdit::sharedState()->moveFavorite(this->m_nSelectedCreateObjectID, 1);
+
+            this->loadItems(as<EditButtonBar*>(as<CCNode*>(pSender)->getUserData()));
+        }
+
         void loadItems(EditButtonBar* bbar) {
             if (bbar->getItems()->count() > 2)
                 for (auto ix = 0u; ix < bbar->getItems()->count() - 2; ix++)
@@ -67,11 +79,29 @@ class EditorUI_CB : public EditorUI {
             for (auto id : BetterEdit::sharedState()->getFavorites()) {
                 auto cbtn = this->getCreateBtn(id, 4);
                 cbtn->setTarget(this, (SEL_MenuHandler)&EditorUI_CB::onSelect);
+                if (id == this->m_nSelectedCreateObjectID)
+                    this->disableButton(cbtn);
 
                 bbar->addButton(cbtn, false);
 
                 this->m_pCreateButtonArray->addObject(cbtn);
             }
+
+            auto upBtn = CCMenuItemSpriteExtra::create(
+                make_bspr("edit_upBtn_001.png", "GJ_button_05.png"),
+                this,
+                (SEL_MenuHandler)&EditorUI_CB::moveFavoriteUp
+            );
+            upBtn->setUserData(bbar);
+            bbar->addButton(upBtn, false);
+
+            auto downBtn = CCMenuItemSpriteExtra::create(
+                make_bspr("edit_downBtn_001.png", "GJ_button_05.png"),
+                this,
+                (SEL_MenuHandler)&EditorUI_CB::moveFavoriteDown
+            );
+            downBtn->setUserData(bbar);
+            bbar->addButton(downBtn, false);
 
             auto addBtn = CCMenuItemSpriteExtra::create(
                 make_bspr("edit_addCBtn_001.png"),

@@ -189,9 +189,9 @@ void TemplateMenu::onSaveBlockVariant(cocos2d::CCObject* pSender) {
             auto o_obj = extra::as<GameObject*>(sel->objectAtIndex(ix));
             auto obj = new GameObject(*o_obj);
             obj->setPosition(obj->getPosition() - centre);
-            std::cout << obj->getRealPosition().x << ", " << obj->getRealPosition().y << "\n";
-            obj->setRealPosition(obj->getRealPosition() - centre);
-            std::cout << obj->getRealPosition().x << ", " << obj->getRealPosition().y << "\n";
+            std::cout << obj->getStartPosition().x << ", " << obj->getStartPosition().y << "\n";
+            obj->setStartPosition(obj->getStartPosition() - centre);
+            std::cout << obj->getStartPosition().x << ", " << obj->getStartPosition().y << "\n";
             spr->addChild(obj);
         }
 

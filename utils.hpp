@@ -122,6 +122,13 @@ inline std::vector<std::string> stringSplit(std::string const& orig, std::string
     return res;
 }
 
+template<typename t> inline void vectorMove(std::vector<t>& v, size_t oldIndex, size_t newIndex) {
+    if (oldIndex > newIndex)
+        std::rotate(v.rend() - oldIndex - 1, v.rend() - oldIndex, v.rend() - newIndex);
+    else        
+        std::rotate(v.begin() + oldIndex, v.begin() + oldIndex + 1, v.begin() + newIndex + 1);
+}
+
 inline int strToInt(const char* str, bool* is = nullptr) {
     bool isStr = true;
     for (auto i = 0u; i < strlen(str); i++)

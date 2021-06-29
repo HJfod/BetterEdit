@@ -37,6 +37,20 @@ bool BetterEdit::init() {
 }
 
 void BetterEdit::encodeDataTo(DS_Dictionary* data) {
+    STEP_SUBDICT(data, "settings",
+        for (auto [key, value] : m_mSettingsDict)
+            switch (value.type) {
+                case BESetting::Int:
+                    STEP_SUBDICT(data, "int",
+                        data->setIntegerForKey(key.c_str(), value.data_n);
+                    ) break;
+                case BESetting::String:
+                    STEP_SUBDICT(data, "string",
+                        data->setStringForKey(key.c_str(), value.data_s);
+                    ) break;
+            }
+    );
+
     STEP_SUBDICT(data, "templates",
         m_pTemplateManager->encodeDataTo(data);
     );
@@ -58,6 +72,17 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
 }
 
 void BetterEdit::dataLoaded(DS_Dictionary* data) {
+    STEP_SUBDICT_NC(data, "settings",
+        STEP_SUBDICT_NC(data, "int",
+            for (auto key : data->getAllKeys())
+                m_mSettingsDict.insert({ key, BESetting(data->getIntegerForKey(key.c_str())) });
+        )
+        STEP_SUBDICT_NC(data, "string",
+            for (auto key : data->getAllKeys())
+                m_mSettingsDict.insert({ key, BESetting(data->getStringForKey(key.c_str())) });
+        )
+    );
+
     STEP_SUBDICT_NC(data, "templates",
         m_pTemplateManager->dataLoaded(data);
     );

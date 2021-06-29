@@ -4,10 +4,31 @@
 #include "passTouch.hpp"
 #include "../tools/GroupIDFilter/groupfilter.hpp"
 #include "../BetterEdit.hpp"
+#include <thread>
 
 using namespace gdmake;
 
 #define CATCH_NULL(x) if (x) x
+
+void showErrorMessages() {
+    std::cout << "thread!\n";
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    std::cout << "showy\n";
+
+    for (auto errMsg : BetterEdit::sharedState()->getErrors())
+        gd::FLAlertLayer::create(
+            nullptr,
+            "Error",
+            "OK", nullptr,
+            errMsg
+        )->show();
+
+    std::cout << "bye\n";
+    
+    std::terminate();
+}
 
 class EUITextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
     public:
@@ -169,6 +190,8 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     setupGroupFilterButton(self);
 
     BetterEdit::sharedState()->m_bHookConflictFound = false;
+
+    std::thread(showErrorMessages);
 
     return true;
 }

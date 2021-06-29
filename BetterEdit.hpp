@@ -4,6 +4,7 @@
 #include "tools/Templates/TemplateManager.hpp"
 #include "utils.hpp"
 #include <set>
+#include <algorithm>
 
 struct BESetting {
     enum SType { Int, String };
@@ -50,12 +51,13 @@ class BetterEdit : public gd::GManager {
             std::string data;
         };
     
-        using FavoritesList = std::set<int>;
+        using FavoritesList = std::vector<int>;
     
     protected:
         TemplateManager* m_pTemplateManager;
         std::map<std::string, BESetting> m_mSettingsDict;
         std::vector<Preset> m_vPresets;
+        std::vector<std::string> m_vScheduledErrors;
         FavoritesList m_vFavorites;
 
         virtual bool init() override;
@@ -76,6 +78,9 @@ class BetterEdit : public gd::GManager {
         inline std::map<std::string, BESetting> getSettingsDict() { return m_mSettingsDict; }
         static void showHookConflictMessage();
 
+        inline void scheduleError(std::string const& err) { this->m_vScheduledErrors.push_back(err); }
+        inline std::vector<std::string> & getErrors() { return this->m_vScheduledErrors; }
+
         inline std::vector<Preset> & getPresets() { return m_vPresets; }
         inline BetterEdit* addPreset(Preset const& preset) { m_vPresets.push_back(preset); return this; }
         inline BetterEdit* removePreset(unsigned int index) { m_vPresets.erase(m_vPresets.begin() + index); return this; }
@@ -90,14 +95,30 @@ class BetterEdit : public gd::GManager {
 
         inline FavoritesList & getFavorites() { return m_vFavorites; }
         inline bool addFavorite(int id) {
-            if (m_vFavorites.count(id))
+            if (std::find(m_vFavorites.begin(), m_vFavorites.end(), id) != m_vFavorites.end())
                 return false;
-            m_vFavorites.insert(id);
+            m_vFavorites.push_back(id);
             return true;
         }
         inline bool removeFavorite(int id) {
-            auto res = m_vFavorites.count(id);
-            m_vFavorites.erase(id);
-            return res;
+            for (size_t ix = 0; ix < m_vFavorites.size(); ix++)
+                if (m_vFavorites[ix] == id) {
+                    m_vFavorites.erase(m_vFavorites.begin() + ix);
+                    return true;
+                }
+            
+            return false;
         }
+        inline void moveFavorite(int id, int pos) {
+            auto idPosIt = std::find(m_vFavorites.begin(), m_vFavorites.end(), id);
+
+            if (idPosIt == m_vFavorites.end()) return;
+
+            size_t idPos = std::distance(m_vFavorites.begin(), idPosIt);
+            
+            if (idPos + pos < 0) return;
+            if (idPos + pos > m_vFavorites.size() - 1) return;
+
+            vectorMove(m_vFavorites, idPos, idPos + pos);
+        } 
 };

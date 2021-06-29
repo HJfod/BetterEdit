@@ -5,8 +5,9 @@
 #include "BetterEdit.hpp"
 #include "tools/Templates/templates.hpp"
 #include "tools/Favourites/favourite.hpp"
+#include "tools/ContextMenu/ContextMenu.hpp"
 
-GDMAKE_MAIN {
+GDMAKE_MAIN_HM(hMod) {
     // main entrypoint for your mod.
     // this is where you do things like
     // create hooks, load settings, etc.
@@ -47,6 +48,8 @@ GDMAKE_MAIN {
     loadTemplates();
     loadFavouriteTab();
 
+    ContextMenu::loadRightClick(hMod);
+
     return true;
 }
 
@@ -71,6 +74,8 @@ GDMAKE_UNLOAD {
     //         0xff, 0x15, 0x88, 0x22, 0x68, 0x00,         // CALL dword ptr
     //     }
     // );
+
+    ContextMenu::unloadRightClick();
 
     // if you need to do some extra cleanup
     // for your mod, write it here.
