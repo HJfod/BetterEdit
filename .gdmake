@@ -1,8 +1,8 @@
 {
   "ProjectName": "BetterEdit",
   "EntryPoint": null,
-  "Version": "v0.3",
-  "ConsoleEnabled": true,
+  "Version": "v0.31",
+  "ConsoleEnabled": false,
   "Compiler": 0,
   "Platform": 0,
   "IgnoredFiles": [],
@@ -10,8 +10,7 @@
     "libs/minhook.x32.lib",
     "submodules/Cocos2d/cocos2dx/libcocos2d.lib",
     "submodules/Cocos2d/cocos2dx/robtop/glfw/glfw3.lib",
-    "submodules/Cocos2d/extensions/libExtensions.lib",
-    "opengl32.lib"
+    "submodules/Cocos2d/extensions/libExtensions.lib"
   ],
   "Dlls": null,
   "Resources": []

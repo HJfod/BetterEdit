@@ -75,11 +75,11 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
     STEP_SUBDICT_NC(data, "settings",
         STEP_SUBDICT_NC(data, "int",
             for (auto key : data->getAllKeys())
-                m_mSettingsDict.insert({ key, BESetting(data->getIntegerForKey(key.c_str())) });
+                m_mSettingsDict[key] = BESetting(data->getIntegerForKey(key.c_str()));
         )
         STEP_SUBDICT_NC(data, "string",
             for (auto key : data->getAllKeys())
-                m_mSettingsDict.insert({ key, BESetting(data->getStringForKey(key.c_str())) });
+                m_mSettingsDict[key] = BESetting(data->getStringForKey(key.c_str()));
         )
     );
 

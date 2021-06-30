@@ -16,6 +16,13 @@ CCPoint posToCCPoint(MSLLHOOKSTRUCT* p) {
 }
 
 void ContextMenu::loadRightClick(HMODULE hMod) {
+    // std::cout << glfwInit() << "\n";
+    // std::cout << glfwGetVersionString() << "\n";
+    
+    // auto win = CCDirector::sharedDirector()->getOpenGLView()->getWindow();
+    
+    // std::cout << win << "\n";
+    // std::cout << glfwGetWin32Window(win) << "\n";
 }
 
 void ContextMenu::unloadRightClick() {

@@ -10,6 +10,8 @@ using namespace gdmake;
 
 #define CATCH_NULL(x) if (x) x
 
+char* g_clipboard;
+
 void showErrorMessages() {
     std::cout << "thread!\n";
 
@@ -151,6 +153,25 @@ void __fastcall EditorUI_onGoToBaseLayer(gd::EditorUI* self, edx_t edx, cocos2d:
         );
 }
 
+GDMAKE_HOOK(0x76090)
+void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
+    auto addr = reinterpret_cast<uintptr_t>(self) + 0x2D0;
+    auto str_len = *reinterpret_cast<size_t*>(addr + 16);
+    if (str_len) {
+        char* str_buf;
+        if (str_len < 16) {
+            // string is small enough to be directly here
+            str_buf = reinterpret_cast<char*>(addr);
+        } else {
+            str_buf = *reinterpret_cast<char**>(addr);
+        }
+        g_clipboard = reinterpret_cast<char*>(realloc(g_clipboard, str_len + 1));
+        memcpy(g_clipboard, str_buf, str_len + 1);
+    }
+
+    return GDMAKE_ORIG_V(self);
+}
+
 GDMAKE_HOOK(EditorUI::init)
 bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lvl) {
     if (!GDMAKE_ORIG(self, edx, lvl))
@@ -188,6 +209,21 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     self->addChild(ed);
 
     setupGroupFilterButton(self);
+
+    if (g_clipboard && g_clipboard[0]) {
+        auto clipboard = reinterpret_cast<uintptr_t>(self) + 0x2D0;
+        auto len = strlen(g_clipboard);
+        *reinterpret_cast<size_t*>(clipboard + 16) = len; // size
+        *reinterpret_cast<size_t*>(clipboard + 20) = max(len, 15); // capacity
+        if (len <= 15) {
+            memcpy(reinterpret_cast<char*>(clipboard), g_clipboard, len + 1);
+        } else {
+            void* newb = malloc(len + 1);
+            memcpy(newb, g_clipboard, len + 1);
+            *reinterpret_cast<void**>(clipboard) = newb;
+        }
+        self->updateButtons();
+    }
 
     BetterEdit::sharedState()->m_bHookConflictFound = false;
 

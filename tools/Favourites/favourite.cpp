@@ -19,6 +19,8 @@ class EditorUI_CB : public EditorUI {
         void onSelect(CCObject* pSender) {
             this->onCreateButton(pSender);
 
+            std::cout << as<CreateMenuItem*>(pSender)->m_nObjectID << " == " << this->m_nSelectedCreateObjectID << "\n";
+
             if (as<CreateMenuItem*>(pSender)->m_nObjectID == this->m_nSelectedCreateObjectID)
                 this->enableButton(as<CreateMenuItem*>(pSender));
             else
