@@ -53,6 +53,10 @@ class CCNodeConstructor {
             node->setPosition(pos);
             return *this;
         }
+        inline CCNodeConstructor<T> & anchor(cocos2d::CCPoint const& pos) {
+            node->setAnchorPoint(pos);
+            return *this;
+        }
         inline CCNodeConstructor<T> & color(cocos2d::ccColor3B color) {
             node->setColor(color);
             return *this;
