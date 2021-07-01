@@ -30,6 +30,7 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
         static constexpr const unsigned int s_nMaxItemsOnPage = 10;
 
         void setup() override;
+        void onClose(cocos2d::CCObject*) override;
 
         cocos2d::CCPoint getItemPos(bool large = false, bool center = false);
         void incrementPageCount(bool skip = false);

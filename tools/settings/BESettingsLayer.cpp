@@ -38,6 +38,8 @@ void BESettingsLayer::setup() {
     this->m_pButtonMenu->addChild(this->m_pNextPageBtn, 150);
 
     this->addInput("Scale Snap:", "scale-snap");
+    this->addToggle("Custom Grid Size", "Enable Custom Grid Size <cy>(Static)</c>", "grid-size-enabled");
+    this->addInput("Grid Size:", "grid-size");
     this->addSlider(
         "Music",
         (SEL_MenuHandler)&PauseLayer::musicSliderChanged,
@@ -49,7 +51,7 @@ void BESettingsLayer::setup() {
         FMODAudioEngine::sharedEngine()->getSFXVolume()
     );
 
-    this->incrementPageCount(true);
+    // this->incrementPageCount(true);
     this->addButton(
         CCNodeConstructor<CCLabelBMFont*>()
             .fromText("Developed by HJfod", "goldFont.fnt")
@@ -96,6 +98,10 @@ void BESettingsLayer::addItem(CCNode* item) {
         this->m_vPages.push_back(std::vector<CCNode*>());
 
     this->m_vPages[this->m_nDestPage].push_back(item);
+
+    std::cout << item << "\n";
+    std::cout << this->m_nDestPage << "\n";
+
     item->setVisible(!this->m_nDestPage);
 }
 
@@ -251,7 +257,7 @@ void BESettingsLayer::onToggle(CCObject* pSender) {
         );
 }
 
-void BESettingsLayer::textChanged(gd::CCTextInputNode* input) {
+void BESettingsLayer::textChanged(CCTextInputNode* input) {
     if (input && input->getUserObject())
         BetterEdit::sharedState()->setKeyInt(
             as<CCString*>(input->getUserObject())->getCString(),
@@ -261,6 +267,12 @@ void BESettingsLayer::textChanged(gd::CCTextInputNode* input) {
 
 void BESettingsLayer::onShowAccount(CCObject* pSender) {
     ProfilePage::create(as<int>(as<CCNode*>(pSender)->getUserData()), true)->show();
+}
+
+void BESettingsLayer::onClose(CCObject* pSender) {
+    GameManager::sharedState()->getEditorLayer()->getEditorUI()->updateGridNodeSize();
+
+    BrownAlertDelegate::onClose(pSender);
 }
 
 BESettingsLayer* BESettingsLayer::create() {

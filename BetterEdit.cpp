@@ -30,6 +30,8 @@ bool BetterEdit::init() {
     this->m_sFileName = "BetterEdit.dat";
 
     this->setKeyInt("scale-snap", 4);
+    this->setKeyInt("grid-size", 30);
+    this->setKeyInt("grid-size-enabled", false);
 
     this->setup();
 
