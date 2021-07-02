@@ -4,6 +4,7 @@
 #include <BrownAlertDelegate.hpp>
 #include <InputNode.hpp>
 #include "../../BetterEdit.hpp"
+#include <array>
 
 class MoreOptionsLayer : public gd::FLAlertLayer,
     gd::TextInputDelegate,
@@ -16,6 +17,9 @@ class MoreOptionsLayer : public gd::FLAlertLayer,
             )(this);
         };
 };
+
+using BE_Callback = void(*)(std::string const&);
+using BE_Callback_B = void(*)(bool);
 
 class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
     protected:
@@ -30,14 +34,19 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
         static constexpr const unsigned int s_nMaxItemsOnPage = 10;
 
         void setup() override;
-        void onClose(cocos2d::CCObject*) override;
+        void onClose(cocos2d::CCObject*);
 
         cocos2d::CCPoint getItemPos(bool large = false, bool center = false);
         void incrementPageCount(bool skip = false);
         void addItem(cocos2d::CCNode* item);
 
-        void addToggle(const char* text, const char* desc, const char* key);
-        void addInput(const char* text, const char* key, std::string const& filter = "0123456789");
+        void addInput(
+            const char* text,
+            std::string const& value,
+            BE_Callback cb, 
+            std::string const& filter = "0123456789"
+        );
+        void addToggle(const char* text, const char* desc, bool value, BE_Callback_B cb);
         void addSlider(const char* text, cocos2d::SEL_MenuHandler onChange, float val = 0.0f);
         cocos2d::CCLabelBMFont* addTitle(const char* text, const char* font = "goldFont.fnt");
         cocos2d::CCLabelBMFont* addSubtitle(const char* text, bool centered = false);

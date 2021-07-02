@@ -56,5 +56,5 @@ ButtonSelector* ButtonSelector::create(ButtonSelector::ButtonList const& list) {
 }
 
 ButtonSelector::~ButtonSelector() {
-    CCMenu::~CCMenu();
+    this->m_pButtons->release();
 }

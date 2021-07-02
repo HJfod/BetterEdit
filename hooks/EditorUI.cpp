@@ -3,6 +3,7 @@
 #include "../utils.hpp"
 #include "passTouch.hpp"
 #include "../tools/GroupIDFilter/groupfilter.hpp"
+#include "../tools/GridSize/gridButton.hpp"
 #include "../BetterEdit.hpp"
 #include <thread>
 
@@ -209,6 +210,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     self->addChild(ed);
 
     setupGroupFilterButton(self);
+    loadGridButtons(self);
 
     if (g_clipboard && g_clipboard[0]) {
         auto clipboard = reinterpret_cast<uintptr_t>(self) + 0x2D0;

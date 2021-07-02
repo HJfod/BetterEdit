@@ -6,43 +6,41 @@
 #include <set>
 #include <algorithm>
 
-struct BESetting {
-    enum SType { Int, String };
-    SType type;
-    union {
-        int data_n;
-        std::string data_s;
-    };
+#pragma region macros (ew)
+#define BE_SETTINGS(__macro__)                                                                  \
+    __macro__(ScaleSnap, int, 4, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 0, 10)                \
+    __macro__(GridSize, float, 30.0f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 7.5f, 120.0f)      \
+    __macro__(GridSizeEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
 
-    BESetting() {}
-    BESetting(BESetting const& sett) {
-        this->type = sett.type;
-        switch (sett.type) {
-            case SType::Int: this->data_n = sett.data_n; break;
-            case SType::String: this->data_s = sett.data_s; break;
-        }
-    }
-    BESetting& operator=(BESetting const& sett) {
-        this->type = sett.type;
-        switch (sett.type) {
-            case SType::Int: this->data_n = sett.data_n; break;
-            case SType::String: this->data_s = sett.data_s; break;
-        }
+#define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
+    static void set##__name__##(__type__ value) {           \
+        sharedState()->m_Sett##__name__ = value;            \
+    }                                                       \
+    static void set##__name__##OrDefault(__type__ value) {  \
+        set##__name__##(value);                             \
+    }                                                       \
 
-        return *this;
-    }
-    ~BESetting() {}
+#define BE_MAKE_SFUNC_RANGE(__name__, __type__, __value__, __lbound__, __rbound__)      \
+    static void set##__name__##(__type__ value) {                                       \
+        if (value < __lbound__) sharedState()->m_Sett##__name__ = __lbound__;           \
+        else if (value > __rbound__) sharedState()->m_Sett##__name__ = __rbound__;      \
+        else sharedState()->m_Sett##__name__ = value;                                   \
+    }                                                                                   \
+    static void set##__name__##OrDefault(__type__ value) {                              \
+        if (value < __lbound__) sharedState()->m_Sett##__name__ = __value__;            \
+        else if (value > __rbound__) sharedState()->m_Sett##__name__ = __value__;       \
+        else sharedState()->m_Sett##__name__ = value;                                   \
+    }                                                                                   \
 
-    BESetting(int x) {
-        this->data_n = x;
-        this->type = SType::Int;
-    }
-
-    BESetting(std::string x) {
-        this->data_s = x;
-        this->type = SType::String;
-    }
-};
+// jesus fucking christ
+#define BE_MAKE_SETTING(__name__, __type__, __value__, _, __conv__, __sfunc__, __lb__, __rb__)  \
+    protected: __type__ m_Sett##__name__ = __value__;                                       \
+    public: __sfunc__(__name__, __type__, __value__, __lb__, __rb__)                        \
+    static __type__ get##__name__() { return sharedState()->m_Sett##__name__; }             \
+    static void set##__name__##FromString(std::string const& value) {                       \
+    set##__name__(static_cast<__type__>(__conv__(value))); }                                \
+    static std::string get##__name__##AsString() { return formatToString(get##__name__()); }
+#pragma endregion macros (ew)
 
 class BetterEdit : public gd::GManager {
     public:
@@ -55,11 +53,13 @@ class BetterEdit : public gd::GManager {
     
     protected:
         TemplateManager* m_pTemplateManager;
-        std::map<std::string, BESetting> m_mSettingsDict;
         std::vector<Preset> m_vPresets;
         std::vector<std::string> m_vScheduledErrors;
         FavoritesList m_vFavorites;
 
+        BE_SETTINGS(BE_MAKE_SETTING)
+
+    protected:
         virtual bool init() override;
 
         virtual void encodeDataTo(DS_Dictionary* data);
@@ -67,15 +67,26 @@ class BetterEdit : public gd::GManager {
         virtual void firstLoad();
     
     public:
+        template<typename T>
+        inline static std::string formatToString(T num) {
+            std::string res = std::to_string(num);
+
+            if (std::is_same<T, float>::value && res.find('.') != std::string::npos) {
+                while (res.at(res.length() - 1) == '0')
+                    res = res.substr(0, res.length() - 1);
+                
+                if (res.at(res.length() - 1) == '.')
+                    res = res.substr(0, res.length() - 1);
+            }
+
+            return res;
+        }
+
         bool m_bHookConflictFound = true;
         
         static BetterEdit* sharedState();
         static bool initGlobal();
 
-        int getKeyInt(std::string const& key);
-        BetterEdit* setKeyInt(std::string const& key, int val);
-
-        inline std::map<std::string, BESetting> getSettingsDict() { return m_mSettingsDict; }
         static void showHookConflictMessage();
 
         inline void scheduleError(std::string const& err) { this->m_vScheduledErrors.push_back(err); }

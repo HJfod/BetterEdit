@@ -5,6 +5,14 @@ using namespace gdmake::extra;
 using namespace gd;
 using namespace cocos2d;
 
+#define BE_SETTING_FUNC(__name__) \
+    BetterEdit::get##__name__##AsString(),\
+    &BetterEdit::set##__name__##FromString
+
+#define BE_SETTING_FUNC_B(__name__) \
+    BetterEdit::get##__name__(),\
+    &BetterEdit::set##__name__
+
 #define USER_LINK(name, gdid) \
     addButton(                                                  \
         CCNodeConstructor<CCLabelBMFont*>()                     \
@@ -37,9 +45,10 @@ void BESettingsLayer::setup() {
     this->m_pNextPageBtn->setPosition(this->m_pLrSize.width / 2 + 64.0f, 0.0f);
     this->m_pButtonMenu->addChild(this->m_pNextPageBtn, 150);
 
-    this->addInput("Scale Snap:", "scale-snap");
-    this->addToggle("Custom Grid Size", "Enable Custom Grid Size <cy>(Static)</c>", "grid-size-enabled");
-    this->addInput("Grid Size:", "grid-size");
+    this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap));
+    this->addToggle("Custom Grid Size", "Enable Custom Grid Size <cy>(Static)</c>", BE_SETTING_FUNC_B(GridSizeEnabled));
+    this->addSubtitle("Defaut Size: 30");
+    this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
     this->addSlider(
         "Music",
         (SEL_MenuHandler)&PauseLayer::musicSliderChanged,
@@ -99,13 +108,15 @@ void BESettingsLayer::addItem(CCNode* item) {
 
     this->m_vPages[this->m_nDestPage].push_back(item);
 
-    std::cout << item << "\n";
-    std::cout << this->m_nDestPage << "\n";
-
     item->setVisible(!this->m_nDestPage);
 }
 
-void BESettingsLayer::addInput(const char* text, const char* key, std::string const& filter) {
+void BESettingsLayer::addInput(
+    const char* text,
+    std::string const& value,
+    BE_Callback cb,
+    std::string const& filter
+) {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     
     auto y = getItemPos(true).y;
@@ -118,11 +129,9 @@ void BESettingsLayer::addInput(const char* text, const char* key, std::string co
     scaleSnapLabel->limitLabelWidth(this->m_pLrSize.width / 2, .7f, .2f);
     scaleSnapInput->getInputNode()->setAllowedChars(filter);
 
-    if (key && strlen(key)) {
-        scaleSnapInput->setString(std::to_string(BetterEdit::sharedState()->getKeyInt(key)).c_str());
-        scaleSnapInput->getInputNode()->setUserObject(CCString::create(key));
-        scaleSnapInput->getInputNode()->setDelegate(this);
-    }
+    scaleSnapInput->setString(value.c_str());
+    scaleSnapInput->getInputNode()->setUserData(as<void*>(cb));
+    scaleSnapInput->getInputNode()->setDelegate(this);
 
     this->m_pLayer->addChild(scaleSnapInput);
     this->m_pLayer->addChild(scaleSnapLabel);
@@ -201,7 +210,7 @@ CCMenuItemSpriteExtra* BESettingsLayer::addButton(CCNode* sprite, SEL_MenuHandle
     return btn;
 }
 
-void BESettingsLayer::addToggle(const char* text, const char* desc, const char* key) {
+void BESettingsLayer::addToggle(const char* text, const char* desc, bool value, BE_Callback_B cb) {
     auto toggle = CCMenuItemToggler::createWithStandardSprites(
         this,
         (SEL_MenuHandler)&BESettingsLayer::onToggle,
@@ -216,10 +225,8 @@ void BESettingsLayer::addToggle(const char* text, const char* desc, const char* 
     toggle->setPosition(x, y);
     label->setPosition(x + 16.0f + label->getScaledContentSize().width / 2, y);
 
-    if (key != nullptr) {
-        toggle->toggle(BetterEdit::sharedState()->getKeyInt(key));
-        toggle->setUserObject(CCString::create(key));
-    }
+    toggle->toggle(value);
+    toggle->setUserData(as<void*>(cb));
 
     this->m_pButtonMenu->addChild(toggle);
     this->m_pButtonMenu->addChild(label);
@@ -250,19 +257,13 @@ void BESettingsLayer::onPage(CCObject* pSender) {
 void BESettingsLayer::onToggle(CCObject* pSender) {
     auto toggle = as<CCMenuItemToggler*>(pSender);
 
-    if (toggle && toggle->getUserObject())
-        BetterEdit::sharedState()->setKeyInt(
-            as<CCString*>(toggle->getUserObject())->getCString(),
-            !toggle->isToggled()
-        );
+    if (toggle && toggle->getUserData())
+        (reinterpret_cast<BE_Callback_B>(toggle->getUserData()))(!toggle->isToggled());
 }
 
 void BESettingsLayer::textChanged(CCTextInputNode* input) {
-    if (input && input->getUserObject())
-        BetterEdit::sharedState()->setKeyInt(
-            as<CCString*>(input->getUserObject())->getCString(),
-            strlen(input->getString()) ? std::atoi(input->getString()) : 0
-        );
+    if (input && input->getUserData() && strlen(input->getString()))
+        (reinterpret_cast<BE_Callback>(input->getUserData()))(input->getString());
 }
 
 void BESettingsLayer::onShowAccount(CCObject* pSender) {
