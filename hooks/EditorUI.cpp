@@ -6,6 +6,7 @@
 #include "../tools/GridSize/gridButton.hpp"
 #include "../BetterEdit.hpp"
 #include <thread>
+#include "ScaleTextDelegate.hpp"
 
 using namespace gdmake;
 
@@ -269,5 +270,46 @@ void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, 
         else
             layer->setPositionY(layer->getPositionY() + amt * mult);
         GDMAKE_ORIG(self_, edx, 0.f, 0.f); // hehe
+    }
+}
+
+// Credits to Alk1m123 (https://github.com/altalk23) for this scale fix
+// this lets you scale multiple objects without it fucking up the position
+GDMAKE_HOOK(0x8f150)
+void __fastcall EditorUI_scaleObjects(gd::EditorUI* self, edx_t, CCArray* objs, CCPoint centerPos) {
+    float scale;
+    __asm movss scale, xmm2;
+    CCObject* obj;
+
+    // maybe add some scale anchor point feature, as itd
+    // only require changing the centerPos here
+
+    // prevent the scale from being 0
+    // as that can cause weird behaviour
+    if (scale > -0.01f && scale < 0.01f) {
+        scale = std::copysign(0.01f, scale);
+    }
+    bool lockPos = false;
+    if (self->m_pScaleControl) {
+        auto fancyWidget = dynamic_cast<ScaleTextDelegate*>(self->m_pScaleControl->getChildByTag(7777));
+        if (fancyWidget)
+            lockPos = fancyWidget->m_bLockPosEnabled;
+    }
+    CCARRAY_FOREACH(objs, obj) {
+        auto gameObj = reinterpret_cast<gd::GameObject*>(obj);
+        auto pos = gameObj->getPosition();
+        float newScale = gameObj->m_fMultiScaleMultiplier * scale;
+        float newMultiplier = newScale / gameObj->m_fScale;
+        auto newPos = (pos - centerPos) * newMultiplier + (centerPos - pos);
+        
+        // this is just GameObject::updateCustomScale
+        // although that does some rounding so its stupid
+        gameObj->m_fScale = newScale;
+        gameObj->setRScale(1.f);
+        gameObj->m_unk2B0 = true;
+        gameObj->m_bIsObjectRectDirty = true;
+
+        if (!lockPos)
+            self->moveObject(gameObj, newPos);
     }
 }

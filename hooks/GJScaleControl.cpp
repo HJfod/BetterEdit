@@ -2,46 +2,37 @@
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
 #include "passTouch.hpp"
 #include "../BetterEdit.hpp"
+#include "ScaleTextDelegate.hpp"
 
 using namespace gdmake;
 
-class ScaleTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
-    public:
-        gd::GJScaleControl* m_pControl;
-        gd::CCTextInputNode* m_pInputNode;
-        gd::CCMenuItemSpriteExtra* m_pLockPosBtn;
-        gd::CCMenuItemSpriteExtra* m_pLockScaleBtn;
-        bool m_bLockPosEnabled;
-        bool m_bUnlockScaleEnabled;
+void ScaleTextDelegate::textChanged(gd::CCTextInputNode* input) {
+    float val = 1.0f;
 
-        virtual void textChanged(gd::CCTextInputNode* input) override {
-            float val = 1.0f;
+    if (input->getString() && strlen(input->getString()))
+        val = static_cast<float>(std::atof(input->getString()));
 
-            if (input->getString() && strlen(input->getString()))
-                val = static_cast<float>(std::atof(input->getString()));
+    m_pControl->m_fValue = val;
+    m_pControl->m_pSlider->setValue((val - .5f) / 1.5f);
 
-            m_pControl->m_fValue = val;
-            m_pControl->m_pSlider->setValue((val - .5f) / 1.5f);
+    auto ui = gd::GameManager::sharedState()->getEditorLayer()->getEditorUI();
 
-            auto ui = gd::GameManager::sharedState()->getEditorLayer()->getEditorUI();
+    if (ui)
+        ui->scaleChanged(val);
+}
 
-            if (ui)
-                ui->scaleChanged(val);
-        }
+ScaleTextDelegate* ScaleTextDelegate::create(gd::GJScaleControl* c) {
+    auto ret = new ScaleTextDelegate();
 
-        static ScaleTextDelegate* create(gd::GJScaleControl* c) {
-            auto ret = new ScaleTextDelegate();
+    if (ret && ret->init()) {
+        ret->m_pControl = c;
+        ret->autorelease();
+        return ret;
+    }
 
-            if (ret && ret->init()) {
-                ret->m_pControl = c;
-                ret->autorelease();
-                return ret;
-            }
-
-            CC_SAFE_DELETE(ret);
-            return nullptr;
-        }
-};
+    CC_SAFE_DELETE(ret);
+    return nullptr;
+}
 
 class GJScaleControl_CB : public gd::GJScaleControl {
     ScaleTextDelegate* getSTD() {
