@@ -9,6 +9,7 @@
 #include "ScaleTextDelegate.hpp"
 
 using namespace gdmake;
+using namespace cocos2d;
 
 #define CATCH_NULL(x) if (x) x
 
