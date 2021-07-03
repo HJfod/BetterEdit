@@ -1,4 +1,5 @@
 #include "ButtonSelector.hpp"
+#include <InputNode.hpp>
 
 using namespace gd;
 using namespace gdmake;
@@ -35,8 +36,14 @@ bool ButtonSelector::init(ButtonSelector::ButtonList const& list) {
 
 void ButtonSelector::onSelect(CCObject* pSender) {
     CCARRAY_FOREACH_B_TYPE(this->m_pButtons, btn, CCMenuItemSpriteExtra) {
-        CCARRAY_FOREACH_B_TYPE(as<CCArray*>(btn->getUserObject()), node, CCNode)
+        CCARRAY_FOREACH_B_TYPE(as<CCArray*>(btn->getUserObject()), node, CCNode) {
             node->setVisible(btn == pSender);
+
+            if (node->getPositionY() > 0 && btn != pSender)
+                node->setPositionY(node->getPositionY() - 1500.0f);
+            if (node->getPositionY() < 0 && btn == pSender)
+                node->setPositionY(node->getPositionY() + 1500.0f);
+        }
     
         as<ButtonSprite*>(btn->getNormalImage())
             ->updateBGImage(btn == pSender ? "GJ_button_02.png" : "GJ_button_01.png");
@@ -56,5 +63,5 @@ ButtonSelector* ButtonSelector::create(ButtonSelector::ButtonList const& list) {
 }
 
 ButtonSelector::~ButtonSelector() {
-    CCMenu::~CCMenu();
+    this->m_pButtons->release();
 }

@@ -116,8 +116,8 @@ void __fastcall ConfigureHSVWidget_updateLabels(ConfigureHSVWidget* self) {
 }
 
 GDMAKE_HOOK(0x4a3f0)
-bool __fastcall ConfigureHSVWidget_init(ConfigureHSVWidget* self, edx_t edx, cocos2d::ccHSVValue val, bool idk) {
-    if (!GDMAKE_ORIG(self, edx, val, idk))
+bool __fastcall ConfigureHSVWidget_init(ConfigureHSVWidget* self, edx_t edx, int abs, cocos2d::ccHSVValue val) {
+    if (!GDMAKE_ORIG(self, edx, abs, val))
         return false;
     
     auto hsva = AddHSVTextDelegate::create(self);

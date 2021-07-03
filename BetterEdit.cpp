@@ -1,6 +1,7 @@
 #include "BetterEdit.hpp"
 
 using namespace gdmake;
+using namespace gdmake::extra;
 using namespace gd;
 using namespace cocos2d;
 
@@ -21,6 +22,10 @@ using namespace cocos2d;
     dict->stepOutOfSubDict();                   \
     }
 
+#define BE_SAVE_SETTING(__name__, _, __, __ctype__, _0, _1, _2, _3) data->set##__ctype__##ForKey(#__name__, get##__name__());
+#define BE_LOAD_SETTING(__name__, _, __, __ctype__, _0, _1, _2, _3) set##__name__##OrDefault(data->get##__ctype__##ForKey(#__name__));
+#define BE_DEFAULT_SETTING(__name__, _, __value__, __, ___, _0, _1, _2) set##__name__(__value__);
+
 BetterEdit* g_betterEdit;
 
 
@@ -29,9 +34,7 @@ bool BetterEdit::init() {
     this->m_pTemplateManager = TemplateManager::sharedState();
     this->m_sFileName = "BetterEdit.dat";
 
-    this->setKeyInt("scale-snap", 4);
-    this->setKeyInt("grid-size", 30);
-    this->setKeyInt("grid-size-enabled", false);
+    // BE_SETTINGS(BE_DEFAULT_SETTING)
 
     this->setup();
 
@@ -40,17 +43,7 @@ bool BetterEdit::init() {
 
 void BetterEdit::encodeDataTo(DS_Dictionary* data) {
     STEP_SUBDICT(data, "settings",
-        for (auto [key, value] : m_mSettingsDict)
-            switch (value.type) {
-                case BESetting::Int:
-                    STEP_SUBDICT(data, "int",
-                        data->setIntegerForKey(key.c_str(), value.data_n);
-                    ) break;
-                case BESetting::String:
-                    STEP_SUBDICT(data, "string",
-                        data->setStringForKey(key.c_str(), value.data_s);
-                    ) break;
-            }
+        BE_SETTINGS(BE_SAVE_SETTING)
     );
 
     STEP_SUBDICT(data, "templates",
@@ -75,14 +68,7 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
 
 void BetterEdit::dataLoaded(DS_Dictionary* data) {
     STEP_SUBDICT_NC(data, "settings",
-        STEP_SUBDICT_NC(data, "int",
-            for (auto key : data->getAllKeys())
-                m_mSettingsDict[key] = BESetting(data->getIntegerForKey(key.c_str()));
-        )
-        STEP_SUBDICT_NC(data, "string",
-            for (auto key : data->getAllKeys())
-                m_mSettingsDict[key] = BESetting(data->getStringForKey(key.c_str()));
-        )
+        BE_SETTINGS(BE_LOAD_SETTING)
     );
 
     STEP_SUBDICT_NC(data, "templates",
@@ -104,28 +90,6 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
 }
 
 void BetterEdit::firstLoad() {}
-
-
-
-int BetterEdit::getKeyInt(std::string const& key) {
-    auto si = this->m_mSettingsDict.find(key);
-    if (si != this->m_mSettingsDict.end()) {
-        auto val = this->m_mSettingsDict[key];
-
-        if (val.type == BESetting::Int)
-            return val.data_n;
-    }
-    
-    return 0;
-}
-
-BetterEdit* BetterEdit::setKeyInt(std::string const& key, int val) {
-    if (key.size())
-        this->m_mSettingsDict[key] = BESetting(val);
-
-    return this;
-}
-
 
 
 BetterEdit* BetterEdit::sharedState() {
@@ -158,13 +122,5 @@ void BetterEdit::showHookConflictMessage() {
         "Please <cr>remove</c> or <cg>load</c> the mods at a different "
         "loading phase. Contact <cy>HJfod#1795</c> for help."
     )->show();
-}
-
-
-GDMAKE_HOOK(0x3D5E0)
-void __fastcall AppDelegate_trySaveGame(cocos2d::CCObject* self) {
-    BetterEdit::sharedState()->save();
-
-    return GDMAKE_ORIG_V(self);
 }
 

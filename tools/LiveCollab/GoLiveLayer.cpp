@@ -8,43 +8,37 @@ using namespace cocos2d;
 void GoLiveLayer::setup() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
-    auto pHostButtons = CCArray::create();
-    auto pJoinButtons = CCArray::create();
-
     this->m_pLayer->addChild(
-        CCNodeConstructor<CCLabelBMFont*>()
-            .fromText("IP Address", "bigFont.fnt")
-            .move(winSize.width / 2, winSize.height / 2 + 30.0f)
-            .scale(.6f)
-            .exec([&pJoinButtons](auto s) -> void { pJoinButtons->addObject(s); })
+        CCNodeConstructor<InputNode*>()
+            .fromNode(InputNode::create(
+                240.0f, "Server Address",
+                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.:-_?/0123456789~"_s
+            ))
+            .move(winSize / 2 + CCPoint { 0, 30.0f })
+            .exec([](auto s) -> void {
+                s->getInputNode()->setLabelPlaceholerScale(.5f);
+            })
+            .save(&this->m_pAddrInput)
             .done()
     );
     this->m_pLayer->addChild(
         CCNodeConstructor<InputNode*>()
-            .fromNode(InputNode::create(150.0f, "0.0.0.0:0000"))
-            .move(winSize / 2)
-            .exec([&pJoinButtons](auto s) -> void { pJoinButtons->addObject(s); })
+            .fromNode(InputNode::create(240.0f, "Room Name"))
+            .move(winSize / 2 + CCPoint { 0, -10.0f })
+            .exec([](auto s) -> void {
+                s->getInputNode()->setLabelPlaceholerScale(.5f);
+            })
+            .save(&this->m_pRoomInput)
             .done()
     );
-
     this->m_pLayer->addChild(
-        CCNodeConstructor<CCLabelBMFont*>()
-            .fromText("Host Room", "goldFont.fnt")
-            .move(winSize / 2)
-            .scale(.7f)
-            .exec([&pHostButtons](auto s) -> void { pHostButtons->addObject(s); })
-            .done()
-    );
-
-    this->m_pButtonMenu->addChild(
-        CCNodeConstructor<ButtonSelector*>()
-            .fromNode(ButtonSelector::create({
-                { "Join", pJoinButtons },
-                { "Host", pHostButtons },
-            }))
-            .move(0.0f, this->m_pLrSize.height / 2 - 60.0f)
-            .anchor({ 0, 0 })
-            .scale(.6f)
+        CCNodeConstructor<InputNode*>()
+            .fromNode(InputNode::create(240.0f, "Room Password (Optional)"))
+            .move(winSize / 2 + CCPoint { 0, -50.0f })
+            .exec([](auto s) -> void {
+                s->getInputNode()->setLabelPlaceholerScale(.5f);
+            })
+            .save(&this->m_pRoomPWInput)
             .done()
     );
 
@@ -53,15 +47,23 @@ void GoLiveLayer::setup() {
             .fromNode(CCMenuItemSpriteExtra::create(
                 CCNodeConstructor<ButtonSprite*>()
                     .fromNode(ButtonSprite::create(
-                        "OK", 0, 0, "goldFont.fnt", "GJ_button_01.png", 0, .8f
+                        "Host", 0, 0, "goldFont.fnt", "GJ_button_01.png", 0, .8f
                     ))
                     .scale(.8f)
                     .done(),
                 this,
-                (SEL_MenuHandler)&GoLiveLayer::onClose
+                (SEL_MenuHandler)&GoLiveLayer::onHost
             ))
             .move(0.0f, - this->m_pLrSize.height / 2 + 25.0f)
             .done()
+    );
+}
+
+void GoLiveLayer::onHost(CCObject* pSender) {
+    LiveManager::sharedState()->goLive(
+        this->m_pAddrInput->getString(),
+        this->m_pRoomInput->getString(),
+        this->m_pRoomPWInput->getString()
     );
 }
 

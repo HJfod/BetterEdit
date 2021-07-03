@@ -120,7 +120,7 @@ void __fastcall GJScaleControl_ccTouchMoved(gd::GJScaleControl* self_, edx_t edx
         float val = roundf((self->m_pSlider->getValue() * 1.5f + .5f) * 100) / 100;
 
         auto std = reinterpret_cast<ScaleTextDelegate*>(self->getChildByTag(7777));
-        auto snap = BetterEdit::sharedState()->getKeyInt("scale-snap");
+        auto snap = BetterEdit::sharedState()->getScaleSnap();
         if (snap < 1) snap = 1;
 
         if (std && !std->m_bUnlockScaleEnabled) {

@@ -14,5 +14,5 @@ class ButtonSelector : public cocos2d::CCMenu {
     public:
         static ButtonSelector* create(ButtonList const& list);
 
-        virtual ~ButtonSelector() override;
+        virtual ~ButtonSelector();
 };
