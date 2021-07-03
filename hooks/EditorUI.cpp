@@ -249,17 +249,18 @@ GDMAKE_HOOK(0x921d0)
 void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, float b) {
     // get the actual EditorUI since this function is a virtual that messes it up
     auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xfc);
-    auto kb = CCDirector::sharedDirector()->getKeyboardDispatcher();
+    auto kb = cocos2d::CCDirector::sharedDirector()->getKeyboardDispatcher();
     if (kb->getControlKeyPressed()) {
         auto zoom = self->m_pEditorLayer->getObjectLayer()->getScale();
         // std::log defaults to base e, and since c++ doesnt have it anywhere, just hardcode it in
         // i mean, whats the worst that can happen, they change a fucking math constant?
-        zoom = std::pow(2.71828182845904523536, std::log(max(zoom, 0.001f)) - amt * 0.01f);
+        zoom = static_cast<float>(std::pow(2.71828182845904523536, std::log(max(zoom, 0.001f)) - amt * 0.01f));
         self->updateZoom(zoom);
         // GJGroundLayer::updateGroundWidth
         // too lazy to somehow add this to fod's gd.h
         // so here u go
-        reinterpret_cast<void(__thiscall*)(gd::GJGroundLayer*)>(gd::base + 0x12dda0)(*reinterpret_cast<gd::GJGroundLayer**>(reinterpret_cast<uintptr_t>(self->m_pEditorLayer) + 0x3c4));
+        reinterpret_cast<void(__thiscall*)(gd::GJGroundLayer*)>(gd::base + 0x12dda0)
+            (*reinterpret_cast<gd::GJGroundLayer**>(reinterpret_cast<uintptr_t>(self->m_pEditorLayer) + 0x3c4));
     } else {
         auto layer = self->m_pEditorLayer->getObjectLayer();
         constexpr float mult = 2.f;

@@ -120,8 +120,6 @@ bool __fastcall ConfigureHSVWidget_init(ConfigureHSVWidget* self, edx_t edx, int
     if (!GDMAKE_ORIG(self, edx, abs, val))
         return false;
     
-    std::cout << val.h << "," << val.s << "," << val.v << ";" << "yeet" << "\n";
-    
     auto hsva = AddHSVTextDelegate::create(self);
 
     turnLabelIntoInput(

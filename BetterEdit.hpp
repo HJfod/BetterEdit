@@ -11,6 +11,7 @@
     __macro__(ScaleSnap, int, 4, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 0, 10)                \
     __macro__(GridSize, float, 30.0f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 7.5f, 120.0f)      \
     __macro__(GridSizeEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
+    __macro__(PasteStateEnabled, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)              \
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \

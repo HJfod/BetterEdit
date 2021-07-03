@@ -37,6 +37,10 @@ class CCNodeConstructor {
             node->setFlipY(flip);
             return *this;
         }
+        inline CCNodeConstructor<T> & z(int zix) {
+            node->setZOrder(zix);
+            return *this;
+        }
         inline CCNodeConstructor<T> & rotate(float rot) {
             node->setRotation(rot);
             return *this;
@@ -45,12 +49,24 @@ class CCNodeConstructor {
             node->setScale(scale);
             return *this;
         }
+        inline CCNodeConstructor<T> & alpha(GLubyte opacity) {
+            node->setOpacity(opacity);
+            return *this;
+        }
         inline CCNodeConstructor<T> & move(float x, float y) {
             node->setPosition(x, y);
             return *this;
         }
         inline CCNodeConstructor<T> & move(cocos2d::CCPoint const& pos) {
             node->setPosition(pos);
+            return *this;
+        }
+        inline CCNodeConstructor<T> & csize(float x, float y) {
+            node->setContentSize({ x, y });
+            return *this;
+        }
+        inline CCNodeConstructor<T> & csize(cocos2d::CCSize const& size) {
+            node->setContentSize(size);
             return *this;
         }
         inline CCNodeConstructor<T> & anchor(cocos2d::CCPoint const& pos) {

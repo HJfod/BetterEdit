@@ -5,10 +5,13 @@
 
 class GoLiveLayer : public BrownAlertDelegate {
     protected:
-        InputNode* m_pIPInput;
-        ButtonSelector* m_pSelector;
+        InputNode* m_pAddrInput;
+        InputNode* m_pRoomInput;
+        InputNode* m_pRoomPWInput;
 
         void setup() override;
+
+        void onHost(cocos2d::CCObject*);
     
     public:
         static GoLiveLayer* create();

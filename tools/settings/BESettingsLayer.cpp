@@ -45,10 +45,10 @@ void BESettingsLayer::setup() {
     this->m_pNextPageBtn->setPosition(this->m_pLrSize.width / 2 + 64.0f, 0.0f);
     this->m_pButtonMenu->addChild(this->m_pNextPageBtn, 150);
 
-    this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap));
+    this->addToggle("Custom Paste State", "Select what attributes to paste", BE_SETTING_FUNC_B(PasteStateEnabled));
     this->addToggle("Custom Grid Size", "Enable Custom Grid Size <cy>(Static)</c>", BE_SETTING_FUNC_B(GridSizeEnabled));
-    this->addSubtitle("Defaut Size: 30");
     this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
+    this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap));
     this->addSlider(
         "Music",
         (SEL_MenuHandler)&PauseLayer::musicSliderChanged,

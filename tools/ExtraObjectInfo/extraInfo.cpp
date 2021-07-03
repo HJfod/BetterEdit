@@ -5,25 +5,26 @@ GDMAKE_HOOK(0x793b0)
 void __fastcall EditorUI_updateObjectInfoLabel(gd::EditorUI* self) {
     GDMAKE_ORIG_V(self);
 
-    self->m_pObjectInfoLabel->setPositionY(280);
+    self->m_pObjectInfoLabel->setPosition(90, 275);
 
     if (self->m_pSelectedObject) {
-        auto baseHSV = self->m_pSelectedObject->getBaseColor();
-        auto detailHSV = self->m_pSelectedObject->getDetailColor();
-
+        auto baseColor = self->m_pSelectedObject->getBaseColor();
+        auto detailColor = self->m_pSelectedObject->getDetailColor();
+        
         std::stringstream ss;
         ss << self->m_pObjectInfoLabel->getString();
 
-        ss << "HSV: "
-            << baseHSV->hue << ","
-            << baseHSV->saturation << (baseHSV->saturationChecked ? " (a)" : "") << ","
-            << baseHSV->brightness << (baseHSV->brightnessChecked ? " (a)" : "") << "\n";
+        if (baseColor)
+            ss << "HSV: "
+                << baseColor->hue << ","
+                << baseColor->saturation << (baseColor->saturationChecked ? " (a)" : "") << ","
+                << baseColor->brightness << (baseColor->brightnessChecked ? " (a)" : "") << "\n";
 
-        if (detailHSV)
+        if (detailColor)
             ss << "HSV 2: "
-                << detailHSV->hue << ","
-                << detailHSV->saturation << (detailHSV->saturationChecked ? " (a)" : "") << ","
-                << detailHSV->brightness << (detailHSV->brightnessChecked ? " (a)" : "") << "\n";
+                << detailColor->hue << ","
+                << detailColor->saturation << (detailColor->saturationChecked ? " (a)" : "") << ","
+                << detailColor->brightness << (detailColor->brightnessChecked ? " (a)" : "") << "\n";
         
         ss << "Rot: " << self->m_pSelectedObject->getRotation() << "\n";
         ss << "Scale: " << self->m_pSelectedObject->getScale() << "\n";
