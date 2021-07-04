@@ -2,6 +2,7 @@
 #include "../BetterEdit.hpp"
 #include "../tools/settings/BESettingsLayer.hpp"
 #include "../tools/LiveCollab/pauseMenuHook.hpp"
+#include "../tools/AutoColorTriggers/autoCT.hpp"
 
 using namespace gdmake;
 
@@ -42,6 +43,7 @@ bool __fastcall EditorPauseLayer_init(gd::EditorPauseLayer* self, edx_t edx, gd:
         ->setPositionX(winSize.width / 2 - 30);
 
     loadLiveButton(self);
+    loadColorTriggerButton(self);
 
     return true;
 }
