@@ -13,6 +13,7 @@ class ColorTriggerPopup : public BrownAlertDelegate {
         void setup() override;
 
         void onCreate(cocos2d::CCObject*);
+        void onInfo(cocos2d::CCObject*);
 
     public:
         static ColorTriggerPopup* create(gd::EditorPauseLayer* = nullptr);

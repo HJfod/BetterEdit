@@ -6,6 +6,11 @@ using namespace gdmake;
 using namespace gdmake::extra;
 using namespace cocos2d;
 
+#define CATCH_NULL(x) if (x) x
+
+static constexpr const int ZOOMIN_TAG = 8001;
+static constexpr const int ZOOMOUT_TAG = 8002;
+
 class EditorUI_CB : public EditorUI {
     public:
         void zoomGrid(CCObject* pSender) {
@@ -16,11 +21,21 @@ class EditorUI_CB : public EditorUI {
                 size *= 2;
 
             BetterEdit::sharedState()->setGridSize(size);
-            BetterEdit::sharedState()->setGridSizeEnabled(size != 30.0f);
+            if (!BetterEdit::sharedState()->getAlwaysUseCustomGridSize())
+                BetterEdit::sharedState()->setGridSizeEnabled(size != 30.0f);
+            else
+                BetterEdit::sharedState()->setGridSizeEnabled(true);
+            
+            GameManager::sharedState()->setGameVariable("0038", true);
 
             this->updateGridNodeSize();
         }
 };
+
+void showGridButtons(EditorUI* self, bool show) {
+    CATCH_NULL(self->m_pButton4->getParent()->getChildByTag(ZOOMIN_TAG))->setVisible(show);
+    CATCH_NULL(self->m_pButton4->getParent()->getChildByTag(ZOOMOUT_TAG))->setVisible(show);
+}
 
 void loadGridButtons(EditorUI* self) {
     self->m_pButton4->getParent()->addChild(
@@ -36,6 +51,7 @@ void loadGridButtons(EditorUI* self) {
                 )
             )
             .udata(1)
+            .tag(ZOOMIN_TAG)
             .move(175.0f, 140.0f)
             .done()
     );
@@ -52,6 +68,7 @@ void loadGridButtons(EditorUI* self) {
                 )
             )
             .udata(0)
+            .tag(ZOOMOUT_TAG)
             .move(145.0f, 140.0f)
             .done()
     );

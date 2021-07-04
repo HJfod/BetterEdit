@@ -41,6 +41,10 @@ class CCNodeConstructor {
             node->setZOrder(zix);
             return *this;
         }
+        inline CCNodeConstructor<T> & tag(int tag) {
+            node->setTag(tag);
+            return *this;
+        }
         inline CCNodeConstructor<T> & rotate(float rot) {
             node->setRotation(rot);
             return *this;

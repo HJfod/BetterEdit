@@ -47,8 +47,11 @@ void BESettingsLayer::setup() {
 
     this->addToggle("Custom Paste State", "Select what attributes to paste", BE_SETTING_FUNC_B(PasteStateEnabled));
     this->addToggle("Custom Grid Size", "Enable Custom Grid Size <cy>(Static)</c>", BE_SETTING_FUNC_B(GridSizeEnabled));
+    this->addToggle("Always Use Custom Grid Size", nullptr, BE_SETTING_FUNC_B(AlwaysUseCustomGridSize));
+    this->addToggle("Disable Move On Zoom", nullptr, BE_SETTING_FUNC_B(DisableMouseZoomMove));
     this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
     this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap));
+    this->incrementPageCount(true);
     this->addSlider(
         "Music",
         (SEL_MenuHandler)&PauseLayer::musicSliderChanged,
@@ -60,7 +63,7 @@ void BESettingsLayer::setup() {
         FMODAudioEngine::sharedEngine()->getSFXVolume()
     );
 
-    // this->incrementPageCount(true);
+    this->incrementPageCount(true);
     this->addButton(
         CCNodeConstructor<CCLabelBMFont*>()
             .fromText("Developed by HJfod", "goldFont.fnt")

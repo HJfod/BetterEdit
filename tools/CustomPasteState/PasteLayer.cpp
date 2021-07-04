@@ -21,7 +21,7 @@ void PasteLayer::setup() {
             ))
             .color({ 0, 0, 0 })
             .alpha(75)
-            .csize(140.0f, 150.0f)
+            .csize(140.0f, 170.0f)
             .move(-60.0f, 0.0f)
             .z(-100)
             .done()
@@ -37,6 +37,9 @@ void PasteLayer::setup() {
     this->addStateToggle("Dont Enter", PasteLayer::DontEnter);
     this->addStateToggle("Position X", PasteLayer::PositionX);
     this->addStateToggle("Position Y", PasteLayer::PositionY);
+    this->addStateToggle("Rotation", PasteLayer::Rotation);
+    this->addStateToggle("Scale", PasteLayer::Scale);
+    this->addStateToggle("High Detail", PasteLayer::HighDetail);
 
     this->m_pButtonMenu->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()

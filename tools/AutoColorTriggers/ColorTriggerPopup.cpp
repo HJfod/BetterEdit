@@ -47,6 +47,20 @@ void ColorTriggerPopup::setup() {
     this->m_pButtonMenu->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
             .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor()
+                    .fromFrameName("GJ_infoIcon_001.png")
+                    .scale(.8f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&ColorTriggerPopup::onInfo
+            ))
+            .move(CCPoint { 0, 0 } - this->m_pLrSize / 2 + CCPoint { 25.0f, 25.0f })
+            .done()
+    );
+
+    this->m_pButtonMenu->addChild(
+        CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
                 CCNodeConstructor<ButtonSprite*>()
                     .fromNode(ButtonSprite::create(
                         "Create", 0, 0, "goldFont.fnt", "GJ_button_01.png", 0, .8f
@@ -77,12 +91,54 @@ void ColorTriggerPopup::onCreate(CCObject* pSender) {
         strlen(this->m_pRangeEndInput->getString()))
         rangeEnd = std::atoi(this->m_pRangeEndInput->getString());
     
-    std::cout << rangeStart << " - " << rangeEnd << "\n";
+    auto lel = GameManager::sharedState()->getEditorLayer();
+
+    auto dict = lel->m_pLevelSettings->m_effectManager->m_colorActionDict;
+    CCDictElement* el;
+    auto pos = lel->getObjectLayer()->convertToNodeSpace(CCDirector::sharedDirector()->getWinSize() / 2);
+    float y = pos.y;
+    std::stringstream ss;
+
+    CCDICT_FOREACH(dict, el) {
+        const auto colorID = el->getIntKey();
+        if (colorID < rangeStart || colorID > rangeEnd) continue;
+
+        auto color = reinterpret_cast<gd::ColorAction*>(el->getObject());
+
+        ss << "1,899,2," << pos.x << ",3," << y << ",10,0,36,1,23," << colorID << ",7," <<
+            (int)(color->m_color.r) << ",8," << (int)(color->m_color.g) << ",9," <<
+            (int)(color->m_color.b) << ",17," << color->m_blending << ",15," <<
+            (color->m_playerColor == 1) << ",16," <<  (color->m_playerColor == 2) <<
+            ",50," << color->m_copyID << ",49," << std::floor(color->m_copyHue) << "a"
+            << color->m_copySaturation << "a" << color->m_copyBrightness << "a"
+            << color->m_saturationChecked << "a" << color->m_brightnessChecked << ",35,"
+            << color->m_opacity << ",60," << color->m_copyOpacity << ";";
+        
+        y += 30;
+    }
+    const auto result = ss.str();
+
+    lel->getEditorUI()->pasteObjects(result);
+    lel->getEditorUI()->updateButtons();
 
     if (this->m_pPauseLayer)
         this->m_pPauseLayer->onResume(pSender);
 
     this->onClose(pSender);
+}
+
+void ColorTriggerPopup::onInfo(CCObject*) {
+    FLAlertLayer::create(
+        nullptr,
+        "Info",
+        "OK", nullptr,
+        300.0f,
+        "Automatically creates <cy>color</c> triggers for each color "
+        "you have set. By default it will create for <cl>all</c> modified "
+        "channels, but you can also select a specific range.\n\n"
+        "<co>Special colors</c> (<cr>BG</c>, <cr>3DL</c>, <cr>Obj</c> etc.) "
+        "are IDs <cp>1000</c>-<cp>1012</c>."
+    )->show();
 }
 
 ColorTriggerPopup* ColorTriggerPopup::create(EditorPauseLayer* pl) {

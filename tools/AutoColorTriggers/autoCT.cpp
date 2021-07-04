@@ -28,7 +28,7 @@ void loadColorTriggerButton(EditorPauseLayer* self) {
         (SEL_MenuHandler)&EditorPauseLayer_CB::onAutoColorTriggers
     );
     auto buildHelper = extra::getChild<CCNode*>(menu, 8);
-    auto keysBtn = extra::getChild<CCNode*>(menu, -4);
+    auto keysBtn = extra::getChild<CCNode*>(menu, -3);
 
     btn->setPosition(
         buildHelper->getPositionX(),
