@@ -2,23 +2,15 @@
 
 A mod that makes the GD Editor, well, Better.
 
-## Current Features
+# Download
 
- * Type in Editor L, L2 and Z Order
- * Type in current layer
- * Type in HSV
- * Advanced Scaling Controls
+Download is available on my Discord Server: https://discord.gg/K9Kuh3hzTC
 
-## WIP Features
+# Building
 
- * Template building (Auto building)
- * Advanced Rotating Controls
+1. Install [GDMake](https://github.com/HJfod/GDMake) (good luck)
 
-## Planned features
+2. `gdmake submodules add nodes https://github.com/HJfod/GD-Nodes -inc-src -no-header`
+   `gdmake submodules add-src nodes *.cpp`
 
- * Auto-saving
- * Lock layers
- * Faster saving / loading
- * Remap IDs
- * Make Hidden Block IDs visible (Legacy slopes etc.)
- * Editor bugfixes (playtest lag, frozen window movement etc.)
+3. `gdmake . -outlvl minimal`
