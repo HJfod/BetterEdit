@@ -7,6 +7,9 @@ void __fastcall EditorUI_updateObjectInfoLabel(gd::EditorUI* self) {
 
     self->m_pObjectInfoLabel->setPosition(90, 275);
 
+    if (BetterEdit::getDisableExtraObjectInfo())
+        return;
+
     if (self->m_pSelectedObject) {
         auto baseColor = self->m_pSelectedObject->getBaseColor();
         auto detailColor = self->m_pSelectedObject->getDetailColor();

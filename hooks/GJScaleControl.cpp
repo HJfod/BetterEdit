@@ -248,3 +248,10 @@ bool __fastcall GJScaleControl_init(gd::GJScaleControl* self) {
 
     return true;
 }
+
+GDMAKE_HOOK(0x87030)
+void __fastcall EditorUI_updateSpecialUIElements(EditorUI* self) {
+    GDMAKE_ORIG_V(self);
+
+    CATCH_NULL(reinterpret_cast<gd::CCTextInputNode*>(self->getChildByTag(6978)))->detachWithIME();
+}

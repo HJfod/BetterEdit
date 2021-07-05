@@ -48,11 +48,38 @@ void BESettingsLayer::setup() {
     this->m_pNextPageBtn->setPosition(this->m_pLrSize.width / 2 + 64.0f, 0.0f);
     this->m_pButtonMenu->addChild(this->m_pNextPageBtn, 150);
 
-    this->addToggle("Custom Paste State", "Select what attributes to paste", BE_SETTING_FUNC_B(PasteStateEnabled));
-    this->addToggle("Custom Grid Size", "Enable Custom Grid Size <cy>(Static)</c>", BE_SETTING_FUNC_B(GridSizeEnabled));
-    this->addToggle("Always Use Custom Grid Size", nullptr, BE_SETTING_FUNC_B(AlwaysUseCustomGridSize));
-    this->addToggle("Disable Move On Zoom", nullptr, BE_SETTING_FUNC_B(DisableMouseZoomMove));
-    this->addToggle("Fade Out Percentage", nullptr, BE_SETTING_FUNC_B(FadeOutPercentage));
+    this->addToggle(
+        "Custom Paste State",
+        "When using <cy>Paste State</c>, you can select which <cc>attributes</c> to paste",
+        BE_SETTING_FUNC_B(PasteStateEnabled)
+    );
+    this->addToggle(
+        "Custom Grid Size",
+        "Enable Custom Grid Size <cy>(Static)</c>",
+        BE_SETTING_FUNC_B(GridSizeEnabled)
+    );
+    this->addToggle(
+        "Always Use Custom Grid Size",
+        "Without this option, using the <cr>grid zoom buttons</c> will reset grid behaviour to normal "
+        "when the zoom level is back to normal",
+        BE_SETTING_FUNC_B(AlwaysUseCustomGridSize)
+    );
+    this->addToggle(
+        "Disable Move On Zoom",
+        "When using <cr>Control</c> + <cp>Scroll Wheel</c> to zoom, the screen won't move toward the cursor",
+        BE_SETTING_FUNC_B(DisableMouseZoomMove)
+    );
+    this->addToggle(
+        "Fade Out Percentage",
+        "When enabled, the <cl>percentage</c> text below the progress bar will automatically fade out when "
+        "the screen is not being moved",
+        BE_SETTING_FUNC_B(FadeOutPercentage)
+    );
+    // this->addToggle("Pulse Objects", nullptr, BE_SETTING_FUNC_B(PulseObjectsInEditor));
+    this->addToggle("Disable Position Text", nullptr, BE_SETTING_FUNC_B(DisableEditorPos));
+    this->addToggle("Disable Zoom Text", nullptr, BE_SETTING_FUNC_B(DisableZoomText));
+    this->addToggle("Disable Percentage", nullptr, BE_SETTING_FUNC_B(DisablePercentage));
+    this->addToggle("Disable Extra Object Info", nullptr, BE_SETTING_FUNC_B(DisableExtraObjectInfo));
     this->incrementPageCount(true);
     this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
     this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap), "0123456789.");
@@ -240,6 +267,23 @@ void BESettingsLayer::addToggle(const char* text, const char* desc, bool value, 
     toggle->toggle(value);
     toggle->setUserData(as<void*>(cb));
 
+    if (desc && strlen(desc)) {
+        auto infoButton = CCMenuItemSpriteExtra::create(
+            CCNodeConstructor()
+                .fromFrameName("GJ_infoIcon_001.png")
+                .scale(.5f)
+                .done(),
+            this,
+            (SEL_MenuHandler)&BESettingsLayer::onInfo
+        );
+
+        infoButton->setPosition(toggle->getPosition() + cocos2d::CCPoint { -15.0f, 15.0f });
+        infoButton->setUserObject(CCString::create(desc));
+
+        this->m_pButtonMenu->addChild(infoButton);
+        this->addItem(infoButton);
+    }
+
     this->m_pButtonMenu->addChild(toggle);
     this->m_pButtonMenu->addChild(label);
 
@@ -248,6 +292,16 @@ void BESettingsLayer::addToggle(const char* text, const char* desc, bool value, 
     this->incrementPageCount();
 }
 
+
+void BESettingsLayer::onInfo(CCObject* pSender) {
+    FLAlertLayer::create(
+        nullptr,
+        "Info",
+        "OK", nullptr,
+        320.0f,
+        as<CCString*>(as<CCNode*>(pSender)->getUserObject())->getCString()
+    )->show();
+}
 
 void BESettingsLayer::onPage(CCObject* pSender) {
     for (auto page : this->m_vPages)

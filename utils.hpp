@@ -163,3 +163,12 @@ inline int strToInt(const char* str, bool* is = nullptr) {
 
     return isStr ? std::atoi(str) : -1;
 }
+
+inline std::vector<unsigned char> intToBytes(int paramInt) {
+    std::vector<unsigned char> arrayOfByte(4);
+    for (int i = 0; i < 4; i++)
+        arrayOfByte[3 - i] = (paramInt >> (i * 8));
+    
+    std::reverse(arrayOfByte.begin(), arrayOfByte.end());
+    return arrayOfByte;
+}

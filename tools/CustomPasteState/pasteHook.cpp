@@ -46,6 +46,9 @@ void __fastcall GameObject_duplicateAttributes(gd::GameObject* dest, edx_t edx, 
             for (auto ix = 0; ix < src->m_nGroupCount && ix < 10; ix++) 
                 dest->addToGroup(src->m_pGroups[ix]);
     }
+
+    LevelEditorLayer::get()->getEditorUI()->updateSpecialUIElements();
+    LevelEditorLayer::get()->getEditorUI()->updateObjectInfoLabel();
 }
 
 GDMAKE_HOOK(0x16b600)

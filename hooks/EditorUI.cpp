@@ -158,6 +158,23 @@ void __fastcall EditorUI_onGoToBaseLayer(gd::EditorUI* self, edx_t edx, cocos2d:
         );
 }
 
+GDMAKE_HOOK(0x874f0)
+void __fastcall EditorUI_updatePlaybackBtn(gd::EditorUI* self) {
+    // if (BetterEdit::getPulseObjectsInEditor()) {
+    //     auto pulse = FMODAudioEngine::sharedEngine()->m_fPulse1 + 
+    //         FMODAudioEngine::sharedEngine()->m_fPulse2 +
+    //         FMODAudioEngine::sharedEngine()->m_fPulse3;
+    //     pulse /= 3.f;
+
+    //     GameManager::sharedState()->getEditorLayer()->getAllObjects();
+
+    //     patchBytes(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+    // } else
+    //     patchBytes(0x23b56, { 0x0f, 0x84, 0x23, 0x01, 0x00, 0x00 });
+
+    GDMAKE_ORIG_V(self);
+}
+
 GDMAKE_HOOK(0x76090)
 void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
     auto addr = reinterpret_cast<uintptr_t>(self) + 0x2D0;
@@ -269,22 +286,24 @@ void __fastcall EditorUI_updateZoom(gd::EditorUI* self) {
     float zoom;
     __asm { movss zoom, xmm1 }
 
-    auto zLabel = as<CCLabelBMFont*>(self->getChildByTag(ZOOMLABEL_TAG));
+    if (!BetterEdit::getDisableZoomText()) {
+        auto zLabel = as<CCLabelBMFont*>(self->getChildByTag(ZOOMLABEL_TAG));
 
-    if (zLabel) {
-        zLabel->setString(
-            ("Zoom: "_s +
-            BetterEdit::formatToString(
-                self->m_pEditorLayer->getObjectLayer()->getScale(), 2u
-            ) +"x"_s
-        ).c_str());
-        zLabel->setOpacity(255);
-        zLabel->stopAllActions();
-        zLabel->runAction(CCSequence::create(CCArray::create(
-            CCDelayTime::create(.5f),
-            CCFadeOut::create(.5f),
-            nullptr
-        )));
+        if (zLabel) {
+            zLabel->setString(
+                ("Zoom: "_s +
+                BetterEdit::formatToString(
+                    self->m_pEditorLayer->getObjectLayer()->getScale(), 2u
+                ) +"x"_s
+            ).c_str());
+            zLabel->setOpacity(255);
+            zLabel->stopAllActions();
+            zLabel->runAction(CCSequence::create(CCArray::create(
+                CCDelayTime::create(.5f),
+                CCFadeOut::create(.5f),
+                nullptr
+            )));
+        }
     }
 
     updatePercentLabelPosition(self);
@@ -346,6 +365,18 @@ void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, 
     }
 
     updatePercentLabelPosition(self);
+}
+
+GDMAKE_HOOK(0x91a30)
+void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
+    auto kb = cocos2d::CCDirector::sharedDirector()->getKeyboardDispatcher();
+    
+    auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xf8);
+
+    if (key == enumKeyCodes::KEY_A && kb->getControlKeyPressed())
+        self->selectAll();
+    else
+        GDMAKE_ORIG_V(self_, edx, key);
 }
 
 // Credits to Alk1m123 (https://github.com/altalk23) for this scale fix

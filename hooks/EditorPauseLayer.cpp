@@ -14,11 +14,20 @@ class EditorPauseLayer_CB : public gd::EditorPauseLayer {
         }
 };
 
+GDMAKE_HOOK(0x758d0)
+void __fastcall EditorPauseLayer_keyDown(EditorPauseLayer* self, edx_t edx, enumKeyCodes key) {
+    if (key == KEY_Escape)
+        as<EditorPauseLayer*>(as<uintptr_t>(self) - 0xf8)->keyBackClicked();
+    else
+        GDMAKE_ORIG_V(self, edx, key);
+}
+
 GDMAKE_HOOK(0x74fe0)
 void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     updatePercentLabelPosition(LevelEditorLayer::get()->getEditorUI());
+    showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
 }
 
 GDMAKE_HOOK(0x75660)

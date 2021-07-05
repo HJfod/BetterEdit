@@ -21,7 +21,7 @@ void PasteLayer::setup() {
             ))
             .color({ 0, 0, 0 })
             .alpha(75)
-            .csize(140.0f, 170.0f)
+            .csize(140.0f, 180.0f)
             .move(-60.0f, 0.0f)
             .z(-100)
             .done()
@@ -95,14 +95,14 @@ void PasteLayer::addStateToggle(const char* text, PasteLayer::State state) {
     auto toggle = CCMenuItemToggler::createWithStandardSprites(
         this, (SEL_MenuHandler)&PasteLayer::onToggle, .4f
     );
-    toggle->setPosition(-115.0f, 60.0f - 15.0f * this->m_nToggleCount);
+    toggle->setPosition(-115.0f, 78.0f - 14.0f * this->m_nToggleCount);
     toggle->toggle(g_pStates->count(state));
     toggle->setUserData(as<void*>(state));
     this->m_pButtonMenu->addChild(toggle);
 
     auto label = CCLabelBMFont::create(text, "bigFont.fnt");
     label->limitLabelWidth(230.0f, .4f, .2f);
-    label->setPosition(-100.0f + label->getScaledContentSize().width / 2, 60.0f - 15.0f * this->m_nToggleCount);
+    label->setPosition(-100.0f + label->getScaledContentSize().width / 2, 78.0f - 14.0f * this->m_nToggleCount);
     this->m_pButtonMenu->addChild(label);
 
     this->m_vToggles.push_back(toggle);
@@ -163,7 +163,7 @@ PasteLayer* PasteLayer::create() {
     if (g_pStates == nullptr)
         g_pStates = new std::set<PasteLayer::State>;
 
-    if (pRet && pRet->init(320.0f, 250.0f, "GJ_square01.png", "Paste State")) {
+    if (pRet && pRet->init(320.0f, 270.0f, "GJ_square01.png", "Paste State")) {
         pRet->autorelease();
         return pRet;
     }

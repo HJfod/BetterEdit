@@ -13,8 +13,6 @@ class EditorUI_CB : public gd::EditorUI {
 };
 
 void loadTemplates() {
-    return;
-
     addEditorTab("puzzle_base_001.png", [](auto self) -> gd::EditButtonBar* {
         auto btns = cocos2d::CCArray::create();
         

@@ -1,20 +1,27 @@
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
 #include "../utils.hpp"
+#include <InputPrompt.hpp>
 
+using namespace gd;
 using namespace gdmake;
+using namespace gdmake::extra;
+using namespace cocos2d;
+
+std::string g_nextFreeInput = "";
+static constexpr const int NEXTFREE_TAG = 5000;
 
 class AddTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
     public:
-        gd::SetGroupIDLayer* m_pGIL;
+        SetGroupIDLayer* m_pGIL;
 
         virtual void textChanged(gd::CCTextInputNode* input) override {
-            reinterpret_cast<void(__thiscall*)(gd::SetGroupIDLayer*, gd::CCTextInputNode*)>(
+            reinterpret_cast<void(__thiscall*)(SetGroupIDLayer*, gd::CCTextInputNode*)>(
                 gd::base + 0x22d610
             )(this->m_pGIL, input);
         }
 
-        static AddTextDelegate* create(gd::SetGroupIDLayer* gil) {
+        static AddTextDelegate* create(SetGroupIDLayer* gil) {
             auto ret = new AddTextDelegate();
 
             if (ret && ret->init()) {
@@ -28,8 +35,48 @@ class AddTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
         }
 };
 
+class SetGroupIDLayer_CB : public SetGroupIDLayer {
+    public:
+        void onCustomNextFree(CCObject* pSender) {
+            auto p = InputPrompt::create("Next Free Offset", "ID", [this](const char* txt) -> void {
+                if (txt && strlen(txt)) {
+                    auto startID = 0;
+                    try { startID = std::stoi(txt); } catch (...) {}
+
+                    auto bytes = intToBytes(startID);
+                    bytes.insert(bytes.begin(), 0xbe);
+
+                    patchBytes(0x164c59, bytes);
+                    auto id = LevelEditorLayer::get()->getNextFreeGroupID(nullptr);
+
+                    this->m_nGroupID = id;
+                    this->updateGroupIDLabel();
+
+                    g_nextFreeInput = txt;
+                } else {
+                    g_nextFreeInput = "";
+                    patchBytes(0x164c59, { 0xbe, 0x01, 0x00, 0x00, 0x00 });
+                }
+
+                auto btn = as<CCMenuItemSpriteExtra*>(this->m_pButtonMenu->getChildByTag(NEXTFREE_TAG));
+
+                if (btn) {
+                    auto spr = as<ButtonSprite*>(btn->getNormalImage());
+                    spr->setString(g_nextFreeInput.size() ? g_nextFreeInput.c_str() : "0");
+                    spr->updateBGImage(
+                        g_nextFreeInput.size() ? "GJ_button_02.png" : "GJ_button_04.png"
+                    );
+                }
+            }, "Apply")->setApplyOnEsc(true)->setTrashButton(true);
+            p->getInputNode()->getInputNode()->setAllowedChars("0123456789");
+            p->getInputNode()->getInputNode()->setMaxLabelLength(6);
+            p->getInputNode()->setString(g_nextFreeInput.c_str());
+            p->show();
+        }
+};
+
 GDMAKE_HOOK(0x22d690)
-void __fastcall SetGroupIDLayer_onEditorLayer(gd::SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
+void __fastcall SetGroupIDLayer_onEditorLayer(SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     auto i = self->getChildByTag(69);
@@ -41,7 +88,7 @@ void __fastcall SetGroupIDLayer_onEditorLayer(gd::SetGroupIDLayer* self, edx_t e
 }
 
 GDMAKE_HOOK(0x22d710)
-void __fastcall SetGroupIDLayer_onEditorLayer2(gd::SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
+void __fastcall SetGroupIDLayer_onEditorLayer2(SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     auto i = self->getChildByTag(70);
@@ -53,7 +100,7 @@ void __fastcall SetGroupIDLayer_onEditorLayer2(gd::SetGroupIDLayer* self, edx_t 
 }
 
 GDMAKE_HOOK(0x22de80)
-void __fastcall SetGroupIDLayer_onZOrder(gd::SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
+void __fastcall SetGroupIDLayer_onZOrder(SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     auto i = self->getChildByTag(71);
@@ -65,7 +112,7 @@ void __fastcall SetGroupIDLayer_onZOrder(gd::SetGroupIDLayer* self, edx_t edx, c
 }
 
 GDMAKE_HOOK(0x22d610)
-void __fastcall SetGroupIDLayer_textChanged(gd::SetGroupIDLayer* self, edx_t edx, gd::CCTextInputNode* input) {
+void __fastcall SetGroupIDLayer_textChanged(SetGroupIDLayer* self, edx_t edx, CCTextInputNode* input) {
     int val = 0;
     bool isInt = true;
 
@@ -100,7 +147,7 @@ void __fastcall SetGroupIDLayer_textChanged(gd::SetGroupIDLayer* self, edx_t edx
 }
 
 void turnLabelIntoInput(
-    gd::SetGroupIDLayer* self,
+    SetGroupIDLayer* self,
     cocos2d::CCLabelBMFont* text,
     AddTextDelegate* ad,
     int id,
@@ -137,13 +184,32 @@ void turnLabelIntoInput(
 
 GDMAKE_HOOK(0x22b670)
 bool __fastcall SetGroupIDLayer_initHook(
-    gd::SetGroupIDLayer* self,
+    SetGroupIDLayer* self,
     edx_t edx,
-    gd::GameObject* obj,
-    cocos2d::CCArray* arr
+    GameObject* obj,
+    CCArray* arr
 ) {
     if (!GDMAKE_ORIG(self, edx, obj, arr))
         return false;
+
+    auto nextFreeBtn = getChild<CCMenuItemSpriteExtra*>(self->m_pButtonMenu, 2);
+
+    nextFreeBtn->setPositionX(nextFreeBtn->getPositionX() - 20.0f);
+
+    auto customNextFreeBtn = CCMenuItemSpriteExtra::create(
+        ButtonSprite::create(
+            g_nextFreeInput.size() ? g_nextFreeInput.c_str() : "0", 20, true, "goldFont.fnt", 
+            g_nextFreeInput.size() ? "GJ_button_02.png" : "GJ_button_04.png", 25, .6f
+        ),
+        self,
+        (SEL_MenuHandler)&SetGroupIDLayer_CB::onCustomNextFree
+    );
+    customNextFreeBtn->setTag(NEXTFREE_TAG);
+    customNextFreeBtn->setPosition(
+        nextFreeBtn->getPositionX() + 58.0f,
+        nextFreeBtn->getPositionY()
+    );
+    self->m_pButtonMenu->addChild(customNextFreeBtn);
 
     auto inp = AddTextDelegate::create(self);
 

@@ -23,6 +23,11 @@ using namespace cocos2d;
     __macro__(PasteStateEnabled, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)              \
     __macro__(DisableMouseZoomMove, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
     __macro__(FadeOutPercentage, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
+    __macro__(PulseObjectsInEditor, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
+    __macro__(DisableEditorPos, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)              \
+    __macro__(DisableZoomText, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
+    __macro__(DisablePercentage, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
+    __macro__(DisableExtraObjectInfo, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \

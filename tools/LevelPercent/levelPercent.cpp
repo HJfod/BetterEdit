@@ -53,7 +53,7 @@ void updatePercentLabelPosition(EditorUI* self) {
         label->setString((BetterEdit::formatToString(val, BetterEdit::getPercentageAccuracy()) + "%").c_str());
         label->setOpacity(255);
 
-        if (BetterEdit::getFadeOutPercentage()) {
+        if (BetterEdit::getFadeOutPercentage() && !BetterEdit::getDisablePercentage()) {
             label->stopAllActions();
             label->runAction(CCSequence::create(CCArray::create(
                 CCDelayTime::create(.5f),
@@ -81,7 +81,13 @@ void editorHasBeenTouched(bool up) {
 }
 
 void showPositionLabel(EditorUI* self, bool show) {
-    CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(show);
+    if (BetterEdit::getDisableEditorPos())
+        CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(false);
+    else
+        CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(show);
+    
+    auto menu = as<CCMenu*>(self->m_pPositionSlider->getChildByTag(SLIDERLABEL_TAG));
+    menu->setVisible(!BetterEdit::getDisablePercentage());
 }
 
 GDMAKE_HOOK(0x162650)
@@ -151,5 +157,6 @@ void loadSliderPercent(EditorUI* self) {
             .done()
     );
 
+    showPositionLabel(self, true);
     updatePercentLabelPosition(self);
 }
