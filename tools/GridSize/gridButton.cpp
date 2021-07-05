@@ -6,8 +6,6 @@ using namespace gdmake;
 using namespace gdmake::extra;
 using namespace cocos2d;
 
-#define CATCH_NULL(x) if (x) x
-
 static constexpr const int ZOOMIN_TAG = 8001;
 static constexpr const int ZOOMOUT_TAG = 8002;
 
@@ -27,6 +25,7 @@ class EditorUI_CB : public EditorUI {
                 BetterEdit::sharedState()->setGridSizeEnabled(true);
             
             GameManager::sharedState()->setGameVariable("0038", true);
+            this->m_pEditorLayer->updateOptions();
 
             this->updateGridNodeSize();
         }

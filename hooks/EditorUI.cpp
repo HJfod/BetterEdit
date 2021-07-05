@@ -9,8 +9,6 @@
 #include <thread>
 #include "ScaleTextDelegate.hpp"
 
-#define CATCH_NULL(x) if (x) x
-
 static constexpr const int LAYERINPUT_TAG = 6978;
 static constexpr const int LAYERINPUTBG_TAG = 6977;
 static constexpr const int ZOOMLABEL_TAG = 6976;
@@ -261,6 +259,7 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     CATCH_NULL(self->getChildByTag(LAYERINPUTBG_TAG))->setVisible(show);
     CATCH_NULL(self->m_pCopyBtn->getParent()->getChildByTag(7777))->setVisible(show);
     showGridButtons(self, show);
+    showPositionLabel(self, show);
 }
 
 GDMAKE_HOOK(0x878a0)
@@ -304,7 +303,7 @@ void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, 
         // i mean, whats the worst that can happen, they change a fucking math constant?
         zoom = static_cast<float>(std::pow(2.71828182845904523536, std::log(max(zoom, 0.001f)) - amt * 0.01f));
         // zoom limit
-        zoom = max(zoom, .15f);
+        zoom = max(zoom, .1f);
         zoom = min(zoom, 1000000);  // just in case some dumbass (like me) unlocks
                                     // their scroll wheel and zooms over 1mx
 

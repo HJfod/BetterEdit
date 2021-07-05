@@ -11,10 +11,14 @@ class EditorUI_CB : public EditorUI {
         void onGoToPercentage(CCObject* pSender) {
             auto p = InputPrompt::create("Go To %", "%", [this](const char* txt) -> void {
                 if (txt && strlen(txt)) {
+                    float val = 0.0f;
+                    try { val = std::stof(txt); } catch(...) {}
+
                     auto width = CCDirector::sharedDirector()->getWinSize().width;
 
                     this->m_pEditorLayer->getObjectLayer()->setPosition({
-                        - g_lastObjectPosX * min(std::stoi(txt), 100) / 100.0f * this->m_pEditorLayer->getObjectLayer()->getScale(),
+                        (- g_lastObjectPosX * min(val, 100.0f) / 100.0f + width / 2) *
+                            this->m_pEditorLayer->getObjectLayer()->getScale(),
                         this->m_pEditorLayer->getObjectLayer()->getPositionY()
                     });
 
@@ -22,8 +26,8 @@ class EditorUI_CB : public EditorUI {
                     this->updateSlider();
                 }
             }, "Go");
-            p->getInputNode()->getInputNode()->setAllowedChars("0123456789");
-            p->getInputNode()->getInputNode()->setMaxLabelLength(3);
+            p->getInputNode()->getInputNode()->setAllowedChars("0123456789.");
+            p->getInputNode()->getInputNode()->setMaxLabelLength(6);
             p->show();
         }
 };
@@ -36,17 +40,27 @@ void updatePercentLabelPosition(EditorUI* self) {
 
         menu->setPositionX(self->m_pPositionSlider->m_pTouchLogic->m_pThumb->getPositionX());
 
-        int val = 0;
+        float val = 0.0f;
         if (g_lastObjectPosX)
             val =
-                static_cast<int>(self->m_pEditorLayer->getObjectLayer()->convertToNodeSpace(
+                self->m_pEditorLayer->getObjectLayer()->convertToNodeSpace(
                     CCDirector::sharedDirector()->getWinSize() / 2
-                ).x / g_lastObjectPosX * 100.0f);
+                ).x / g_lastObjectPosX * 100.0f;
         
-        val = min(val, 100);
-        val = max(val, 0);
+        val = min(val, 100.0f);
+        val = max(val, 0.0f);
 
-        label->setString((std::to_string(val) + "%").c_str());
+        label->setString((BetterEdit::formatToString(val, BetterEdit::getPercentageAccuracy()) + "%").c_str());
+        label->setOpacity(255);
+
+        if (BetterEdit::getFadeOutPercentage()) {
+            label->stopAllActions();
+            label->runAction(CCSequence::create(CCArray::create(
+                CCDelayTime::create(.5f),
+                CCFadeOut::create(.5f),
+                nullptr
+            )));
+        }
     }
 
     auto posLabel = as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG));
@@ -64,6 +78,10 @@ void updatePercentLabelPosition(EditorUI* self) {
 
 void editorHasBeenTouched(bool up) {
     g_doUpdate = up;
+}
+
+void showPositionLabel(EditorUI* self, bool show) {
+    CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(show);
 }
 
 GDMAKE_HOOK(0x162650)
@@ -111,7 +129,7 @@ void loadSliderPercent(EditorUI* self) {
     auto label = CCLabelBMFont::create("100%", "bigFont.fnt");
 
     label->setPosition(0, 0);
-    label->setScale(.5f);
+    label->setScale(.4f);
 
     auto btn = CCMenuItemSpriteExtra::create(
         label, self, (SEL_MenuHandler)&EditorUI_CB::onGoToPercentage

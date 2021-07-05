@@ -5,6 +5,8 @@ using namespace gdmake::extra;
 using namespace gd;
 using namespace cocos2d;
 
+int g_nSettingsPage = 0;
+
 #define BE_SETTING_FUNC(__name__) \
     BetterEdit::get##__name__##AsString(),\
     &BetterEdit::set##__name__##FromString
@@ -32,6 +34,7 @@ void BESettingsLayer::setup() {
     this->m_pPrevPageBtn->setUserData(as<void*>(-1));
     this->m_pPrevPageBtn->setPosition(- this->m_pLrSize.width / 2 - 64.0f, 0.0f);
     this->m_pButtonMenu->addChild(this->m_pPrevPageBtn, 150);
+    this->m_nCurrentPage = g_nSettingsPage;
 
     this->m_pNextPageBtn = CCMenuItemSpriteExtra::create(
         CCNodeConstructor()
@@ -49,9 +52,11 @@ void BESettingsLayer::setup() {
     this->addToggle("Custom Grid Size", "Enable Custom Grid Size <cy>(Static)</c>", BE_SETTING_FUNC_B(GridSizeEnabled));
     this->addToggle("Always Use Custom Grid Size", nullptr, BE_SETTING_FUNC_B(AlwaysUseCustomGridSize));
     this->addToggle("Disable Move On Zoom", nullptr, BE_SETTING_FUNC_B(DisableMouseZoomMove));
-    this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
-    this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap));
+    this->addToggle("Fade Out Percentage", nullptr, BE_SETTING_FUNC_B(FadeOutPercentage));
     this->incrementPageCount(true);
+    this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
+    this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap), "0123456789.");
+    this->addInput("Percentage Accuracy:", BE_SETTING_FUNC(PercentageAccuracy), "0123456789");
     this->addSlider(
         "Music",
         (SEL_MenuHandler)&PauseLayer::musicSliderChanged,
@@ -63,7 +68,7 @@ void BESettingsLayer::setup() {
         FMODAudioEngine::sharedEngine()->getSFXVolume()
     );
 
-    this->incrementPageCount(true);
+    // this->incrementPageCount(true);
     this->addButton(
         CCNodeConstructor<CCLabelBMFont*>()
             .fromText("Developed by HJfod", "goldFont.fnt")
@@ -111,7 +116,7 @@ void BESettingsLayer::addItem(CCNode* item) {
 
     this->m_vPages[this->m_nDestPage].push_back(item);
 
-    item->setVisible(!this->m_nDestPage);
+    item->setVisible(this->m_nDestPage == g_nSettingsPage);
 }
 
 void BESettingsLayer::addInput(
@@ -128,9 +133,13 @@ void BESettingsLayer::addInput(
     auto scaleSnapLabel = CCLabelBMFont::create(text, "goldFont.fnt");
 
     scaleSnapInput->setPosition(winSize.width / 2 + 60.0f, winSize.height / 2 + y);
-    scaleSnapLabel->setPosition(winSize.width / 2 - 30.0f, winSize.height / 2 + y);
-    scaleSnapLabel->limitLabelWidth(this->m_pLrSize.width / 2, .7f, .2f);
     scaleSnapInput->getInputNode()->setAllowedChars(filter);
+
+    scaleSnapLabel->limitLabelWidth(this->m_pLrSize.width / 2 - 40.0f, .7f, .2f);
+    scaleSnapLabel->setPosition(
+        winSize.width / 2 - scaleSnapLabel->getScaledContentSize().width / 2,
+        winSize.height / 2 + y
+    );
 
     scaleSnapInput->setString(value.c_str());
     scaleSnapInput->getInputNode()->setUserData(as<void*>(cb));
@@ -255,6 +264,8 @@ void BESettingsLayer::onPage(CCObject* pSender) {
 
     for (auto item : this->m_vPages[this->m_nCurrentPage])
         item->setVisible(true);
+    
+    g_nSettingsPage = this->m_nCurrentPage;
 }
 
 void BESettingsLayer::onToggle(CCObject* pSender) {
@@ -265,7 +276,7 @@ void BESettingsLayer::onToggle(CCObject* pSender) {
 }
 
 void BESettingsLayer::textChanged(CCTextInputNode* input) {
-    if (input && input->getUserData() && strlen(input->getString()))
+    if (input && input->getUserData() && input->getString() && strlen(input->getString()))
         (reinterpret_cast<BE_Callback>(input->getUserData()))(input->getString());
 }
 
