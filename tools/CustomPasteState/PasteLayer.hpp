@@ -14,6 +14,7 @@ class PasteLayer : public BrownAlertDelegate {
     protected:
         std::vector<gd::CCMenuItemToggler*> m_vToggles;
         int m_nToggleCount;
+        bool m_bNextRow = false;
         
         void setup() override;
 

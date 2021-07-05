@@ -29,7 +29,7 @@ void __fastcall GameObject_duplicateAttributes(gd::GameObject* dest, edx_t edx, 
     if (states->count(PasteLayer::PositionX))       dest->setPositionX(src->getPositionX());
     if (states->count(PasteLayer::PositionY))       dest->setPositionY(src->getPositionY());
     if (states->count(PasteLayer::Rotation))        dest->setRotation(src->getRotation());
-    if (states->count(PasteLayer::Scale))           dest->setScale(src->getScale());
+    if (states->count(PasteLayer::Scale))           dest->updateCustomScale(src->getScale());
     if (states->count(PasteLayer::ZOrder)) {
         auto z = src->m_nZOrder;
         if (!z) z = src->m_nDefaultZOrder;
@@ -59,6 +59,6 @@ void __fastcall LevelEditorLayer_copyObjectState(gd::LevelEditorLayer* self, edx
         self->m_pCopyStateObject->m_nObjectID = obj->m_nObjectID;
         self->m_pCopyStateObject->setPosition(obj->getPosition());
         self->m_pCopyStateObject->setRotation(obj->getRotation());
-        self->m_pCopyStateObject->setScale(obj->getScale());
+        self->m_pCopyStateObject->updateCustomScale(obj->getScale());
     }
 }

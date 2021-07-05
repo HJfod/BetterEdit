@@ -4,7 +4,7 @@
 std::string g_nextFreeColorInput = "";
 static constexpr const int NEXTFREE_TAG = 5000;
 
-class SetGroupIDLayer_CB : public CustomizeObjectLayer {
+class CustomizeObjectLayer_CB : public CustomizeObjectLayer {
     public:
         void onCustomNextFree(CCObject* pSender) {
             auto p = InputPrompt::create("Next Free Offset", "ID", [this, pSender](const char* txt) -> void {
@@ -54,7 +54,7 @@ bool __fastcall CustomizeObjectLayer_init(CustomizeObjectLayer* self, edx_t edx,
             g_nextFreeColorInput.size() ? "GJ_button_02.png" : "GJ_button_04.png", 25, .6f
         ),
         self,
-        (SEL_MenuHandler)&SetGroupIDLayer_CB::onCustomNextFree
+        (SEL_MenuHandler)&CustomizeObjectLayer_CB::onCustomNextFree
     );
     customNextFreeBtn->setTag(NEXTFREE_TAG);
     customNextFreeBtn->setPosition(
