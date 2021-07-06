@@ -2,6 +2,8 @@
 #include "../BetterEdit.hpp"
 #include "../tools/settings/BESettingsLayer.hpp"
 #include "../tools/LiveCollab/pauseMenuHook.hpp"
+#include "../tools/AutoColorTriggers/autoCT.hpp"
+#include "../tools/LevelPercent/levelPercent.hpp"
 
 using namespace gdmake;
 
@@ -12,15 +14,31 @@ class EditorPauseLayer_CB : public gd::EditorPauseLayer {
         }
 };
 
+GDMAKE_HOOK(0x758d0)
+void __fastcall EditorPauseLayer_keyDown(EditorPauseLayer* self, edx_t edx, enumKeyCodes key) {
+    if (key == KEY_Escape)
+        as<EditorPauseLayer*>(as<uintptr_t>(self) - 0xf8)->keyBackClicked();
+    else
+        GDMAKE_ORIG_V(self, edx, key);
+}
+
+GDMAKE_HOOK(0x74fe0)
+void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCObject* pSender) {
+    GDMAKE_ORIG_V(self, edx, pSender);
+
+    updatePercentLabelPosition(LevelEditorLayer::get()->getEditorUI());
+    showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
+}
+
 GDMAKE_HOOK(0x75660)
-void __fastcall EditorPauseLayer_onExitEditor(gd::EditorPauseLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
+void __fastcall EditorPauseLayer_onExitEditor(EditorPauseLayer* self, edx_t edx, CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     self->removeFromParentAndCleanup(true);
 }
 
 GDMAKE_HOOK(0x730e0)
-bool __fastcall EditorPauseLayer_init(gd::EditorPauseLayer* self, edx_t edx, gd::LevelEditorLayer* el) {
+bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, LevelEditorLayer* el) {
     if (!GDMAKE_ORIG(self, edx, el))
         return false;
 
@@ -42,6 +60,7 @@ bool __fastcall EditorPauseLayer_init(gd::EditorPauseLayer* self, edx_t edx, gd:
         ->setPositionX(winSize.width / 2 - 30);
 
     loadLiveButton(self);
+    loadColorTriggerButton(self);
 
     return true;
 }

@@ -121,10 +121,10 @@ void __fastcall GJScaleControl_ccTouchMoved(gd::GJScaleControl* self_, edx_t edx
 
         auto std = reinterpret_cast<ScaleTextDelegate*>(self->getChildByTag(7777));
         auto snap = BetterEdit::sharedState()->getScaleSnap();
-        if (snap < 1) snap = 1;
+        if (snap == 0) snap = 1;
 
         if (std && !std->m_bUnlockScaleEnabled) {
-            val = roundf(val * snap) / snap;
+            val = roundf(val / snap) * snap;
         
             self->m_pSlider->setValue((val - .5f) / 1.5f);
         }
@@ -247,4 +247,11 @@ bool __fastcall GJScaleControl_init(gd::GJScaleControl* self) {
     ed->setTag(7777);
 
     return true;
+}
+
+GDMAKE_HOOK(0x87030)
+void __fastcall EditorUI_updateSpecialUIElements(EditorUI* self) {
+    GDMAKE_ORIG_V(self);
+
+    CATCH_NULL(reinterpret_cast<gd::CCTextInputNode*>(self->getChildByTag(6978)))->detachWithIME();
 }

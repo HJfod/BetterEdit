@@ -41,6 +41,10 @@ class CCNodeConstructor {
             node->setZOrder(zix);
             return *this;
         }
+        inline CCNodeConstructor<T> & tag(int tag) {
+            node->setTag(tag);
+            return *this;
+        }
         inline CCNodeConstructor<T> & rotate(float rot) {
             node->setRotation(rot);
             return *this;
@@ -158,4 +162,13 @@ inline int strToInt(const char* str, bool* is = nullptr) {
     if (is) *is = isStr;
 
     return isStr ? std::atoi(str) : -1;
+}
+
+inline std::vector<unsigned char> intToBytes(int paramInt) {
+    std::vector<unsigned char> arrayOfByte(4);
+    for (int i = 0; i < 4; i++)
+        arrayOfByte[3 - i] = (paramInt >> (i * 8));
+    
+    std::reverse(arrayOfByte.begin(), arrayOfByte.end());
+    return arrayOfByte;
 }

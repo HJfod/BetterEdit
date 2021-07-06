@@ -6,12 +6,28 @@
 #include <set>
 #include <algorithm>
 
+using namespace gd;
+using namespace gdmake;
+using namespace gdmake::extra;
+using namespace cocos2d;
+
+#define CATCH_NULL(x) if (x) x
+
 #pragma region macros (ew)
 #define BE_SETTINGS(__macro__)                                                                  \
-    __macro__(ScaleSnap, int, 4, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 0, 10)                \
+    __macro__(ScaleSnap, float, .25f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.01f, 1.0f)       \
     __macro__(GridSize, float, 30.0f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 7.5f, 120.0f)      \
+    __macro__(PercentageAccuracy, int, 0, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 0, 10)       \
     __macro__(GridSizeEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
+    __macro__(AlwaysUseCustomGridSize, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)       \
     __macro__(PasteStateEnabled, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)              \
+    __macro__(DisableMouseZoomMove, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
+    __macro__(FadeOutPercentage, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
+    __macro__(PulseObjectsInEditor, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
+    __macro__(DisableEditorPos, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)              \
+    __macro__(DisableZoomText, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
+    __macro__(DisablePercentage, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
+    __macro__(DisableExtraObjectInfo, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \
@@ -39,7 +55,7 @@
     public: __sfunc__(__name__, __type__, __value__, __lb__, __rb__)                        \
     static __type__ get##__name__() { return sharedState()->m_Sett##__name__; }             \
     static void set##__name__##FromString(std::string const& value) {                       \
-    set##__name__(static_cast<__type__>(__conv__(value))); }                                \
+    try { set##__name__(static_cast<__type__>(__conv__(value))); } catch (...) {} }         \
     static std::string get##__name__##AsString() { return formatToString(get##__name__()); }
 #pragma endregion macros (ew)
 
@@ -69,7 +85,7 @@ class BetterEdit : public gd::GManager {
     
     public:
         template<typename T>
-        inline static std::string formatToString(T num) {
+        inline static std::string formatToString(T num, unsigned int precision = 60u) {
             std::string res = std::to_string(num);
 
             if (std::is_same<T, float>::value && res.find('.') != std::string::npos) {
@@ -78,6 +94,15 @@ class BetterEdit : public gd::GManager {
                 
                 if (res.at(res.length() - 1) == '.')
                     res = res.substr(0, res.length() - 1);
+
+                if (res.find('.') != std::string::npos) {
+                    auto pos = res.find('.');
+
+                    if (precision)
+                        res = res.substr(0, pos + 1 + precision);
+                    else
+                        res = res.substr(0, pos);
+                }
             }
 
             return res;

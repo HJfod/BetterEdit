@@ -54,6 +54,10 @@ void __fastcall EditorUI_setupCreateMenu(gd::EditorUI* self) {
         self->addChild(bbar, 10);
     }
 
+    // fix F1 & F2
+    patchBytes(0x92044, { 0xb9, static_cast<uint8_t>(self->m_pTabsArray->count()) });
+    patchBytes(0x9207a, { 0x83, 0xf8, static_cast<uint8_t>(self->m_pTabsArray->count() - 1) });
+
     self->m_pTabsMenu->alignItemsHorizontallyWithPadding(-3.0f);
 
     self->m_pTabsMenu->setPosition(pos);

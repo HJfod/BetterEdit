@@ -21,8 +21,8 @@ void PasteLayer::setup() {
             ))
             .color({ 0, 0, 0 })
             .alpha(75)
-            .csize(140.0f, 150.0f)
-            .move(-60.0f, 0.0f)
+            .csize(310.0f, 180.0f)
+            .move(0.0f, 0.0f)
             .z(-100)
             .done()
     );
@@ -33,10 +33,13 @@ void PasteLayer::setup() {
     this->addStateToggle("Z Order", PasteLayer::ZOrder);
     this->addStateToggle("Editor Layer", PasteLayer::EditorLayer);
     this->addStateToggle("Editor Layer 2", PasteLayer::EditorLayer2);
+    this->addStateToggle("High Detail", PasteLayer::HighDetail);
     this->addStateToggle("Dont Fade", PasteLayer::DontFade);
     this->addStateToggle("Dont Enter", PasteLayer::DontEnter);
     this->addStateToggle("Position X", PasteLayer::PositionX);
     this->addStateToggle("Position Y", PasteLayer::PositionY);
+    this->addStateToggle("Rotation", PasteLayer::Rotation);
+    this->addStateToggle("Scale", PasteLayer::Scale);
 
     this->m_pButtonMenu->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
@@ -50,7 +53,7 @@ void PasteLayer::setup() {
                 this,
                 (SEL_MenuHandler)&PasteLayer::onToggleAll
             ))
-            .move(80.0f, 20.0f)
+            .move(-50.0f, -65.0f)
             .udata(1)
             .done()
     );
@@ -66,7 +69,7 @@ void PasteLayer::setup() {
                 this,
                 (SEL_MenuHandler)&PasteLayer::onToggleAll
             ))
-            .move(80.0f, -20.0f)
+            .move(50.0f, -65.0f)
             .udata(0)
             .done()
     );
@@ -89,17 +92,28 @@ void PasteLayer::setup() {
 }
 
 void PasteLayer::addStateToggle(const char* text, PasteLayer::State state) {
+    if (this->m_nToggleCount >= 6) {
+        this->m_nToggleCount = 0;
+        this->m_bNextRow = true;
+    }
+
     auto toggle = CCMenuItemToggler::createWithStandardSprites(
-        this, (SEL_MenuHandler)&PasteLayer::onToggle, .4f
+        this, (SEL_MenuHandler)&PasteLayer::onToggle, .5f
     );
-    toggle->setPosition(-115.0f, 60.0f - 15.0f * this->m_nToggleCount);
+    toggle->setPosition(
+        (m_bNextRow ? 20.0f : -140.0f),
+        70.0f - 20.0f * this->m_nToggleCount
+    );
     toggle->toggle(g_pStates->count(state));
     toggle->setUserData(as<void*>(state));
     this->m_pButtonMenu->addChild(toggle);
 
     auto label = CCLabelBMFont::create(text, "bigFont.fnt");
-    label->limitLabelWidth(230.0f, .4f, .2f);
-    label->setPosition(-100.0f + label->getScaledContentSize().width / 2, 60.0f - 15.0f * this->m_nToggleCount);
+    label->limitLabelWidth(125.0f, .5f, .2f);
+    label->setPosition(
+        (m_bNextRow ? 35.0f : -125.0f) + label->getScaledContentSize().width / 2,
+        70.0f - 20.0f * this->m_nToggleCount
+    );
     this->m_pButtonMenu->addChild(label);
 
     this->m_vToggles.push_back(toggle);
@@ -160,7 +174,7 @@ PasteLayer* PasteLayer::create() {
     if (g_pStates == nullptr)
         g_pStates = new std::set<PasteLayer::State>;
 
-    if (pRet && pRet->init(320.0f, 250.0f, "GJ_square01.png", "Paste State")) {
+    if (pRet && pRet->init(350.0f, 270.0f, "GJ_square01.png", "Paste State")) {
         pRet->autorelease();
         return pRet;
     }

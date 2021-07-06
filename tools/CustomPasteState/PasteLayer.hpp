@@ -7,12 +7,14 @@ class PasteLayer : public BrownAlertDelegate {
     public:
         enum State {
             ObjID, Groups, ZLayer, ZOrder, EditorLayer, EditorLayer2,
-            DontFade, DontEnter, PositionX, PositionY,
+            DontFade, DontEnter, PositionX, PositionY, Rotation, Scale,
+            HighDetail,
         };
 
     protected:
         std::vector<gd::CCMenuItemToggler*> m_vToggles;
         int m_nToggleCount;
+        bool m_bNextRow = false;
         
         void setup() override;
 

@@ -52,6 +52,7 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
         cocos2d::CCLabelBMFont* addSubtitle(const char* text, bool centered = false);
         gd::CCMenuItemSpriteExtra* addButton(cocos2d::CCNode* sprite, cocos2d::SEL_MenuHandler callback, bool large = false);
 
+        void onInfo(cocos2d::CCObject*);
         void onPage(cocos2d::CCObject*);
         void onToggle(cocos2d::CCObject*);
         void textChanged(gd::CCTextInputNode*) override;

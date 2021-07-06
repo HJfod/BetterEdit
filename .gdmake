@@ -1,8 +1,8 @@
 {
   "ProjectName": "BetterEdit",
   "EntryPoint": null,
-  "Version": "v0.32",
-  "ConsoleEnabled": true,
+  "Version": "v0.34",
+  "ConsoleEnabled": false,
   "Compiler": 0,
   "Platform": 0,
   "IgnoredFiles": [],
