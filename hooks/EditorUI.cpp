@@ -9,6 +9,11 @@
 #include <thread>
 #include "ScaleTextDelegate.hpp"
 
+using namespace gdmake;
+using namespace cocos2d;
+
+#define CATCH_NULL(x) if (x) x
+
 static constexpr const int LAYERINPUT_TAG = 6978;
 static constexpr const int LAYERINPUTBG_TAG = 6977;
 static constexpr const int ZOOMLABEL_TAG = 6976;
@@ -158,23 +163,6 @@ void __fastcall EditorUI_onGoToBaseLayer(gd::EditorUI* self, edx_t edx, cocos2d:
         );
 }
 
-GDMAKE_HOOK(0x874f0)
-void __fastcall EditorUI_updatePlaybackBtn(gd::EditorUI* self) {
-    // if (BetterEdit::getPulseObjectsInEditor()) {
-    //     auto pulse = FMODAudioEngine::sharedEngine()->m_fPulse1 + 
-    //         FMODAudioEngine::sharedEngine()->m_fPulse2 +
-    //         FMODAudioEngine::sharedEngine()->m_fPulse3;
-    //     pulse /= 3.f;
-
-    //     GameManager::sharedState()->getEditorLayer()->getAllObjects();
-
-    //     patchBytes(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-    // } else
-    //     patchBytes(0x23b56, { 0x0f, 0x84, 0x23, 0x01, 0x00, 0x00 });
-
-    GDMAKE_ORIG_V(self);
-}
-
 GDMAKE_HOOK(0x76090)
 void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
     auto addr = reinterpret_cast<uintptr_t>(self) + 0x2D0;
@@ -195,6 +183,65 @@ void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
 
     return GDMAKE_ORIG_V(self);
 }
+
+// this exists entirely because dynamic_cast<gd::GameObject*> doesnt work
+gd::GameObject* castToGameObject(CCObject* obj) {
+    if (obj != nullptr) {
+        const auto vtable = *reinterpret_cast<uintptr_t*>(obj) - gd::base;
+        // GameObject and RingObject respectively
+        std::cout << std::hex << vtable << std::endl;
+        if (vtable == 0x29A514 || vtable == 0x2E390C) {
+            return reinterpret_cast<gd::GameObject*>(obj);
+        }
+    }
+    return nullptr;
+}
+
+bool g_hasResetObjectsScale = true;
+
+// TODO: have this somewhere
+// patchBytes(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+// you dont really have to patch it back to the original, game works fine with
+// the patch always on
+
+class EditorUIPulse : public gd::EditorUI {
+public:
+    void updateObjectsPulse(float dt) {
+        // too lazy to add these to gd.h
+        // theyre isMusicPlaying and isPlaybackMode
+        if (*reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + 0x130) ||
+        *reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(m_pEditorLayer) + 0x3ac)) {
+            g_hasResetObjectsScale = false;
+            // incredible
+            const auto arr = m_pEditorLayer->m_pSpriteBatch29->getChildren();
+            const auto arr2 = m_pEditorLayer->m_pSpriteBatch28->getChildren();
+            CCObject* obj_;
+            auto fmod = gd::FMODAudioEngine::sharedEngine();
+            auto pulse = fmod->m_fPulse1 + fmod->m_fPulse2 + fmod->m_fPulse3;
+            pulse /= 3.f;
+            const auto f = [&](CCObject* obj_) {
+                auto obj = castToGameObject(obj_);
+                if (obj != nullptr && obj->m_unk32C)
+                    obj->setRScale(pulse);
+            };
+            CCARRAY_FOREACH(arr, obj_) {
+                f(obj_);
+            }
+            CCARRAY_FOREACH(arr2, obj_) {
+                f(obj_);
+            }
+        } else if (!g_hasResetObjectsScale) {
+            g_hasResetObjectsScale = true;
+            const auto arr = m_pEditorLayer->getAllObjects();
+            CCObject* obj_;
+            CCARRAY_FOREACH(arr, obj_) {
+                auto obj = castToGameObject(obj_);
+                if (obj != nullptr && obj->m_unk32C)
+                    obj->setRScale(1.f);
+            }
+        }
+    }
+};
 
 GDMAKE_HOOK(EditorUI::init)
 bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lvl) {
@@ -262,6 +309,9 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     }
 
     BetterEdit::sharedState()->m_bHookConflictFound = false;
+
+    g_hasResetObjectsScale = true;
+    self->schedule(schedule_selector(EditorUIPulse::updateObjectsPulse));
 
     return true;
 }
