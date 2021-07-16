@@ -4,6 +4,7 @@
 #include "../tools/LiveCollab/pauseMenuHook.hpp"
 #include "../tools/AutoColorTriggers/autoCT.hpp"
 #include "../tools/LevelPercent/levelPercent.hpp"
+#include "../tools/IDRemap/remapHook.hpp"
 
 using namespace gdmake;
 
@@ -27,7 +28,7 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
     GDMAKE_ORIG_V(self, edx, pSender);
 
     updatePercentLabelPosition(LevelEditorLayer::get()->getEditorUI());
-    showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
+    // showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
 }
 
 GDMAKE_HOOK(0x75660)
@@ -61,6 +62,7 @@ bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, LevelEd
 
     loadLiveButton(self);
     loadColorTriggerButton(self);
+    loadRemapHook(self);
 
     return true;
 }

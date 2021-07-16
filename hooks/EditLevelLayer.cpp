@@ -1,5 +1,6 @@
 #include <GDMake.h>
 #include "../tools/Presets/browserHook.hpp"
+#include "../tools/CustomStartPos/ellHook.hpp"
 
 using namespace gdmake;
 
@@ -24,6 +25,7 @@ bool __fastcall EditLevelLayer_init(gd::EditLevelLayer* self, edx_t edx, gd::GJG
     self->m_pButtonMenu->addChild(garageRope);
 
     setupCreatePresetButton(self, level);
+    loadStartPosButton(self, level);
 
     return true;
 }

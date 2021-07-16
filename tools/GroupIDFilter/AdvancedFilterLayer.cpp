@@ -24,9 +24,10 @@ CCMenuItemToggler* createButtonToggle(const char* text, CCNode* target, SEL_Menu
 
 void AdvancedFilterLayer::setup() {
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-    constexpr const char* rangeFilter  = "0123456789- ";
-    constexpr const char* rangeFilterF = "0123456789.- ";
-    constexpr const char* rangeFilterC = "0123456789-bglineojdpwhtackrBGLINEOJDPWHTACKR ";
+    constexpr const char* rangeFilter  = "0123456789~ ";
+    constexpr const char* rangeFilterN  = "0123456789~- ";
+    constexpr const char* rangeFilterF = "0123456789.~ ";
+    constexpr const char* rangeFilterC = "0123456789~bglineojdpwhtackrBGLINEOJDPWHTACKR ";
 
     if (!g_pFilter) g_pFilter = new AdvancedFilterLayer::ObjFilter;
 
@@ -92,7 +93,7 @@ void AdvancedFilterLayer::setup() {
         );
         this->m_pLayer->addChild(
             CCNodeConstructor<InputNode*>()
-                .fromNode(InputNode::create(80.0f, "Z Order", "chatFont.fnt", rangeFilter, 20))
+                .fromNode(InputNode::create(80.0f, "Z Order", "chatFont.fnt", rangeFilterN, 20))
                 .move(winSize.width / 2 + 50.0f, winSize.height / 2 + this->m_pLrSize.height / 2 - 140.0f)
                 .exec([this](auto self) -> void { this->m_vInputs.push_back(self); })
                 .udata(&g_pFilter->zOrder)

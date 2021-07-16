@@ -207,7 +207,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                         bool clctb = false;
                         for (auto c : text)
                             switch (c) {
-                                case '-':
+                                case '~':
                                     clctb = true;
                                     if (clct.size())
                                         this->start = AFL_IORF(T, clct);
@@ -216,7 +216,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                                     
                                 case '0': case '1': case '2': case '3': case '4':
                                 case '5': case '6': case '7': case '8': case '9':
-                                case '.': // whoops, forgot floats exist
+                                case '.': case '-': case '+':
                                     clct += c;
                                     break;
                             }

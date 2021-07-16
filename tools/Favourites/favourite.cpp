@@ -124,6 +124,9 @@ class EditorUI_CB : public EditorUI {
 };
 
 void loadFavouriteTab() {
+    if (BetterEdit::getDisableFavoritesTab())
+        return;
+
     addEditorTab("GJ_bigStar_noShadow_001.png", [](auto self) -> EditButtonBar* {
         auto bbar = gd::EditButtonBar::create(
             CCArray::create(), { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f },

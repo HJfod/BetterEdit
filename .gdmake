@@ -1,10 +1,16 @@
 {
   "ProjectName": "BetterEdit",
   "EntryPoint": null,
-  "Version": "v0.34",
-  "ConsoleEnabled": false,
+  "Version": "v3.5",
+  "ConsoleEnabled": true,
   "Compiler": 0,
   "Platform": 0,
+  "Submodules": [
+    "gd.h",
+    "MinHook",
+    "Cocos2d",
+    "nodes"
+  ],
   "IgnoredFiles": [],
   "Libs": [
     "libs/minhook.x32.lib",

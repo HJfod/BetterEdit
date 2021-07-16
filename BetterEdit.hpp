@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GDMake.h>
+#include <GUI/CCControlExtension/CCScale9Sprite.h>
 #include "tools/Templates/TemplateManager.hpp"
 #include "utils.hpp"
 #include <set>
@@ -28,6 +29,9 @@ using namespace cocos2d;
     __macro__(DisableZoomText, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(DisablePercentage, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(DisableExtraObjectInfo, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
+    __macro__(DisableFavoritesTab, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
+    __macro__(DisableGlobalClipboard, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
+
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \

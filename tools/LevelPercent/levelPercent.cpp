@@ -80,15 +80,15 @@ void editorHasBeenTouched(bool up) {
     g_doUpdate = up;
 }
 
-void showPositionLabel(EditorUI* self, bool show) {
-    if (BetterEdit::getDisableEditorPos())
-        CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(false);
-    else
-        CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(show);
+// void showPositionLabel(EditorUI* self, bool show) {
+//     if (BetterEdit::getDisableEditorPos())
+//         CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(false);
+//     else
+//         CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(show);
     
-    auto menu = as<CCMenu*>(self->m_pPositionSlider->getChildByTag(SLIDERLABEL_TAG));
-    menu->setVisible(!BetterEdit::getDisablePercentage());
-}
+//     auto menu = as<CCMenu*>(self->m_pPositionSlider->getChildByTag(SLIDERLABEL_TAG));
+//     menu->setVisible(!BetterEdit::getDisablePercentage());
+// }
 
 GDMAKE_HOOK(0x162650)
 void __fastcall LevelEditorLayer_addSpecial(LevelEditorLayer* self, edx_t edx, GameObject* obj) {
@@ -148,15 +148,15 @@ void loadSliderPercent(EditorUI* self) {
 
     g_lastObjectPosX = self->m_pEditorLayer->getLastObjectX();
 
-    self->addChild(
-        CCNodeConstructor<CCLabelBMFont*>()
-            .fromText("x,x", "bigFont.fnt")
-            .scale(.3f)
-            .move(winSize / 2 + CCPoint { -100.0f, 140.0f })
-            .tag(EPOSITION_TAG)
-            .done()
-    );
+    // self->addChild(
+    //     CCNodeConstructor<CCLabelBMFont*>()
+    //         .fromText("x,x", "bigFont.fnt")
+    //         .scale(.3f)
+    //         .move(winSize / 2 + CCPoint { -100.0f, 140.0f })
+    //         .tag(EPOSITION_TAG)
+    //         .done()
+    // );
 
-    showPositionLabel(self, true);
+    // showPositionLabel(self, true);
     updatePercentLabelPosition(self);
 }

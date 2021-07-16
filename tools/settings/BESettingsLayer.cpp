@@ -75,11 +75,17 @@ void BESettingsLayer::setup() {
         "the screen is not being moved",
         BE_SETTING_FUNC_B(FadeOutPercentage)
     );
-    // this->addToggle("Pulse Objects", nullptr, BE_SETTING_FUNC_B(PulseObjectsInEditor));
-    this->addToggle("Disable Position Text", nullptr, BE_SETTING_FUNC_B(DisableEditorPos));
+    this->addToggle("Pulse Objects", nullptr, BE_SETTING_FUNC_B(PulseObjectsInEditor));
+    this->addToggle("No Global Clipboard", nullptr, BE_SETTING_FUNC_B(DisableGlobalClipboard));
+    // this->addToggle("Disable Position Text", nullptr, BE_SETTING_FUNC_B(DisableEditorPos));
     this->addToggle("Disable Zoom Text", nullptr, BE_SETTING_FUNC_B(DisableZoomText));
     this->addToggle("Disable Percentage", nullptr, BE_SETTING_FUNC_B(DisablePercentage));
     this->addToggle("Disable Extra Object Info", nullptr, BE_SETTING_FUNC_B(DisableExtraObjectInfo));
+    this->addToggle(
+        "Disable Favorites Tab",
+        "Requires a restart to apply",
+        BE_SETTING_FUNC_B(DisableFavoritesTab)
+    );
     this->incrementPageCount(true);
     this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
     this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap), "0123456789.");
@@ -94,6 +100,12 @@ void BESettingsLayer::setup() {
         (SEL_MenuHandler)&PauseLayer::sfxSliderChanged,
         FMODAudioEngine::sharedEngine()->getSFXVolume()
     );
+
+    // this->addButton(
+    //     ButtonSprite::create(
+    //         "Default Object Props", 0, 0, "bigFont.fnt", "GJ_button_01.png", 0, .8f
+    //     ), nullptr, true
+    // );
 
     // this->incrementPageCount(true);
     this->addButton(
@@ -342,6 +354,19 @@ void BESettingsLayer::onClose(CCObject* pSender) {
     GameManager::sharedState()->getEditorLayer()->getEditorUI()->updateGridNodeSize();
 
     BrownAlertDelegate::onClose(pSender);
+}
+
+void BESettingsLayer::keyDown(enumKeyCodes key) {
+    switch (key) {
+        case KEY_Left:
+            onPage(m_pPrevPageBtn);
+            break;
+        case KEY_Right:
+            onPage(m_pNextPageBtn);
+            break;
+        default:
+            BrownAlertDelegate::keyDown(key);
+    }
 }
 
 BESettingsLayer* BESettingsLayer::create() {

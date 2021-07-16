@@ -35,6 +35,7 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
 
         void setup() override;
         void onClose(cocos2d::CCObject*);
+        void keyDown(enumKeyCodes) override;
 
         cocos2d::CCPoint getItemPos(bool large = false, bool center = false);
         void incrementPageCount(bool skip = false);

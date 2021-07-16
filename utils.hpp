@@ -25,6 +25,10 @@ class CCNodeConstructor {
             this->node = cocos2d::CCMenu::create();
             return *this;
         }
+        inline CCNodeConstructor<gd::ButtonSprite*> & fromButtonSprite(const char* text, const char* bg, const char* font) {
+            this->node = gd::ButtonSprite::create(text, 0, 0, font, bg, 0, .8f);
+            return *this;
+        }
         inline CCNodeConstructor<T> & fromNode(T node) {
             this->node = node;
             return *this;
