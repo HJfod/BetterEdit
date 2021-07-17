@@ -56,8 +56,8 @@ class EditorUI_CB : public EditorUI {
 
                 auto spr = as<ButtonSprite*>(btn->getNormalImage());
 
-                spr->updateBGImage(g_showUI ? "GJ_button_01.png" : "GJ_button_05.png");
-                spr->setString(g_showUI ? "Show" : "Hide");
+                spr->updateBGImage(g_showUI ? "GJ_button_01.png" : "GJ_button_06.png");
+                spr->setString(g_showUI ? "Hide" : "Show");
             }
         }
 };
@@ -221,13 +221,11 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
 
     g_showUI = show;
 
-    self->m_pCurrentLayerLabel->setVisible(false);
-
-    CATCH_NULL(self->getChildByTag(LAYERINPUT_TAG))->setVisible(show);
-    CATCH_NULL(self->getChildByTag(LAYERINPUTBG_TAG))->setVisible(show);
+    self->m_pTabsMenu->setVisible(show);
     CATCH_NULL(self->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG))->setVisible(show);
     CATCH_NULL(self->m_pCopyBtn->getParent()->getChildByTag(7777))->setVisible(show);
     showGridButtons(self, show);
+    showLayerControls(self, show);
     // showPositionLabel(self, show);
 }
 

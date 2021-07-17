@@ -1,4 +1,5 @@
 #include "BetterEdit.hpp"
+#include "tools/EditorLayerInput/LayerManager.hpp"
 
 using namespace gdmake;
 using namespace gdmake::extra;
@@ -50,6 +51,10 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
         m_pTemplateManager->encodeDataTo(data);
     );
 
+    STEP_SUBDICT(data, "editor-layers",
+        LayerManager::get()->encodeDataTo(data);
+    );
+
     STEP_SUBDICT(data, "presets",
         auto ix = 0u;
         for (auto preset : m_vPresets)
@@ -73,6 +78,10 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
 
     STEP_SUBDICT_NC(data, "templates",
         m_pTemplateManager->dataLoaded(data);
+    );
+
+    STEP_SUBDICT_NC(data, "editor-layers",
+        LayerManager::get()->dataLoaded(data);
     );
 
     STEP_SUBDICT_NC(data, "presets",

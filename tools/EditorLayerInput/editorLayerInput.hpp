@@ -4,6 +4,9 @@
 
 static constexpr const int LAYERINPUT_TAG = 6978;
 static constexpr const int LAYERINPUTBG_TAG = 6977;
+static constexpr const int NEXTFREELAYER_TAG = 7001;
+static constexpr const int LOCKLAYER_TAG = 7002;
+static constexpr const int VIEWLAYERS_TAG = 7003;
 
 class EUITextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
     public:
@@ -30,4 +33,6 @@ class EUITextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
         }
 };
 
+void showLayerControls(EditorUI*, bool);
+void updateEditorLayerInputText(EditorUI*);
 void loadEditorLayerInput(EditorUI*);

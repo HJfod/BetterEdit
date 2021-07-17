@@ -7,6 +7,7 @@
 #include "tools/Favourites/favourite.hpp"
 #include "tools/ContextMenu/ContextMenu.hpp"
 #include "tools/LiveCollab/LiveManager.hpp"
+#include "tools/EditorLayerInput/LayerManager.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     // main entrypoint for your mod.
@@ -46,6 +47,8 @@ GDMAKE_MAIN_HM(hMod) {
     if (!BetterEdit::initGlobal())
         return false;
     if (!LiveManager::initGlobal())
+        return false;
+    if (!LayerManager::initGlobal())
         return false;
     
     loadTemplates();
