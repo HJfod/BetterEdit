@@ -8,6 +8,7 @@
 #include "tools/ContextMenu/ContextMenu.hpp"
 #include "tools/LiveCollab/LiveManager.hpp"
 #include "tools/EditorLayerInput/LayerManager.hpp"
+#include "tools/EditorLayerInput/editorLayerInput.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     // main entrypoint for your mod.
@@ -49,6 +50,9 @@ GDMAKE_MAIN_HM(hMod) {
     if (!LiveManager::initGlobal())
         return false;
     if (!LayerManager::initGlobal())
+        return false;
+
+    if (!loadUpdateVisibilityHook())
         return false;
     
     loadTemplates();

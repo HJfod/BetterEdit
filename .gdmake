@@ -19,5 +19,13 @@
     "submodules/Cocos2d/extensions/libExtensions.lib"
   ],
   "Dlls": null,
-  "Resources": []
+  "Resources": [
+    "resources/BE_eye-on.png",
+    "resources/BE_eye-on-alt.png",
+    "resources/BE_eye-on-thick.png",
+    "resources/BE_eye-on-btn.png",
+    "resources/BE_eye-off.png",
+    "resources/BE_eye-off-c.png",
+    "resources/BE_eye-off-btn.png"
+  ]
 }

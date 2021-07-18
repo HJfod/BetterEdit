@@ -65,12 +65,77 @@ void __fastcall EditorUI_onGoToBaseLayer(gd::EditorUI* self, edx_t edx, cocos2d:
     updateEditorLayerInputText(self);
 }
 
+
+void LevelEditorLayer_updateVisibility() {
+    int opacity;
+    GameObject* obj;
+
+    __asm {
+        mov opacity, eax
+        mov [obj], edi
+    }
+
+    if (opacity < 255) {
+        auto layer = LayerManager::get()->getLayer(obj->m_nEditorLayer);
+
+        if (layer)
+            if (!layer->m_bVisible)
+                opacity = 0;
+            else
+                opacity = layer->m_nOpacity;
+    }
+
+    __asm {
+        mov eax, opacity
+    }
+}
+
+void (*LevelEditorLayer_updateVisibility_retAddr)();
+__declspec(naked) void LevelEditorLayer_updateVisiblity_midHook() {
+    // funny lil stuff
+    // pushad doesn't work because we
+    // want to modify the eax register
+    __asm {
+        push ecx
+        push edx
+        push ebx
+        push esp
+        push ebp
+        push esi
+        push edi
+        pushfd
+        call LevelEditorLayer_updateVisibility
+        popfd
+        pop edi
+        pop esi
+        pop ebp
+        add esp, 0x4
+        pop ebx
+        pop edx
+        pop ecx
+        jmp LevelEditorLayer_updateVisibility_retAddr
+    }
+}
+
+bool loadUpdateVisibilityHook() {
+    if (MH_CreateHook(
+        as<LPVOID>(gd::base + 0x163a2e),
+        as<LPVOID>(LevelEditorLayer_updateVisiblity_midHook),
+        as<LPVOID*>(&LevelEditorLayer_updateVisibility_retAddr)
+    ) != MH_OK) return false;
+
+    return MH_EnableHook(as<LPVOID>(gd::base + 0x163a2e)) == MH_OK;
+}
+
+
 void showLayerControls(EditorUI* self, bool show) {
     self->m_pCurrentLayerLabel->setVisible(false);
 
     CATCH_NULL(self->getChildByTag(LAYERINPUT_TAG))->setVisible(show);
     CATCH_NULL(self->getChildByTag(LAYERINPUTBG_TAG))->setVisible(show);
     CATCH_NULL(self->m_pEditGroupBtn->getParent()->getChildByTag(NEXTFREELAYER_TAG))->setVisible(show);
+    CATCH_NULL(self->m_pEditGroupBtn->getParent()->getChildByTag(LOCKLAYER_TAG))->setVisible(show);
+    CATCH_NULL(self->m_pEditGroupBtn->getParent()->getChildByTag(VIEWLAYERS_TAG))->setVisible(show);
 }
 
 void updateEditorLayerInputText(EditorUI* self) {
@@ -201,4 +266,21 @@ void loadEditorLayerInput(EditorUI* self) {
     );
 
     updateEditorLayerInputText(self);
+}
+
+bool testSelectObjectLayer(GameObject* obj) {
+    auto layer1 = LayerManager::get()->getLayer(obj->m_nEditorLayer);
+    auto layer2 = LayerManager::get()->getLayer(obj->m_nEditorLayer2);
+
+    if (obj->m_nEditorLayer == LevelEditorLayer::get()->m_nCurrentLayer ||
+        obj->m_nEditorLayer2 == LevelEditorLayer::get()->m_nCurrentLayer)
+        return true;
+
+    if (layer1 && (!layer1->m_bVisible || layer1->m_bLocked))
+        return false;
+
+    if (layer2 && (!layer2->m_bVisible || layer2->m_bLocked))
+        return false;
+
+    return true;
 }

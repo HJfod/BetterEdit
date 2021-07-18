@@ -11,6 +11,22 @@ using namespace gd;
 using namespace gdmake;
 using namespace gdmake::extra;
 using namespace cocos2d;
+using namespace cocos2d::extension;
+
+static constexpr const char* inputf_Default =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-_";
+static constexpr const char* inputf_Alphabet =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+static constexpr const char* inputf_AlphabetNoSpaces =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static constexpr const char* inputf_Numeral =
+    "0123456789";
+static constexpr const char* inputf_NumeralSigned =
+    "0123456789-+";
+static constexpr const char* inputf_NumeralFloat =
+    "0123456789.";
+static constexpr const char* inputf_NumeralFloatSigned =
+    "0123456789.-+";
 
 #define CATCH_NULL(x) if (x) x
 

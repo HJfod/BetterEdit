@@ -5,12 +5,14 @@
 
 class LayerManager {
     public:
+        static constexpr const unsigned int default_opacity = 50;
+
         struct Layer {
             int m_nLayerNumber;
             bool m_bLocked = false;
             bool m_bVisible = true;
-            float m_fOpacity = .3f;
-            const char* m_sName = nullptr;
+            int m_nOpacity = default_opacity;
+            std::string m_sName = "";
 
             Layer(int n) : m_nLayerNumber(n) {}
         };
@@ -31,6 +33,7 @@ class LayerManager {
 
         LevelName getLevel();
         Layer * getLayer(int number);
+        Layers getLayers();
 
         static bool initGlobal();
         static LayerManager* get();

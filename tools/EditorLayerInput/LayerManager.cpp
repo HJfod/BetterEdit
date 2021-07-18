@@ -25,6 +25,15 @@ LayerManager::Layer* LayerManager::getLayer(int number) {
     return m_mLayers[lvl][number];
 }
 
+LayerManager::Layers LayerManager::getLayers() {
+    auto lvl = this->getLevel();
+
+    if (!lvl.size())
+        return {};
+
+    return m_mLayers[lvl];
+}
+
 void LayerManager::dataLoaded(DS_Dictionary* data) {}
 
 void LayerManager::encodeDataTo(DS_Dictionary* data) {}

@@ -344,6 +344,13 @@ bool AdvancedFilterLayer::noFilter() {
     return g_pFilter->isEmpty();
 }
 
+bool AdvancedFilterLayer::testSelectObject(GameObject* obj) {
+    if (noFilter())
+        return true;
+    
+    return getFilter()->match(obj);
+}
+
 AdvancedFilterLayer* AdvancedFilterLayer::create(CCMenuItemSpriteExtra* pSender) {
     auto ret = new AdvancedFilterLayer();
 

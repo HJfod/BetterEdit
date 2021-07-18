@@ -36,3 +36,5 @@ class EUITextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
 void showLayerControls(EditorUI*, bool);
 void updateEditorLayerInputText(EditorUI*);
 void loadEditorLayerInput(EditorUI*);
+bool loadUpdateVisibilityHook();
+bool testSelectObjectLayer(GameObject*);

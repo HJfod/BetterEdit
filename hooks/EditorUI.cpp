@@ -45,6 +45,27 @@ void showErrorMessages() {
     std::terminate();
 }
 
+void updateToggleButtonSprite(CCMenuItemSpriteExtra* btn) {
+    auto spr = btn->getNormalImage();
+    spr->retain();
+
+    btn->setNormalImage(
+        CCNodeConstructor()
+            .fromFile(g_showUI ?
+                "BE_eye-on-btn.png" : 
+                "BE_eye-off-btn.png")
+            .scale(spr->getScale())
+            .csize(spr->getContentSize())
+            .done()
+    );
+
+    btn->getNormalImage()->setPosition(spr->getPosition());
+    btn->getNormalImage()->setAnchorPoint(spr->getAnchorPoint());
+    btn->getNormalImage()->setScale(spr->getScale());
+
+    spr->release();
+}
+
 class EditorUI_CB : public EditorUI {
     public:
         void onToggleShowUI(CCObject*) {
@@ -53,11 +74,9 @@ class EditorUI_CB : public EditorUI {
             auto btn = as<CCMenuItemSpriteExtra*>(this->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG));
             if (btn) {
                 btn->setVisible(true);
-
-                auto spr = as<ButtonSprite*>(btn->getNormalImage());
-
-                spr->updateBGImage(g_showUI ? "GJ_button_01.png" : "GJ_button_06.png");
-                spr->setString(g_showUI ? "Hide" : "Show");
+                
+                if (!g_showUI) // it has been updated anyway by showUI
+                    updateToggleButtonSprite(btn);
             }
         }
 };
@@ -184,22 +203,28 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     currentZoomLabel->setZOrder(99999);
     self->addChild(currentZoomLabel);
 
+    CCMenuItemSpriteExtra* toggleBtn;
     self->m_pButton4->getParent()->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
             .fromNode(
                 CCMenuItemSpriteExtra::create(
-                    CCNodeConstructor<ButtonSprite*>()
-                        .fromButtonSprite("Hide", "GJ_button_01.png", "bigFont.fnt")
+                    CCNodeConstructor()
+                        .fromFile("BE_eye-on-btn.png")
                         .scale(.6f)
+                        .exec([](auto t) -> void {
+                            t->setContentSize(t->getScaledContentSize());
+                        })
                         .done(),
                     self,
                     (SEL_MenuHandler)&EditorUI_CB::onToggleShowUI
                 )
             )
             .tag(TOGGLEUI_TAG)
-            .move(-100.0f, 140.0f)
+            .move(-110.0f, 139.0f) // x -100 center
+            .save(&toggleBtn)
             .done()
     );
+    updateToggleButtonSprite(toggleBtn);
 
     loadEditorLayerInput(self);
     setupGroupFilterButton(self);
@@ -226,6 +251,10 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     CATCH_NULL(self->m_pCopyBtn->getParent()->getChildByTag(7777))->setVisible(show);
     showGridButtons(self, show);
     showLayerControls(self, show);
+    if (show)
+        updateToggleButtonSprite(as<CCMenuItemSpriteExtra*>(
+            self->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG)
+        ));
     // showPositionLabel(self, show);
 }
 

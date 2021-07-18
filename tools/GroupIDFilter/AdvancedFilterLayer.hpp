@@ -371,5 +371,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
         static ObjFilter* getFilter();
         static bool noFilter();
 
+        static bool testSelectObject(GameObject*);
+
         static AdvancedFilterLayer* create(gd::CCMenuItemSpriteExtra* pSender = nullptr);
 };
