@@ -156,8 +156,8 @@ public:
             g_hasResetObjectsScale = false;
 
             // incredible
-            const auto arr = m_pEditorLayer->m_pSpriteBatch29->getChildren();
-            const auto arr2 = m_pEditorLayer->m_pSpriteBatch28->getChildren();
+            const auto arr = m_pEditorLayer->m_pSpriteBatch28->getChildren();
+            const auto arr2 = m_pEditorLayer->m_pSpriteBatch27->getChildren();
 
             auto fmod = gd::FMODAudioEngine::sharedEngine();
             auto pulse = fmod->m_fPulse1 + fmod->m_fPulse2 + fmod->m_fPulse3;
