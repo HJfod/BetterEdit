@@ -39,10 +39,19 @@ void setupGroupFilterButton(gd::EditorUI* self) {
         (SEL_MenuHandler)&EditorUI_CB::onShowGroupFilter
     );
 
-    btn->setPosition(
-        self->m_pDeleteFilterStatic->getPositionX() + 40.0f,
-        self->m_pDeleteFilterStatic->getPositionY()
-    );
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    auto ratio = winSize.width / winSize.height;
+
+    if (ratio > 1.7f)
+        btn->setPosition(
+            self->m_pDeleteFilterStatic->getPositionX() + 40.0f,
+            self->m_pDeleteFilterStatic->getPositionY()
+        );
+    else
+        btn->setPosition(
+            self->m_pDeleteFilterDetails->getPositionX() - 40.0f,
+            self->m_pDeleteFilterDetails->getPositionY()
+        );
     btn->setTag(0x80085);
 
     self->m_pDeleteMenu->addChild(btn, 100);

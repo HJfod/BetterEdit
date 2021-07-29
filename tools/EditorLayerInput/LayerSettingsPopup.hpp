@@ -5,20 +5,20 @@
 
 class LayerViewPopup;
 
-class LayerEditPopup : public BrownAlertDelegate {
+class LayerSettingsPopup : public BrownAlertDelegate {
     protected:
-        LayerManager::Layer* m_pELayer;
-        InputNode* m_pNameInput;
-        InputNode* m_pOpacityInput;
+        Slider* m_pOpacitySlider;
+        CCLabelBMFont* m_pOpacityLabel;
         LayerViewPopup* m_pViewPopup;
 
         void setup() override;
         
         void onClose(CCObject*) override;
         void onReset(CCObject*);
+        void sliderChanged(CCObject*);
 
         friend class LayerViewPopup;
         
     public:
-        static LayerEditPopup* create(LayerViewPopup*, LayerManager::Layer*);
+        static LayerSettingsPopup* create(LayerViewPopup*);
 };

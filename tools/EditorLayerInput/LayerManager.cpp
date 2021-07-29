@@ -2,7 +2,7 @@
 
 LayerManager* g_manager;
 
-LayerManager::LevelName LayerManager::getLevel() {
+LayerManager::LevelName LayerManager::getLevelName() {
     if (!LevelEditorLayer::get()) {
         return "";
     }
@@ -13,25 +13,27 @@ LayerManager::LevelName LayerManager::getLevel() {
 LayerManager::Layer* LayerManager::getLayer(int number) {
     if (number < 0) return nullptr;
     if (number > static_cast<int>(max_layer_num)) return nullptr;
-
+    
     auto lvl = this->getLevel();
+
+    if (!lvl) return nullptr;
+
+    if (!lvl->m_mLayers[number])
+        lvl->m_mLayers[number] = new Layer(number);
+
+    return lvl->m_mLayers[number];
+}
+
+LayerManager::Level * LayerManager::getLevel() {
+    auto lvl = this->getLevelName();
 
     if (!lvl.size())
         return nullptr;
 
-    if (!m_mLayers[lvl][number])
-        m_mLayers[lvl][number] = new Layer(number);
+    if (!m_mLevels.count(lvl))
+        m_mLevels.insert({ lvl, new Level() });
 
-    return m_mLayers[lvl][number];
-}
-
-LayerManager::Layers LayerManager::getLayers() {
-    auto lvl = this->getLevel();
-
-    if (!lvl.size())
-        return {};
-
-    return m_mLayers[lvl];
+    return m_mLevels[lvl];
 }
 
 void LayerManager::dataLoaded(DS_Dictionary* data) {}

@@ -4,8 +4,14 @@
 GDMAKE_HOOK(0x793b0)
 void __fastcall EditorUI_updateObjectInfoLabel(gd::EditorUI* self) {
     GDMAKE_ORIG_V(self);
-
-    self->m_pObjectInfoLabel->setPosition(90, 275);
+    
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    auto ratio = winSize.width / winSize.height;
+    
+    if (ratio > 1.6f)
+        self->m_pObjectInfoLabel->setPosition(90, 275);
+    else
+        self->m_pObjectInfoLabel->setPosition(120, 275);
 
     if (BetterEdit::getDisableExtraObjectInfo())
         return;

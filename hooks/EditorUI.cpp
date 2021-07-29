@@ -6,6 +6,7 @@
 #include "../tools/LevelPercent/levelPercent.hpp"
 #include "../tools/GlobalClipboard/clipboardHook.hpp"
 #include "../tools/EditorLayerInput/editorLayerInput.hpp"
+#include "../tools/RepeatPaste/repeatPaste.hpp"
 #include <thread>
 
 using namespace gdmake;
@@ -25,24 +26,20 @@ bool g_hasResetObjectsScale = true;
 // you dont really have to patch it back to the original, game works fine with
 // the patch always on
 
-void showErrorMessages() {
-    std::cout << "thread!\n";
+CCPoint getShowButtonPosition(EditorUI* self) {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    auto ratio = winSize.width / winSize.height;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-    std::cout << "showy\n";
-
-    for (auto errMsg : BetterEdit::sharedState()->getErrors())
-        gd::FLAlertLayer::create(
-            nullptr,
-            "Error",
-            "OK", nullptr,
-            errMsg
-        )->show();
-
-    std::cout << "bye\n";
+    if (ratio > 1.5f)
+        return {
+            self->m_pTrashBtn->getPositionX() + 40.0f,
+            self->m_pTrashBtn->getPositionY()
+        };
     
-    std::terminate();
+    return {
+        self->m_pPlaybackBtn->getPositionX() + 45.0f,
+        self->m_pPlaybackBtn->getPositionY()
+    };
 }
 
 void updateToggleButtonSprite(CCMenuItemSpriteExtra* btn) {
@@ -81,32 +78,38 @@ class EditorUI_CB : public EditorUI {
         }
 };
 
+bool touchIntersectsInput(CCNode* input, CCTouch* touch) {
+    if (!input)
+        return false;
+
+    auto inp = reinterpret_cast<gd::CCTextInputNode*>(input);
+    auto isize = inp->getScaledContentSize();
+
+    auto rect = cocos2d::CCRect {
+        inp->getPositionX() - isize.width / 2,
+        inp->getPositionY() - isize.height / 2,
+        isize.width,
+        isize.height
+    };
+
+    if (!rect.containsPoint(input->getParent()->convertTouchToNodeSpace(touch))) {
+        reinterpret_cast<gd::CCTextInputNode*>(input)->getTextField()->detachWithIME();
+        return false;
+    } else
+        return true;
+}
+
 GDMAKE_HOOK(0x907b0)
 bool __fastcall EditorUI_ccTouchBegan(gd::EditorUI* self, edx_t edx, cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
     auto self_ = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self) - 0xEC);
-    auto i = self_->getChildByTag(LAYERINPUT_TAG);
-
-    editorHasBeenTouched(true);
 
     g_bHoldingDownTouch = true;
     
-    if (i) {
-        auto inp = reinterpret_cast<gd::CCTextInputNode*>(i);
-        auto isize = inp->getScaledContentSize();
+    if (touchIntersectsInput(self_->getChildByTag(LAYERINPUT_TAG), touch))
+        return true;
+    if (touchIntersectsInput(getGridButtonParent(self_)->getChildByTag(ZOOMINPUT_TAG), touch))
+        return true;
 
-        auto rect = cocos2d::CCRect {
-            inp->getPositionX() - isize.width / 2,
-            inp->getPositionY() - isize.height / 2,
-            isize.width,
-            isize.height
-        };
-
-        if (!rect.containsPoint(touch->getLocation()))
-            reinterpret_cast<gd::CCTextInputNode*>(i)->getTextField()->detachWithIME();
-        else
-            return true;
-    }
-    
     if (pointIntersectsControls(self_, touch, event))
         return true;
     
@@ -127,7 +130,7 @@ GDMAKE_HOOK(0x76090)
 void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
     saveClipboard(self);
 
-    editorHasBeenTouched(false);
+    resetSliderPercent(self);
 
     return GDMAKE_ORIG_V(self);
 }
@@ -220,7 +223,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
                 )
             )
             .tag(TOGGLEUI_TAG)
-            .move(-110.0f, 139.0f) // x -100 center
+            .move(getShowButtonPosition(self))
             .save(&toggleBtn)
             .done()
     );
@@ -231,6 +234,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     loadGridButtons(self);
     loadSliderPercent(self);
     loadClipboard(self);
+    loadPasteRepeatButton(self);
     
     BetterEdit::sharedState()->m_bHookConflictFound = false;
 
@@ -238,6 +242,13 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     self->schedule(schedule_selector(EditorUIPulse::updateObjectsPulse));
 
     return true;
+}
+
+GDMAKE_HOOK(0x78280)
+void __fastcall EditorUI_updateButtons(EditorUI* self) {
+    GDMAKE_ORIG_V(self);
+
+    updatePasteRepeatButton(self);
 }
 
 GDMAKE_HOOK(0x87180)
@@ -293,6 +304,9 @@ void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
     auto kb = cocos2d::CCDirector::sharedDirector()->getKeyboardDispatcher();
     
     auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xf8);
+
+    if (!BetterEdit::getEnableControlA())
+        return GDMAKE_ORIG_V(self_, edx, key);
 
     if (key == enumKeyCodes::KEY_A && kb->getControlKeyPressed())
         self->selectAll();

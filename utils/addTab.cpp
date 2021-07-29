@@ -58,7 +58,14 @@ void __fastcall EditorUI_setupCreateMenu(gd::EditorUI* self) {
     patchBytes(0x92044, { 0xb9, static_cast<uint8_t>(self->m_pTabsArray->count()) });
     patchBytes(0x9207a, { 0x83, 0xf8, static_cast<uint8_t>(self->m_pTabsArray->count() - 1) });
 
-    self->m_pTabsMenu->alignItemsHorizontallyWithPadding(-3.0f);
+
+    auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
+    auto ratio = winSize.width / winSize.height;
+
+    if (ratio > 1.5f)
+        self->m_pTabsMenu->alignItemsHorizontallyWithPadding(-3.0f);
+    else
+        self->m_pTabsMenu->alignItemsHorizontallyWithPadding(-1.0f);
 
     self->m_pTabsMenu->setPosition(pos);
 }

@@ -3,6 +3,56 @@
 #include <string>
 #include <GDMake.h>
 
+using namespace gdmake;
+using namespace gdmake::extra;
+
+static constexpr const char* inputf_Default =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,/\\{}[]()&%!?\"#¤$€:;'*^¨~+<>|.-_";
+static constexpr const char* inputf_Alphabet =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+static constexpr const char* inputf_AlphabetNoSpaces =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static constexpr const char* inputf_Numeral =
+    "0123456789";
+static constexpr const char* inputf_NumeralSigned =
+    "0123456789-+";
+static constexpr const char* inputf_NumeralFloat =
+    "0123456789.";
+static constexpr const char* inputf_NumeralFloatSigned =
+    "0123456789.-+";
+
+template<typename E, typename T>
+static constexpr E enum_cast(T type) { return static_cast<E>(reinterpret_cast<int>(type)); }
+
+static std::unordered_map<uintptr_t, std::vector<uint8_t>> g_patchedBytes;
+
+static std::vector<uint8_t> patch(uintptr_t addr, std::vector<uint8_t> bytes, bool hardOverwrite = false) {
+    if (!g_patchedBytes[addr].size())
+        g_patchedBytes[addr] = patchBytesEx(addr, bytes, hardOverwrite);
+
+    return g_patchedBytes[addr];
+}
+
+static void unpatch(uintptr_t addr, bool hardOverwrite = false) {
+    if (addr == 0) {
+        for (auto const& [key, val] : g_patchedBytes) {
+            if (val.size())
+                patchBytesEx(key, val, hardOverwrite);
+        
+            g_patchedBytes[key] = {};
+        }
+        return;
+    }
+
+    if (g_patchedBytes[addr].size())
+        patchBytes(addr, g_patchedBytes[addr]);
+    
+    g_patchedBytes[addr] = {};
+}
+
+#define CATCH_NULL(x) if (x) x
+
+
 template<class T = cocos2d::CCSprite*>
 class CCNodeConstructor {
     protected:
@@ -41,8 +91,16 @@ class CCNodeConstructor {
             node->setFlipY(flip);
             return *this;
         }
+        inline CCNodeConstructor<T> & visible(bool show) {
+            node->setVisible(show);
+            return *this;
+        }
         inline CCNodeConstructor<T> & z(int zix) {
             node->setZOrder(zix);
+            return *this;
+        }
+        inline CCNodeConstructor<T> & limit(float width, float scale, float mscale) {
+            node->limitLabelWidth(width, scale, mscale);
             return *this;
         }
         inline CCNodeConstructor<T> & tag(int tag) {
@@ -83,6 +141,14 @@ class CCNodeConstructor {
         }
         inline CCNodeConstructor<T> & color(cocos2d::ccColor3B color) {
             node->setColor(color);
+            return *this;
+        }
+        inline CCNodeConstructor<T> & text(const char* text) {
+            node->setString(text);
+            return *this;
+        }
+        inline CCNodeConstructor<T> & delegate(cocos2d::CCObject* pDelegate) {
+            node->setDelegate(pDelegate);
             return *this;
         }
         inline CCNodeConstructor<T> & add(cocos2d::CCNode* anode) {
@@ -168,8 +234,8 @@ inline int strToInt(const char* str, bool* is = nullptr) {
     return isStr ? std::atoi(str) : -1;
 }
 
-inline std::vector<unsigned char> intToBytes(int paramInt) {
-    std::vector<unsigned char> arrayOfByte(4);
+inline std::vector<uint8_t> intToBytes(int paramInt) {
+    std::vector<uint8_t> arrayOfByte(4);
     for (int i = 0; i < 4; i++)
         arrayOfByte[3 - i] = (paramInt >> (i * 8));
     

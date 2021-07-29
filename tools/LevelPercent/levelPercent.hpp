@@ -2,5 +2,5 @@
 
 void loadSliderPercent(EditorUI*);
 void updatePercentLabelPosition(EditorUI*);
-void editorHasBeenTouched(bool); // crazen
+void resetSliderPercent(EditorUI*);
 // void showPositionLabel(EditorUI*, bool);

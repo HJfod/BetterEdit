@@ -13,27 +13,10 @@ using namespace gdmake::extra;
 using namespace cocos2d;
 using namespace cocos2d::extension;
 
-static constexpr const char* inputf_Default =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-_";
-static constexpr const char* inputf_Alphabet =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
-static constexpr const char* inputf_AlphabetNoSpaces =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-static constexpr const char* inputf_Numeral =
-    "0123456789";
-static constexpr const char* inputf_NumeralSigned =
-    "0123456789-+";
-static constexpr const char* inputf_NumeralFloat =
-    "0123456789.";
-static constexpr const char* inputf_NumeralFloatSigned =
-    "0123456789.-+";
-
-#define CATCH_NULL(x) if (x) x
-
 #pragma region macros (ew)
 #define BE_SETTINGS(__macro__)                                                                  \
     __macro__(ScaleSnap, float, .25f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.01f, 1.0f)       \
-    __macro__(GridSize, float, 30.0f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 7.5f, 120.0f)      \
+    __macro__(GridSize, float, 30.0f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.9375f, 120.0f)   \
     __macro__(PercentageAccuracy, int, 0, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 0, 10)       \
     __macro__(GridSizeEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(AlwaysUseCustomGridSize, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)       \
@@ -41,12 +24,18 @@ static constexpr const char* inputf_NumeralFloatSigned =
     __macro__(DisableMouseZoomMove, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
     __macro__(FadeOutPercentage, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(PulseObjectsInEditor, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
+    __macro__(RotateSawsInEditor, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
     __macro__(DisableEditorPos, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)              \
     __macro__(DisableZoomText, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(DisablePercentage, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(DisableExtraObjectInfo, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
     __macro__(DisableFavoritesTab, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
     __macro__(DisableGlobalClipboard, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
+    __macro__(ShowAllLayers, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                 \
+    __macro__(EnableControlA, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                \
+    __macro__(BypassObjectLimit, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
+    __macro__(UseOldProgressBar, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
+    __macro__(DontRepeatPaste, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
 
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \

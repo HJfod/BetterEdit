@@ -31,9 +31,9 @@ void __fastcall GameObject_duplicateAttributes(gd::GameObject* dest, edx_t edx, 
     if (states->count(PasteLayer::Rotation))        dest->setRotation(src->getRotation());
     if (states->count(PasteLayer::Scale))           dest->updateCustomScale(src->getScale());
     if (states->count(PasteLayer::ZOrder)) {
-        auto z = src->m_nZOrder;
+        auto z = src->m_nGameZOrder;
         if (!z) z = src->m_nDefaultZOrder;
-        dest->m_nZOrder = z;
+        dest->m_nGameZOrder = z;
     }
     if (states->count(PasteLayer::ZLayer)) {
         auto z = src->m_nZLayer;

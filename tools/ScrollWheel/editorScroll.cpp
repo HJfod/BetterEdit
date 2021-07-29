@@ -36,6 +36,9 @@ void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, 
 
             mpos = mpos - winSize / 2; // relative to window centre
 
+            if (amt > 0.0f)
+                mpos = -mpos;
+
             self->m_pEditorLayer->getObjectLayer()->setPosition(
                 self->m_pEditorLayer->getObjectLayer()->getPosition() - mpos / max(zoom, 5.0f)
             );

@@ -52,9 +52,9 @@ class GJScaleControl_CB : public gd::GJScaleControl {
                 ));
             
             if (std->m_bLockPosEnabled)
-                patchBytes(0x8f2f9, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+                patch(0x8f2f9, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
             else
-                patchBytes(0x8f2f9, { 0x56, 0xe8, 0xb1, 0xea, 0xff, 0xff });
+                unpatch(0x8f2f9);
         }
 
         void onUnlockScale(cocos2d::CCObject* pSender) {

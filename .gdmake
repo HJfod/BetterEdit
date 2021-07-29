@@ -26,6 +26,11 @@
     "resources/BE_eye-on-btn.png",
     "resources/BE_eye-off.png",
     "resources/BE_eye-off-c.png",
-    "resources/BE_eye-off-btn.png"
+    "resources/BE_eye-off-btn.png",
+    "resources/BE_edit_layer_btn.png",
+    "resources/BE_cursor.png",
+    "resources/BE_grid-icon.png",
+    "resources/BE_grid-icon-alt.png",
+    "resources/BE_0_objs.png"
   ]
 }

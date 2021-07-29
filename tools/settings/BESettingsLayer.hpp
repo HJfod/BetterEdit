@@ -47,7 +47,7 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
             BE_Callback cb, 
             std::string const& filter = "0123456789"
         );
-        void addToggle(const char* text, const char* desc, bool value, BE_Callback_B cb);
+        void addToggle(const char* text, const char* desc, bool value, BE_Callback_B cb, bool experimental = false);
         void addSlider(const char* text, cocos2d::SEL_MenuHandler onChange, float val = 0.0f);
         cocos2d::CCLabelBMFont* addTitle(const char* text, const char* font = "goldFont.fnt");
         cocos2d::CCLabelBMFont* addSubtitle(const char* text, bool centered = false);
@@ -59,6 +59,7 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
         void textChanged(gd::CCTextInputNode*) override;
 
         void onShowAccount(cocos2d::CCObject*);
+        void onURL(cocos2d::CCObject*);
 
     public:
         static BESettingsLayer* create();

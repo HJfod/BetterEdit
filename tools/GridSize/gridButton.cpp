@@ -1,5 +1,6 @@
 #include "gridButton.hpp"
 #include "../../BetterEdit.hpp"
+#include <InputNode.hpp>
 
 using namespace gd;
 using namespace gdmake;
@@ -8,6 +9,34 @@ using namespace cocos2d;
 
 static constexpr const int ZOOMIN_TAG = 8001;
 static constexpr const int ZOOMOUT_TAG = 8002;
+
+CCPoint getGridButtonPosition(EditorUI* self, int which) {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    auto ratio = winSize.width / winSize.height;
+
+    auto pOptionsBtn = getChild<CCNode*>(self->m_pCopyBtn->getParent(), 1);
+
+    if (ratio > 1.6f)
+        return {
+            pOptionsBtn->getPositionX() - 55.0f + which * 22.0f,
+            pOptionsBtn->getPositionY()
+        };
+    
+    return {
+        self->m_pLinkBtn->getPositionX() + 35.0f,
+        (self->m_pLinkBtn->getPositionY() + self->m_pUnlinkBtn->getPositionY()) / 2.0f + which * 18.0f
+    };
+}
+
+CCMenu* getGridButtonParent(EditorUI* self) {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    auto ratio = winSize.width / winSize.height;
+
+    if (ratio > 1.6f)
+        return as<CCMenu*>(self->m_pCopyBtn->getParent());
+    
+    return as<CCMenu*>(self->m_pLinkBtn->getParent());
+}
 
 class EditorUI_CB : public EditorUI {
     public:
@@ -28,22 +57,64 @@ class EditorUI_CB : public EditorUI {
             this->m_pEditorLayer->updateOptions();
 
             this->updateGridNodeSize();
+
+            CATCH_NULL(as<CCTextInputNode*>(getGridButtonParent(this)->getChildByTag(ZOOMINPUT_TAG)))
+                ->setString(BetterEdit::sharedState()->getGridSizeAsString().c_str());
+        }
+};
+
+class GridInputDelegate : public CCNode, public TextInputDelegate {
+    public:
+        void textChanged(CCTextInputNode* input) override {
+            auto ui = LevelEditorLayer::get()->getEditorUI();
+            auto size = 30.0f;
+
+            if (input->getString() && strlen(input->getString()))
+                try { size = std::stof(input->getString()); }
+                catch (...) {}
+            
+            BetterEdit::sharedState()->setGridSize(size);
+            if (!BetterEdit::sharedState()->getAlwaysUseCustomGridSize())
+                BetterEdit::sharedState()->setGridSizeEnabled(size != 30.0f);
+            else
+                BetterEdit::sharedState()->setGridSizeEnabled(true);
+
+            GameManager::sharedState()->setGameVariable("0038", true);
+            ui->m_pEditorLayer->updateOptions();
+
+            ui->updateGridNodeSize();
+        }
+
+        static GridInputDelegate* create() {
+            auto pRet = new GridInputDelegate();
+
+            if (pRet && pRet->init()) {
+                pRet->autorelease();
+                return pRet;
+            }
+
+            CC_SAFE_DELETE(pRet);
+            return nullptr;
         }
 };
 
 void showGridButtons(EditorUI* self, bool show) {
-    CATCH_NULL(self->m_pButton4->getParent()->getChildByTag(ZOOMIN_TAG))->setVisible(show);
-    CATCH_NULL(self->m_pButton4->getParent()->getChildByTag(ZOOMOUT_TAG))->setVisible(show);
+    CATCH_NULL(getGridButtonParent(self)->getChildByTag(ZOOMIN_TAG))->setVisible(show);
+    CATCH_NULL(getGridButtonParent(self)->getChildByTag(ZOOMOUT_TAG))->setVisible(show);
+    CATCH_NULL(getGridButtonParent(self)->getChildByTag(ZOOMINPUT_TAG))->setVisible(show);
 }
 
 void loadGridButtons(EditorUI* self) {
-    self->m_pButton4->getParent()->addChild(
+    auto d = GridInputDelegate::create();
+    self->addChild(d);
+
+    getGridButtonParent(self)->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
             .fromNode(
                 CCMenuItemSpriteExtra::create(
                     CCNodeConstructor()
                         .fromFrameName("GJ_zoomInBtn_001.png")
-                        .scale(.6f)
+                        .scale(.35f)
                         .done(),
                     self,
                     (SEL_MenuHandler)&EditorUI_CB::zoomGrid
@@ -51,16 +122,31 @@ void loadGridButtons(EditorUI* self) {
             )
             .udata(1)
             .tag(ZOOMIN_TAG)
-            .move(175.0f, 140.0f)
+            .move(getGridButtonPosition(self, 1))
             .done()
     );
-    self->m_pButton4->getParent()->addChild(
+    getGridButtonParent(self)->addChild(
+        CCNodeConstructor<CCTextInputNode*>()
+            .fromNode(CCTextInputNode::create("30", self, "bigFont.fnt", 60.0f, 30.0f))
+            .scale(.5f)
+            .text(BetterEdit::getGridSizeAsString().c_str())
+            .exec([d](CCTextInputNode* i) -> void {
+                i->setAllowedChars(inputf_NumeralFloat);
+                i->setAnchorPoint({ 0, 0 });
+                i->setLabelPlaceholderColor({ 150, 150, 150 });
+                i->setDelegate(d);
+            })
+            .tag(ZOOMINPUT_TAG)
+            .move(getGridButtonPosition(self, 0))
+            .done()
+    );
+    getGridButtonParent(self)->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
             .fromNode(
                 CCMenuItemSpriteExtra::create(
                     CCNodeConstructor()
                         .fromFrameName("GJ_zoomOutBtn_001.png")
-                        .scale(.6f)
+                        .scale(.35f)
                         .done(),
                     self,
                     (SEL_MenuHandler)&EditorUI_CB::zoomGrid
@@ -68,7 +154,7 @@ void loadGridButtons(EditorUI* self) {
             )
             .udata(0)
             .tag(ZOOMOUT_TAG)
-            .move(145.0f, 140.0f)
+            .move(getGridButtonPosition(self, -1))
             .done()
     );
 }

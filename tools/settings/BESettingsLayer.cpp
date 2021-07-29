@@ -19,7 +19,7 @@ int g_nSettingsPage = 0;
     addButton(                                                  \
         CCNodeConstructor<CCLabelBMFont*>()                     \
             .fromText(name, "goldFont.fnt")                     \
-            .scale(.75f)                                        \
+            .limit(this->m_pLrSize.width / 2 - 64.0f, .75f, .1f)\
             .done(),                                            \
         (SEL_MenuHandler)&BESettingsLayer::onShowAccount,       \
         false                                                   \
@@ -32,7 +32,7 @@ void BESettingsLayer::setup() {
         (SEL_MenuHandler)&BESettingsLayer::onPage
     );
     this->m_pPrevPageBtn->setUserData(as<void*>(-1));
-    this->m_pPrevPageBtn->setPosition(- this->m_pLrSize.width / 2 - 64.0f, 0.0f);
+    this->m_pPrevPageBtn->setPosition(- this->m_pLrSize.width / 2 - 40.0f, 0.0f);
     this->m_pButtonMenu->addChild(this->m_pPrevPageBtn, 150);
     this->m_nCurrentPage = g_nSettingsPage;
 
@@ -45,7 +45,7 @@ void BESettingsLayer::setup() {
         (SEL_MenuHandler)&BESettingsLayer::onPage
     );
     this->m_pNextPageBtn->setUserData(as<void*>(1));
-    this->m_pNextPageBtn->setPosition(this->m_pLrSize.width / 2 + 64.0f, 0.0f);
+    this->m_pNextPageBtn->setPosition(this->m_pLrSize.width / 2 + 40.0f, 0.0f);
     this->m_pButtonMenu->addChild(this->m_pNextPageBtn, 150);
 
     this->addToggle(
@@ -75,9 +75,15 @@ void BESettingsLayer::setup() {
         "the screen is not being moved",
         BE_SETTING_FUNC_B(FadeOutPercentage)
     );
-    this->addToggle("Pulse Objects", nullptr, BE_SETTING_FUNC_B(PulseObjectsInEditor));
+    this->addToggle("Pulse Objects", nullptr, BE_SETTING_FUNC_B(PulseObjectsInEditor), true);
+    this->addToggle("Rotate Saws", nullptr, BE_SETTING_FUNC_B(RotateSawsInEditor), true);
     this->addToggle("No Global Clipboard", nullptr, BE_SETTING_FUNC_B(DisableGlobalClipboard));
     // this->addToggle("Disable Position Text", nullptr, BE_SETTING_FUNC_B(DisableEditorPos));
+    this->addToggle(
+        "Enable Ctrl + A",
+        "Pressing Ctrl + A selects all objects",
+        BE_SETTING_FUNC_B(EnableControlA)
+    );
     this->addToggle("Disable Zoom Text", nullptr, BE_SETTING_FUNC_B(DisableZoomText));
     this->addToggle("Disable Percentage", nullptr, BE_SETTING_FUNC_B(DisablePercentage));
     this->addToggle("Disable Extra Object Info", nullptr, BE_SETTING_FUNC_B(DisableExtraObjectInfo));
@@ -85,6 +91,24 @@ void BESettingsLayer::setup() {
         "Disable Favorites Tab",
         "Requires a restart to apply",
         BE_SETTING_FUNC_B(DisableFavoritesTab)
+    );
+    this->addToggle(
+        "Bypass Object Limit",
+        "Disables the 80k Object Limit and 100 Custom Object Limit",
+        BE_SETTING_FUNC_B(BypassObjectLimit)
+    );
+    this->addToggle(
+        "Use Old Progress Bar",
+        "Reset the <co>Position Slider's</c> behaviour back to GD's original one\n\n "
+        "(<cl>BetterEdit</c> makes the Slider relative to the level's size)",
+        BE_SETTING_FUNC_B(UseOldProgressBar)
+    );
+    this->addToggle(
+        "Don't Repeat Paste",
+        "<cy>Paste Repeating</c> means that when using <co>Copy + Paste</c>, "
+        "actions such as moving & incrementing trigger targets are automatically "
+        "repeated on the next object",
+        BE_SETTING_FUNC_B(DontRepeatPaste)
     );
     this->incrementPageCount(true);
     this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
@@ -122,6 +146,30 @@ void BESettingsLayer::setup() {
     this->USER_LINK("Figment", 107269);
     this->USER_LINK("cos8oih", 4504713);
     this->USER_LINK("Brittank88", 93792);
+    this->USER_LINK("Alphalaneous", 0x116147);
+    this->USER_LINK("Zidnes", 0x42f5cd);
+    this->addTitle("Special Thanks (Part 2):", "bigFont.fnt")->setScale(.6f);
+    this->USER_LINK("Absolute", 0x5243ef);
+    this->USER_LINK("Adaf", 0x55b039);
+    this->USER_LINK("RobTop", 71);
+    this->USER_LINK("PoweredByPie", 0x2beddd);
+    this->USER_LINK("GDColon", 106255);
+    this->addButton(
+        CCNodeConstructor<CCLabelBMFont*>()
+            .fromText("And You :)", "goldFont.fnt")
+            .limit(this->m_pLrSize.width / 2 - 64.0f, .75f, .1f)
+            .done(),
+        (SEL_MenuHandler)&BESettingsLayer::onURL,
+        false
+    )->setUserObject(CCString::create("https://www.youtube.com/watch?v=4TnAKurylA8"));
+    this->addButton(
+        CCNodeConstructor<ButtonSprite*>()
+            .fromButtonSprite("Support Server", "GJ_button_05.png", "goldFont.fnt")
+            .scale(.75f)
+            .done(),
+        (SEL_MenuHandler)&BESettingsLayer::onURL,
+        true
+    )->setUserObject(CCString::create("https://discord.gg/K9Kuh3hzTC"));
 }
 
 
@@ -261,7 +309,13 @@ CCMenuItemSpriteExtra* BESettingsLayer::addButton(CCNode* sprite, SEL_MenuHandle
     return btn;
 }
 
-void BESettingsLayer::addToggle(const char* text, const char* desc, bool value, BE_Callback_B cb) {
+void BESettingsLayer::addToggle(
+    const char* text,
+    const char* desc,
+    bool value,
+    BE_Callback_B cb,
+    bool experimental
+) {
     auto toggle = CCMenuItemToggler::createWithStandardSprites(
         this,
         (SEL_MenuHandler)&BESettingsLayer::onToggle,
@@ -294,6 +348,32 @@ void BESettingsLayer::addToggle(const char* text, const char* desc, bool value, 
 
         this->m_pButtonMenu->addChild(infoButton);
         this->addItem(infoButton);
+    }
+
+    if (experimental) {
+        auto eLabel = CCMenuItemSpriteExtra::create(
+            CCNodeConstructor<CCLabelBMFont*>()
+                .fromText("*", "bigFont.fnt")
+                .color({ 255, 80, 0 })
+                .scale(.7f)
+                .done(),
+            this,
+            (SEL_MenuHandler)&BESettingsLayer::onInfo
+        );
+
+        eLabel->setPosition(
+            x + 20.0f + label->getScaledContentSize().width,
+            y + 2.0f
+        );
+        eLabel->setUserObject(CCString::create(
+            "<cr>Warning</c>\n\n "
+            "This feature is <co>experimental</c>, and may contain "
+            "<cy>bugs</c> ranging from <cp>visual glitches</c> to potentially <cl>crashing "
+            "the game</c>.\n\n <cc>Proceed at your own risk!</c>"
+        ));
+
+        this->m_pButtonMenu->addChild(eLabel);
+        this->addItem(eLabel);
     }
 
     this->m_pButtonMenu->addChild(toggle);
@@ -347,7 +427,17 @@ void BESettingsLayer::textChanged(CCTextInputNode* input) {
 }
 
 void BESettingsLayer::onShowAccount(CCObject* pSender) {
-    ProfilePage::create(as<int>(as<CCNode*>(pSender)->getUserData()), true)->show();
+    if (as<CCNode*>(pSender)->getUserData())
+        ProfilePage::create(as<int>(as<CCNode*>(pSender)->getUserData()), true)->show();
+}
+
+void BESettingsLayer::onURL(CCObject* pSender) {
+    ShellExecuteA(
+        0, 0,
+        as<CCString*>(as<CCNode*>(pSender)->getUserObject())->getCString(),
+        0, 0 ,
+        SW_SHOW
+    );
 }
 
 void BESettingsLayer::onClose(CCObject* pSender) {

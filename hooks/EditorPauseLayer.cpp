@@ -5,13 +5,21 @@
 #include "../tools/AutoColorTriggers/autoCT.hpp"
 #include "../tools/LevelPercent/levelPercent.hpp"
 #include "../tools/IDRemap/remapHook.hpp"
+#include "../tools/PasteString/loadPasteButton.hpp"
+#include "../tools/RotateSaws/rotateSaws.hpp"
 
 using namespace gdmake;
+
+bool g_bRotateSaws = false;
 
 class EditorPauseLayer_CB : public gd::EditorPauseLayer {
     public:
         void onBESettings(cocos2d::CCObject* pSender) {
             BESettingsLayer::create()->show();
+        }
+
+        void onRotateSaws(CCObject* pSender) {
+            g_bRotateSaws = !as<CCMenuItemToggler*>(pSender)->isToggled();
         }
 };
 
@@ -26,6 +34,34 @@ void __fastcall EditorPauseLayer_keyDown(EditorPauseLayer* self, edx_t edx, enum
 GDMAKE_HOOK(0x74fe0)
 void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
+
+    for (auto const& addr : std::initializer_list<int> {
+        0x73169,
+        0x856A4, 
+        0x87B17,
+        0x87BC7,
+        0x87D95,
+        0x880F4,
+        0x160B06,
+    })
+        if (BetterEdit::getBypassObjectLimit())
+            patch(addr, { 0xff, 0xff, 0xff, 0x7f });
+        else unpatch(addr);
+    
+    if (BetterEdit::getBypassObjectLimit()) {
+        patch(0x7A100, { 0xeb });
+        patch(0x7A022, { 0xeb });
+        patch(0x7A203, { 0x90, 0x90 });
+    } else {
+        unpatch(0x7A100);
+        unpatch(0x7A022);
+        unpatch(0x7A203);
+    }
+
+    if (g_bRotateSaws)
+        beginRotations(self->m_pEditorLayer);
+    else
+        stopRotations(self->m_pEditorLayer);
 
     updatePercentLabelPosition(LevelEditorLayer::get()->getEditorUI());
     // showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
@@ -43,26 +79,40 @@ bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, LevelEd
     if (!GDMAKE_ORIG(self, edx, el))
         return false;
 
-    auto menu = extra::as<cocos2d::CCMenu*>(self->m_pButton0->getParent());
+    auto menu = as<CCMenu*>(self->m_pButton0->getParent());
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
-    auto btn = gd::CCMenuItemSpriteExtra::create(
+    auto gdSettingsBtn = getChild<CCMenu*>(menu, menu->getChildrenCount() - 1);
+
+    auto btn = CCMenuItemSpriteExtra::create(
         CCNodeConstructor()
             .fromFrameName("GJ_optionsBtn02_001.png")
             .scale(.8f)
             .done(),
         self,
-        (cocos2d::SEL_MenuHandler)&EditorPauseLayer_CB::onBESettings
+        (SEL_MenuHandler)&EditorPauseLayer_CB::onBESettings
     );
-    btn->setPosition(winSize.width / 2 - 70, winSize.height - 73);
+    btn->setPosition(winSize.width / 2 - 70, gdSettingsBtn->getPositionY());
     menu->addChild(btn);
 
-    extra::getChild<cocos2d::CCMenu*>(menu, menu->getChildrenCount() - 2)
-        ->setPositionX(winSize.width / 2 - 30);
+    gdSettingsBtn->setPositionX(winSize.width / 2 - 30);
 
     loadLiveButton(self);
     loadColorTriggerButton(self);
     loadRemapHook(self);
+    loadPasteButton(self);
+
+    GameToolbox::createToggleButton(
+        (SEL_MenuHandler)&EditorPauseLayer_CB::onRotateSaws,
+        g_bRotateSaws, as<CCMenu*>(self->m_pButton0->getParent()),
+        self, self, .55f, .42f, 85.0f, "", false, 0, nullptr,
+        "Preview Saws",
+        {
+            CCDirector::sharedDirector()->getScreenLeft() + 25.0f,
+            CCDirector::sharedDirector()->getScreenBottom() + 192.0f
+        },
+        { 8.0f, 0.0f }
+    );
 
     return true;
 }

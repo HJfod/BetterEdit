@@ -6,28 +6,45 @@ class EditorUI_CB : public EditorUI {
     public:
         void onNextFreeEditorLayer(CCObject*) {
             auto objs = this->m_pEditorLayer->getAllObjects();
-            int lastLayerWithStuff = 0;
+
+            std::set<int> layers;
 
             CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
-                if (obj->m_nEditorLayer > lastLayerWithStuff)
-                    lastLayerWithStuff = obj->m_nEditorLayer;
-                if (obj->m_nEditorLayer2 > lastLayerWithStuff)
-                    lastLayerWithStuff = obj->m_nEditorLayer2;
+                layers.insert(obj->m_nEditorLayer);
+                layers.insert(obj->m_nEditorLayer2);
             }
 
-            this->m_pEditorLayer->setCurrentLayer(lastLayerWithStuff + 1);
+            int last = -1;
+            for (auto const& layer : layers) {
+                if (last + 1 != layer)
+                    break;
+                last = layer;
+            }
+
+            this->m_pEditorLayer->setCurrentLayer(last + 1);
             this->m_pCurrentLayerLabel->setString(
-                CCString::createWithFormat("%d", lastLayerWithStuff + 1)->getCString()
+                CCString::createWithFormat("%d", last + 1)->getCString()
             );
+
+            LayerManager::get()->getLevel()->clearVisible();
 
             updateEditorLayerInputText(this);
         }
 
         void onLockLayer(CCObject*) {
-            auto layer = LayerManager::get()->getLayer(this->m_pEditorLayer->m_nCurrentLayer);
+            if (LayerManager::get()->getLevel()->isMultiple()) {
+                for (auto const& num : LayerManager::get()->getLevel()->m_vVisibleLayers) {
+                    auto layer = LayerManager::get()->getLayer(num);
 
-            if (layer)
-                layer->m_bLocked = !layer->m_bLocked;
+                    if (layer)
+                        layer->m_bLocked = !layer->m_bLocked;
+                }
+            } else {
+                auto layer = LayerManager::get()->getLayer(this->m_pEditorLayer->m_nCurrentLayer);
+
+                if (layer)
+                    layer->m_bLocked = !layer->m_bLocked;
+            }
 
             updateEditorLayerInputText(this);
         }
@@ -41,12 +58,16 @@ GDMAKE_HOOK(0x886b0)
 void __fastcall EditorUI_onGoToLayer(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
+    LayerManager::get()->getLevel()->clearVisible();
+
     updateEditorLayerInputText(self);
 }
 
 GDMAKE_HOOK(0x8d7e0)
 void __fastcall EditorUI_onGroupDown(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG(self, edx, pSender);
+
+    LayerManager::get()->getLevel()->clearVisible();
 
     updateEditorLayerInputText(self);
 }
@@ -55,12 +76,16 @@ GDMAKE_HOOK(0x8d780)
 void __fastcall EditorUI_onGroupUp(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG(self, edx, pSender);
 
+    LayerManager::get()->getLevel()->clearVisible();
+
     updateEditorLayerInputText(self);
 }
 
 GDMAKE_HOOK(0x88790)
 void __fastcall EditorUI_onGoToBaseLayer(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG(self, edx, pSender);
+
+    LayerManager::get()->getLevel()->clearVisible();
 
     updateEditorLayerInputText(self);
 }
@@ -82,11 +107,32 @@ void LevelEditorLayer_updateVisibility() {
             if (!layer->m_bVisible)
                 opacity = 0;
             else
-                opacity = layer->m_nOpacity;
+                if (layer->m_nOpacity == LayerManager::use_default_opacity)
+                    opacity = LayerManager::get()->default_opacity;
+                else
+                    opacity = layer->m_nOpacity;
     }
 
     __asm {
         mov eax, opacity
+    }
+}
+
+void LevelEditorLayer_objectAtPosition() {
+    int clickable;
+    GameObject* obj;
+
+    __asm {
+        mov clickable, ecx
+        mov [obj], edi
+    }
+
+    // std::cout << obj->m_nEditorLayer << " == " << clickable << "\n";
+
+    // clickable = -1;
+
+    __asm {
+        mov ecx, clickable
     }
 }
 
@@ -117,6 +163,32 @@ __declspec(naked) void LevelEditorLayer_updateVisiblity_midHook() {
     }
 }
 
+void (*LevelEditorLayer_objectAtPosition_retAddr)();
+__declspec(naked) void LevelEditorLayer_objectAtPosition_midHook() {
+    __asm {
+        push eax
+        // push ecx
+        push edx
+        push ebx
+        push esp
+        push ebp
+        push esi
+        push edi
+        pushfd
+        call LevelEditorLayer_objectAtPosition
+        popfd
+        pop edi
+        pop esi
+        pop ebp
+        add esp, 0x4
+        pop ebx
+        pop edx
+        // pop ecx
+        pop eax
+        jmp LevelEditorLayer_objectAtPosition_retAddr
+    }
+}
+
 bool loadUpdateVisibilityHook() {
     if (MH_CreateHook(
         as<LPVOID>(gd::base + 0x163a2e),
@@ -124,7 +196,19 @@ bool loadUpdateVisibilityHook() {
         as<LPVOID*>(&LevelEditorLayer_updateVisibility_retAddr)
     ) != MH_OK) return false;
 
-    return MH_EnableHook(as<LPVOID>(gd::base + 0x163a2e)) == MH_OK;
+    if (MH_EnableHook(as<LPVOID>(gd::base + 0x163a2e)) != MH_OK)
+        return false;
+
+    if (MH_CreateHook(
+        as<LPVOID>(gd::base + 0x1615f7),
+        as<LPVOID>(LevelEditorLayer_objectAtPosition_midHook),
+        as<LPVOID*>(&LevelEditorLayer_objectAtPosition_retAddr)
+    ) != MH_OK) return false;
+
+    if (MH_EnableHook(as<LPVOID>(gd::base + 0x1615f7)) != MH_OK)
+        return false;
+    
+    return true;
 }
 
 
@@ -177,13 +261,21 @@ void updateEditorLayerInputText(EditorUI* self) {
     }
 }
 
+#define MOVE_ITEM(_par_, _ix_, _amount_)                                \
+    if (getChild<CCNode*>(_par_, _ix_)) {                               \
+        auto pos = getChild<CCNode*>(_par_, _ix_)->getPosition();       \
+        getChild<CCNode*>(_par_, _ix_)->setPositionX(pos.x + _amount_); \
+    }
+
 void loadEditorLayerInput(EditorUI* self) {
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
     auto ed = EUITextDelegate::create(self);
 
     self->m_pCurrentLayerLabel->setVisible(false);
-    self->m_pCurrentLayerLabel->setPositionX(507);
+    self->m_pCurrentLayerLabel->setPositionX(
+        self->m_pCurrentLayerLabel->getPositionX() - 14.0f
+    );
 
     auto spr = cocos2d::extension::CCScale9Sprite::create(
         "square02b_001.png", { 0.0f, 0.0f, 80.0f, 80.0f }
@@ -214,9 +306,15 @@ void loadEditorLayerInput(EditorUI* self) {
 
     auto menu = self->m_pEditGroupBtn->getParent();
 
-    CATCH_NULL(getChild<CCMenuItemSpriteExtra*>(menu, 17))->setPositionX(-90);
-    CATCH_NULL(getChild<CCMenuItemSpriteExtra*>(menu, 16))->setPositionX(-70);
-    CATCH_NULL(getChild<CCMenuItemSpriteExtra*>(menu, 15))->setPositionX(-13);
+    auto goToAllBtn = getChild<CCMenuItemSpriteExtra*>(menu, 17);
+
+    // CATCH_NULL(getChild<CCMenuItemSpriteExtra*>(menu, 17))->setPositionX(-90);
+    // CATCH_NULL(getChild<CCMenuItemSpriteExtra*>(menu, 16))->setPositionX(-70);
+    // CATCH_NULL(getChild<CCMenuItemSpriteExtra*>(menu, 15))->setPositionX(-13);
+
+    MOVE_ITEM(menu, 17, -5.0f);
+    MOVE_ITEM(menu, 16, -13.0f);
+    MOVE_ITEM(menu, 15, -15.0f);
 
     menu->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
@@ -230,7 +328,7 @@ void loadEditorLayerInput(EditorUI* self) {
                 self,
                 (SEL_MenuHandler)&EditorUI_CB::onNextFreeEditorLayer
             ))
-            .move(7.0f, -177.0f)
+            .move(9.0f, goToAllBtn->getPositionY())
             .tag(NEXTFREELAYER_TAG)
             .done()
     );
@@ -245,7 +343,7 @@ void loadEditorLayerInput(EditorUI* self) {
                 self,
                 (SEL_MenuHandler)&EditorUI_CB::onLockLayer
             ))
-            .move(-106.0f, -177.0f)
+            .move(-106.0f, goToAllBtn->getPositionY())
             .tag(LOCKLAYER_TAG)
             .done()
     );
@@ -260,7 +358,7 @@ void loadEditorLayerInput(EditorUI* self) {
                 self,
                 (SEL_MenuHandler)&EditorUI_CB::onShowLayerPopup
             ))
-            .move(-130.0f, -177.0f)
+            .move(-130.0f, goToAllBtn->getPositionY())
             .tag(VIEWLAYERS_TAG)
             .done()
     );

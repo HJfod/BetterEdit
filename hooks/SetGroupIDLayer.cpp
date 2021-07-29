@@ -49,7 +49,7 @@ class SetGroupIDLayer_CB : public SetGroupIDLayer {
                     patchBytes(0x164c59, bytes);
                     auto id = LevelEditorLayer::get()->getNextFreeGroupID(nullptr);
 
-                    this->m_nGroupID = id;
+                    this->m_nGroupIDValue = id;
                     this->updateGroupIDLabel();
 
                     g_nextFreeInput = txt;
@@ -83,7 +83,7 @@ void __fastcall SetGroupIDLayer_onEditorLayer(SetGroupIDLayer* self, edx_t edx, 
 
     if (i)
         reinterpret_cast<gd::CCTextInputNode*>(i)->setString(
-            std::to_string(self->m_nEditorLayer).c_str()
+            std::to_string(self->m_nEditorLayerValue).c_str()
         );
 }
 
@@ -95,7 +95,7 @@ void __fastcall SetGroupIDLayer_onEditorLayer2(SetGroupIDLayer* self, edx_t edx,
 
     if (i)
         reinterpret_cast<gd::CCTextInputNode*>(i)->setString(
-            std::to_string(self->m_nEditorLayer2).c_str()
+            std::to_string(self->m_nEditorLayer2Value).c_str()
         );
 }
 
@@ -107,7 +107,7 @@ void __fastcall SetGroupIDLayer_onZOrder(SetGroupIDLayer* self, edx_t edx, cocos
 
     if (i)
         reinterpret_cast<gd::CCTextInputNode*>(i)->setString(
-            std::to_string(self->m_nZOrder).c_str()
+            std::to_string(self->m_nZOrderValue).c_str()
         );
 }
 
@@ -123,21 +123,21 @@ void __fastcall SetGroupIDLayer_textChanged(SetGroupIDLayer* self, edx_t edx, CC
         case 5:
             if (!isInt) return;
 
-            self->m_nEditorLayer = val;
+            self->m_nEditorLayerValue = val;
             self->updateEditorLayerID();
             break;
 
         case 6:
             if (!isInt) return;
             
-            self->m_nEditorLayer2 = val;
+            self->m_nEditorLayer2Value = val;
             self->updateEditorLayerID2();
             break;
 
         case 7:
             if (!isInt) return;
             
-            self->m_nZOrder = val;
+            self->m_nZOrderValue = val;
             self->updateZOrder();
             break;
         

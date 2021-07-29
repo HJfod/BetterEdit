@@ -3,13 +3,14 @@
 
 static constexpr const int SLIDERLABEL_TAG = 420;
 static constexpr const int EPOSITION_TAG = 421;
-float g_lastObjectPosX = 0.0f;
-bool g_doUpdate = false;
+GameObject* g_lastObject = nullptr;
 
 class EditorUI_CB : public EditorUI {
     public:
         void onGoToPercentage(CCObject* pSender) {
             auto p = InputPrompt::create("Go To %", "%", [this](const char* txt) -> void {
+                if (!g_lastObject) return;
+
                 if (txt && strlen(txt)) {
                     float val = 0.0f;
                     try { val = std::stof(txt); } catch(...) {}
@@ -17,7 +18,7 @@ class EditorUI_CB : public EditorUI {
                     auto width = CCDirector::sharedDirector()->getWinSize().width;
 
                     this->m_pEditorLayer->getObjectLayer()->setPosition({
-                        (- g_lastObjectPosX * min(val, 100.0f) / 100.0f + width / 2) *
+                        (- g_lastObject->getPositionX() * min(val, 100.0f) / 100.0f + width / 2) *
                             this->m_pEditorLayer->getObjectLayer()->getScale(),
                         this->m_pEditorLayer->getObjectLayer()->getPositionY()
                     });
@@ -32,20 +33,52 @@ class EditorUI_CB : public EditorUI {
         }
 };
 
+void updateLastObjectX(LevelEditorLayer* lel, GameObject* obj = nullptr) {
+    if (obj == nullptr) {
+        CCARRAY_FOREACH_B_TYPE(lel->m_pObjects, pObj, GameObject) {
+            if (!g_lastObject) {
+                g_lastObject = pObj;
+                continue;
+            }
+
+            if (pObj->getPositionX() > g_lastObject->getPositionX())
+                g_lastObject = pObj;
+        }
+    } else {
+        if (!g_lastObject)
+            g_lastObject = obj;
+
+        if (obj->getPositionX() > g_lastObject->getPositionX())
+            g_lastObject = obj;
+    }
+}
+
+void resetSliderPercent(EditorUI* self) {
+    g_lastObject = nullptr;
+}
+
 void updatePercentLabelPosition(EditorUI* self) {
+    if (!self) return;
+
     auto menu = as<CCMenu*>(self->m_pPositionSlider->getChildByTag(SLIDERLABEL_TAG));
 
     if (menu) {
         auto label = as<CCLabelBMFont*>(menu->getUserData());
 
+        if (BetterEdit::getDisablePercentage())
+            return menu->setVisible(false);
+        menu->setVisible(true);
+
         menu->setPositionX(self->m_pPositionSlider->m_pTouchLogic->m_pThumb->getPositionX());
 
         float val = 0.0f;
-        if (g_lastObjectPosX)
+        if (!BetterEdit::getUseOldProgressBar()) {
+            val = self->m_pPositionSlider->getValue() * 100.0f;
+        } else if (g_lastObject && g_lastObject->getPositionX())
             val =
                 self->m_pEditorLayer->getObjectLayer()->convertToNodeSpace(
                     CCDirector::sharedDirector()->getWinSize() / 2
-                ).x / g_lastObjectPosX * 100.0f;
+                ).x / g_lastObject->getPositionX() * 100.0f;
         
         val = min(val, 100.0f);
         val = max(val, 0.0f);
@@ -76,52 +109,112 @@ void updatePercentLabelPosition(EditorUI* self) {
     }
 }
 
-void editorHasBeenTouched(bool up) {
-    g_doUpdate = up;
+/*
+void showPositionLabel(EditorUI* self, bool show) {
+    if (BetterEdit::getDisableEditorPos())
+        CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(false);
+    else
+        CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(show);
+    
+    auto menu = as<CCMenu*>(self->m_pPositionSlider->getChildByTag(SLIDERLABEL_TAG));
+    menu->setVisible(!BetterEdit::getDisablePercentage());
+} //*/
+
+GDMAKE_HOOK(0x78cc0)
+void __fastcall EditorUI_sliderChanged(EditorUI* self, edx_t edx, Slider* pSlider) {
+    if (BetterEdit::getUseOldProgressBar()) {
+        GDMAKE_ORIG_V(self, edx, pSlider);
+        updatePercentLabelPosition(self);
+        return;
+    }
+
+    float val = self->m_pPositionSlider->getValue() * 100.0f;
+
+    auto width = CCDirector::sharedDirector()->getWinSize().width;
+    
+    float posX = 0.0f;
+    if (g_lastObject) {
+        posX = (- g_lastObject->getPositionX() * min(val, 100.0f) / 100.0f + width / 2) *
+            self->m_pEditorLayer->getObjectLayer()->getScale();
+
+        self->m_pEditorLayer->getObjectLayer()->setPosition({
+            posX, self->m_pEditorLayer->getObjectLayer()->getPositionY()
+        });
+    }
+
+    self->constrainGameLayerPosition();
+
+    updatePercentLabelPosition(self);
 }
 
-// void showPositionLabel(EditorUI* self, bool show) {
-//     if (BetterEdit::getDisableEditorPos())
-//         CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(false);
-//     else
-//         CATCH_NULL(as<CCLabelBMFont*>(self->getChildByTag(EPOSITION_TAG)))->setVisible(show);
+GDMAKE_HOOK(0x78e30)
+void __fastcall EditorUI_valueFromXPos(EditorUI* self) {
+    if (BetterEdit::getUseOldProgressBar())
+        return GDMAKE_ORIG_V(self);
+
+    float val = 0.0f;
+    if (g_lastObject && g_lastObject->getPositionX())
+        val =
+            self->m_pEditorLayer->getObjectLayer()->convertToNodeSpace(
+                CCDirector::sharedDirector()->getWinSize() / 2
+            ).x / g_lastObject->getPositionX() * 100.0f;
     
-//     auto menu = as<CCMenu*>(self->m_pPositionSlider->getChildByTag(SLIDERLABEL_TAG));
-//     menu->setVisible(!BetterEdit::getDisablePercentage());
-// }
+    val = min(val, 100.0f);
+    val = max(val, 0.0f);
+
+    val /= 100.0f;
+
+    __asm movss xmm0, val
+
+    return;
+}
 
 GDMAKE_HOOK(0x162650)
 void __fastcall LevelEditorLayer_addSpecial(LevelEditorLayer* self, edx_t edx, GameObject* obj) {
     GDMAKE_ORIG_V(self, edx, obj);
 
-    if (g_doUpdate) {
-        g_lastObjectPosX = self->getLastObjectX();
-    
-        updatePercentLabelPosition(self->m_pEditorUI);
-    }
+    if (obj) updateLastObjectX(self, obj);
+
+    updatePercentLabelPosition(self->m_pEditorUI);
+
+    if (self->m_pEditorUI)
+        self->m_pEditorUI->updateSlider();
 }
 
 GDMAKE_HOOK(0x161cb0)
 void __fastcall LevelEditorLayer_removeObject(LevelEditorLayer* self, edx_t edx, GameObject* obj, bool idk) {
     GDMAKE_ORIG_V(self, edx, obj, idk);
 
-    if (g_doUpdate) {
-        g_lastObjectPosX = self->getLastObjectX();
-    
-        updatePercentLabelPosition(self->m_pEditorUI);
-    }
+    if (obj) updateLastObjectX(self, obj);
+
+    updatePercentLabelPosition(self->m_pEditorUI);
+
+    if (self->m_pEditorUI)
+        self->m_pEditorUI->updateSlider();
+}
+
+GDMAKE_HOOK(0x8ddb0)
+void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, CCPoint pos) {
+    // because gd sometimes passes a good ol'
+    // nullptr to moveObject when you're
+    // free moving and then press undo
+    // (yes very specific bugfix)
+
+    if (obj == nullptr)
+        return;
+
+    GDMAKE_ORIG_V(self, edx, obj, pos);
+
+    updateLastObjectX(self->m_pEditorLayer, obj);
+
+    updatePercentLabelPosition(self);
+
+    self->updateSlider();
 }
 
 GDMAKE_HOOK(0x78f10)
 void __fastcall EditorUI_updateSlider(EditorUI* self) {
     GDMAKE_ORIG_V(self);
-
-    updatePercentLabelPosition(self);
-}
-
-GDMAKE_HOOK(0x78cc0)
-void __fastcall EditorUI_sliderChanged(EditorUI* self, edx_t edx, Slider* pSlider) {
-    GDMAKE_ORIG_V(self, edx, pSlider);
 
     updatePercentLabelPosition(self);
 }
@@ -146,7 +239,7 @@ void loadSliderPercent(EditorUI* self) {
     menu->addChild(btn);
     self->m_pPositionSlider->addChild(menu, 999);
 
-    g_lastObjectPosX = self->m_pEditorLayer->getLastObjectX();
+    updateLastObjectX(self->m_pEditorLayer);
 
     // self->addChild(
     //     CCNodeConstructor<CCLabelBMFont*>()
