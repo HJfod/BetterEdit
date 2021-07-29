@@ -2,6 +2,42 @@
 #include "LayerManager.hpp"
 #include "LayerViewPopup.hpp"
 
+#define MAKE_MIDHOOK(addr, func)        \
+    if (MH_CreateHook(                  \
+        as<LPVOID>(gd::base + addr),    \
+        as<LPVOID>(func##_midHook),     \
+        as<LPVOID*>(&func##_retAddr)    \
+    ) != MH_OK) return false;           \
+                                        \
+    if (MH_EnableHook(                  \
+        as<LPVOID>(gd::base + addr)     \
+    ) != MH_OK)                         \
+        return false;
+    
+#define MAKE_VALIDGROUP_MIDHOOK_DEF(name)   \
+    void (*name##_retAddr)();               \
+    __declspec(naked) void name##_midHook() {\
+    __asm {                                 \
+        push eax                            \
+        push edx                            \
+        push ebx                            \
+        push esp                            \
+        push ebp                            \
+        push esi                            \
+        push edi                            \
+        pushfd                              \
+        call LevelEditorLayer_validGroup_hook\
+        popfd                               \
+        pop edi                             \
+        pop esi                             \
+        pop ebp                             \
+        add esp, 0x4                        \
+        pop ebx                             \
+        pop edx                             \
+        pop eax                             \
+        jmp name##_retAddr                  \
+    }}
+
 class EditorUI_CB : public EditorUI {
     public:
         void onNextFreeEditorLayer(CCObject*) {
@@ -118,7 +154,7 @@ void LevelEditorLayer_updateVisibility() {
     }
 }
 
-void LevelEditorLayer_objectAtPosition() {
+void LevelEditorLayer_validGroup_hook() {
     int clickable;
     GameObject* obj;
 
@@ -129,7 +165,7 @@ void LevelEditorLayer_objectAtPosition() {
 
     // std::cout << obj->m_nEditorLayer << " == " << clickable << "\n";
 
-    // clickable = -1;
+    clickable = -1;
 
     __asm {
         mov ecx, clickable
@@ -137,7 +173,7 @@ void LevelEditorLayer_objectAtPosition() {
 }
 
 void (*LevelEditorLayer_updateVisibility_retAddr)();
-__declspec(naked) void LevelEditorLayer_updateVisiblity_midHook() {
+__declspec(naked) void LevelEditorLayer_updateVisibility_midHook() {
     // funny lil stuff
     // pushad doesn't work because we
     // want to modify the eax register
@@ -163,51 +199,34 @@ __declspec(naked) void LevelEditorLayer_updateVisiblity_midHook() {
     }
 }
 
-void (*LevelEditorLayer_objectAtPosition_retAddr)();
-__declspec(naked) void LevelEditorLayer_objectAtPosition_midHook() {
-    __asm {
-        push eax
-        // push ecx
-        push edx
-        push ebx
-        push esp
-        push ebp
-        push esi
-        push edi
-        pushfd
-        call LevelEditorLayer_objectAtPosition
-        popfd
-        pop edi
-        pop esi
-        pop ebp
-        add esp, 0x4
-        pop ebx
-        pop edx
-        // pop ecx
-        pop eax
-        jmp LevelEditorLayer_objectAtPosition_retAddr
-    }
-}
+MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_objectAtPosition)
+MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_objectsAtPosition)
+MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_typeExistsAtPosition)
+MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_objectsInRect)
+MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_selectAllWithDirection)
+MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_selectAll)
+MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_draw)
+MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_updateVisibility2)
 
 bool loadUpdateVisibilityHook() {
-    if (MH_CreateHook(
-        as<LPVOID>(gd::base + 0x163a2e),
-        as<LPVOID>(LevelEditorLayer_updateVisiblity_midHook),
-        as<LPVOID*>(&LevelEditorLayer_updateVisibility_retAddr)
-    ) != MH_OK) return false;
+    MAKE_MIDHOOK(0x163a2e, LevelEditorLayer_updateVisibility);
+    // LevelEditorLayer::objectsAtPosition
+    MAKE_MIDHOOK(0x1615f7, LevelEditorLayer_objectsAtPosition);
+    // LevelEditorLayer::objectAtPosition
+    MAKE_MIDHOOK(0x161417, LevelEditorLayer_objectAtPosition);
+    // LevelEditorLayer::typeExistsAtPosition
+    MAKE_MIDHOOK(0x160f5a, LevelEditorLayer_typeExistsAtPosition);
+    // LevelEditorLayer::objectsInRect
+    MAKE_MIDHOOK(0x161bf0, LevelEditorLayer_objectsInRect);
+    // EditorUI::selectAllWithDirection
+    MAKE_MIDHOOK(0x86e50, LevelEditorLayer_selectAllWithDirection);
+    // EditorUI::selectAll
+    MAKE_MIDHOOK(0x86c93, LevelEditorLayer_selectAll);
+    // LevelEditorLayer::draw
+    MAKE_MIDHOOK(0x16b89d, LevelEditorLayer_draw);
+    // LevelEditorLayer::updateVisibility
+    MAKE_MIDHOOK(0x1639f6, LevelEditorLayer_updateVisibility2);
 
-    if (MH_EnableHook(as<LPVOID>(gd::base + 0x163a2e)) != MH_OK)
-        return false;
-
-    if (MH_CreateHook(
-        as<LPVOID>(gd::base + 0x1615f7),
-        as<LPVOID>(LevelEditorLayer_objectAtPosition_midHook),
-        as<LPVOID*>(&LevelEditorLayer_objectAtPosition_retAddr)
-    ) != MH_OK) return false;
-
-    if (MH_EnableHook(as<LPVOID>(gd::base + 0x1615f7)) != MH_OK)
-        return false;
-    
     return true;
 }
 
