@@ -1,5 +1,6 @@
 #include "../../BetterEdit.hpp"
 #include "RGBColorInputWidget.hpp"
+#include "../EyeDropper/eyeDropper.hpp"
 
 static constexpr const int WIDGET_TAG = 69696;
 
@@ -23,6 +24,8 @@ bool __fastcall ColorSelectPopup_init(ColorSelectPopup* self, edx_t edx, EffectG
     layer->addChild(widget);
     widget->setVisible(!self->copyColor);
 
+    loadEyeDropper(self);
+
     return true;
 }
 
@@ -38,6 +41,7 @@ void __fastcall ColorSelectPopup_updateCopyColorIdfk(ColorSelectPopup* self) {
     GDMAKE_ORIG(self);
     CATCH_NULL(as<RGBColorInputWidget*>(self->getAlertLayer()->getChildByTag(WIDGET_TAG)))
         ->setVisible(!self->copyColor);
+    showEyeDropper(self);
 }
 
 GDMAKE_HOOK(0x23e980)
@@ -65,6 +69,8 @@ bool __fastcall SetupPulsePopup_init(SetupPulsePopup* self, edx_t edx, EffectGam
     layer->addChild(widget);
     widget->setVisible(self->pulseMode == 0);
 
+    loadEyeDropper(self);
+
     return true;
 }
 
@@ -80,4 +86,5 @@ void __fastcall SetupPulsePopup_switchPulseModeIDK(SetupPulsePopup* self) {
     GDMAKE_ORIG_V(self);
     CATCH_NULL(as<RGBColorInputWidget*>(as<ColorSelectPopup*>(self)->getAlertLayer()->getChildByTag(WIDGET_TAG)))
         ->setVisible(self->pulseMode == 0);
+    showEyeDropper(self);
 }

@@ -5,7 +5,7 @@
 #include <BrownAlertDelegate.hpp>
 #include "LayerManager.hpp"
 
-class LayerEditNode;
+class LayerEditPopup;
 
 class LayerViewPopup : public BrownAlertDelegate {
     public:
@@ -29,6 +29,7 @@ class LayerViewPopup : public BrownAlertDelegate {
 
         enum GridView {
             kGridViewNormal,
+            kGridViewAlt,
             kGridViewLocked,
             kGridViewVisible,
         };
@@ -45,8 +46,12 @@ class LayerViewPopup : public BrownAlertDelegate {
         ButtonSprite* m_pViewGridBtn;
         ButtonSprite* m_pViewListBtn;
         ButtonSprite* m_pViewEmptyBtn;
+        CCMenuItemSpriteExtra* m_pPrevPageBtn;
+        CCMenuItemSpriteExtra* m_pNextPageBtn;
 
         void setup() override;
+
+        void keyDown(enumKeyCodes) override;
         
         void onClose(CCObject*) override;
         void onPage(CCObject*);
@@ -74,7 +79,7 @@ class LayerViewPopup : public BrownAlertDelegate {
         void createGridItemAtPosition(float x, float y, bool color, int index);
         void updateLayerItem(int index, LayerManager::Layer*);
 
-        friend class LayerEditNode;
+        friend class LayerEditPopup;
         
     public:
         static LayerViewPopup* create();

@@ -1,4 +1,5 @@
 #include "ColorTriggerPopup.hpp"
+#include <MonoSpaceLabel.hpp>
 
 using namespace gd;
 using namespace gdmake;
@@ -7,6 +8,19 @@ using namespace cocos2d;
 
 void ColorTriggerPopup::setup() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+//     auto label = MonoSpaceLabel::create("", "chatFont.fnt", 10.0f, 350.0f);
+
+//     label->setPosition(winSize / 2);
+//     label->setScale(.8f);
+//     label->setString(
+// R"CPP(
+// auto label = MonoSpaceLabel::create("", "chatFont.fnt", 10.0f, 350.0f);
+// label->setPosition(winSize / 2);
+// label->setPosition(winSize / 2);
+// )CPP");
+
+//     this->m_pLayer->addChild(label);
 
     this->m_pLayer->addChild(
         CCNodeConstructor<InputNode*>()
@@ -99,26 +113,42 @@ void ColorTriggerPopup::onCreate(CCObject* pSender) {
     float y = pos.y;
     std::stringstream ss;
 
+    lel->getEditorUI()->deselectAll();
+
+    auto objs = CCArray::create();
     CCDICT_FOREACH(dict, el) {
         const auto colorID = el->getIntKey();
         if (colorID < rangeStart || colorID > rangeEnd) continue;
 
-        auto color = reinterpret_cast<gd::ColorAction*>(el->getObject());
+        auto color = as<ColorAction*>(el->getObject());
 
-        ss << "1,899,2," << pos.x << ",3," << y << ",10,0,36,1,23," << colorID << ",7," <<
-            (int)(color->m_color.r) << ",8," << (int)(color->m_color.g) << ",9," <<
-            (int)(color->m_color.b) << ",17," << color->m_blending << ",15," <<
-            (color->m_playerColor == 1) << ",16," <<  (color->m_playerColor == 2) <<
-            ",50," << color->m_copyID << ",49," << std::floor(color->m_copyHue) << "a"
-            << color->m_copySaturation << "a" << color->m_copyBrightness << "a"
-            << color->m_saturationChecked << "a" << color->m_brightnessChecked << ",35,"
-            << color->m_opacity << ",60," << color->m_copyOpacity << ";";
+        auto obj = as<EffectGameObject*>(lel->createObject(899, { pos.x, y }, false));
+
+        obj->m_nTargetColorID = colorID;
+        obj->m_colColor = color->m_color;
+        obj->m_bBlending = color->m_blending;
+        obj->m_fOpacity = color->m_opacity;
+        obj->m_bPlayerColor1 = color->m_playerColor == 1;
+        obj->m_bPlayerColor2 = color->m_playerColor == 2;
+        obj->m_nCopyColorID = color->m_copyID;
+        obj->m_fColorHue = color->m_copyHue;
+        obj->m_fColorSaturation = color->m_copySaturation;
+        obj->m_fColorBrightness = color->m_copyBrightness;
+        obj->m_bAbsoluteSaturation = color->m_saturationChecked;
+        obj->m_bAbsoluteBrightness = color->m_brightnessChecked;
+        obj->updateLabel();
+
+        if (lel->m_nCurrentLayer != -1)
+            obj->m_nEditorLayer = lel->m_nCurrentLayer;
+
+        objs->addObject(obj);
         
-        y += 30;
+        y += 30.0f;
     }
-    const auto result = ss.str();
 
-    lel->getEditorUI()->pasteObjects(result);
+    lel->getEditorUI()->selectObjects(objs, true);
+    objs->release();
+
     lel->getEditorUI()->updateButtons();
 
     if (this->m_pPauseLayer)

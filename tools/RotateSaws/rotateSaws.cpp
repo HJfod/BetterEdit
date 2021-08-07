@@ -76,7 +76,8 @@ void stopRotations(LevelEditorLayer* self) {
     CCARRAY_FOREACH_B_TYPE(self->m_pObjects, obj, GameObject)
         if (objectIsSaw(obj)) {
             obj->stopActionByTag(ROTATEACTION_TAG);
-            obj->setRotation(g_startRotations[obj]);
+            if (g_startRotations.count(obj))
+                obj->setRotation(g_startRotations[obj]);
             if (obj->m_pMyAction)
                 obj->m_pMyAction->release();
             obj->m_pMyAction = nullptr;

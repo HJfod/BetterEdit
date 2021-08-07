@@ -2,7 +2,7 @@
   "ProjectName": "BetterEdit",
   "EntryPoint": null,
   "Version": "v3.5",
-  "ConsoleEnabled": true,
+  "ConsoleEnabled": false,
   "Compiler": 0,
   "Platform": 0,
   "Submodules": [
@@ -31,6 +31,7 @@
     "resources/BE_cursor.png",
     "resources/BE_grid-icon.png",
     "resources/BE_grid-icon-alt.png",
-    "resources/BE_0_objs.png"
+    "resources/BE_0_objs.png",
+    "resources/BE_eyedropper.png"
   ]
 }

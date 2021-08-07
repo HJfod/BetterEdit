@@ -4,6 +4,13 @@ void LayerSettingsPopup::setup() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     this->m_pLayer->addChild(
+        CCNodeConstructor<CCLabelBMFont*>()
+            .fromText("Default Opacity:", "bigFont.fnt")
+            .move(winSize / 2 + CCPoint { 0.0f, 20.0f })
+            .scale(.5f)
+            .done()
+    );
+    this->m_pLayer->addChild(
         CCNodeConstructor<Slider*>()
             .fromNode(Slider::create(this, (SEL_MenuHandler)&LayerSettingsPopup::sliderChanged, .8f))
             .move(winSize / 2)

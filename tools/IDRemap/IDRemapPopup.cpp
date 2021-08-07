@@ -1,6 +1,11 @@
 #include "IDRemapPopup.hpp"
 
-#define GDML(gdml)
+#define RANGE_CHECK(id)             \
+    if (start <= id && id <= end) { \
+        id += offset;               \
+        edited = true;              \
+        remapCount++;               \
+    }
 
 void IDRemapPopup::setup() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -97,11 +102,14 @@ void IDRemapPopup::onRemap(CCObject* pSender) {
         bool edited = false;
 
         for (auto i = 0; i < obj->m_nGroupCount; i++)
-            if (start <= obj->m_pGroups[i] && obj->m_pGroups[i] <= end) {
-                obj->m_pGroups[i] += offset;
-                edited = true;
-                remapCount++;
-            }
+            RANGE_CHECK(obj->m_pGroups[i]);
+        
+        if (asEffectGameObject(obj)) {
+            auto eobj = asEffectGameObject(obj);
+
+            RANGE_CHECK(eobj->m_nTargetGroupID);
+            RANGE_CHECK(eobj->m_nCenterGroupID);
+        }
         
         if (edited)
             editCount++;

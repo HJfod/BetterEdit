@@ -50,6 +50,24 @@ static void unpatch(uintptr_t addr, bool hardOverwrite = false) {
     g_patchedBytes[addr] = {};
 }
 
+static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
+    if (obj != nullptr) {
+        const auto vtable = *as<uintptr_t*>(obj) - gd::base;
+        if (
+            // EffectGameObject::vftable
+            vtable == 0x2e4190 ||
+            // RingObject::vftable
+            vtable == 0x2e390c ||
+            // LabelGameObject::vftable
+            vtable == 0x2e3ed8 ||
+            // StartPosObject::vftable
+            vtable == 0x25aa40
+        )
+            return as<gd::EffectGameObject*>(obj);
+    }
+    return nullptr;
+}
+
 #define CATCH_NULL(x) if (x) x
 
 
@@ -121,6 +139,10 @@ class CCNodeConstructor {
         }
         inline CCNodeConstructor<T> & move(float x, float y) {
             node->setPosition(x, y);
+            return *this;
+        }
+        inline CCNodeConstructor<T> & moveR(cocos2d::CCSize winSize, float x, float y) {
+            node->setPosition(winSize / 2 + cocos2d::CCPoint { x, y });
             return *this;
         }
         inline CCNodeConstructor<T> & move(cocos2d::CCPoint const& pos) {

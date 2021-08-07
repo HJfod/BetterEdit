@@ -7,6 +7,10 @@ void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, 
     auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xfc);
     auto kb = cocos2d::CCDirector::sharedDirector()->getKeyboardDispatcher();
 
+    float prevScale = self->m_pEditorLayer->m_pObjectLayer->getScale();
+    auto swipeStart =
+        self->m_pEditorLayer->m_pObjectLayer->convertToNodeSpace(self->m_obSwipeStart) * prevScale;
+
     if (kb->getControlKeyPressed()) {
         auto zoom = self->m_pEditorLayer->getObjectLayer()->getScale();
 
@@ -37,7 +41,7 @@ void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, 
             mpos = mpos - winSize / 2; // relative to window centre
 
             if (amt > 0.0f)
-                mpos = -mpos;
+                mpos = -mpos * .5f;
 
             self->m_pEditorLayer->getObjectLayer()->setPosition(
                 self->m_pEditorLayer->getObjectLayer()->getPosition() - mpos / max(zoom, 5.0f)
@@ -58,6 +62,15 @@ void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, 
 
         GDMAKE_ORIG(self_, edx, 0.f, 0.f); // hehe
     }
+
+    auto nSwipeStart = 
+        self->m_pEditorLayer->m_pObjectLayer->convertToNodeSpace(self->m_obSwipeStart) * prevScale;
+    
+    auto rel = swipeStart - nSwipeStart;
+    rel = rel * (self->m_pEditorLayer->m_pObjectLayer->getScale() / prevScale);
+
+    if (BetterEdit::getEnableRelativeSwipe())
+        self->m_obSwipeStart = self->m_obSwipeStart + rel;
 
     updatePercentLabelPosition(self);
 }

@@ -9,7 +9,7 @@ CCSprite* updateBtnSprite(CCMenuItemSpriteExtra*, CCSprite*);
 void updateLockSprite(CCMenuItemSpriteExtra*, LayerManager::Layer*);
 void updateShowSprite(CCMenuItemSpriteExtra*, LayerManager::Layer*);
 
-class LayerEditNode : public CCMenu, TextInputDelegate {
+class LayerEditPopup : public BrownAlertDelegate, TextInputDelegate {
     protected:
         static constexpr const int s_nameInputTag = 1;
         static constexpr const int s_opacityInputTag = 2;
@@ -23,7 +23,8 @@ class LayerEditNode : public CCMenu, TextInputDelegate {
         CCMenuItemSpriteExtra* m_pLockBtn;
         CCMenuItemSpriteExtra* m_pShowBtn;
 
-        bool init(LayerViewPopup*, LayerManager::Layer*);
+        void setup() override;
+        void onClose(CCObject*) override;
 
         void onReset(CCObject*);
         void onResetOpacity(CCObject*);
@@ -36,7 +37,5 @@ class LayerEditNode : public CCMenu, TextInputDelegate {
         friend class LayerViewPopup;
         
     public:
-        void updateNode(LayerManager::Layer*);
-
-        static LayerEditNode* create(LayerViewPopup*, LayerManager::Layer*);
+        static LayerEditPopup* create(LayerViewPopup*, LayerManager::Layer*);
 };

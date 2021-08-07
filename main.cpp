@@ -10,6 +10,7 @@
 #include "tools/EditorLayerInput/LayerManager.hpp"
 #include "tools/EditorLayerInput/editorLayerInput.hpp"
 #include "tools/EnterToSearch/loadEnterSearch.hpp"
+#include "tools/EyeDropper/eyeDropper.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,

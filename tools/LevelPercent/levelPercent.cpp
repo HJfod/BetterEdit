@@ -5,6 +5,18 @@ static constexpr const int SLIDERLABEL_TAG = 420;
 static constexpr const int EPOSITION_TAG = 421;
 GameObject* g_lastObject = nullptr;
 
+float getLevelLength() {
+    // from camden314/gdp/finished_works/PlayLayer/createObjectsFromSetup.cpp
+
+    float screenEnd = CCDirector::sharedDirector()->getScreenRight() + 300.0f;
+    auto res = g_lastObject->getPositionX() + 340.0f;
+
+    if (res < screenEnd)
+        res = screenEnd;
+    
+    return res;
+}
+
 class EditorUI_CB : public EditorUI {
     public:
         void onGoToPercentage(CCObject* pSender) {
@@ -18,7 +30,7 @@ class EditorUI_CB : public EditorUI {
                     auto width = CCDirector::sharedDirector()->getWinSize().width;
 
                     this->m_pEditorLayer->getObjectLayer()->setPosition({
-                        (- g_lastObject->getPositionX() * min(val, 100.0f) / 100.0f + width / 2) *
+                        (- getLevelLength() * min(val, 100.0f) / 100.0f + width / 2) *
                             this->m_pEditorLayer->getObjectLayer()->getScale(),
                         this->m_pEditorLayer->getObjectLayer()->getPositionY()
                     });
@@ -74,11 +86,11 @@ void updatePercentLabelPosition(EditorUI* self) {
         float val = 0.0f;
         if (!BetterEdit::getUseOldProgressBar()) {
             val = self->m_pPositionSlider->getValue() * 100.0f;
-        } else if (g_lastObject && g_lastObject->getPositionX())
+        } else if (g_lastObject && getLevelLength())
             val =
                 self->m_pEditorLayer->getObjectLayer()->convertToNodeSpace(
                     CCDirector::sharedDirector()->getWinSize() / 2
-                ).x / g_lastObject->getPositionX() * 100.0f;
+                ).x / getLevelLength() * 100.0f;
         
         val = min(val, 100.0f);
         val = max(val, 0.0f);
@@ -134,7 +146,7 @@ void __fastcall EditorUI_sliderChanged(EditorUI* self, edx_t edx, Slider* pSlide
     
     float posX = 0.0f;
     if (g_lastObject) {
-        posX = (- g_lastObject->getPositionX() * min(val, 100.0f) / 100.0f + width / 2) *
+        posX = (- getLevelLength() * min(val, 100.0f) / 100.0f + width / 2) *
             self->m_pEditorLayer->getObjectLayer()->getScale();
 
         self->m_pEditorLayer->getObjectLayer()->setPosition({
@@ -153,11 +165,11 @@ void __fastcall EditorUI_valueFromXPos(EditorUI* self) {
         return GDMAKE_ORIG_V(self);
 
     float val = 0.0f;
-    if (g_lastObject && g_lastObject->getPositionX())
+    if (g_lastObject && getLevelLength())
         val =
             self->m_pEditorLayer->getObjectLayer()->convertToNodeSpace(
                 CCDirector::sharedDirector()->getWinSize() / 2
-            ).x / g_lastObject->getPositionX() * 100.0f;
+            ).x / getLevelLength() * 100.0f;
     
     val = min(val, 100.0f);
     val = max(val, 0.0f);
@@ -173,6 +185,8 @@ GDMAKE_HOOK(0x162650)
 void __fastcall LevelEditorLayer_addSpecial(LevelEditorLayer* self, edx_t edx, GameObject* obj) {
     GDMAKE_ORIG_V(self, edx, obj);
 
+    if (!self) return;
+
     if (obj) updateLastObjectX(self, obj);
 
     updatePercentLabelPosition(self->m_pEditorUI);
@@ -184,6 +198,8 @@ void __fastcall LevelEditorLayer_addSpecial(LevelEditorLayer* self, edx_t edx, G
 GDMAKE_HOOK(0x161cb0)
 void __fastcall LevelEditorLayer_removeObject(LevelEditorLayer* self, edx_t edx, GameObject* obj, bool idk) {
     GDMAKE_ORIG_V(self, edx, obj, idk);
+
+    if (!self) return;
 
     if (obj) updateLastObjectX(self, obj);
 

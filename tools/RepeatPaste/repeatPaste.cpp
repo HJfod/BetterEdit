@@ -32,15 +32,6 @@ bool g_bSkipDeselect = false;
     if (as<EffectGameObject*>(target)->_var_ > _max_)   \
         as<EffectGameObject*>(target)->_var_ = _max_;   \
 
-EffectGameObject* asEffectGameObject(GameObject* obj) {
-    if (obj != nullptr) {
-        const auto vtable = *as<uintptr_t*>(obj) - gd::base;
-        if (vtable == 0x2e4190)
-            return as<EffectGameObject*>(obj);
-    }
-    return nullptr;
-}
-
 void updateEffectGameObjectLabel(EffectGameObject* target) {
     auto label = as<CCLabelBMFont*>(target->getChildByTag(999));
 
@@ -115,7 +106,7 @@ void __fastcall EditorUI_onDuplicate(EditorUI* self, edx_t edx, CCObject* pSende
     g_bSkipDeselect = false;
 
     if (g_pPreviousObject || g_pPreviousObjects->count()) {
-        if (BetterEdit::getDontRepeatPaste())
+        if (!BetterEdit::getRepeatCopyPaste())
             return;
 
         if (self->m_pSelectedObject)

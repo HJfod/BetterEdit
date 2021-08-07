@@ -1,28 +1,26 @@
-#include "LayerEditNode.hpp"
+#include "LayerEditPopup.hpp"
 
 CCSprite* updateBtnSprite(CCMenuItemSpriteExtra* btn, CCSprite* nspr) {
     auto spr = btn->getNormalImage();
 
-    if (btn->getTag() == 0) {
+    if (spr->getChildByTag(1)) {
         auto cspr = as<CCSprite*>(spr->getChildByTag(1));
 
-        if (cspr) {
-            cspr->retain();
-            spr->removeChildByTag(1);
-            
-            nspr->setScale(cspr->getScale());
-            nspr->setContentSize(cspr->getContentSize());
-            nspr->setPosition(cspr->getPosition());
-            nspr->setAnchorPoint(cspr->getAnchorPoint());
-            nspr->setTag(cspr->getTag());
-            nspr->setZOrder(cspr->getZOrder());
+        cspr->retain();
+        spr->removeChildByTag(1);
+        
+        nspr->setScale(cspr->getScale());
+        nspr->setContentSize(cspr->getContentSize());
+        nspr->setPosition(cspr->getPosition());
+        nspr->setAnchorPoint(cspr->getAnchorPoint());
+        nspr->setTag(cspr->getTag());
+        nspr->setZOrder(cspr->getZOrder());
 
-            spr->addChild(nspr);
+        spr->addChild(nspr);
 
-            cspr->release();
+        cspr->release();
 
-            return nspr;
-        }
+        return nspr;
     }
 
     spr->retain();
@@ -69,12 +67,124 @@ void updateShowSprite(CCMenuItemSpriteExtra* btn, LayerManager::Layer* layer) {
     updateBtnSprite(btn, CCSprite::create(fname));
 }
 
+void LayerEditPopup::setup() {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
 
-void LayerEditNode::updateNode(LayerManager::Layer* layer) {
-    this->m_pELayer = layer;
+    this->m_bNoElasticity = true;
 
-    if (!layer) return;
+    this->m_pButtonMenu->addChild(
+        CCNodeConstructor<CCLabelBMFont*>()
+            .fromText("Name:", "bigFont.fnt")
+            .move(0, 52.0f)
+            .scale(.5f)
+            .done()
+    );
+    this->m_pLayer->addChild(
+        CCNodeConstructor<InputNode*>()
+            .fromNode(InputNode::create(120.0f, "Name", inputf_Default, 20))
+            .moveR(winSize, 0.0f, 25.0f)
+            .save(&this->m_pNameInput)
+            .exec([this](InputNode* n) -> void {
+                n->getInputNode()->setDelegate(this);
+                n->getInputNode()->setTag(s_nameInputTag);
+            })
+            .done()
+    );
+    this->m_pButtonMenu->addChild(
+        CCNodeConstructor<CCLabelBMFont*>()
+            .fromText("Opacity:", "bigFont.fnt")
+            .move(-15.0f, -10.0f)
+            .scale(.5f)
+            .done()
+    );
+    this->m_pButtonMenu->addChild(
+        CCNodeConstructor<Slider*>()
+            .fromNode(Slider::create(this, (SEL_MenuHandler)&LayerEditPopup::sliderChanged, .7f))
+            .move(0, -30.0f)
+            .save(&this->m_pOpacitySlider)
+            .done()
+    );
+    this->m_pLayer->addChild(
+        CCNodeConstructor<InputNode*>()
+            .fromNode(InputNode::create(60.0f, "", "bigFont.fnt", inputf_Numeral, 3))
+            .moveR(winSize, 40.0f, -10.0f)
+            .scale(.5f)
+            .save(&this->m_pOpacityLabel)
+            .exec([this](InputNode* n) -> void {
+                n->getInputNode()->setDelegate(this);
+                n->getInputNode()->setTag(s_opacityInputTag);
+            })
+            .done()
+    );
+    this->m_pButtonMenu->addChild(
+        CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor()
+                    .fromFrameName("GJ_resetBtn_001.png")
+                    .scale(.5f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&LayerEditPopup::onResetOpacity
+            ))
+            .move(70.0f, -10.0f)
+            .save(&this->m_pResetOpacityBtn)
+            .done()
+    );
+    this->m_pButtonMenu->addChild(
+        CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor()
+                    .fromFrameName("GJ_lock_001.png")
+                    .scale(.9f)
+                    .exec([](auto t) -> void {
+                        t->setContentSize(t->getScaledContentSize());
+                    })
+                    .done(),
+                this,
+                (SEL_MenuHandler)&LayerEditPopup::onLock
+            ))
+            .move(-15.0f, -65.0f)
+            .save(&this->m_pLockBtn)
+            .done()
+    );
+    this->m_pButtonMenu->addChild(
+        CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor()
+                    .fromFile("BE_eye-on.png")
+                    .scale(.7f)
+                    .exec([](auto t) -> void {
+                        t->setContentSize(t->getScaledContentSize());
+                    })
+                    .done(),
+                this,
+                (SEL_MenuHandler)&LayerEditPopup::onShow
+            ))
+            .move(15.0f, -65.0f)
+            .save(&this->m_pShowBtn)
+            .done()
+    );
+    this->m_pButtonMenu->addChild(
+        CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor()
+                    .fromFrameName("GJ_resetBtn_001.png")
+                    .scale(.8f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&LayerEditPopup::onReset
+            ))
+            .move(m_pLrSize / 2 - CCPoint { 25.0f, 25.0f })
+            .done()
+    );
 
+    this->registerWithTouchDispatcher();
+    cocos2d::CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
+    
+    this->setKeypadEnabled(true);
+    this->setTouchEnabled(true);
+
+    
     if (this->m_pELayer->m_sName.size())
         this->m_pNameInput->setString(this->m_pELayer->m_sName.c_str());
 
@@ -90,129 +200,7 @@ void LayerEditNode::updateNode(LayerManager::Layer* layer) {
     updateShowSprite(this->m_pShowBtn, this->m_pELayer);
 }
 
-bool LayerEditNode::init(LayerViewPopup* popup, LayerManager::Layer* layer) {
-    auto winSize = CCDirector::sharedDirector()->getWinSize();
-
-    this->m_pELayer = layer;
-    this->m_pViewPopup = popup;
-
-    this->addChild(
-        CCNodeConstructor<CCLabelBMFont*>()
-            .fromText("Name:", "bigFont.fnt")
-            .move(0, 52.0f)
-            .scale(.5f)
-            .done()
-    );
-    this->addChild(
-        CCNodeConstructor<InputNode*>()
-            .fromNode(InputNode::create(120.0f, "Name", inputf_Default, 20))
-            .move(0, 25.0f)
-            .save(&this->m_pNameInput)
-            .tag(s_nameInputTag)
-            .done()
-    );
-    this->addChild(
-        CCNodeConstructor<CCLabelBMFont*>()
-            .fromText("Opacity:", "bigFont.fnt")
-            .move(-15.0f, -10.0f)
-            .scale(.5f)
-            .done()
-    );
-    this->addChild(
-        CCNodeConstructor<Slider*>()
-            .fromNode(Slider::create(this, (SEL_MenuHandler)&LayerEditNode::sliderChanged, .7f))
-            .move(0, -30.0f)
-            .save(&this->m_pOpacitySlider)
-            .done()
-    );
-    this->addChild(
-        CCNodeConstructor<InputNode*>()
-            .fromNode(InputNode::create(60.0f, "", "bigFont.fnt", inputf_Numeral, 3))
-            .move(40.0f, -10.0f)
-            .scale(.5f)
-            .save(&this->m_pOpacityLabel)
-            .exec([this](InputNode* n) -> void {
-                n->getInputNode()->setDelegate(this);
-            })
-            .tag(s_opacityInputTag)
-            .done()
-    );
-    this->addChild(
-        CCNodeConstructor<CCMenuItemSpriteExtra*>()
-            .fromNode(CCMenuItemSpriteExtra::create(
-                CCNodeConstructor()
-                    .fromFrameName("GJ_resetBtn_001.png")
-                    .scale(.5f)
-                    .done(),
-                this,
-                (SEL_MenuHandler)&LayerEditNode::onResetOpacity
-            ))
-            .move(70.0f, -10.0f)
-            .save(&this->m_pResetOpacityBtn)
-            .done()
-    );
-    this->addChild(
-        CCNodeConstructor<CCMenuItemSpriteExtra*>()
-            .fromNode(CCMenuItemSpriteExtra::create(
-                CCNodeConstructor()
-                    .fromFrameName("GJ_lock_001.png")
-                    .scale(.9f)
-                    .exec([](auto t) -> void {
-                        t->setContentSize(t->getScaledContentSize());
-                    })
-                    .done(),
-                this,
-                (SEL_MenuHandler)&LayerEditNode::onLock
-            ))
-            .move(-15.0f, -50.0f)
-            .save(&this->m_pLockBtn)
-            .done()
-    );
-    this->addChild(
-        CCNodeConstructor<CCMenuItemSpriteExtra*>()
-            .fromNode(CCMenuItemSpriteExtra::create(
-                CCNodeConstructor()
-                    .fromFile("BE_eye-on.png")
-                    .scale(.7f)
-                    .exec([](auto t) -> void {
-                        t->setContentSize(t->getScaledContentSize());
-                    })
-                    .done(),
-                this,
-                (SEL_MenuHandler)&LayerEditNode::onShow
-            ))
-            .move(15.0f, -50.0f)
-            .save(&this->m_pShowBtn)
-            .done()
-    );
-    this->addChild(
-        CCNodeConstructor<CCMenuItemSpriteExtra*>()
-            .fromNode(CCMenuItemSpriteExtra::create(
-                CCNodeConstructor()
-                    .fromFrameName("GJ_resetBtn_001.png")
-                    .scale(.8f)
-                    .done(),
-                this,
-                (SEL_MenuHandler)&LayerEditNode::onReset
-            ))
-            .move(150.0f, 150.0f)
-            .done()
-    );
-
-    this->registerWithTouchDispatcher();
-    cocos2d::CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
-    
-    this->setKeypadEnabled(true);
-    this->setTouchEnabled(true);
-
-    this->updateNode(layer);
-
-    this->sliderChanged(nullptr);
-    updateLockSprite(this->m_pLockBtn, this->m_pELayer);
-    updateShowSprite(this->m_pShowBtn, this->m_pELayer);
-}
-
-void LayerEditNode::onShow(CCObject* pSender) {
+void LayerEditPopup::onShow(CCObject* pSender) {
     auto btn = as<CCMenuItemSpriteExtra*>(pSender);
     
     if (!this->m_pELayer) return;
@@ -222,7 +210,7 @@ void LayerEditNode::onShow(CCObject* pSender) {
     updateShowSprite(btn, this->m_pELayer);
 }
 
-void LayerEditNode::onLock(CCObject* pSender) {
+void LayerEditPopup::onLock(CCObject* pSender) {
     auto btn = as<CCMenuItemSpriteExtra*>(pSender);
     
     if (!this->m_pELayer) return;
@@ -232,7 +220,7 @@ void LayerEditNode::onLock(CCObject* pSender) {
     updateLockSprite(btn, this->m_pELayer);
 }
 
-void LayerEditNode::sliderChanged(CCObject* pSender) {
+void LayerEditPopup::sliderChanged(CCObject* pSender) {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     if (!this->m_pELayer) return;
@@ -258,18 +246,25 @@ void LayerEditNode::sliderChanged(CCObject* pSender) {
     this->m_pViewPopup->updateLayerItem(this->m_pELayer->m_nLayerNumber, this->m_pELayer);
 }
 
-void LayerEditNode::onResetOpacity(CCObject* pSender) {
+void LayerEditPopup::onResetOpacity(CCObject* pSender) {
     this->m_pOpacitySlider->setValue(LayerManager::get()->default_opacity / 255.0f);
     this->m_pOpacitySlider->updateBar();
     this->sliderChanged(nullptr);
 }
 
-void LayerEditNode::onReset(CCObject* pSender) {
+void LayerEditPopup::onReset(CCObject* pSender) {
     this->m_pNameInput->setString("");
     this->onResetOpacity(pSender);
 }
 
-void LayerEditNode::textChanged(CCTextInputNode* pInput) {
+void LayerEditPopup::onClose(CCObject*) {
+    if (this->m_pViewPopup)
+        this->m_pViewPopup->updateLayerItem(this->m_pELayer->m_nLayerNumber, this->m_pELayer);
+
+    BrownAlertDelegate::onClose(nullptr);
+}
+
+void LayerEditPopup::textChanged(CCTextInputNode* pInput) {
     switch (pInput->getTag()) {
         case s_opacityInputTag: {
             int o = LayerManager::get()->default_opacity;
@@ -305,10 +300,14 @@ void LayerEditNode::textChanged(CCTextInputNode* pInput) {
     }
 }
 
-LayerEditNode* LayerEditNode::create(LayerViewPopup* popup, LayerManager::Layer* layer) {
-    auto pRet = new LayerEditNode();
+LayerEditPopup* LayerEditPopup::create(LayerViewPopup* popup, LayerManager::Layer* layer) {
+    auto pRet = new LayerEditPopup();
 
-    if (pRet && pRet->init(popup, layer)) {
+    if (pRet && (pRet->m_pELayer = layer) && (pRet->m_pViewPopup = popup) && pRet->init(
+        220.0f, 200.0f,
+        "GJ_square02.png",
+        ("Layer " + std::to_string(layer->m_nLayerNumber)).c_str()
+    )) {
         pRet->autorelease();
         return pRet;
     }

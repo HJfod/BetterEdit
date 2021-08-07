@@ -26,6 +26,8 @@ int g_nSettingsPage = 0;
     )->setUserData(reinterpret_cast<void*>(gdid));
 
 void BESettingsLayer::setup() {
+    this->m_bNoElasticity = true;
+
     this->m_pPrevPageBtn = CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"),
         this,
@@ -104,11 +106,22 @@ void BESettingsLayer::setup() {
         BE_SETTING_FUNC_B(UseOldProgressBar)
     );
     this->addToggle(
-        "Don't Repeat Paste",
+        "Repeat Copy+Paste",
         "<cy>Paste Repeating</c> means that when using <co>Copy + Paste</c>, "
         "actions such as moving & incrementing trigger targets are automatically "
         "repeated on the next object",
-        BE_SETTING_FUNC_B(DontRepeatPaste)
+        BE_SETTING_FUNC_B(RepeatCopyPaste), true
+    );
+    this->addToggle(
+        "Enable Relative Swipe",
+        "Makes it so that when you scroll the screen while using <co>swipe</c>, "
+        "the start point of the swipe rectangle stays relative to the object layer",
+        BE_SETTING_FUNC_B(EnableRelativeSwipe)
+    );
+    this->addToggle(
+        "Use Old Color Select",
+        "Use GD's original color select popup when using <co>Edit Object</c>",
+        BE_SETTING_FUNC_B(DisableNewColorSelection)
     );
     this->incrementPageCount(true);
     this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");

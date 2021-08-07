@@ -32,7 +32,7 @@ CCPoint getShowButtonPosition(EditorUI* self) {
 
     if (ratio > 1.5f)
         return {
-            self->m_pTrashBtn->getPositionX() + 40.0f,
+            self->m_pTrashBtn->getPositionX() + 50.0f,
             self->m_pTrashBtn->getPositionY()
         };
     
@@ -257,7 +257,6 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
 
     g_showUI = show;
 
-    self->m_pTabsMenu->setVisible(show);
     CATCH_NULL(self->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG))->setVisible(show);
     CATCH_NULL(self->m_pCopyBtn->getParent()->getChildByTag(7777))->setVisible(show);
     showGridButtons(self, show);

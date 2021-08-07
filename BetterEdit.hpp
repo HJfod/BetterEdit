@@ -35,7 +35,9 @@ using namespace cocos2d::extension;
     __macro__(EnableControlA, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                \
     __macro__(BypassObjectLimit, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(UseOldProgressBar, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
-    __macro__(DontRepeatPaste, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
+    __macro__(RepeatCopyPaste, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
+    __macro__(EnableRelativeSwipe, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
+    __macro__(DisableNewColorSelection, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)      \
 
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \

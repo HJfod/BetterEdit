@@ -1,6 +1,8 @@
 #include "gridButton.hpp"
 #include "../../BetterEdit.hpp"
 #include <InputNode.hpp>
+#include <string>
+#include <sstream>
 
 using namespace gd;
 using namespace gdmake;
@@ -10,6 +12,13 @@ using namespace cocos2d;
 static constexpr const int ZOOMIN_TAG = 8001;
 static constexpr const int ZOOMOUT_TAG = 8002;
 
+bool isFloat(std::string const& myString) {
+    std::istringstream iss(myString);
+    float f;
+    iss >> f;
+    return iss.eof() && !iss.fail(); 
+}
+
 CCPoint getGridButtonPosition(EditorUI* self, int which) {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     auto ratio = winSize.width / winSize.height;
@@ -18,7 +27,7 @@ CCPoint getGridButtonPosition(EditorUI* self, int which) {
 
     if (ratio > 1.6f)
         return {
-            pOptionsBtn->getPositionX() - 55.0f + which * 22.0f,
+            pOptionsBtn->getPositionX() - 55.0f - which * 18.0f,
             pOptionsBtn->getPositionY()
         };
     
@@ -67,12 +76,20 @@ class GridInputDelegate : public CCNode, public TextInputDelegate {
     public:
         void textChanged(CCTextInputNode* input) override {
             auto ui = LevelEditorLayer::get()->getEditorUI();
-            auto size = 30.0f;
+            auto size = BetterEdit::getGridSize();
 
             if (input->getString() && strlen(input->getString()))
-                try { size = std::stof(input->getString()); }
-                catch (...) {}
-            
+                try {
+                    size = std::stof(input->getString());
+                    if (!isFloat(input->getString())) {
+                        input->setString(BetterEdit::formatToString(size).c_str());
+                        input->getTextField()->detachWithIME();
+                    }
+                } catch (...) {
+                    input->setString(BetterEdit::formatToString(size).c_str());
+                    input->getTextField()->detachWithIME();
+                }
+
             BetterEdit::sharedState()->setGridSize(size);
             if (!BetterEdit::sharedState()->getAlwaysUseCustomGridSize())
                 BetterEdit::sharedState()->setGridSizeEnabled(size != 30.0f);
@@ -127,7 +144,7 @@ void loadGridButtons(EditorUI* self) {
     );
     getGridButtonParent(self)->addChild(
         CCNodeConstructor<CCTextInputNode*>()
-            .fromNode(CCTextInputNode::create("30", self, "bigFont.fnt", 60.0f, 30.0f))
+            .fromNode(CCTextInputNode::create("30", self, "bigFont.fnt", 30.0f, 30.0f))
             .scale(.5f)
             .text(BetterEdit::getGridSizeAsString().c_str())
             .exec([d](CCTextInputNode* i) -> void {

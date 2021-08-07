@@ -2,41 +2,42 @@
 #include "LayerManager.hpp"
 #include "LayerViewPopup.hpp"
 
-#define MAKE_MIDHOOK(addr, func)        \
-    if (MH_CreateHook(                  \
-        as<LPVOID>(gd::base + addr),    \
-        as<LPVOID>(func##_midHook),     \
-        as<LPVOID*>(&func##_retAddr)    \
-    ) != MH_OK) return false;           \
-                                        \
-    if (MH_EnableHook(                  \
-        as<LPVOID>(gd::base + addr)     \
-    ) != MH_OK)                         \
-        return false;
+#define MAKE_MIDHOOK(addr, func)
+
+// #define MAKE_MIDHOOK(addr, func)        \
+//     if (MH_CreateHook(                  \
+//         as<LPVOID>(gd::base + addr),    \
+//         as<LPVOID>(func##_midHook),     \
+//         as<LPVOID*>(&func##_retAddr)    \
+//     ) != MH_OK) return false;           \
+//                                         \
+//     if (MH_EnableHook(                  \
+//         as<LPVOID>(gd::base + addr)     \
+//     ) != MH_OK)                         \
+//         return false;
     
-#define MAKE_VALIDGROUP_MIDHOOK_DEF(name)   \
-    void (*name##_retAddr)();               \
-    __declspec(naked) void name##_midHook() {\
-    __asm {                                 \
-        push eax                            \
-        push edx                            \
-        push ebx                            \
-        push esp                            \
-        push ebp                            \
-        push esi                            \
-        push edi                            \
-        pushfd                              \
-        call LevelEditorLayer_validGroup_hook\
-        popfd                               \
-        pop edi                             \
-        pop esi                             \
-        pop ebp                             \
-        add esp, 0x4                        \
-        pop ebx                             \
-        pop edx                             \
-        pop eax                             \
-        jmp name##_retAddr                  \
-    }}
+#define MAKE_VALIDGROUP_MIDHOOK_DEF(name)     \
+    void (*name##_retAddr)();                 \
+    __declspec(naked) void name##_midHook() { \
+    __asm push eax                            \
+    __asm push edx                            \
+    __asm push ebx                            \
+    __asm push esp                            \
+    __asm push ebp                            \
+    __asm push esi                            \
+    __asm push edi                            \
+    __asm pushfd                              \
+    __asm call LevelEditorLayer_validGroup_hook\
+    __asm popfd                               \
+    __asm pop edi                             \
+    __asm pop esi                             \
+    __asm pop ebp                             \
+    __asm add esp, 0x4                        \
+    __asm pop ebx                             \
+    __asm pop edx                             \
+    __asm pop eax                             \
+    __asm jmp name##_retAddr                  \
+    }
 
 class EditorUI_CB : public EditorUI {
     public:
@@ -165,7 +166,7 @@ void LevelEditorLayer_validGroup_hook() {
 
     // std::cout << obj->m_nEditorLayer << " == " << clickable << "\n";
 
-    clickable = -1;
+    // clickable = -1;
 
     __asm {
         mov ecx, clickable
@@ -225,7 +226,7 @@ bool loadUpdateVisibilityHook() {
     // LevelEditorLayer::draw
     MAKE_MIDHOOK(0x16b89d, LevelEditorLayer_draw);
     // LevelEditorLayer::updateVisibility
-    MAKE_MIDHOOK(0x1639f6, LevelEditorLayer_updateVisibility2);
+    // MAKE_MIDHOOK(0x1639f6, LevelEditorLayer_updateVisibility2);
 
     return true;
 }
@@ -392,7 +393,6 @@ bool testSelectObjectLayer(GameObject* obj) {
     if (obj->m_nEditorLayer == LevelEditorLayer::get()->m_nCurrentLayer ||
         obj->m_nEditorLayer2 == LevelEditorLayer::get()->m_nCurrentLayer)
         return true;
-
     if (layer1 && (!layer1->m_bVisible || layer1->m_bLocked))
         return false;
 

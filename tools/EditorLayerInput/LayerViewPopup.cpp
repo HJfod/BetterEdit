@@ -1,5 +1,5 @@
 #include "LayerViewPopup.hpp"
-#include "LayerEditNode.hpp"
+#include "LayerEditPopup.hpp"
 #include "LayerSettingsPopup.hpp"
 
 int g_nPage = 0;
@@ -91,6 +91,7 @@ void LayerViewPopup::setup() {
                 (SEL_MenuHandler)&LayerViewPopup::onPage
             ))
             .udata(-1)
+            .save(&m_pPrevPageBtn)
             .move(- s_fItemWidth / 2 - 25.0f, 0.0f)
             .done()
         );
@@ -105,6 +106,7 @@ void LayerViewPopup::setup() {
                 (SEL_MenuHandler)&LayerViewPopup::onPage
             ))
             .udata(1)
+            .save(&m_pNextPageBtn)
             .move(s_fItemWidth / 2 + 25.0f, 0.0f)
             .done()
         );
@@ -122,7 +124,7 @@ void LayerViewPopup::setup() {
                 (SEL_MenuHandler)&LayerViewPopup::onLockAll
             ))
             .udata(true)
-            .move(this->m_pLrSize.width / 2 - 40.0f, -this->m_pLrSize.height / 2 + 50.0f)
+            .move(this->m_pLrSize.width / 2 - 40.0f, -this->m_pLrSize.height / 2 + 24.0f)
             .done()
         );
         this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
@@ -137,26 +139,11 @@ void LayerViewPopup::setup() {
                 (SEL_MenuHandler)&LayerViewPopup::onLockAll
             ))
             .udata(false)
-            .move(- this->m_pLrSize.width / 2 + 40.0f, -this->m_pLrSize.height / 2 + 50.0f)
+            .move(this->m_pLrSize.width / 2 - 40.0f, -this->m_pLrSize.height / 2 + 50.0f)
             .done()  
         );
     }
     { // show all
-        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
-            .fromNode(CCMenuItemSpriteExtra::create(
-                CCNodeConstructor<ButtonSprite*>()
-                    .fromNode(ButtonSprite::create(
-                        "Show All", 80, true, "bigFont.fnt", "GJ_button_04.png", 0, .9f
-                    ))
-                    .scale(.55f)
-                    .done(),
-                this,
-                (SEL_MenuHandler)&LayerViewPopup::onShowAll
-            ))
-            .udata(true)
-            .move(this->m_pLrSize.width / 2 - 40.0f, -this->m_pLrSize.height / 2 + 24.0f)
-            .done()
-        );
         this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
             .fromNode(CCMenuItemSpriteExtra::create(
                 CCNodeConstructor<ButtonSprite*>()
@@ -170,6 +157,21 @@ void LayerViewPopup::setup() {
             ))
             .udata(false)
             .move(- this->m_pLrSize.width / 2 + 40.0f, -this->m_pLrSize.height / 2 + 24.0f)
+            .done()
+        );
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor<ButtonSprite*>()
+                    .fromNode(ButtonSprite::create(
+                        "Show All", 80, true, "bigFont.fnt", "GJ_button_04.png", 0, .9f
+                    ))
+                    .scale(.55f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&LayerViewPopup::onShowAll
+            ))
+            .udata(true)
+            .move(- this->m_pLrSize.width / 2 + 40.0f, -this->m_pLrSize.height / 2 + 50.0f)
             .done()
         );
     }
@@ -294,11 +296,35 @@ void LayerViewPopup::setup() {
                 this,
                 (SEL_MenuHandler)&LayerViewPopup::onGridView
             ))
-            .move(- this->m_pLrSize.width / 2 + 23.0f, this->m_pLrSize.height / 2 - 47.5f)
+            .move(- this->m_pLrSize.width / 2 + 50.0f, this->m_pLrSize.height / 2 - 47.5f)
             .exec([this](CCMenuItemSpriteExtra* s) -> void {
                 this->m_vGridViewBtns.push_back(s);
             })
             .udata(kGridViewNormal)
+            .done()
+        );
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor<ButtonSprite*>()
+                    .fromNode(ButtonSprite::create(
+                        CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png"),
+                        0x20, true, 1.0f, false, GRIDVIEW_TO_BG(Alt),
+                        true, 32.0f
+                    ))
+                    .scale(.5f)
+                    .exec([](ButtonSprite* s) -> void {
+                        s->m_obSpritePosition = CCPoint { 0.0f, -1.0f };
+                        s->updateSpriteBGSize(s->m_obSpritePosition);
+                    })
+                    .done(),
+                this,
+                (SEL_MenuHandler)&LayerViewPopup::onGridView
+            ))
+            .move(- this->m_pLrSize.width / 2 + 50.0f, this->m_pLrSize.height / 2 - 70.0f)
+            .exec([this](CCMenuItemSpriteExtra* s) -> void {
+                this->m_vGridViewBtns.push_back(s);
+            })
+            .udata(kGridViewAlt)
             .done()
         );
         this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
@@ -318,7 +344,7 @@ void LayerViewPopup::setup() {
                 this,
                 (SEL_MenuHandler)&LayerViewPopup::onGridView
             ))
-            .move(- this->m_pLrSize.width / 2 + 23.0f, this->m_pLrSize.height / 2 - 70.0f)
+            .move(- this->m_pLrSize.width / 2 + 50.0f, this->m_pLrSize.height / 2 - 92.5f)
             .exec([this](CCMenuItemSpriteExtra* s) -> void {
                 this->m_vGridViewBtns.push_back(s);
             })
@@ -342,7 +368,7 @@ void LayerViewPopup::setup() {
                 this,
                 (SEL_MenuHandler)&LayerViewPopup::onGridView
             ))
-            .move(- this->m_pLrSize.width / 2 + 23.0f, this->m_pLrSize.height / 2 - 92.5f)
+            .move(- this->m_pLrSize.width / 2 + 50.0f, this->m_pLrSize.height / 2 - 115.0f)
             .exec([this](CCMenuItemSpriteExtra* s) -> void {
                 this->m_vGridViewBtns.push_back(s);
             })
@@ -376,15 +402,47 @@ void LayerViewPopup::updateLayerItem(int number, LayerManager::Layer* layer) {
             LayerViewPopup::name_tag_offset + number
         )
     );
+
     if (name) {
         if (layer->m_sName.size())
             name->setString(layer->m_sName.c_str());
         else
             name->setString("Layer");
 
-        name->limitLabelWidth(s_fItemWidth / 2 - 35.0f, .3f, .1f);
+        name->limitLabelWidth(s_fItemWidth - 75.0f, .3f, .1f);
 
         name->setPositionX(as<int>(name->getUserData()) + name->getScaledContentSize().width / 2);
+    } else {
+        auto nameBtn = as<CCMenuItemSpriteExtra*>(
+            this->m_pButtonMenu->getChildByTag(
+                name_tag_offset + number
+            )
+        );
+
+        if (nameBtn) {
+            name = as<CCLabelBMFont*>(nameBtn->getNormalImage()->getChildByTag(1));
+        
+            if (name) {
+                if (layer->m_sName.size()) {
+                    auto nameStr = layer->m_sName;
+
+                    if (nameStr.size() > 7) {
+                        nameStr = nameStr.substr(0, 5);
+                        nameStr += "...";
+                    }
+
+                    name->setString(nameStr.c_str());
+                    name->setOpacity(255);
+                } else {
+                    name->setString("-");
+                    name->setOpacity(150);
+                }
+
+                name->limitLabelWidth(
+                    nameBtn->getNormalImage()->getScaledContentSize().width - 5.0f, .3f, .1f
+                );
+            }
+        }
     }
 
     auto view = as<CCMenuItemSpriteExtra*>(
@@ -415,7 +473,8 @@ void LayerViewPopup::createGridItemAtPosition(float x, float y, bool color, int 
 
     bg->addChild(tinyIxLabel);
 
-    SEL_MenuHandler callback;
+    SEL_MenuHandler callback = nullptr;
+    int bindex = 0;
 
     switch (this->m_nGridView) {
         case kGridViewVisible: {
@@ -429,6 +488,7 @@ void LayerViewPopup::createGridItemAtPosition(float x, float y, bool color, int 
             bg->addChild(viewSprite);
 
             callback = (SEL_MenuHandler)&LayerViewPopup::onShow;
+            bindex = eye_tag_offset + index;
         } break;
 
         case kGridViewLocked: {
@@ -442,6 +502,7 @@ void LayerViewPopup::createGridItemAtPosition(float x, float y, bool color, int 
             bg->addChild(lockSprite);
 
             callback = (SEL_MenuHandler)&LayerViewPopup::onLock;
+            bindex = lock_tag_offset + index;
         } break;
 
         case kGridViewNormal: {
@@ -454,8 +515,20 @@ void LayerViewPopup::createGridItemAtPosition(float x, float y, bool color, int 
             tinyIxLabel->setVisible(false);
 
             bg->addChild(ixLabel);
+        } break;
+    
+        case kGridViewAlt: {
+            auto nameLabel = CCLabelBMFont::create("", "bigFont.fnt");
 
-            callback = nullptr;
+            nameLabel->setPosition(bg->getContentSize() / 2);
+            nameLabel->limitLabelWidth(20.0f, .5f, .1f);
+            nameLabel->setAnchorPoint({ .5f, .5f });
+            nameLabel->setTag(1);
+
+            bg->addChild(nameLabel);
+
+            callback = (SEL_MenuHandler)&LayerViewPopup::onSettings;
+            bindex = name_tag_offset + index;
         } break;
     }
 
@@ -464,7 +537,7 @@ void LayerViewPopup::createGridItemAtPosition(float x, float y, bool color, int 
     );
     btn->setPosition(CCPoint { x, y });
     btn->setUserData(as<void*>(index));
-    btn->setTag(0);
+    btn->setTag(bindex);
 
     this->m_pButtonMenu->addChild(btn);
     this->m_vPageContent.push_back(btn);
@@ -490,11 +563,13 @@ void LayerViewPopup::createListItemAtPosition(float x, float y, bool color, int 
 
     auto ixLabel = CCLabelBMFont::create(std::to_string(index).c_str(), "goldFont.fnt");
 
-    ixLabel->setPositionX(x + winSize.width / 2 + s_fItemWidth / 2 - 20.0f);
-    ixLabel->setPositionY(y + winSize.height / 2);
     ixLabel->limitLabelWidth(45.0f, .6f, .1f);
 
-    this->m_pLayer->addChild(ixLabel);
+    ixLabel->setPositionX(x + s_fItemWidth / 2 - 20.0f);
+    ixLabel->setPositionY(y);
+    ixLabel->setUserData(as<void*>(index));
+
+    this->m_pButtonMenu->addChild(ixLabel);
     this->m_vPageContent.push_back(ixLabel);
 
     auto lock = 
@@ -539,45 +614,45 @@ void LayerViewPopup::createListItemAtPosition(float x, float y, bool color, int 
     this->m_pButtonMenu->addChild(viewToggle);
     this->m_vPageContent.push_back(viewToggle);
 
-    auto gotoBtn = 
-        CCNodeConstructor<CCMenuItemToggler*>()
-            .fromNode(CCMenuItemToggler::createWithStandardSprites(
-                this,
-                (SEL_MenuHandler)&LayerViewPopup::onViewLayer
-            ))
-            .move(x - s_fItemWidth / 2 + 70.0f, y)
-            .scale(.5f)
-            .udata(index)
-            .tag(view_tag_offset + index)
-            .done();
-
-    this->m_pButtonMenu->addChild(gotoBtn);
-    this->m_vPageContent.push_back(gotoBtn);
-
-    // auto settings = 
-    //     CCNodeConstructor<CCMenuItemSpriteExtra*>()
-    //         .fromNode(CCMenuItemSpriteExtra::create(
-    //             CCNodeConstructor()
-    //                 .fromFile("BE_edit_layer_btn.png")
-    //                 .scale(.5f)
-    //                 .done(),
+    // auto gotoBtn = 
+    //     CCNodeConstructor<CCMenuItemToggler*>()
+    //         .fromNode(CCMenuItemToggler::createWithStandardSprites(
     //             this,
-    //             (SEL_MenuHandler)&LayerViewPopup::onSettings
+    //             (SEL_MenuHandler)&LayerViewPopup::onViewLayer
     //         ))
+    //         .move(x - s_fItemWidth / 2 + 70.0f, y)
+    //         .scale(.5f)
     //         .udata(index)
-    //         .move(x - s_fItemWidth / 2 + 85.0f, y)
+    //         .tag(view_tag_offset + index)
     //         .done();
 
-    // this->m_pButtonMenu->addChild(settings);
-    // this->m_vPageContent.push_back(settings);
+    // this->m_pButtonMenu->addChild(gotoBtn);
+    // this->m_vPageContent.push_back(gotoBtn);
+
+    auto settings = 
+        CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor()
+                    .fromFrameName("GJ_optionsBtn_001.png")
+                    .scale(.35f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&LayerViewPopup::onSettings
+            ))
+            .udata(index)
+            .move(x + s_fItemWidth / 2 - 48.0f, y)
+            .done();
+
+    this->m_pButtonMenu->addChild(settings);
+    this->m_vPageContent.push_back(settings);
 
     auto titleLabel = CCLabelBMFont::create("Layer", "bigFont.fnt");
 
-    titleLabel->setPositionX(x + winSize.width / 2 - 10.0f);
+    titleLabel->setPositionX(x + winSize.width / 2 - 60.0f);
     titleLabel->setPositionY(y + winSize.height / 2 + 6.0f);
-    titleLabel->limitLabelWidth(s_fItemWidth / 2 - 35.0f, .3f, .1f);
+    titleLabel->limitLabelWidth(s_fItemWidth - 75.0f, .3f, .1f);
     titleLabel->setTag(name_tag_offset + index);
-    titleLabel->setUserData(as<void*>(static_cast<int>(x + winSize.width / 2 - 10.0f)));
+    titleLabel->setUserData(as<void*>(static_cast<int>(titleLabel->getPositionX())));
 
     this->m_pLayer->addChild(titleLabel);
     this->m_vPageContent.push_back(titleLabel);
@@ -587,7 +662,7 @@ void LayerViewPopup::createListItemAtPosition(float x, float y, bool color, int 
     ) + " objs").c_str(), "goldFont.fnt");
 
     objCountLabel->limitLabelWidth(s_fItemWidth / 2 - 35.0f, .3f, .1f);
-    objCountLabel->setPositionX(x + winSize.width / 2 + objCountLabel->getScaledContentSize().width / 2 - 10.0f);
+    objCountLabel->setPositionX(x + winSize.width / 2 + objCountLabel->getScaledContentSize().width / 2 - 60.0f);
     objCountLabel->setPositionY(y + winSize.height / 2 - 6.0f);
 
     this->m_pLayer->addChild(objCountLabel);
@@ -661,9 +736,12 @@ void LayerViewPopup::onPage(CCObject* pSender) {
 void LayerViewPopup::onClose(CCObject* pSender) {
     auto ui = LevelEditorLayer::get()->getEditorUI();
 
-    ui->m_pCurrentLayerLabel->setString(CCString::createWithFormat("%d",
-        LevelEditorLayer::get()->m_nCurrentLayer
-    )->getCString());
+    if (LevelEditorLayer::get()->m_nCurrentLayer == -1)
+        ui->m_pCurrentLayerLabel->setString("All");
+    else
+        ui->m_pCurrentLayerLabel->setString(CCString::createWithFormat("%d",
+            LevelEditorLayer::get()->m_nCurrentLayer
+        )->getCString());
 
     updateEditorLayerInputText(ui);
 
@@ -737,7 +815,7 @@ void LayerViewPopup::onSettings(CCObject* pSender) {
     if (!layer)
         return;
 
-    // LayerEditPopup::create(this, layer)->show();
+    LayerEditPopup::create(this, layer)->show();
 }
 
 void LayerViewPopup::onGlobalSettings(CCObject*) {
@@ -830,6 +908,18 @@ void LayerViewPopup::onToggleEmpty(CCObject* pSender) {
     this->updatePage();
 }
 
+void LayerViewPopup::keyDown(enumKeyCodes key) {
+    switch (key) {
+        case KEY_Left:
+            onPage(m_pPrevPageBtn);
+            break;
+        case KEY_Right:
+            onPage(m_pNextPageBtn);
+            break;
+        default:
+            BrownAlertDelegate::keyDown(key);
+    }
+}
 LayerViewPopup* LayerViewPopup::create() {
     auto pRet = new LayerViewPopup();
 
