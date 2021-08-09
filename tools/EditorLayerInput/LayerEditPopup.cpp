@@ -64,7 +64,7 @@ void updateShowSprite(CCMenuItemSpriteExtra* btn, LayerManager::Layer* layer) {
             fname = "BE_eye-on.png";
     }
 
-    updateBtnSprite(btn, CCSprite::create(fname));
+    updateBtnSprite(btn, createBESprite(fname));
 }
 
 void LayerEditPopup::setup() {
@@ -151,7 +151,7 @@ void LayerEditPopup::setup() {
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
             .fromNode(CCMenuItemSpriteExtra::create(
                 CCNodeConstructor()
-                    .fromFile("BE_eye-on.png")
+                    .fromBESprite("BE_eye-on.png")
                     .scale(.7f)
                     .exec([](auto t) -> void {
                         t->setContentSize(t->getScaledContentSize());

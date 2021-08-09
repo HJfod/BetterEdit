@@ -29,6 +29,7 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
         std::vector<std::vector<cocos2d::CCNode*>> m_vPages;
         gd::CCMenuItemSpriteExtra* m_pPrevPageBtn;
         gd::CCMenuItemSpriteExtra* m_pNextPageBtn;
+        EditorPauseLayer* m_pPauseLayer;
 
         static constexpr const float s_fItemPaddingV = 35.0f;
         static constexpr const unsigned int s_nMaxItemsOnPage = 10;
@@ -62,5 +63,5 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
         void onURL(cocos2d::CCObject*);
 
     public:
-        static BESettingsLayer* create();
+        static BESettingsLayer* create(EditorPauseLayer*);
 };

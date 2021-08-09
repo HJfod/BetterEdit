@@ -5,7 +5,13 @@
 static constexpr const int WIDGET_TAG = 69696;
 
 GDMAKE_HOOK(0x43ae0)
-bool __fastcall ColorSelectPopup_init(ColorSelectPopup* self, edx_t edx, EffectGameObject* eff_obj, CCArray* arr, gd::ColorAction* action) {
+bool __fastcall ColorSelectPopup_init(
+    ColorSelectPopup* self,
+    edx_t edx,
+    EffectGameObject* eff_obj,
+    CCArray* arr,
+    ColorAction* action
+) {
     if (!GDMAKE_ORIG(self, edx, eff_obj, arr, action))
         return false;
     
@@ -63,8 +69,8 @@ bool __fastcall SetupPulsePopup_init(SetupPulsePopup* self, edx_t edx, EffectGam
     auto square_width = self->currentColorSpr->getScaledContentSize().width;
     auto x = widget->getPositionX() - square_width / 2.f;
 
-    self->currentColorSpr->setPosition({x, center.height + 85.f});
-    self->prevColorSpr->setPosition({x + square_width, center.height + 85.f});
+    self->currentColorSpr->setPosition({x + 20.0f, center.height + 85.f});
+    self->prevColorSpr->setPosition({x + 20.0f + square_width, center.height + 85.f});
 
     layer->addChild(widget);
     widget->setVisible(self->pulseMode == 0);

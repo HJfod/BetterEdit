@@ -2,19 +2,19 @@
 #include "LayerManager.hpp"
 #include "LayerViewPopup.hpp"
 
-#define MAKE_MIDHOOK(addr, func)
+// #define MAKE_MIDHOOK(addr, func)
 
-// #define MAKE_MIDHOOK(addr, func)        \
-//     if (MH_CreateHook(                  \
-//         as<LPVOID>(gd::base + addr),    \
-//         as<LPVOID>(func##_midHook),     \
-//         as<LPVOID*>(&func##_retAddr)    \
-//     ) != MH_OK) return false;           \
-//                                         \
-//     if (MH_EnableHook(                  \
-//         as<LPVOID>(gd::base + addr)     \
-//     ) != MH_OK)                         \
-//         return false;
+#define MAKE_MIDHOOK(addr, func)        \
+    if (MH_CreateHook(                  \
+        as<LPVOID>(gd::base + addr),    \
+        as<LPVOID>(func##_midHook),     \
+        as<LPVOID*>(&func##_retAddr)    \
+    ) != MH_OK) return false;           \
+                                        \
+    if (MH_EnableHook(                  \
+        as<LPVOID>(gd::base + addr)     \
+    ) != MH_OK)                         \
+        return false;
     
 #define MAKE_VALIDGROUP_MIDHOOK_DEF(name)     \
     void (*name##_retAddr)();                 \
@@ -211,20 +211,21 @@ MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_updateVisibility2)
 
 bool loadUpdateVisibilityHook() {
     MAKE_MIDHOOK(0x163a2e, LevelEditorLayer_updateVisibility);
+
     // LevelEditorLayer::objectsAtPosition
-    MAKE_MIDHOOK(0x1615f7, LevelEditorLayer_objectsAtPosition);
+    // MAKE_MIDHOOK(0x1615f7, LevelEditorLayer_objectsAtPosition);
     // LevelEditorLayer::objectAtPosition
-    MAKE_MIDHOOK(0x161417, LevelEditorLayer_objectAtPosition);
+    // MAKE_MIDHOOK(0x161417, LevelEditorLayer_objectAtPosition);
     // LevelEditorLayer::typeExistsAtPosition
-    MAKE_MIDHOOK(0x160f5a, LevelEditorLayer_typeExistsAtPosition);
+    // MAKE_MIDHOOK(0x160f5a, LevelEditorLayer_typeExistsAtPosition);
     // LevelEditorLayer::objectsInRect
-    MAKE_MIDHOOK(0x161bf0, LevelEditorLayer_objectsInRect);
+    // MAKE_MIDHOOK(0x161bf0, LevelEditorLayer_objectsInRect);
     // EditorUI::selectAllWithDirection
-    MAKE_MIDHOOK(0x86e50, LevelEditorLayer_selectAllWithDirection);
+    // MAKE_MIDHOOK(0x86e50, LevelEditorLayer_selectAllWithDirection);
     // EditorUI::selectAll
-    MAKE_MIDHOOK(0x86c93, LevelEditorLayer_selectAll);
+    // MAKE_MIDHOOK(0x86c93, LevelEditorLayer_selectAll);
     // LevelEditorLayer::draw
-    MAKE_MIDHOOK(0x16b89d, LevelEditorLayer_draw);
+    // MAKE_MIDHOOK(0x16b89d, LevelEditorLayer_draw);
     // LevelEditorLayer::updateVisibility
     // MAKE_MIDHOOK(0x1639f6, LevelEditorLayer_updateVisibility2);
 
@@ -393,10 +394,16 @@ bool testSelectObjectLayer(GameObject* obj) {
     if (obj->m_nEditorLayer == LevelEditorLayer::get()->m_nCurrentLayer ||
         obj->m_nEditorLayer2 == LevelEditorLayer::get()->m_nCurrentLayer)
         return true;
-    if (layer1 && (!layer1->m_bVisible || layer1->m_bLocked))
+
+    bool check2 = false;
+
+    if (obj->m_nEditorLayer == 0 &&
+        obj->m_nEditorLayer2 > 0) check2 = true;
+
+    if (!check2 && layer1 && (!layer1->m_bVisible || layer1->m_bLocked))
         return false;
 
-    if (layer2 && (!layer2->m_bVisible || layer2->m_bLocked))
+    if (check2 && layer2 && (!layer2->m_bVisible || layer2->m_bLocked))
         return false;
 
     return true;

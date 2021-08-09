@@ -50,6 +50,31 @@ static void unpatch(uintptr_t addr, bool hardOverwrite = false) {
     g_patchedBytes[addr] = {};
 }
 
+static cocos2d::CCSprite* createBESprite(const char* name, const char* fallback = nullptr) {
+    auto spr = cocos2d::CCSprite::createWithSpriteFrameName(name);
+
+    if (spr) return spr;
+    if (fallback) {
+        spr = cocos2d::CCSprite::createWithSpriteFrameName(fallback);
+
+        if (spr) return spr;
+    }
+
+    auto missingTextureSpr = cocos2d::CCSprite::create();
+
+    auto missingTextureLabel = cocos2d::CCLabelBMFont::create("Missing\nTexture", "bigFont.fnt");
+
+    missingTextureLabel->setColor({ 255, 50, 50 });
+    missingTextureLabel->setScale(.3f);
+    missingTextureLabel->setPosition(missingTextureLabel->getScaledContentSize() / 2);
+
+    missingTextureSpr->addChild(missingTextureLabel);
+
+    missingTextureSpr->setContentSize(missingTextureLabel->getScaledContentSize());
+
+    return missingTextureSpr;
+}
+
 static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
     if (obj != nullptr) {
         const auto vtable = *as<uintptr_t*>(obj) - gd::base;
@@ -79,6 +104,10 @@ class CCNodeConstructor {
     public:
         inline CCNodeConstructor<cocos2d::CCSprite*> & fromFrameName(const char* fname) {
             this->node = cocos2d::CCSprite::createWithSpriteFrameName(fname);
+            return *this;
+        }
+        inline CCNodeConstructor<cocos2d::CCSprite*> & fromBESprite(const char* fname, const char* fback = nullptr) {
+            this->node = createBESprite(name, fback);
             return *this;
         }
         inline CCNodeConstructor<cocos2d::CCSprite*> & fromFile(const char* fname) {

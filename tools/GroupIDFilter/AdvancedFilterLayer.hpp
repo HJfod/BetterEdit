@@ -207,7 +207,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
                         bool clctb = false;
                         for (auto c : text)
                             switch (c) {
-                                case '~':
+                                case ':':
                                     clctb = true;
                                     if (clct.size())
                                         this->start = AFL_IORF(T, clct);

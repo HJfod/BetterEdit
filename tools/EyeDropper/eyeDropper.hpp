@@ -7,3 +7,4 @@ void loadEyeDropper(ColorSelectPopup* popup);
 void loadEyeDropper(SetupPulsePopup* popup);
 void showEyeDropper(ColorSelectPopup*);
 void showEyeDropper(SetupPulsePopup*);
+bool isPickingEyeDropperColor();

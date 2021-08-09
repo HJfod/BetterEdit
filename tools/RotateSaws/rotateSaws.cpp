@@ -72,16 +72,21 @@ void beginRotations(LevelEditorLayer* self) {
         beginRotateSaw(obj);
 }
 
+void stopRotateSaw(GameObject* obj) {
+    obj->stopActionByTag(ROTATEACTION_TAG);
+    if (g_startRotations.count(obj)) {
+        obj->setRotation(g_startRotations[obj]);
+        g_startRotations.erase(obj);
+    }
+    if (obj->m_pMyAction)
+        obj->m_pMyAction->release();
+    obj->m_pMyAction = nullptr;
+}
+
 void stopRotations(LevelEditorLayer* self) {
     CCARRAY_FOREACH_B_TYPE(self->m_pObjects, obj, GameObject)
-        if (objectIsSaw(obj)) {
-            obj->stopActionByTag(ROTATEACTION_TAG);
-            if (g_startRotations.count(obj))
-                obj->setRotation(g_startRotations[obj]);
-            if (obj->m_pMyAction)
-                obj->m_pMyAction->release();
-            obj->m_pMyAction = nullptr;
-        }
+        if (objectIsSaw(obj))
+            stopRotateSaw(obj);
     
     g_startRotations.clear();
 }

@@ -28,6 +28,9 @@ int g_nSettingsPage = 0;
 void BESettingsLayer::setup() {
     this->m_bNoElasticity = true;
 
+    as<CCMenu*>(m_pPauseLayer->getChildren()->objectAtIndex(0))->setEnabled(false);
+    as<CCMenu*>(m_pPauseLayer->m_pButton0->getParent())->setEnabled(false);
+
     this->m_pPrevPageBtn = CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"),
         this,
@@ -78,7 +81,7 @@ void BESettingsLayer::setup() {
         BE_SETTING_FUNC_B(FadeOutPercentage)
     );
     this->addToggle("Pulse Objects", nullptr, BE_SETTING_FUNC_B(PulseObjectsInEditor), true);
-    this->addToggle("Rotate Saws", nullptr, BE_SETTING_FUNC_B(RotateSawsInEditor), true);
+    this->addToggle("Rotate Saws", nullptr, BE_SETTING_FUNC_B(RotateSawsInEditor));
     this->addToggle("No Global Clipboard", nullptr, BE_SETTING_FUNC_B(DisableGlobalClipboard));
     // this->addToggle("Disable Position Text", nullptr, BE_SETTING_FUNC_B(DisableEditorPos));
     this->addToggle(
@@ -123,6 +126,11 @@ void BESettingsLayer::setup() {
         "Use GD's original color select popup when using <co>Edit Object</c>",
         BE_SETTING_FUNC_B(DisableNewColorSelection)
     );
+    this->addToggle(
+        "Enable Up Arrow",
+        "Enables the <cr>Up</c> arrow to be used when playtesting",
+        BE_SETTING_FUNC_B(UseUpArrowForGameplay)
+    );
     this->incrementPageCount(true);
     this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
     this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap), "0123456789.");
@@ -147,9 +155,9 @@ void BESettingsLayer::setup() {
     // this->incrementPageCount(true);
     this->addButton(
         CCNodeConstructor<CCLabelBMFont*>()
-            .fromText("Developed by HJfod", "goldFont.fnt")
-            .color({ 4, 255, 255 })
-            .scale(.75f)
+            .fromText("Developed by HJfod", "bigFont.fnt")
+            .color({ 15, 255, 45 })
+            .scale(.6f)
             .done(),
         (SEL_MenuHandler)&BESettingsLayer::onShowAccount,
         true
@@ -167,6 +175,7 @@ void BESettingsLayer::setup() {
     this->USER_LINK("RobTop", 71);
     this->USER_LINK("PoweredByPie", 0x2beddd);
     this->USER_LINK("GDColon", 106255);
+    this->USER_LINK("Fed", 0xced343);
     this->addButton(
         CCNodeConstructor<CCLabelBMFont*>()
             .fromText("And You :)", "goldFont.fnt")
@@ -410,8 +419,15 @@ void BESettingsLayer::onInfo(CCObject* pSender) {
 
 void BESettingsLayer::onPage(CCObject* pSender) {
     for (auto page : this->m_vPages)
-        for (auto item : page)
+        for (auto item : page) {
             item->setVisible(false);
+            if (dynamic_cast<CCMenuItemSprite*>(item))
+                as<CCMenuItemSpriteExtra*>(item)->setEnabled(false);
+            if (dynamic_cast<InputNode*>(item)) {
+                as<InputNode*>(item)->getInputNode()->setTouchEnabled(false);
+                as<InputNode*>(item)->getInputNode()->detachWithIME();
+            }
+        }
     
     auto add = as<int>(as<CCNode*>(pSender)->getUserData());
     this->m_nCurrentPage += add;
@@ -421,8 +437,13 @@ void BESettingsLayer::onPage(CCObject* pSender) {
     else if (this->m_nCurrentPage < 0)
         this->m_nCurrentPage = this->m_vPages.size() - 1;
 
-    for (auto item : this->m_vPages[this->m_nCurrentPage])
+    for (auto item : this->m_vPages[this->m_nCurrentPage]) {
         item->setVisible(true);
+        if (dynamic_cast<CCMenuItemSprite*>(item))
+            as<CCMenuItemSpriteExtra*>(item)->setEnabled(true);
+        if (dynamic_cast<InputNode*>(item))
+            as<InputNode*>(item)->getInputNode()->setTouchEnabled(true);
+    }
     
     g_nSettingsPage = this->m_nCurrentPage;
 }
@@ -456,6 +477,9 @@ void BESettingsLayer::onURL(CCObject* pSender) {
 void BESettingsLayer::onClose(CCObject* pSender) {
     GameManager::sharedState()->getEditorLayer()->getEditorUI()->updateGridNodeSize();
 
+    as<CCMenu*>(m_pPauseLayer->getChildren()->objectAtIndex(0))->setEnabled(true);
+    as<CCMenu*>(m_pPauseLayer->m_pButton0->getParent())->setEnabled(true);
+
     BrownAlertDelegate::onClose(pSender);
 }
 
@@ -472,10 +496,10 @@ void BESettingsLayer::keyDown(enumKeyCodes key) {
     }
 }
 
-BESettingsLayer* BESettingsLayer::create() {
+BESettingsLayer* BESettingsLayer::create(EditorPauseLayer* pause) {
     auto ret = new BESettingsLayer();
 
-    if (ret && ret->init(340.0f, 240.0f, "GJ_square01.png", "BetterEdit Settings")) {
+    if (ret && (ret->m_pPauseLayer = pause) && ret->init(340.0f, 240.0f, "GJ_square01.png", "BetterEdit Settings")) {
         ret->autorelease();
         return ret;
     }

@@ -211,7 +211,7 @@ bool __fastcall HSVWidgetPopup_init(HSVWidgetPopup* self, edx_t edx, HSVWidgetPo
     if (!GDMAKE_ORIG(self, edx, delegate, hsv, str))
         return false;
 
-    if (!g_hsvColorChannel)
+    if (g_hsvColorChannel < 1)
         return true;
     
     auto winSize = CCDirector::sharedDirector()->getWinSize();

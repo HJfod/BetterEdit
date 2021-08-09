@@ -4,8 +4,6 @@
 static constexpr const int DROPPER_TAG = 0xb00b;
 bool g_bPickingColor = false;
 ccColor3B g_obColorUnderCursor;
-ColorSelectPopup* g_pTargetLayer;
-ColorAction* g_pTargetChannel;
 EyeDropperColorOverlay* g_pOverlay;
 HWND g_hwnd;
 
@@ -22,16 +20,16 @@ HWND glfwGetWin32Window(GLFWwindow* wnd) {
 class PickCallback : public CCObject {
     public:
         void onPickColor(CCObject* pSender) {
-            if (g_bPickingColor)
+            if (g_bPickingColor) {
+                SetCapture(g_hwnd);
                 return;
+            }
 
-            g_pTargetLayer = as<ColorSelectPopup*>(as<CCNode*>(pSender)->getUserData());
-            g_pTargetLayer->retain();
-            g_pTargetChannel = g_pTargetLayer->colorAction;
+            auto popup = as<ColorSelectPopup*>(as<CCNode*>(pSender)->getUserData());
 
             g_bPickingColor = true;
-
-            g_pOverlay = EyeDropperColorOverlay::addToCurrentScene();
+            g_pOverlay = EyeDropperColorOverlay::addToCurrentScene(popup);
+            g_pOverlay->setStatusBool(&g_bPickingColor);
 
             g_hwnd = glfwGetWin32Window(CCDirector::sharedDirector()->getOpenGLView()->getWindow());
 
@@ -41,16 +39,16 @@ class PickCallback : public CCObject {
 
 GDMAKE_HOOK("libcocos2d.dll::?onGLFWMouseCallBack@CCEGLView@cocos2d@@IAEXPAUGLFWwindow@@HHH@Z")
 void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwindow* wnd, int btn, int pressed, int z) {
-    if (btn == 1 && g_bPickingColor) {
+    POINT mpos;
+    GetCursorPos(&mpos);
+
+    auto w = WindowFromPoint(mpos);
+
+    if (g_bPickingColor && (btn == 1 || w != g_hwnd)) {
         g_bPickingColor = false;
 
-        if (g_pTargetLayer) {
-            g_pTargetLayer->setPickerColor(g_obColorUnderCursor);
-            g_pTargetLayer->release();
-        } else if (g_pTargetChannel)
-            g_pTargetChannel->m_color = g_obColorUnderCursor;
-        
-        g_pOverlay->removeFromParentAndCleanup(true);
+        g_pOverlay->finish(&g_obColorUnderCursor);
+
         ReleaseCapture();
         SetFocus(g_hwnd);
         BringWindowToTop(g_hwnd);
@@ -74,8 +72,10 @@ void __fastcall CCScheduler_update(CCScheduler* self, edx_t edx, float dt) {
         g_obColorUnderCursor.g = GetGValue(col);
         g_obColorUnderCursor.b = GetBValue(col);
 
-        if (g_pOverlay)
+        if (g_pOverlay) {
             g_pOverlay->setShowColor(g_obColorUnderCursor);
+            g_pOverlay->setLabelText(WindowFromPoint(mpos) == g_hwnd);
+        }
     }
 
     return GDMAKE_ORIG_V(self, edx, dt);
@@ -83,9 +83,11 @@ void __fastcall CCScheduler_update(CCScheduler* self, edx_t edx, float dt) {
 
 CCMenuItemSpriteExtra* createEyeDropperButton(CCNode* target) {
     auto spr = ButtonSprite::create(
-        CCSprite::create("BE_eyedropper.png"),
+        createBESprite("BE_eyedropper.png"),
         0, 0, 1.0f, 0, "GJ_button_05.png", true, 0
     );
+
+    spr->setScale(.75f);
 
     auto btn = CCMenuItemSpriteExtra::create(
         spr, target, (SEL_MenuHandler)&PickCallback::onPickColor
@@ -114,9 +116,14 @@ void loadEyeDropper(ColorSelectPopup* popup) {
     auto btn = createEyeDropperButton(popup);
 
     btn->setUserData(popup);
-    btn->setPosition(-190.0f, 146.0f);
+    if (popup->isColorTrigger)
+        btn->setPosition(110, 163);
+    else
+        btn->setPosition(-194, 146);
 
     popup->m_pButtonMenu->addChild(btn);
+
+    showEyeDropper(popup);
 }
 
 void loadEyeDropper(SetupPulsePopup* popup) {
@@ -125,7 +132,13 @@ void loadEyeDropper(SetupPulsePopup* popup) {
     auto btn = createEyeDropperButton(popup);
 
     btn->setUserData(popup);
-    btn->setPosition(-190.0f, 146.0f);
+    btn->setPosition(-169, 215);
 
     popup->m_pButtonMenu->addChild(btn);
+
+    showEyeDropper(popup);
+}
+
+bool isPickingEyeDropperColor() {
+    return g_bPickingColor;
 }

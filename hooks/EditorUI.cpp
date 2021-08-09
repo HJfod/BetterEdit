@@ -48,7 +48,7 @@ void updateToggleButtonSprite(CCMenuItemSpriteExtra* btn) {
 
     btn->setNormalImage(
         CCNodeConstructor()
-            .fromFile(g_showUI ?
+            .fromBESprite(g_showUI ?
                 "BE_eye-on-btn.png" : 
                 "BE_eye-off-btn.png")
             .scale(spr->getScale())
@@ -100,7 +100,7 @@ bool touchIntersectsInput(CCNode* input, CCTouch* touch) {
 }
 
 GDMAKE_HOOK(0x907b0)
-bool __fastcall EditorUI_ccTouchBegan(gd::EditorUI* self, edx_t edx, cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
+bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,CCEvent* event) {
     auto self_ = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self) - 0xEC);
 
     g_bHoldingDownTouch = true;
@@ -119,8 +119,28 @@ bool __fastcall EditorUI_ccTouchBegan(gd::EditorUI* self, edx_t edx, cocos2d::CC
     return GDMAKE_ORIG(self, edx, touch, event);
 }
 
+GDMAKE_HOOK(0x90cd0)
+void __fastcall EditorUI_ccTouchMoved(EditorUI* self_, edx_t edx, CCTouch* touch, CCEvent* event) {
+    auto self = reinterpret_cast<EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xEC);
+
+    float prevScale = self->m_pEditorLayer->m_pObjectLayer->getScale();
+    auto swipeStart =
+        self->m_pEditorLayer->m_pObjectLayer->convertToNodeSpace(self->m_obSwipeStart) * prevScale;
+        
+    GDMAKE_ORIG_V(self_, edx, touch, event);
+
+    auto nSwipeStart = 
+        self->m_pEditorLayer->m_pObjectLayer->convertToNodeSpace(self->m_obSwipeStart) * prevScale;
+    
+    auto rel = swipeStart - nSwipeStart;
+    rel = rel * (self->m_pEditorLayer->m_pObjectLayer->getScale() / prevScale);
+
+    if (BetterEdit::getEnableRelativeSwipe())
+        self->m_obSwipeStart = self->m_obSwipeStart + rel;
+}
+
 GDMAKE_HOOK(0x911a0)
-void __fastcall EditorUI_ccTouchEnded(gd::EditorUI* self, edx_t edx, cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
+void __fastcall EditorUI_ccTouchEnded(EditorUI* self, edx_t edx, CCTouch* touch, CCEvent* event) {
     g_bHoldingDownTouch = false;
 
     GDMAKE_ORIG_V(self, edx, touch, event);
@@ -212,7 +232,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
             .fromNode(
                 CCMenuItemSpriteExtra::create(
                     CCNodeConstructor()
-                        .fromFile("BE_eye-on-btn.png")
+                        .fromBESprite("BE_eye-on-btn.png")
                         .scale(.6f)
                         .exec([](auto t) -> void {
                             t->setContentSize(t->getScaledContentSize());
@@ -257,6 +277,7 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
 
     g_showUI = show;
 
+    self->m_pTabsMenu->setVisible(self->m_nSelectedMode == 2 && show);
     CATCH_NULL(self->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG))->setVisible(show);
     CATCH_NULL(self->m_pCopyBtn->getParent()->getChildByTag(7777))->setVisible(show);
     showGridButtons(self, show);
@@ -304,13 +325,31 @@ void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
     
     auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xf8);
 
-    if (!BetterEdit::getEnableControlA())
-        return GDMAKE_ORIG_V(self_, edx, key);
-
-    if (key == enumKeyCodes::KEY_A && kb->getControlKeyPressed())
-        self->selectAll();
+    if (
+        BetterEdit::getEnableControlA() &&
+        key == enumKeyCodes::KEY_A &&
+        kb->getControlKeyPressed()
+    )
+        return self->selectAll();
+    
+    // wacky hack to make 2-player duals work properly
+    if (BetterEdit::getUseUpArrowForGameplay() && key == enumKeyCodes::KEY_Up)
+        patch(0x91ac9, { 0x6a, 0x00 });
     else
-        GDMAKE_ORIG_V(self_, edx, key);
+        unpatch(0x91ac9);
+
+    GDMAKE_ORIG_V(self_, edx, key);
+}
+
+GDMAKE_HOOK(0x92180)
+void __fastcall EditorUI_keyUp(EditorUI* self_, edx_t edx, enumKeyCodes key) {
+    // wacky hack to make 2-player duals work properly
+    if (BetterEdit::getUseUpArrowForGameplay() && key == enumKeyCodes::KEY_Up)
+        patch(0x921b4, { 0x6a, 0x00 });
+    else
+        unpatch(0x921b4);
+
+    GDMAKE_ORIG_V(self_, edx, key);
 }
 
 // Credits to Alk1m123 (https://github.com/altalk23) for this scale fix

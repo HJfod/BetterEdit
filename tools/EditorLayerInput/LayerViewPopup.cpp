@@ -216,7 +216,7 @@ void LayerViewPopup::setup() {
             .fromNode(CCMenuItemSpriteExtra::create(
                 CCNodeConstructor<ButtonSprite*>()
                     .fromNode(ButtonSprite::create(
-                        CCSprite::create("BE_grid-icon.png"),
+                        createBESprite("BE_grid-icon.png"),
                         0x20, true, 1.0f, true, VIEWTYPE_TO_BG(Grid),
                         true, 32.0f
                     ))
@@ -260,7 +260,7 @@ void LayerViewPopup::setup() {
             .fromNode(CCMenuItemSpriteExtra::create(
                 CCNodeConstructor<ButtonSprite*>()
                     .fromNode(ButtonSprite::create(
-                        CCSprite::create("BE_0_objs.png"),
+                        createBESprite("BE_0_objs.png"),
                         0x20, true, 1.0f, true, BOOL_TO_BG(m_bHideEmptyLayers),
                         false, 32.0f
                     ))
@@ -355,7 +355,7 @@ void LayerViewPopup::setup() {
             .fromNode(CCMenuItemSpriteExtra::create(
                 CCNodeConstructor<ButtonSprite*>()
                     .fromNode(ButtonSprite::create(
-                        CCSprite::create("BE_eye-on.png"),
+                        createBESprite("BE_eye-on.png"),
                         0x20, true, 1.0f, false, GRIDVIEW_TO_BG(Visible),
                         true, 32.0f
                     ))
@@ -478,7 +478,7 @@ void LayerViewPopup::createGridItemAtPosition(float x, float y, bool color, int 
 
     switch (this->m_nGridView) {
         case kGridViewVisible: {
-            auto viewSprite = CCSprite::create("BE_eye-on.png"); 
+            auto viewSprite = createBESprite("BE_eye-on.png"); 
 
             viewSprite->setScale(.6f);
             viewSprite->setContentSize(viewSprite->getScaledContentSize());
@@ -597,7 +597,7 @@ void LayerViewPopup::createListItemAtPosition(float x, float y, bool color, int 
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
             .fromNode(CCMenuItemSpriteExtra::create(
                 CCNodeConstructor()
-                    .fromFile("BE_eye-on.png")
+                    .fromBESprite("BE_eye-on.png")
                     .scale(.6f)
                     .exec([](auto t) -> void {
                         t->setContentSize(t->getScaledContentSize());

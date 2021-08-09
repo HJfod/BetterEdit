@@ -7,15 +7,18 @@
 #include "../tools/IDRemap/remapHook.hpp"
 #include "../tools/PasteString/loadPasteButton.hpp"
 #include "../tools/RotateSaws/rotateSaws.hpp"
+#include "../tools/EyeDropper/eyeDropper.hpp"
 
 using namespace gdmake;
 
 bool g_bRotateSaws = false;
 
+bool shouldRotateSaw() { return g_bRotateSaws; }
+
 class EditorPauseLayer_CB : public gd::EditorPauseLayer {
     public:
         void onBESettings(cocos2d::CCObject* pSender) {
-            BESettingsLayer::create()->show();
+            BESettingsLayer::create(this)->show();
         }
 
         void onRotateSaws(CCObject* pSender) {
@@ -26,7 +29,7 @@ class EditorPauseLayer_CB : public gd::EditorPauseLayer {
 GDMAKE_HOOK(0x758d0)
 void __fastcall EditorPauseLayer_keyDown(EditorPauseLayer* self, edx_t edx, enumKeyCodes key) {
     if (key == KEY_Escape)
-        as<EditorPauseLayer*>(as<uintptr_t>(self) - 0xf8)->keyBackClicked();
+        as<EditorPauseLayer*>(as<uintptr_t>(self) - 0xf8)->onResume(nullptr);
     else
         GDMAKE_ORIG_V(self, edx, key);
 }
@@ -58,6 +61,14 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
         unpatch(0x7A203);
     }
 
+    if (BetterEdit::getUseUpArrowForGameplay()) {
+        patch(0x91abb, { 0x3d, 0x26, 0x00 });
+        patch(0x921a6, { 0x3d, 0x26, 0x00 });
+    } else {
+        unpatch(0x91abb);
+        unpatch(0x921a6);
+    }
+
     if (g_bRotateSaws)
         beginRotations(self->m_pEditorLayer);
     else
@@ -67,8 +78,17 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
     // showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
 }
 
+GDMAKE_HOOK(0x75010)
+void __fastcall EditorPauseLayer_saveLevel(EditorPauseLayer* self) {
+    stopRotations(self->m_pEditorLayer);
+
+    GDMAKE_ORIG_V(self);
+}
+
 GDMAKE_HOOK(0x75660)
 void __fastcall EditorPauseLayer_onExitEditor(EditorPauseLayer* self, edx_t edx, CCObject* pSender) {
+    stopRotations(self->m_pEditorLayer);
+
     GDMAKE_ORIG_V(self, edx, pSender);
 
     self->removeFromParentAndCleanup(true);
@@ -113,6 +133,16 @@ bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, LevelEd
         },
         { 8.0f, 0.0f }
     );
+
+    if (isPickingEyeDropperColor()) {
+        FLAlertLayer::create(
+            nullptr,
+            "Warning",
+            "OK", nullptr,
+            "You can not leave the <co>Editor</c> with the "
+            "<cl>Color Picker</c> enabled - <cr>this will cause a guaranteed crash!</c>"
+        )->show();
+    }
 
     return true;
 }

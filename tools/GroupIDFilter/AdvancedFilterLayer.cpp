@@ -25,9 +25,9 @@ CCMenuItemToggler* createButtonToggle(const char* text, CCNode* target, SEL_Menu
 void AdvancedFilterLayer::setup() {
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
     constexpr const char* rangeFilter  = "0123456789~ ";
-    constexpr const char* rangeFilterN  = "0123456789~- ";
-    constexpr const char* rangeFilterF = "0123456789.~ ";
-    constexpr const char* rangeFilterC = "0123456789~bglineojdpwhtackrBGLINEOJDPWHTACKR ";
+    constexpr const char* rangeFilterN  = "0123456789:- ";
+    constexpr const char* rangeFilterF = "0123456789.: ";
+    constexpr const char* rangeFilterC = "0123456789:bglineojdpwhtackrBGLINEOJDPWHTACKR ";
 
     if (!g_pFilter) g_pFilter = new AdvancedFilterLayer::ObjFilter;
 
@@ -286,7 +286,7 @@ void AdvancedFilterLayer::onInfo(CCObject*) {
         "When <cy>Advanced Filters</c> are enabled, you can only select objects that match "
         "<cb>all</c> the selected filters.\n\n"
         "You can enter either a <cp>specific value</c> (for example, <cg>23</c>) or a <co>range</c> "
-        "(<cg>23-50</c>) in inputs.\n"
+        "(<cg>23:50</c>) in inputs.\n"
         "The <cl>group ID</c> filter is special, with more info in its own box."
     )->show();
 }

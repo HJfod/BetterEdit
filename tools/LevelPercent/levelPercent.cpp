@@ -1,5 +1,6 @@
 #include "levelPercent.hpp"
 #include <InputPrompt.hpp>
+#include "../RotateSaws/rotateSaws.hpp"
 
 static constexpr const int SLIDERLABEL_TAG = 420;
 static constexpr const int EPOSITION_TAG = 421;
@@ -191,6 +192,9 @@ void __fastcall LevelEditorLayer_addSpecial(LevelEditorLayer* self, edx_t edx, G
 
     updatePercentLabelPosition(self->m_pEditorUI);
 
+    if (shouldRotateSaw() && objectIsSaw(obj))
+        beginRotateSaw(obj);
+
     if (self->m_pEditorUI)
         self->m_pEditorUI->updateSlider();
 }
@@ -204,6 +208,9 @@ void __fastcall LevelEditorLayer_removeObject(LevelEditorLayer* self, edx_t edx,
     if (obj) updateLastObjectX(self, obj);
 
     updatePercentLabelPosition(self->m_pEditorUI);
+
+    if (shouldRotateSaw() && objectIsSaw(obj))
+        stopRotateSaw(obj);
 
     if (self->m_pEditorUI)
         self->m_pEditorUI->updateSlider();
