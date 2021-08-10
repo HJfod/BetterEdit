@@ -8,6 +8,7 @@
 #include "../tools/PasteString/loadPasteButton.hpp"
 #include "../tools/RotateSaws/rotateSaws.hpp"
 #include "../tools/EyeDropper/eyeDropper.hpp"
+#include "../tools/AutoSave/autoSave.hpp"
 
 using namespace gdmake;
 
@@ -83,11 +84,14 @@ void __fastcall EditorPauseLayer_saveLevel(EditorPauseLayer* self) {
     stopRotations(self->m_pEditorLayer);
 
     GDMAKE_ORIG_V(self);
+    
+    SoftSaveManager::clear();
 }
 
 GDMAKE_HOOK(0x75660)
 void __fastcall EditorPauseLayer_onExitEditor(EditorPauseLayer* self, edx_t edx, CCObject* pSender) {
     stopRotations(self->m_pEditorLayer);
+    resetAutoSaveTimer(self->m_pEditorLayer->m_pEditorUI);
 
     GDMAKE_ORIG_V(self, edx, pSender);
 

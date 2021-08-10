@@ -18,6 +18,8 @@ using namespace cocos2d::extension;
     __macro__(ScaleSnap, float, .25f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.01f, 1.0f)       \
     __macro__(GridSize, float, 30.0f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.9375f, 120.0f)   \
     __macro__(PercentageAccuracy, int, 0, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 0, 10)       \
+    __macro__(AutoSaveTime, int, 1, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 60)             \
+    __macro__(SoftSaveFrequency, int, 1, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 999)       \
     __macro__(GridSizeEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(AlwaysUseCustomGridSize, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)       \
     __macro__(PasteStateEnabled, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)              \
@@ -39,6 +41,9 @@ using namespace cocos2d::extension;
     __macro__(EnableRelativeSwipe, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
     __macro__(DisableNewColorSelection, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)      \
     __macro__(UseUpArrowForGameplay, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)         \
+    __macro__(EnableAutoSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                \
+    __macro__(EnableSoftAutoSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
+    __macro__(EnableAsyncSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \
@@ -84,6 +89,7 @@ class BetterEdit : public gd::GManager {
         std::vector<Preset> m_vPresets;
         std::vector<std::string> m_vScheduledErrors;
         FavoritesList m_vFavorites;
+        bool m_bEditorInitialized;
 
         BE_SETTINGS(BE_MAKE_SETTING)
 
@@ -117,6 +123,13 @@ class BetterEdit : public gd::GManager {
             }
 
             return res;
+        }
+
+        static inline bool isEditorInitialized() {
+            return BetterEdit::sharedState()->m_bEditorInitialized;
+        }
+        static void setEditorInitialized(bool b) {
+            BetterEdit::sharedState()->m_bEditorInitialized = b;
         }
 
         bool m_bHookConflictFound = true;

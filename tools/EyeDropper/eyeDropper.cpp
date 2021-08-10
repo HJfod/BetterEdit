@@ -37,7 +37,7 @@ class PickCallback : public CCObject {
         }
 };
 
-GDMAKE_HOOK("libcocos2d.dll::?onGLFWMouseCallBack@CCEGLView@cocos2d@@IAEXPAUGLFWwindow@@HHH@Z")
+GDMAKE_HOOK("libcocos2d.dll::?onGLFWMouseCallBack@CCEGLView@cocos2d@@IAEXPAUGLFWwindow@@HHH@Z") GDMAKE_ATTR(NoLog)
 void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwindow* wnd, int btn, int pressed, int z) {
     POINT mpos;
     GetCursorPos(&mpos);
@@ -58,7 +58,7 @@ void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwi
     return GDMAKE_ORIG_V(self, edx, wnd, btn, pressed, z);
 }
 
-GDMAKE_HOOK("libcocos2d.dll::?update@CCScheduler@cocos2d@@UAEXM@Z")
+GDMAKE_HOOK("libcocos2d.dll::?update@CCScheduler@cocos2d@@UAEXM@Z") GDMAKE_ATTR(NoLog)
 void __fastcall CCScheduler_update(CCScheduler* self, edx_t edx, float dt) {
     if (g_bPickingColor) {
         POINT mpos;

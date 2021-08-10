@@ -1,10 +1,12 @@
 #include "levelPercent.hpp"
 #include <InputPrompt.hpp>
 #include "../RotateSaws/rotateSaws.hpp"
+#include "../AutoSave/autoSave.hpp"
 
 static constexpr const int SLIDERLABEL_TAG = 420;
 static constexpr const int EPOSITION_TAG = 421;
 GameObject* g_lastObject = nullptr;
+int g_bDontUpdateSlider = 0;
 
 float getLevelLength() {
     // from camden314/gdp/finished_works/PlayLayer/createObjectsFromSetup.cpp
@@ -133,6 +135,12 @@ void showPositionLabel(EditorUI* self, bool show) {
     menu->setVisible(!BetterEdit::getDisablePercentage());
 } //*/
 
+void setIgnoreNewObjectsForSliderPercent(bool b) {
+    if (b) g_bDontUpdateSlider++;
+    else if (g_bDontUpdateSlider > 0)
+        g_bDontUpdateSlider--;
+}
+
 GDMAKE_HOOK(0x78cc0)
 void __fastcall EditorUI_sliderChanged(EditorUI* self, edx_t edx, Slider* pSlider) {
     if (BetterEdit::getUseOldProgressBar()) {
@@ -182,35 +190,12 @@ void __fastcall EditorUI_valueFromXPos(EditorUI* self) {
     return;
 }
 
-GDMAKE_HOOK(0x162650)
-void __fastcall LevelEditorLayer_addSpecial(LevelEditorLayer* self, edx_t edx, GameObject* obj) {
-    GDMAKE_ORIG_V(self, edx, obj);
-
-    if (!self) return;
+void handleObjectAddForSlider(LevelEditorLayer* self, GameObject* obj) {
+    if (g_bDontUpdateSlider && !self) return;
 
     if (obj) updateLastObjectX(self, obj);
 
     updatePercentLabelPosition(self->m_pEditorUI);
-
-    if (shouldRotateSaw() && objectIsSaw(obj))
-        beginRotateSaw(obj);
-
-    if (self->m_pEditorUI)
-        self->m_pEditorUI->updateSlider();
-}
-
-GDMAKE_HOOK(0x161cb0)
-void __fastcall LevelEditorLayer_removeObject(LevelEditorLayer* self, edx_t edx, GameObject* obj, bool idk) {
-    GDMAKE_ORIG_V(self, edx, obj, idk);
-
-    if (!self) return;
-
-    if (obj) updateLastObjectX(self, obj);
-
-    updatePercentLabelPosition(self->m_pEditorUI);
-
-    if (shouldRotateSaw() && objectIsSaw(obj))
-        stopRotateSaw(obj);
 
     if (self->m_pEditorUI)
         self->m_pEditorUI->updateSlider();
@@ -227,6 +212,8 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
         return;
 
     GDMAKE_ORIG_V(self, edx, obj, pos);
+
+    SoftSaveManager::save();
 
     updateLastObjectX(self->m_pEditorLayer, obj);
 

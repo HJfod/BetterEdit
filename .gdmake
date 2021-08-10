@@ -26,5 +26,6 @@
     "resources/BE_GameSheet01-hd.plist",
     "resources/BE_GameSheet01-uhd.png",
     "resources/BE_GameSheet01-uhd.plist"
-  ]
+  ],
+  "DebugLogHookCalls": false
 }

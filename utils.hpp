@@ -107,7 +107,7 @@ class CCNodeConstructor {
             return *this;
         }
         inline CCNodeConstructor<cocos2d::CCSprite*> & fromBESprite(const char* fname, const char* fback = nullptr) {
-            this->node = createBESprite(name, fback);
+            this->node = createBESprite(fname, fback);
             return *this;
         }
         inline CCNodeConstructor<cocos2d::CCSprite*> & fromFile(const char* fname) {

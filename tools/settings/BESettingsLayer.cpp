@@ -132,6 +132,33 @@ void BESettingsLayer::setup() {
         BE_SETTING_FUNC_B(UseUpArrowForGameplay)
     );
     this->incrementPageCount(true);
+
+    this->addToggle(
+        "Enable Auto-Saving",
+        "The level is automatically saved every x minutes\n\n "
+        "<cr>Highly experimental!</c>",
+        BE_SETTING_FUNC_B(EnableAutoSave),
+        true
+    );
+    this->addToggle(
+        "Soft Save",
+        "Saves objects to a file immediately when they're placed\n "
+        "Use the frequency to modify how many blocks have to be placed until data is saved\n "
+        "Can cause lag, but if the game crashes, you can recover the level\n\n"
+        " <cr>Extremely experimental!</c>",
+        BE_SETTING_FUNC_B(EnableSoftAutoSave),
+        true
+    );
+    this->addToggle(
+        "Fast Save",
+        "Enables <cl>asynchronous</c> saving\n\n <cr>Ridiculously experimental!</c>",
+        BE_SETTING_FUNC_B(EnableAsyncSave),
+        true
+    );
+    this->addInput("Save Every (min):", BE_SETTING_FUNC(AutoSaveTime), "0123456789");
+    this->addInput("Soft Save Freq.:", BE_SETTING_FUNC(SoftSaveFrequency), "0123456789");
+    this->incrementPageCount(true);
+
     this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
     this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap), "0123456789.");
     this->addInput("Percentage Accuracy:", BE_SETTING_FUNC(PercentageAccuracy), "0123456789");

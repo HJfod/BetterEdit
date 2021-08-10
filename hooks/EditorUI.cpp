@@ -7,6 +7,7 @@
 #include "../tools/GlobalClipboard/clipboardHook.hpp"
 #include "../tools/EditorLayerInput/editorLayerInput.hpp"
 #include "../tools/RepeatPaste/repeatPaste.hpp"
+#include "../tools/AutoSave/autoSave.hpp"
 #include <thread>
 
 using namespace gdmake;
@@ -255,6 +256,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     loadSliderPercent(self);
     loadClipboard(self);
     loadPasteRepeatButton(self);
+    loadAutoSaveTimer(self);
     
     BetterEdit::sharedState()->m_bHookConflictFound = false;
 
@@ -262,6 +264,42 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     self->schedule(schedule_selector(EditorUIPulse::updateObjectsPulse));
 
     return true;
+}
+
+GDMAKE_HOOK(0x7a370)
+CCArray* __fastcall EditorUI_createCustomItems(EditorUI* self) {
+    setIgnoreNewObjectsForSliderPercent(true);
+
+    auto ret = GDMAKE_ORIG_P(self);
+
+    setIgnoreNewObjectsForSliderPercent(false);
+
+    return ret;
+}
+
+GDMAKE_HOOK(0x7a280)
+void __fastcall EditorUI_onDeleteCustomItem(EditorUI* self, edx_t edx, CCObject* pSender) {
+    setIgnoreNewObjectsForSliderPercent(true);
+
+    GDMAKE_ORIG_V(self, edx, pSender);
+
+    setIgnoreNewObjectsForSliderPercent(false);
+}
+
+GDMAKE_HOOK(0x79fd0)
+void __fastcall EditorUI_onNewCustomItem(EditorUI* self, edx_t edx, CCObject* pSender) {
+    setIgnoreNewObjectsForSliderPercent(true);
+
+    GDMAKE_ORIG_V(self, edx, pSender);
+
+    setIgnoreNewObjectsForSliderPercent(false);
+}
+
+GDMAKE_HOOK(0x8def0)
+void __fastcall EditorUI_transformObjectCall(EditorUI* self, edx_t edx, CCObject* pSender) {
+    GDMAKE_ORIG_V(self, edx, pSender);
+
+    SoftSaveManager::save();
 }
 
 GDMAKE_HOOK(0x78280)

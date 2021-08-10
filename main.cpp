@@ -11,6 +11,7 @@
 #include "tools/EditorLayerInput/editorLayerInput.hpp"
 #include "tools/EnterToSearch/loadEnterSearch.hpp"
 #include "tools/EyeDropper/eyeDropper.hpp"
+#include "tools/AutoSave/autoSave.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -39,6 +40,8 @@ GDMAKE_MAIN_HM(hMod) {
     if (!LiveManager::initGlobal())
         return false;
     if (!LayerManager::initGlobal())
+        return false;
+    if (!SoftSaveManager::initGlobal())
         return false;
 
     if (!loadUpdateVisibilityHook())

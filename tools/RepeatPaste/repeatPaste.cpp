@@ -1,4 +1,5 @@
 #include "repeatPaste.hpp"
+#include "../AutoSave/autoSave.hpp"
 
 static constexpr const int REPEATBTN_TAG = 100;
 
@@ -104,6 +105,8 @@ void __fastcall EditorUI_onDuplicate(EditorUI* self, edx_t edx, CCObject* pSende
     g_bSkipDeselect = true;
     GDMAKE_ORIG_V(self, edx, pSender);
     g_bSkipDeselect = false;
+
+    SoftSaveManager::save();
 
     if (g_pPreviousObject || g_pPreviousObjects->count()) {
         if (!BetterEdit::getRepeatCopyPaste())
