@@ -20,6 +20,9 @@ T bin_read(std::ifstream & stream) {
     return val;
 }
 
+#define M_BIN_READ(_stream_, _val_) \
+    _val_ = bin_read<decltype(_val_)>(_stream_)
+
 enum DataSaveType : byte {
     kSaveTypeAdd,
     kSaveTypeRemove,
@@ -34,6 +37,9 @@ enum GameObjectClassType : byte {
 bool SoftSaveManager::init() {
     m_pManagedObjects = CCArray::create();
     m_pManagedObjects->retain();
+
+    m_pManagedColors = CCArray::create();
+    m_pManagedColors->retain();
 
     m_nCurrentActionCount = 0;
 
@@ -64,7 +70,7 @@ void SoftSaveManager::saveObject(GameObject* obj) {
     // has been modified and `GJEffectManager::getColorAction`
     // is inlined on Windows?"
 
-    // i'm such a genious
+    // you're a fucking genious, fod
 
     if (obj->m_pBaseColor)
         g_pManager->saveColor(obj->m_pBaseColor->colorID);
@@ -93,9 +99,14 @@ void SoftSaveManager::removeObject(GameObject* obj) {
 }
 
 void SoftSaveManager::saveObjectBinary(std::ofstream & stream, GameObject* obj) {
-    // object type
     bin_write(stream, kSaveTypeAdd);
-    bin_write(stream, kClassTypeGameObject);
+
+    auto eobj = asEffectGameObject(obj);
+
+    bin_write(stream, eobj ?
+        kClassTypeEffectGameObject :
+        kClassTypeGameObject
+    );
 
     bin_write(stream, obj->m_nObjectID);
     bin_write(stream, obj->getPosition());
@@ -129,10 +140,74 @@ void SoftSaveManager::saveObjectBinary(std::ofstream & stream, GameObject* obj) 
     bin_write(stream, obj->m_nEditorLayer);
     bin_write(stream, obj->m_nEditorLayer2);
 
+    if (eobj) {
+        bin_write(stream, eobj->m_colColor);
+        bin_write(stream, eobj->m_nTargetColorID);
+        bin_write(stream, eobj->m_nTargetGroupID);
+        bin_write(stream, eobj->m_nCenterGroupID);
+        bin_write(stream, eobj->m_fDuration);
+        bin_write(stream, eobj->m_fOpacity);
+        bin_write(stream, eobj->m_fShakeStrength);
+        bin_write(stream, eobj->m_fShakeInterval);
+        bin_write(stream, eobj->m_bPlayerColor1);
+        bin_write(stream, eobj->m_bPlayerColor2);
+        bin_write(stream, eobj->m_bBlending);
+        bin_write(stream, eobj->m_fMoveX);
+        bin_write(stream, eobj->m_fMoveY);
+        bin_write(stream, eobj->m_nEasingType);
+        bin_write(stream, eobj->m_fEasingRate);
+        bin_write(stream, eobj->m_bLockToPlayerX);
+        bin_write(stream, eobj->m_bLockToPlayerY);
+        bin_write(stream, eobj->m_bUseTarget);
+        bin_write(stream, eobj->m_nMoveTargetType);
+        bin_write(stream, eobj->m_nRotateDegrees);
+        bin_write(stream, eobj->m_nTimes360);
+        bin_write(stream, eobj->m_bLockObjectRotation);
+        bin_write(stream, eobj->m_fFollowXMod);
+        bin_write(stream, eobj->m_fFollowYMod);
+        bin_write(stream, eobj->m_fFollowYSpeed);
+        bin_write(stream, eobj->m_fFollowYDelay);
+        bin_write(stream, eobj->m_nFollowYOffset);
+        bin_write(stream, eobj->m_fFollowYMaxSpeed);
+        bin_write(stream, eobj->m_fFadeInTime);
+        bin_write(stream, eobj->m_fHoldTime);
+        bin_write(stream, eobj->m_fFadeOutTime);
+        bin_write(stream, eobj->m_bPulseHSVMode);
+        bin_write(stream, eobj->m_bPulseGroupMode);
+        bin_write(stream, eobj->m_fColorHue);
+        bin_write(stream, eobj->m_fColorSaturation);
+        bin_write(stream, eobj->m_fColorBrightness);
+        bin_write(stream, eobj->m_bAbsoluteSaturation);
+        bin_write(stream, eobj->m_bAbsoluteBrightness);
+        bin_write(stream, eobj->m_nCopyColorID);
+        bin_write(stream, eobj->m_bCopyOpacity);
+        bin_write(stream, eobj->m_bPulseMainOnly);
+        bin_write(stream, eobj->m_bPulseDetailOnly);
+        bin_write(stream, eobj->m_bPulseExclusive);
+        bin_write(stream, eobj->m_bActivateGroup);
+        bin_write(stream, eobj->m_bTouchHoldMode);
+        bin_write(stream, eobj->m_nTouchToggleMode);
+        bin_write(stream, eobj->m_bTouchDualMode);
+        bin_write(stream, eobj->m_nAnimationID);
+        bin_write(stream, eobj->m_fSpawnDelay);
+        bin_write(stream, eobj->m_bMultiTrigger);
+        bin_write(stream, eobj->m_bEditorDisabled);
+        bin_write(stream, eobj->m_nTargetCount);
+        bin_write(stream, eobj->m_nComparisonType);
+        bin_write(stream, eobj->m_bMultiActivate);
+        bin_write(stream, eobj->m_bTriggerOnExit);
+        bin_write(stream, eobj->m_nBlockBID);
+        bin_write(stream, eobj->m_bDynamicBlock);
+        bin_write(stream, eobj->m_nTargetItemID);
+    }
+
     // depending on type, write more
 }
 
 void SoftSaveManager::loadObjectBinary(std::ifstream & stream) {
+    DataSaveType stype;
+    bin_read(stream, stype);
+
     GameObjectClassType otype;
     bin_read(stream, otype);
 
@@ -143,6 +218,7 @@ void SoftSaveManager::loadObjectBinary(std::ifstream & stream) {
     bin_read(stream, pos);
 
     auto obj = LevelEditorLayer::get()->createObject(objID, pos, false);
+    auto eobj = asEffectGameObject(obj);
 
     obj->setScale(bin_read<float>(stream));
     obj->setRotation(bin_read<float>(stream));
@@ -172,13 +248,76 @@ void SoftSaveManager::loadObjectBinary(std::ifstream & stream) {
     obj->m_nEditorLayer = bin_read<int>(stream);
     obj->m_nEditorLayer2 = bin_read<int>(stream);
 
+    if (eobj) {
+        M_BIN_READ(stream, eobj->m_colColor);
+        M_BIN_READ(stream, eobj->m_nTargetColorID);
+        M_BIN_READ(stream, eobj->m_nTargetGroupID);
+        M_BIN_READ(stream, eobj->m_nCenterGroupID);
+        M_BIN_READ(stream, eobj->m_fDuration);
+        M_BIN_READ(stream, eobj->m_fOpacity);
+        M_BIN_READ(stream, eobj->m_fShakeStrength);
+        M_BIN_READ(stream, eobj->m_fShakeInterval);
+        M_BIN_READ(stream, eobj->m_bPlayerColor1);
+        M_BIN_READ(stream, eobj->m_bPlayerColor2);
+        M_BIN_READ(stream, eobj->m_bBlending);
+        M_BIN_READ(stream, eobj->m_fMoveX);
+        M_BIN_READ(stream, eobj->m_fMoveY);
+        M_BIN_READ(stream, eobj->m_nEasingType);
+        M_BIN_READ(stream, eobj->m_fEasingRate);
+        M_BIN_READ(stream, eobj->m_bLockToPlayerX);
+        M_BIN_READ(stream, eobj->m_bLockToPlayerY);
+        M_BIN_READ(stream, eobj->m_bUseTarget);
+        M_BIN_READ(stream, eobj->m_nMoveTargetType);
+        M_BIN_READ(stream, eobj->m_nRotateDegrees);
+        M_BIN_READ(stream, eobj->m_nTimes360);
+        M_BIN_READ(stream, eobj->m_bLockObjectRotation);
+        M_BIN_READ(stream, eobj->m_fFollowXMod);
+        M_BIN_READ(stream, eobj->m_fFollowYMod);
+        M_BIN_READ(stream, eobj->m_fFollowYSpeed);
+        M_BIN_READ(stream, eobj->m_fFollowYDelay);
+        M_BIN_READ(stream, eobj->m_nFollowYOffset);
+        M_BIN_READ(stream, eobj->m_fFollowYMaxSpeed);
+        M_BIN_READ(stream, eobj->m_fFadeInTime);
+        M_BIN_READ(stream, eobj->m_fHoldTime);
+        M_BIN_READ(stream, eobj->m_fFadeOutTime);
+        M_BIN_READ(stream, eobj->m_bPulseHSVMode);
+        M_BIN_READ(stream, eobj->m_bPulseGroupMode);
+        M_BIN_READ(stream, eobj->m_fColorHue);
+        M_BIN_READ(stream, eobj->m_fColorSaturation);
+        M_BIN_READ(stream, eobj->m_fColorBrightness);
+        M_BIN_READ(stream, eobj->m_bAbsoluteSaturation);
+        M_BIN_READ(stream, eobj->m_bAbsoluteBrightness);
+        M_BIN_READ(stream, eobj->m_nCopyColorID);
+        M_BIN_READ(stream, eobj->m_bCopyOpacity);
+        M_BIN_READ(stream, eobj->m_bPulseMainOnly);
+        M_BIN_READ(stream, eobj->m_bPulseDetailOnly);
+        M_BIN_READ(stream, eobj->m_bPulseExclusive);
+        M_BIN_READ(stream, eobj->m_bActivateGroup);
+        M_BIN_READ(stream, eobj->m_bTouchHoldMode);
+        M_BIN_READ(stream, eobj->m_nTouchToggleMode);
+        M_BIN_READ(stream, eobj->m_bTouchDualMode);
+        M_BIN_READ(stream, eobj->m_nAnimationID);
+        M_BIN_READ(stream, eobj->m_fSpawnDelay);
+        M_BIN_READ(stream, eobj->m_bMultiTrigger);
+        M_BIN_READ(stream, eobj->m_bEditorDisabled);
+        M_BIN_READ(stream, eobj->m_nTargetCount);
+        M_BIN_READ(stream, eobj->m_nComparisonType);
+        M_BIN_READ(stream, eobj->m_bMultiActivate);
+        M_BIN_READ(stream, eobj->m_bTriggerOnExit);
+        M_BIN_READ(stream, eobj->m_nBlockBID);
+        M_BIN_READ(stream, eobj->m_bDynamicBlock);
+        M_BIN_READ(stream, eobj->m_nTargetItemID);
+
+        eobj->updateLabel();
+    }
+
     // depending on otype, read more
 }
 
-void saveColorBinary(std::ofstream & stream, int colorID) {
+void SoftSaveManager::saveColorBinary(std::ofstream & stream, int colorID) {
     auto color = LevelEditorLayer::get()
         ->m_pLevelSettings
-        ->m_effectManager
+        ->m_pEffectManager
         ->getColorAction(colorID);
 
     bin_write(stream, colorID);
@@ -195,24 +334,24 @@ void saveColorBinary(std::ofstream & stream, int colorID) {
     bin_write(stream, color->m_copyOpacity);
 }
 
-void loadColorBinary(std::ifstream & stream) {
+void SoftSaveManager::loadColorBinary(std::ifstream & stream) {
     int colorID = bin_read<int>(stream);
 
     auto color = LevelEditorLayer::get()
         ->m_pLevelSettings
-        ->m_effectManager
+        ->m_pEffectManager
         ->getColorAction(colorID);
     
-    color->m_color = bin_read<ccColor3B>(stream);
-    color->m_blending = bin_read<bool>(stream);
-    color->m_opacity = bin_read<float>(stream);
-    color->m_copyHue = bin_read<float>(stream);
-    color->m_copySaturation = bin_read<float>(stream);
-    color->m_copyBrightness = bin_read<float>(stream);
-    color->m_saturationChecked = bin_read<bool>(stream);
-    color->m_brightnessChecked = bin_read<bool>(stream);
-    color->m_copyID = bin_read<int>(stream);
-    color->m_copyOpacity = bin_read<float>(stream);
+    M_BIN_READ(stream, color->m_color);
+    M_BIN_READ(stream, color->m_blending);
+    M_BIN_READ(stream, color->m_opacity);
+    M_BIN_READ(stream, color->m_copyHue);
+    M_BIN_READ(stream, color->m_copySaturation);
+    M_BIN_READ(stream, color->m_copyBrightness);
+    M_BIN_READ(stream, color->m_saturationChecked);
+    M_BIN_READ(stream, color->m_brightnessChecked);
+    M_BIN_READ(stream, color->m_copyID);
+    M_BIN_READ(stream, color->m_copyOpacity);
 }
 
 bool SoftSaveManager::hasLoad(std::string const& level) {
@@ -258,7 +397,7 @@ void SoftSaveManager::save() {
     
     std::ofstream f(g_softSave_file, std::ios::binary | std::ios::out);
 
-    auto lvlName = LevelEditorLayer::get()->m_pLevelSettings->m_level->levelName.c_str();
+    auto lvlName = LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->levelName.c_str();
 
     if (f.is_open()) {
         bin_write(f, strlen(lvlName));

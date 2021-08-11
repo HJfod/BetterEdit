@@ -88,7 +88,7 @@ void updateButtons(CustomizeObjectLayer* self) {
         self->m_bCustomColorSelected = btn->getParent()->getTag() == 1008 &&
             self->getActiveMode(true) == channel;
 
-        auto col = LevelEditorLayer::get()->m_pLevelSettings->m_effectManager->getColorAction(channel);
+        auto col = LevelEditorLayer::get()->m_pLevelSettings->m_pEffectManager->getColorAction(channel);
 
         btn->updateValues(col);
 
@@ -131,7 +131,7 @@ void updateButtons(CustomizeObjectLayer* self) {
 }
 
 ColorChannelSprite* getChannelSprite(int channel) {
-    auto col = LevelEditorLayer::get()->m_pLevelSettings->m_effectManager->getColorAction(channel);
+    auto col = LevelEditorLayer::get()->m_pLevelSettings->m_pEffectManager->getColorAction(channel);
 
     auto channelSprite = ColorChannelSprite::create();
 

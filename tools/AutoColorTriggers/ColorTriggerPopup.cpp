@@ -107,7 +107,7 @@ void ColorTriggerPopup::onCreate(CCObject* pSender) {
     
     auto lel = GameManager::sharedState()->getEditorLayer();
 
-    auto dict = lel->m_pLevelSettings->m_effectManager->m_colorActionDict;
+    auto dict = lel->m_pLevelSettings->m_pEffectManager->m_colorActionDict;
     CCDictElement* el;
     auto pos = lel->getObjectLayer()->convertToNodeSpace(CCDirector::sharedDirector()->getWinSize() / 2);
     float y = pos.y;

@@ -110,7 +110,7 @@ void turnLabelIntoInput(
 }
 
 ccColor3B getColorChannelBaseColor(int channelID, int stackLimit = 0) {
-    auto col = LevelEditorLayer::get()->m_pLevelSettings->m_effectManager->getColorAction(channelID);
+    auto col = LevelEditorLayer::get()->m_pLevelSettings->m_pEffectManager->getColorAction(channelID);
 
     if (stackLimit > 10 || !col)
         return { 255, 255, 255 };

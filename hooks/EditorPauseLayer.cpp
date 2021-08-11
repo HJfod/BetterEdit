@@ -79,15 +79,6 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
     // showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
 }
 
-GDMAKE_HOOK(0x75010)
-void __fastcall EditorPauseLayer_saveLevel(EditorPauseLayer* self) {
-    stopRotations(self->m_pEditorLayer);
-
-    GDMAKE_ORIG_V(self);
-    
-    SoftSaveManager::clear();
-}
-
 GDMAKE_HOOK(0x75660)
 void __fastcall EditorPauseLayer_onExitEditor(EditorPauseLayer* self, edx_t edx, CCObject* pSender) {
     stopRotations(self->m_pEditorLayer);
