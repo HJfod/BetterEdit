@@ -1,5 +1,6 @@
 #include "BetterEdit.hpp"
 #include "tools/EditorLayerInput/LayerManager.hpp"
+#include "tools/AutoSave/Backup/LevelBackupManager.hpp"
 
 using namespace gdmake;
 using namespace gdmake::extra;
@@ -55,6 +56,10 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
         LayerManager::get()->encodeDataTo(data);
     );
 
+    STEP_SUBDICT(data, "level-backups",
+        LevelBackupManager::get()->encodeDataTo(data);
+    );
+
     STEP_SUBDICT(data, "presets",
         auto ix = 0u;
         for (auto preset : m_vPresets)
@@ -82,6 +87,10 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
 
     STEP_SUBDICT_NC(data, "editor-layers",
         LayerManager::get()->dataLoaded(data);
+    );
+
+    STEP_SUBDICT_NC(data, "level-backups",
+        LevelBackupManager::get()->dataLoaded(data);
     );
 
     STEP_SUBDICT_NC(data, "presets",
