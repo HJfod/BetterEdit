@@ -1,5 +1,6 @@
 #include "BackupViewLayer.hpp"
 #include "LevelBackupManager.hpp"
+#include "BackupListView.hpp"
 
 bool BackupViewLayer::init(GJGameLevel* level) {
     if (!CCLayer::init())
@@ -45,26 +46,19 @@ bool BackupViewLayer::init(GJGameLevel* level) {
     auto addBtn = CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png"),
         this,
-        nullptr
+        menu_selector(BackupViewLayer::onNew)
     );
     addBtn->setPosition(winSize.width / 2 - 40.0f, - winSize.height / 2 + 40.0f);
     this->m_pButtonMenu->addChild(addBtn);
 
-    std::string name = "Backups for " + this->m_pLevel->levelName;
-
-    this->m_pList = GJListLayer::create(
-        nullptr, name.c_str(), { 0, 0, 0, 0xb6 }, 356.0f, 220.0f
-    );
-    this->m_pList->setPosition(
-        winSize / 2 - this->m_pList->getScaledContentSize() / 2
-    );
-    this->addChild(this->m_pList);
+    m_sTitle = "Backups for " + this->m_pLevel->levelName;
 
     m_pListLabel = CCLabelBMFont::create("No backups found!", "bigFont.fnt");
 
     m_pListLabel->setPosition(winSize / 2);
     m_pListLabel->setScale(.6f);
     m_pListLabel->setVisible(false);
+    m_pListLabel->setZOrder(1001);
 
     this->addChild(m_pListLabel);
 
@@ -79,13 +73,29 @@ bool BackupViewLayer::init(GJGameLevel* level) {
 void BackupViewLayer::reloadList() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
+    if (this->m_pList)
+        this->m_pList->removeFromParent();
+
+    BackupListView* list = nullptr;
+
     if (!LevelBackupManager::get()->levelHasBackup(this->m_pLevel)) {
         m_pListLabel->setVisible(true);
     } else {
         m_pListLabel->setVisible(false);
 
-        
+        list = BackupListView::create(
+            LevelBackupManager::get()->getBackupsForLevel(this->m_pLevel),
+            356.f, 220.f
+        );
     }
+
+    this->m_pList = GJListLayer::create(
+        list, this->m_sTitle.c_str(), { 0, 0, 0, 180 }, 356.0f, 220.0f
+    );
+    this->m_pList->setPosition(
+        winSize / 2 - this->m_pList->getScaledContentSize() / 2
+    );
+    this->addChild(this->m_pList);
 }
 
 void BackupViewLayer::keyDown(enumKeyCodes key) {

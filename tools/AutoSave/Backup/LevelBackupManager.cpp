@@ -20,8 +20,12 @@ LevelBackupManager* g_manager;
     }
 
 bool LevelBackupManager::init() {
-    m_pLevels = CCDictionary::create();
-    m_pLevels->retain();
+    this->m_sFileName = "BEBackupManager.dat";
+
+    this->m_pLevels = CCDictionary::create();
+    this->m_pLevels->retain();
+
+    this->setup();
 
     return true;
 }
@@ -35,10 +39,7 @@ void LevelBackupManager::encodeDataTo(DS_Dictionary* dict) {
             STEP_SUBDICT(dict, obj->getStrKey(),
                 CCARRAY_FOREACH_B_BASE(arr, backup, LevelBackup*, ix) {
                     STEP_SUBDICT(dict, CCString::createWithFormat("k%i", ix)->getCString(),
-                        dict->setIntegerForKey("save-time", backup->getTime());
-                        dict->setStringForKey("custom-name", backup->name);
-                        dict->setIntegerForKey("object-count", backup->objectCount);
-                        dict->setStringForKey("data", backup->data);
+                        backup->save(dict);
                     );
                 }
             );
@@ -55,13 +56,15 @@ void LevelBackupManager::dataLoaded(DS_Dictionary* dict) {
 
                 for (auto bkey : dict->getAllKeys()) {
                     STEP_SUBDICT_NC(dict, bkey.c_str(),
-                        
+                        arr->addObject(new LevelBackup(dict));
                     );
                 }
             );
         }
     );
 }
+
+void LevelBackupManager::firstLoad() {}
 
 bool LevelBackupManager::initGlobal() {
     g_manager = new LevelBackupManager;
@@ -84,6 +87,7 @@ bool LevelBackupManager::levelHasBackup(GJGameLevel* level) {
 bool LevelBackupManager::levelHasBackup(std::string const& level) {
     return m_pLevels->objectForKey(level);
 }
+
 CCArray* LevelBackupManager::getBackupsForLevel(GJGameLevel* level) {
     return getBackupsForLevel(level->levelName);
 }

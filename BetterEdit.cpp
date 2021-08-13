@@ -56,10 +56,6 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
         LayerManager::get()->encodeDataTo(data);
     );
 
-    STEP_SUBDICT(data, "level-backups",
-        LevelBackupManager::get()->encodeDataTo(data);
-    );
-
     STEP_SUBDICT(data, "presets",
         auto ix = 0u;
         for (auto preset : m_vPresets)
@@ -74,6 +70,8 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
     for (auto fav : m_vFavorites)
         favStr += std::to_string(fav) + ",";
     data->setStringForKey("favorites", favStr);
+
+    LevelBackupManager::get()->save();
 }
 
 void BetterEdit::dataLoaded(DS_Dictionary* data) {
@@ -87,10 +85,6 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
 
     STEP_SUBDICT_NC(data, "editor-layers",
         LayerManager::get()->dataLoaded(data);
-    );
-
-    STEP_SUBDICT_NC(data, "level-backups",
-        LevelBackupManager::get()->dataLoaded(data);
     );
 
     STEP_SUBDICT_NC(data, "presets",

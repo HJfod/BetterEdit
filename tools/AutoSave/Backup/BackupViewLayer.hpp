@@ -6,8 +6,9 @@ class BackupViewLayer : public CCLayer {
     protected:
         GJGameLevel* m_pLevel;
         CCMenu* m_pButtonMenu;
-        GJListLayer* m_pList;
+        GJListLayer* m_pList = nullptr;
         CCLabelBMFont* m_pListLabel;
+        std::string m_sTitle;
 
         bool init(GJGameLevel*);
 
