@@ -2,16 +2,65 @@
 
 LevelBackupManager* g_manager;
 
+#define STEP_SUBDICT_NC(dict, key, ...)         \
+    if (dict->stepIntoSubDictWithKey(key)) {    \
+        __VA_ARGS__                             \
+        dict->stepOutOfSubDict();               \
+    }
+
+#define STEP_SUBDICT(dict, key, ...)            \
+    {                                           \
+    if (!dict->stepIntoSubDictWithKey(key)) {   \
+        dict->setSubDictForKey(key);            \
+        if (!dict->stepIntoSubDictWithKey(key)) \
+            return;                             \
+    }                                           \
+    __VA_ARGS__                                 \
+    dict->stepOutOfSubDict();                   \
+    }
+
 bool LevelBackupManager::init() {
+    m_pLevels = CCDictionary::create();
+    m_pLevels->retain();
+
     return true;
 }
 
-void LevelBackupManager::encodeDataTo(DS_Dictionary* data) {
+void LevelBackupManager::encodeDataTo(DS_Dictionary* dict) {
+    STEP_SUBDICT(dict, "levels",
+        CCDictElement* obj;
+        CCDICT_FOREACH(m_pLevels, obj) {
+            auto arr = as<CCArray*>(obj->getObject());
 
+            STEP_SUBDICT(dict, obj->getStrKey(),
+                CCARRAY_FOREACH_B_BASE(arr, backup, LevelBackup*, ix) {
+                    STEP_SUBDICT(dict, CCString::createWithFormat("k%i", ix)->getCString(),
+                        dict->setIntegerForKey("save-time", backup->getTime());
+                        dict->setStringForKey("custom-name", backup->name);
+                        dict->setIntegerForKey("object-count", backup->objectCount);
+                        dict->setStringForKey("data", backup->data);
+                    );
+                }
+            );
+        }
+    );
 }
 
-void LevelBackupManager::dataLoaded(DS_Dictionary* data) {
+void LevelBackupManager::dataLoaded(DS_Dictionary* dict) {
+    STEP_SUBDICT_NC(dict, "levels",
+        for (auto key : dict->getAllKeys()) {
+            STEP_SUBDICT_NC(dict, key.c_str(),
+                auto arr = CCArray::create();
+                m_pLevels->setObject(arr, key.c_str());
 
+                for (auto bkey : dict->getAllKeys()) {
+                    STEP_SUBDICT_NC(dict, bkey.c_str(),
+                        
+                    );
+                }
+            );
+        }
+    );
 }
 
 bool LevelBackupManager::initGlobal() {
@@ -33,20 +82,27 @@ bool LevelBackupManager::levelHasBackup(GJGameLevel* level) {
 }
 
 bool LevelBackupManager::levelHasBackup(std::string const& level) {
-    return m_mLevels.count(level);
+    return m_pLevels->objectForKey(level);
 }
-
-LevelBackupManager::backup_list* LevelBackupManager::getBackupsForLevel(GJGameLevel* level) {
+CCArray* LevelBackupManager::getBackupsForLevel(GJGameLevel* level) {
     return getBackupsForLevel(level->levelName);
 }
 
-LevelBackupManager::backup_list* LevelBackupManager::getBackupsForLevel(std::string const& level) {
+CCArray* LevelBackupManager::getBackupsForLevel(std::string const& level) {
     if (levelHasBackup(level))
-        return &m_mLevels[level];
+        return as<CCArray*>(m_pLevels->objectForKey(level));
     
     return nullptr;
 }
 
 void LevelBackupManager::createBackupForLevel(GJGameLevel* level) {
-    
+    CCArray* arr;
+    if (!levelHasBackup(level)) {
+        arr = CCArray::create();
+        m_pLevels->setObject(arr, level->levelName);
+    } else {
+        arr = as<CCArray*>(m_pLevels->objectForKey(level->levelName));
+    }
+
+    arr->addObject(new LevelBackup(level, ""));
 }

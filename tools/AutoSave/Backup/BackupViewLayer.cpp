@@ -60,19 +60,32 @@ bool BackupViewLayer::init(GJGameLevel* level) {
     );
     this->addChild(this->m_pList);
 
-    if (!LevelBackupManager::get()->levelHasBackup(this->m_pLevel)) {
-        auto label = CCLabelBMFont::create("No backups found!", "bigFont.fnt");
+    m_pListLabel = CCLabelBMFont::create("No backups found!", "bigFont.fnt");
 
-        label->setPosition(winSize / 2);
-        label->setScale(.6f);
+    m_pListLabel->setPosition(winSize / 2);
+    m_pListLabel->setScale(.6f);
+    m_pListLabel->setVisible(false);
 
-        this->addChild(label);
-    }
+    this->addChild(m_pListLabel);
+
+    this->reloadList();
 
     this->setKeyboardEnabled(true);
     this->setKeypadEnabled(true);
 
     return true;
+}
+
+void BackupViewLayer::reloadList() {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+    if (!LevelBackupManager::get()->levelHasBackup(this->m_pLevel)) {
+        m_pListLabel->setVisible(true);
+    } else {
+        m_pListLabel->setVisible(false);
+
+        
+    }
 }
 
 void BackupViewLayer::keyDown(enumKeyCodes key) {
@@ -81,6 +94,11 @@ void BackupViewLayer::keyDown(enumKeyCodes key) {
 		    this->onExit(nullptr);
             break;
 	}
+}
+
+void BackupViewLayer::onNew(CCObject*) {
+    LevelBackupManager::get()->createBackupForLevel(this->m_pLevel);
+    this->reloadList();
 }
 
 void BackupViewLayer::onExit(CCObject*) {

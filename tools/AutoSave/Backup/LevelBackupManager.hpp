@@ -3,21 +3,36 @@
 #include "../../../BetterEdit.hpp"
 #include <chrono>
 
-struct LevelBackup {
+struct LevelBackup : public CCObject {
     using LevelBackupTime = std::chrono::time_point<std::chrono::system_clock>;
 
     LevelBackupTime savetime;
     std::string name;
     int objectCount;
     std::string data;
+
+    inline long getTime() {
+        return std::chrono::time_point_cast<std::chrono::seconds>(savetime)
+            .time_since_epoch().count();
+    }
+
+    inline LevelBackup(DS_Dictionary* dict) {
+        name = dict->getStringForKey("custom-name");
+    }
+
+    inline LevelBackup(GJGameLevel* level, std::string const& cname) {
+        savetime = std::chrono::system_clock::now();;
+        name = cname;
+        objectCount = level->objectCount;
+        data = level->levelString;
+
+        this->autorelease();
+    }
 };
 
 class LevelBackupManager {
-    public:
-        using backup_list = std::vector<LevelBackup>;
-
     protected:
-        std::map<std::string, backup_list> m_mLevels;
+        CCDictionary* m_pLevels;
 
         bool init();
 
@@ -30,7 +45,7 @@ class LevelBackupManager {
 
         bool levelHasBackup(GJGameLevel* level);
         bool levelHasBackup(std::string const& level);
-        backup_list* getBackupsForLevel(GJGameLevel* level);
-        backup_list* getBackupsForLevel(std::string const& level);
+        CCArray* getBackupsForLevel(GJGameLevel* level);
+        CCArray* getBackupsForLevel(std::string const& level);
         void createBackupForLevel(GJGameLevel* level);
 };
