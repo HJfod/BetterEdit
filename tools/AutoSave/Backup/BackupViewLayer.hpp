@@ -16,9 +16,9 @@ class BackupViewLayer : public CCLayer {
         void keyDown(enumKeyCodes) override;
         void onNew(CCObject*);
 
+    public:
         void reloadList();
 
-    public:
         static BackupViewLayer* create(GJGameLevel*);
         static BackupViewLayer* scene(GJGameLevel*);
 };

@@ -85,6 +85,7 @@ void BackupViewLayer::reloadList() {
 
         list = BackupListView::create(
             LevelBackupManager::get()->getBackupsForLevel(this->m_pLevel),
+            this,
             356.f, 220.f
         );
     }
