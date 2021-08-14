@@ -62,8 +62,8 @@ const rd = (dpath) => {
                             patch_count += f.includes("patch");
                             patch_count -= f.includes("unpatch");
 
-                            class_count += f.includes("class");
-                            class_count += f.includes("struct");
+                            class_count += f.includes("class ");
+                            class_count += f.includes("struct ");
                         }
                         
                         f.split('').forEach(c => {
