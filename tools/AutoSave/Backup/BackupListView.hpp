@@ -7,10 +7,13 @@
 static constexpr const BoomListType kBoomListType_Backup
     = static_cast<BoomListType>(0x420);
 
+class BackupViewLayer;
+
 class BackupCell : public TableViewCell {
     protected:
         BackupViewLayer* m_pBackupLayer;
         LevelBackup* m_pBackup;
+        CCLabelBMFont* m_pTitle;
 
 		BackupCell(const char* name, CCSize size);
 
@@ -20,6 +23,7 @@ class BackupCell : public TableViewCell {
 	
 	public:
         void loadFromBackup(LevelBackup* backup);
+        void updateTitle(const char*);
 
 		static BackupCell* create(BackupViewLayer*, const char* key, CCSize size);
 };

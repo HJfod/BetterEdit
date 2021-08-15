@@ -67,4 +67,5 @@ class LevelBackupManager : public GManager {
         CCArray* getBackupsForLevel(GJGameLevel* level);
         CCArray* getBackupsForLevel(std::string const& level);
         void createBackupForLevel(GJGameLevel* level);
+        void removeBackupForLevel(GJGameLevel* level, LevelBackup* backup);
 };

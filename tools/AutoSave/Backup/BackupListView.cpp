@@ -9,16 +9,17 @@ static std::string timePointAsString(const std::chrono::system_clock::time_point
 }
 
 void BackupCell::loadFromBackup(LevelBackup* backup) {
-    auto titleLabel = CCLabelBMFont::create(
-        backup->name.size() ? backup->name.c_str() : "Unnamed Backup",
-        "bigFont.fnt"
-    );
+    this->m_pBackup = backup;
 
-    titleLabel->setAnchorPoint({ 0.0f, 0.5f });
-    titleLabel->setPosition(20.0f, 40.0f);
-    titleLabel->setScale(.65f);
+    m_pTitle = CCLabelBMFont::create("", "bigFont.fnt");
 
-    this->m_pLayer->addChild(titleLabel);
+    m_pTitle->setAnchorPoint({ 0.0f, 0.5f });
+    m_pTitle->setPosition(20.0f, 40.0f);
+    m_pTitle->setScale(.65f);
+
+    this->m_pLayer->addChild(m_pTitle);
+
+    this->updateTitle(this->m_pBackup->name.c_str());
 
 
     auto time = timePointAsString(backup->savetime);
@@ -60,8 +61,17 @@ void BackupCell::loadFromBackup(LevelBackup* backup) {
     this->m_pBGLayer->setOpacity(255);
 }
 
+void BackupCell::updateTitle(const char* newTitle) {
+    m_pTitle->setString(
+        strlen(newTitle) ? newTitle : "Unnamed Backup"
+    );
+    m_pTitle->limitLabelWidth(this->getContentSize().width - 160.0f, .65f, .1f);
+}
+
 void BackupCell::onView(CCObject* pSender) {
-    BackupEditLayer::create(this->m_pBackupLayer, this->m_pBackup)->show();
+    BackupEditLayer::create(
+        this->m_pBackupLayer, this, this->m_pBackup
+    )->show();
 }
 
 void BackupCell::draw() {
