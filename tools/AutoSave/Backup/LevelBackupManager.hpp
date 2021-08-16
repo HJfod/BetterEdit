@@ -6,7 +6,11 @@
 struct LevelBackup : public CCObject {
     using LevelBackupTime = std::chrono::time_point<std::chrono::system_clock>;
 
-    static constexpr const long time_offset = 10000000;
+    // normalize time to be better served as an int
+    // there's no way a backup can be made before this point
+    // and also the int's signed so it should theoretically
+    // work anyway
+    static constexpr const long time_offset = 1629000000;
 
     LevelBackupTime savetime;
     std::string name;
@@ -39,7 +43,7 @@ struct LevelBackup : public CCObject {
     }
 
     inline LevelBackup(GJGameLevel* level, std::string const& cname) {
-        savetime = std::chrono::system_clock::now();;
+        savetime = std::chrono::system_clock::now();
         name = cname;
         objectCount = level->objectCount;
         data = level->levelString;

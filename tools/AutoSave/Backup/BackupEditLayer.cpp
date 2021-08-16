@@ -60,14 +60,14 @@ void BackupEditLayer::setup() {
     auto viewBtn = CCMenuItemSpriteExtra::create(
         createBtnSprite("BE_eye-on.png", "View\nBackup", { 255, 255, 80 }),
         this,
-        nullptr
+        menu_selector(BackupEditLayer::onView)
     );
     this->m_pButtonMenu->addChild(viewBtn);
 
     auto loadBtn = CCMenuItemSpriteExtra::create(
         createBtnSprite("GJ_downloadsIcon_001.png", "Load\nBackup", { 80, 255, 95 }),
         this,
-        nullptr
+        menu_selector(BackupEditLayer::onApply)
     );
     this->m_pButtonMenu->addChild(loadBtn);
 
