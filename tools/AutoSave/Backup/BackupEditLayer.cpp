@@ -102,7 +102,13 @@ void BackupEditLayer::onDelete(CCObject*) {
 }
 
 void BackupEditLayer::onView(CCObject*) {
-    
+    auto level = GJGameLevel::create();
+
+    level->levelString = this->m_pBackup->data;
+
+    BetterEdit::setEditorViewOnlyMode(true);
+
+    LevelEditorLayer::scene(level);
 }
 
 void BackupEditLayer::onApply(CCObject*) {

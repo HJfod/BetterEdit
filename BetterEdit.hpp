@@ -90,6 +90,7 @@ class BetterEdit : public gd::GManager {
         std::vector<std::string> m_vScheduledErrors;
         FavoritesList m_vFavorites;
         bool m_bEditorInitialized;
+        bool m_bDisableEditorEditing;
 
         BE_SETTINGS(BE_MAKE_SETTING)
 
@@ -130,6 +131,13 @@ class BetterEdit : public gd::GManager {
         }
         static void setEditorInitialized(bool b) {
             BetterEdit::sharedState()->m_bEditorInitialized = b;
+        }
+
+        static inline bool isEditorViewOnlyMode() {
+            return BetterEdit::sharedState()->m_bDisableEditorEditing;
+        }
+        static void setEditorViewOnlyMode(bool b) {
+            BetterEdit::sharedState()->m_bDisableEditorEditing = b;
         }
 
         bool m_bHookConflictFound = true;

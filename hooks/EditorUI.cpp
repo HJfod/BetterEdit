@@ -147,6 +147,12 @@ void __fastcall EditorUI_ccTouchEnded(EditorUI* self, edx_t edx, CCTouch* touch,
     GDMAKE_ORIG_V(self, edx, touch, event);
 }
 
+GDMAKE_HOOK(0x78860)
+void __fastcall EditorUI_clickOnPosition(EditorUI* self, edx_t edx, CCPoint point) {
+    if (!BetterEdit::isEditorViewOnlyMode())
+        return GDMAKE_ORIG_V(self, edx, point);
+}
+
 GDMAKE_HOOK(0x76090)
 void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
     saveClipboard(self);
@@ -257,6 +263,16 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     loadClipboard(self);
     loadPasteRepeatButton(self);
     loadAutoSaveTimer(self);
+
+    if (BetterEdit::isEditorViewOnlyMode()) {
+        auto viewOnlyLabel = CCLabelBMFont::create("View-Only Mode", "bigFont.fnt");
+
+        viewOnlyLabel->setScale(.6f);
+        viewOnlyLabel->setOpacity(120);
+        viewOnlyLabel->setPosition(winSize.width / 2, winSize.height - 30.0f);
+
+        self->addChild(viewOnlyLabel);
+    }
     
     BetterEdit::sharedState()->m_bHookConflictFound = false;
 
@@ -311,6 +327,9 @@ void __fastcall EditorUI_updateButtons(EditorUI* self) {
 
 GDMAKE_HOOK(0x87180)
 void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
+    if (BetterEdit::isEditorViewOnlyMode())
+        show = false;
+
     GDMAKE_ORIG_V(self, edx, show);
 
     g_showUI = show;
@@ -359,6 +378,10 @@ void __fastcall EditorUI_updateZoom(gd::EditorUI* self) {
 
 GDMAKE_HOOK(0x91a30)
 void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
+    if (BetterEdit::isEditorViewOnlyMode() &&
+        (key != KEY_Up || key != KEY_Space))
+        return;
+
     auto kb = cocos2d::CCDirector::sharedDirector()->getKeyboardDispatcher();
     
     auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xf8);

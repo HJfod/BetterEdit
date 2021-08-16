@@ -1,4 +1,5 @@
 #include "addTab.hpp"
+#include "../BetterEdit.hpp"
 
 using namespace gdmake;
 
@@ -11,6 +12,9 @@ void addEditorTab(const char* spr, addEditorTabFunc bbar) {
 GDMAKE_HOOK(0x7caf0)
 void __fastcall EditorUI_setupCreateMenu(gd::EditorUI* self) {
     GDMAKE_ORIG_V(self);
+
+    if (BetterEdit::isEditorViewOnlyMode())
+        return;
 
     auto pos = self->m_pTabsMenu->getPosition();
 

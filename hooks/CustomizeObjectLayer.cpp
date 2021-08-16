@@ -64,6 +64,23 @@ std::string getShortColorBtnText(int channel) {
     }
 }
 
+void updateCustomChannelSprite(CustomizeObjectLayer* self, ColorChannelSprite* btn) {
+    std::string txt = GJSpecialColorSelect::textForColorIdx(self->m_nCustomColorChannel);
+    
+    if (txt == "NA")
+        try {
+            txt = std::to_string(self->m_nCustomColorChannel);
+        } catch(...) {
+            txt = std::to_string(colorCountOnPage);
+        }
+    
+    auto label = as<CCLabelBMFont*>(
+        btn->getChildByTag(COLORBTN_LABEL_TAG)
+    );
+
+    if (label) label->setString(txt.c_str());
+}
+
 void updateButtons(CustomizeObjectLayer* self) {
     if (BetterEdit::getDisableNewColorSelection())
         return;
@@ -119,7 +136,7 @@ void updateButtons(CustomizeObjectLayer* self) {
             label->setVisible(!col->m_copyID);
 
             if (btn->getParent()->getTag() == 1008)
-                label->setString(std::to_string(self->m_nCustomColorChannel).c_str());
+                updateCustomChannelSprite(self, btn);
         }
     }
 
@@ -166,6 +183,22 @@ ColorChannelSprite* getChannelSprite(int channel) {
     return channelSprite;
 }
 
+void updateCustomChannelSprite(CustomizeObjectLayer* self) {
+    if (BetterEdit::getDisableNewColorSelection())
+        return;
+
+    CCARRAY_FOREACH_B_TYPE(self->m_pColorButtons, btn, ColorChannelSprite) {
+        auto label = as<CCLabelBMFont*>(
+            btn->getChildByTag(COLORBTN_LABEL_TAG)
+        );
+
+        if (!label) continue;
+
+        if (btn->getParent()->getTag() == 1008)
+            updateCustomChannelSprite(self, btn);
+    }
+}
+
 CCSprite* createBGSprite() {
     auto bgTexture = CCRenderTexture::create(365, 260);
 
@@ -200,14 +233,23 @@ CCSprite* createBGSprite() {
 }
 
 GDMAKE_HOOK(0x56db0)
-void __fastcall CustomizeObjectLayer_onSelectMode(CustomizeObjectLayer* self, edx_t edx, CCObject* pSender) {
+void __fastcall CustomizeObjectLayer_onSelectMode(
+    CustomizeObjectLayer* self,
+    edx_t edx,
+    CCObject* pSender
+) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     updateButtons(self);
 }
 
 GDMAKE_HOOK(0x53e00)
-bool __fastcall CustomizeObjectLayer_init(CustomizeObjectLayer* self, edx_t edx, EffectGameObject* obj, CCArray* objs) {
+bool __fastcall CustomizeObjectLayer_init(
+    CustomizeObjectLayer* self,
+    edx_t edx,
+    EffectGameObject* obj,
+    CCArray* objs
+) {
     if (BetterEdit::getDisableNewColorSelection())
         unpatch(0x5737e);
     else
@@ -218,7 +260,10 @@ bool __fastcall CustomizeObjectLayer_init(CustomizeObjectLayer* self, edx_t edx,
 
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     
-    if (self->m_nCustomColorChannel < colorCountOnPage)
+    if (
+        !BetterEdit::getDisableNewColorSelection() &&
+        self->m_nCustomColorChannel < colorCountOnPage
+    )
         self->m_nCustomColorChannel = colorCountOnPage;
 
     auto nextFreeBtn = getChild<CCMenuItemSpriteExtra*>(self->m_pButtonMenu, 26);
@@ -357,22 +402,51 @@ bool __fastcall CustomizeObjectLayer_init(CustomizeObjectLayer* self, edx_t edx,
     return true;
 }
 
+GDMAKE_HOOK(0x574d0)
+void __fastcall CustomizeObjectLayer_textChanged(
+    CustomizeObjectLayer* self_, edx_t edx, CCTextInputNode* input
+) {
+    GDMAKE_ORIG_V(self_, edx, input);
+
+    auto self = as<CustomizeObjectLayer*>(as<uintptr_t>(self_) - 0x1cc);
+
+    if (input->getString() && strlen(input->getString()))
+        try {
+            self->m_nCustomColorChannel = std::stoi(input->getString());
+        } catch(...) {}
+    
+    if (self->m_nCustomColorChannel < 1)
+        self->m_nCustomColorChannel = 1;
+
+    updateCustomChannelSprite(self);
+}
+
 GDMAKE_HOOK(0x57350)
-void __fastcall CustomizeObjectLayer_onUpdateCustomColor(CustomizeObjectLayer* self, edx_t edx, CCObject* pSender) {
+void __fastcall CustomizeObjectLayer_onUpdateCustomColor(
+    CustomizeObjectLayer* self,
+    edx_t edx,
+    CCObject* pSender
+) {
     GDMAKE_ORIG(self, edx, pSender);
 
     updateButtons(self);
 }
 
 GDMAKE_HOOK(0x564a0)
-void __fastcall CustomizeObjectLayer_colorSelectClosed(CustomizeObjectLayer* self) {
+void __fastcall CustomizeObjectLayer_colorSelectClosed(
+    CustomizeObjectLayer* self
+) {
     updateButtons(as<CustomizeObjectLayer*>(as<uintptr_t>(self) - 0x1d4));
 
     GDMAKE_ORIG(self);
 }
 
 GDMAKE_HOOK(0x579d0)
-void __fastcall CustomizeObjectLayer_highlightSelected(CustomizeObjectLayer* self, edx_t edx, ButtonSprite* bspr) {
+void __fastcall CustomizeObjectLayer_highlightSelected(
+    CustomizeObjectLayer* self,
+    edx_t edx,
+    ButtonSprite* bspr
+) {
     if (BetterEdit::getDisableNewColorSelection())
         return GDMAKE_ORIG_V(self, edx, bspr);
 

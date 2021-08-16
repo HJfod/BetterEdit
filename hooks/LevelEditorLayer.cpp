@@ -33,6 +33,7 @@ bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameL
 GDMAKE_HOOK(0x15e8d0)
 void __fastcall LevelEditorLayer_destructorHook(LevelEditorLayer* self) {
     BetterEdit::setEditorInitialized(false);
+    BetterEdit::setEditorViewOnlyMode(false);
 
     return GDMAKE_ORIG_V(self);
 }
