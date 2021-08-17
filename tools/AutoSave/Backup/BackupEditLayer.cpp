@@ -28,7 +28,7 @@ CCSprite* BackupEditLayer::createBtnSprite(const char* spr, const char* text, cc
     }
 
     auto label = CCLabelBMFont::create(text, "bigFont.fnt", 160.0f, kCCTextAlignmentCenter);
-    // label->setColor(color);
+    label->setColor(color);
     label->setScale(.3f);
     label->setPosition(
         parent->getContentSize().width / 2,
@@ -51,21 +51,21 @@ void BackupEditLayer::setup() {
     this->m_pLayer->addChild(this->m_pNameInput);
 
     auto deleteBtn = CCMenuItemSpriteExtra::create(
-        createBtnSprite("edit_delBtn_001.png", "Delete\nBackup", { 255, 115, 95 }),
+        createBtnSprite("edit_delBtn_001.png", "Delete\nBackup", cc3x(0xfa3)), //  { 255, 115, 95 }
         this,
         menu_selector(BackupEditLayer::onDelete)
     );
     this->m_pButtonMenu->addChild(deleteBtn);
 
     auto viewBtn = CCMenuItemSpriteExtra::create(
-        createBtnSprite("BE_eye-on.png", "View\nBackup", { 255, 255, 80 }),
+        createBtnSprite("BE_eye-on.png", "View\nBackup"), // { 255, 255, 80 }
         this,
         menu_selector(BackupEditLayer::onView)
     );
     this->m_pButtonMenu->addChild(viewBtn);
 
     auto loadBtn = CCMenuItemSpriteExtra::create(
-        createBtnSprite("GJ_downloadsIcon_001.png", "Load\nBackup", { 80, 255, 95 }),
+        createBtnSprite("GJ_downloadsIcon_001.png", "Load\nBackup"), // { 80, 255, 95 }
         this,
         menu_selector(BackupEditLayer::onApply)
     );
@@ -104,15 +104,62 @@ void BackupEditLayer::onDelete(CCObject*) {
 void BackupEditLayer::onView(CCObject*) {
     auto level = GJGameLevel::create();
 
-    level->levelString = this->m_pBackup->data;
+    level->setLevelData(this->m_pBackup->data);
 
     BetterEdit::setEditorViewOnlyMode(true);
 
-    LevelEditorLayer::scene(level);
+    auto scene = CCScene::create();
+
+    auto lel = LevelEditorLayer::create(level);
+    lel->m_nCurrentLayer = -1;
+    scene->addChild(lel);
+    CCDirector::sharedDirector()->pushScene(CCTransitionFade::create(
+        0.5f, scene
+    ));
 }
 
 void BackupEditLayer::onApply(CCObject*) {
-    
+    FLAlertLayer::create(
+        this,
+        "Confirm Apply",
+        "Apply", "Backup & Apply",
+        "Would you like to <co>back up</c> your current progress "
+        "before <cl>applying</c>? (<cr>Otherwise progress will be "
+        "lost</c>)"
+    )->show();
+}
+
+void BackupEditLayer::applyBackup() {
+    this->m_pBackupLayer->m_pLevel->setLevelData(this->m_pBackup->data);
+
+    auto alert = FLAlertLayer::create(
+        nullptr,
+        "Backup Applied",
+        "OK", nullptr,
+        "\n\n"
+    );
+
+    auto checkmark = CCSprite::createWithSpriteFrameName("GJ_completesIcon_001.png");
+    checkmark->setScale(1.1f);
+    checkmark->setPosition(
+        CCDirector::sharedDirector()->getWinSize() / 2
+    );
+    alert->m_pLayer->addChild(checkmark, 10);
+    alert->show();
+
+    this->m_pBackupLayer->reloadList();
+
+    this->onClose(nullptr);
+}
+
+void BackupEditLayer::FLAlert_Clicked(FLAlertLayer*, bool btn2) {
+    if (btn2) {
+        LevelBackupManager::get()->createBackupForLevel(
+            this->m_pBackupLayer->m_pLevel
+        );
+    }
+
+    this->applyBackup();
 }
 
 void BackupEditLayer::onResetName(CCObject*) {

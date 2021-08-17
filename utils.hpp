@@ -75,6 +75,21 @@ static cocos2d::CCSprite* createBESprite(const char* name, const char* fallback 
     return missingTextureSpr;
 }
 
+static constexpr cocos2d::ccColor3B cc3x(int hexValue) {
+    if (hexValue > 0xfff)
+        return cocos2d::ccColor3B {
+            static_cast<GLubyte>(hexValue >> 16 & 0xff),
+            static_cast<GLubyte>(hexValue >> 8  & 0xff),
+            static_cast<GLubyte>(hexValue >> 0  & 0xff)
+        };
+    else
+        return cocos2d::ccColor3B {
+            static_cast<GLubyte>((hexValue >> 8 & 0xf) * 17),
+            static_cast<GLubyte>((hexValue >> 4 & 0xf) * 17),
+            static_cast<GLubyte>((hexValue >> 0 & 0xf) * 17)
+        };
+}
+
 static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
     if (obj != nullptr) {
         const auto vtable = *as<uintptr_t*>(obj) - gd::base;

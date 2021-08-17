@@ -104,6 +104,9 @@ void BackupListView::setupList() {
 
     this->m_pTableView->reloadData();
 
+    std::cout << this->m_pEntries->count() << "\n";
+    std::cout << this->m_fItemSeparation << "\n";
+
     if (this->m_pEntries->count() == 1)
         this->m_pTableView->moveToTopWithOffset(this->m_fItemSeparation);
     

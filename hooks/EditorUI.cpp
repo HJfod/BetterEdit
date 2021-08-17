@@ -8,6 +8,7 @@
 #include "../tools/EditorLayerInput/editorLayerInput.hpp"
 #include "../tools/RepeatPaste/repeatPaste.hpp"
 #include "../tools/AutoSave/autoSave.hpp"
+#include "../tools/AutoSave/Backup/BackupViewLayer.hpp"
 #include <thread>
 
 using namespace gdmake;
@@ -15,6 +16,7 @@ using namespace cocos2d;
 
 static constexpr const int ZOOMLABEL_TAG = 6976;
 static constexpr const int TOGGLEUI_TAG = 6979;
+static constexpr const int VIEWMODE_BACKBTN_TAG = 59305;
 
 bool g_showUI = true;
 bool g_hasResetObjectsScale = true;
@@ -76,6 +78,12 @@ class EditorUI_CB : public EditorUI {
                 if (!g_showUI) // it has been updated anyway by showUI
                     updateToggleButtonSprite(btn);
             }
+        }
+
+        void onExitViewMode(CCObject*) {
+            CCDirector::sharedDirector()->popSceneWithTransition(
+                0.5f, cocos2d::kPopTransitionFade
+            );
         }
 };
 
@@ -267,11 +275,30 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     if (BetterEdit::isEditorViewOnlyMode()) {
         auto viewOnlyLabel = CCLabelBMFont::create("View-Only Mode", "bigFont.fnt");
 
-        viewOnlyLabel->setScale(.6f);
-        viewOnlyLabel->setOpacity(120);
+        viewOnlyLabel->setScale(.4f);
+        viewOnlyLabel->setOpacity(90);
         viewOnlyLabel->setPosition(winSize.width / 2, winSize.height - 30.0f);
 
         self->addChild(viewOnlyLabel);
+
+        auto backButton = CCMenuItemSpriteExtra::create(
+            CCNodeConstructor()
+                .fromFrameName("GJ_arrow_01_001.png")
+                .scale(.75f)
+                .done(),
+            self,
+            menu_selector(EditorUI_CB::onExitViewMode)
+        );
+
+        backButton->setPosition(
+            self->m_pPlaybackBtn->getPositionX(),
+            self->m_pTrashBtn->getPositionY()
+        );
+        backButton->setTag(VIEWMODE_BACKBTN_TAG);
+
+        self->m_pPlaybackBtn->getParent()->addChild(backButton);
+
+        self->showUI(false);
     }
     
     BetterEdit::sharedState()->m_bHookConflictFound = false;
@@ -332,6 +359,16 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
 
     GDMAKE_ORIG_V(self, edx, show);
 
+    if (BetterEdit::isEditorViewOnlyMode()) {
+        CCARRAY_FOREACH_B_TYPE(
+            self->m_pPlaybackBtn->getParent()->getChildren(),
+            node,
+            CCNode
+        ) {
+            node->setVisible(node->getTag() == VIEWMODE_BACKBTN_TAG);
+        }
+    }
+
     g_showUI = show;
 
     self->m_pTabsMenu->setVisible(self->m_nSelectedMode == 2 && show);
@@ -379,7 +416,7 @@ void __fastcall EditorUI_updateZoom(gd::EditorUI* self) {
 GDMAKE_HOOK(0x91a30)
 void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
     if (BetterEdit::isEditorViewOnlyMode() &&
-        (key != KEY_Up || key != KEY_Space))
+        (key != KEY_Up || key != KEY_Space || key != KEY_Escape))
         return;
 
     auto kb = cocos2d::CCDirector::sharedDirector()->getKeyboardDispatcher();

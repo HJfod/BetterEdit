@@ -9,7 +9,11 @@
 class BackupViewLayer;
 class BackupCell;
 
-class BackupEditLayer : public BrownAlertDelegate, TextInputDelegate {
+class BackupEditLayer :
+    public BrownAlertDelegate,
+    TextInputDelegate,
+    FLAlertLayerProtocol
+{
     protected:
         BackupViewLayer* m_pBackupLayer;
         LevelBackup* m_pBackup;
@@ -19,13 +23,16 @@ class BackupEditLayer : public BrownAlertDelegate, TextInputDelegate {
         void setup() override;
 
         void textChanged(CCTextInputNode*) override;
+        void applyBackup();
 
         void onResetName(CCObject*);
         void onDelete(CCObject*);
         void onView(CCObject*);
         void onApply(CCObject*);
 
-        CCSprite* createBtnSprite(const char* spr, const char* text, ccColor3B color);
+        void FLAlert_Clicked(FLAlertLayer*, bool) override;
+
+        CCSprite* createBtnSprite(const char* spr, const char* text, ccColor3B color = { 255, 255, 255 });
 
     public:
         static BackupEditLayer* create(BackupViewLayer*, BackupCell*, LevelBackup*);

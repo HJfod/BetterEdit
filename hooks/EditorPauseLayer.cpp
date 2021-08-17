@@ -97,6 +97,20 @@ bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, LevelEd
     auto menu = as<CCMenu*>(self->m_pButton0->getParent());
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
+    if (BetterEdit::isEditorViewOnlyMode()) {
+        auto mainMenu = as<CCMenu*>(self->getChildren()->objectAtIndex(0));
+
+        CCARRAY_FOREACH_B_BASE(mainMenu->getChildren(), btn, CCMenuItemSpriteExtra*, ix) {
+            if (!ix) continue;
+
+            btn->setEnabled(false);
+            as<ButtonSprite*>(btn->getNormalImage())->setCascadeColorEnabled(true);
+            as<ButtonSprite*>(btn->getNormalImage())->setCascadeOpacityEnabled(true);
+            as<ButtonSprite*>(btn->getNormalImage())->setColor({ 90, 90, 90 });
+            as<ButtonSprite*>(btn->getNormalImage())->setOpacity(200);
+        }
+    }
+
     auto gdSettingsBtn = getChild<CCMenu*>(menu, menu->getChildrenCount() - 1);
 
     auto btn = CCMenuItemSpriteExtra::create(
