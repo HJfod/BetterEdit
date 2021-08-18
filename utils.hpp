@@ -108,6 +108,17 @@ static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
     return nullptr;
 }
 
+template<typename R, typename T>
+static constexpr R union_cast(T v) {
+    static_assert(sizeof T == sizeof R, "union_cast: R and T don't match in size!");
+    union {
+        R r;
+        T t;
+    } x;
+    x.t = v;
+    return x.r;
+}
+
 #define CATCH_NULL(x) if (x) x
 
 
@@ -300,11 +311,11 @@ inline int strToInt(const char* str, bool* is = nullptr) {
     return isStr ? std::atoi(str) : -1;
 }
 
-inline std::vector<uint8_t> intToBytes(int paramInt) {
+inline std::vector<uint8_t> intToBytes(int paramInt, bool r = true) {
     std::vector<uint8_t> arrayOfByte(4);
     for (int i = 0; i < 4; i++)
         arrayOfByte[3 - i] = (paramInt >> (i * 8));
     
-    std::reverse(arrayOfByte.begin(), arrayOfByte.end());
+    if (r) std::reverse(arrayOfByte.begin(), arrayOfByte.end());
     return arrayOfByte;
 }

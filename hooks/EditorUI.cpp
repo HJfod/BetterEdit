@@ -9,6 +9,7 @@
 #include "../tools/RepeatPaste/repeatPaste.hpp"
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/AutoSave/Backup/BackupViewLayer.hpp"
+#include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include <thread>
 
 using namespace gdmake;
@@ -228,6 +229,8 @@ public:
 
 GDMAKE_HOOK(EditorUI::init)
 bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lvl) {
+    makeVisibilityPatches();
+
     if (!GDMAKE_ORIG(self, edx, lvl))
         return false;
 
@@ -271,6 +274,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     loadClipboard(self);
     loadPasteRepeatButton(self);
     loadAutoSaveTimer(self);
+    loadVisibilityTab(self);
 
     if (BetterEdit::isEditorViewOnlyMode()) {
         auto viewOnlyLabel = CCLabelBMFont::create("View-Only Mode", "bigFont.fnt");
@@ -429,6 +433,9 @@ void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
         kb->getControlKeyPressed()
     )
         return self->selectAll();
+    
+    if (key == KEY_Four)
+        self->toggleMode(self->m_pBuildModeBtn->getParent()->getChildByTag(4));
     
     // wacky hack to make 2-player duals work properly
     if (BetterEdit::getUseUpArrowForGameplay() && key == enumKeyCodes::KEY_Up)
