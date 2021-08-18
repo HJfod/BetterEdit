@@ -14,4 +14,6 @@ Download is available on my Discord Server: https://discord.gg/K9Kuh3hzTC
    
    `gdmake submodules add-src nodes *.cpp`
 
-3. `gdmake . -outlvl minimal`
+   `gdmake submodules add-inc Cocos2d cocos2dx/support/zip_support`
+
+3. `gdmake . -outlvl minimal -re` (the `-re` flag is not necessary after the first compile)
