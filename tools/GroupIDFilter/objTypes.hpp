@@ -241,7 +241,7 @@ static int g_objIDs_hidden[] = {
 
     61,     // old circular floor hazard
 
-    88, 89, 98,         // normal (old ver)
+    88, 89, 98,         // normal saws (old ver)
     397, 398, 399,      // 1.9 spikey things (old ver)
     675, 676, 677,      // gears (old 1.9 ver)
 };

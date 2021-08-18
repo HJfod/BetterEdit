@@ -4,6 +4,8 @@
 static constexpr const float f_96 = 96.0f;
 static constexpr const float f_0  = 0.0f;
 
+static constexpr const int VIEWBUTTONBAR_TAG = 0x234592;
+
 #define UPD_IMG(_var_, _tag_) \
     if (_var_) \
     as<ButtonSprite*>(as<CCMenuItemSpriteExtra*>(_var_)->getNormalImage())  \
@@ -67,6 +69,32 @@ void loadVisibilityTab(EditorUI* self) {
     self->toggleMode(self->m_pBuildModeBtn->getParent()->getChildByTag(
         self->m_nSelectedMode
     ));
+
+
+
+    auto btns = CCArray::create();
+
+    btns->addObject(self->getSpriteButton(
+        "sawblade_02_001.png", nullptr, nullptr, .9f
+    ));
+    btns->addObject(self->getSpriteButton(
+        "rod_ball_03_001.png", nullptr, nullptr, .9f
+    ));
+    btns->addObject(self->getSpriteButton(
+        "smallOutline_01_001.png", nullptr, nullptr, .9f
+    ));
+
+    auto buttonBar = EditButtonBar::create(
+        btns,
+        { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f },
+        self->m_pTabsArray->count(), false,
+        GameManager::sharedState()->getIntGameVariable("0049"),
+        GameManager::sharedState()->getIntGameVariable("0050")
+    );
+    buttonBar->setTag(VIEWBUTTONBAR_TAG);
+    buttonBar->setVisible(self->m_nSelectedMode == 4);
+
+    self->addChild(buttonBar, 10);
 }
 
 GDMAKE_HOOK(0x7ad20)
@@ -93,5 +121,6 @@ void __fastcall EditorUI_toggleMode(EditorUI* self, edx_t edx, CCObject* pSender
         self->updateCreateMenu(false);
         self->m_pEditButtonBar->setVisible(tag == 3);
         self->updateGridNodeSize();
+        self->getChildByTag(VIEWBUTTONBAR_TAG)->setVisible(tag == 4);
     }
 }
