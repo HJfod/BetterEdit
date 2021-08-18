@@ -51,6 +51,13 @@ void __fastcall LevelEditorLayer_addSpecial(
 
     if (shouldRotateSaw() && objectIsSaw(obj))
         beginRotateSaw(obj);
+
+    if (obj->m_nObjectID == 747) {
+        auto op = as<gd::TeleportPortalObject*>(obj)->m_pOrangePortal;
+        // idk why rob uses a negative scale instead of just flip x
+        op->m_fScale = object->m_fScale;
+        op->setRScale(1.f);
+    }
 }
 
 GDMAKE_HOOK(0x161cb0)
