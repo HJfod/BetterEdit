@@ -66,7 +66,7 @@ CCMenuItemToggler* createEditBtn(
 
     if (b) btn->setUserData(as<void*>(b));
     if (gmVar) {
-        btn->setUserData(as<void*>(gmVar));
+        btn->setUserObject(CCString::create(gmVar));
 
         btn->toggle(GameManager::sharedState()->getGameVariable(gmVar));
     }
