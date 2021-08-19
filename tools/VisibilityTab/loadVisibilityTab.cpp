@@ -21,6 +21,12 @@ class VisibilityToggleCallbacks : public CCObject {
 
             *data = !as<CCMenuItemToggler*>(pSender)->isToggled();
         }
+
+        void onToggleGMVar(CCObject* pSender) {
+            auto var = as<CCString*>(as<CCNode*>(pSender)->getUserObject())->getCString();
+
+            GameManager::sharedState()->toggleGameVariable(var);
+        }
 };
 
 ButtonSprite* createBtnSprite(const char* file) {
@@ -36,7 +42,8 @@ CCMenuItemToggler* createEditBtn(
     EditorUI* target,
     const char* file,
     SEL_MenuHandler cb = nullptr,
-    bool* b = nullptr
+    bool* b = nullptr,
+    const char* gmVar = nullptr
 ) {
     auto sprOff = ButtonSprite::create(
         createBESprite(file),
@@ -51,12 +58,18 @@ CCMenuItemToggler* createEditBtn(
     sprOn->m_pSubSprite->setScale(1.25f);
 
     if (b) cb = (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggle;
+    if (gmVar) cb = (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggleGMVar;
 
     auto btn = CCMenuItemToggler::create(
         sprOff, sprOn, target, cb
     );
 
     if (b) btn->setUserData(as<void*>(b));
+    if (gmVar) {
+        btn->setUserData(as<void*>(gmVar));
+
+        btn->toggle(GameManager::sharedState()->getGameVariable(gmVar));
+    }
 
     return btn;
 }
@@ -117,7 +130,7 @@ void loadVisibilityTab(EditorUI* self) {
         self, "BE_v_pulse.png"
     ));
     btns->addObject(createEditBtn(
-        self, "BE_v_prevmode.png"
+        self, "BE_v_prevmode.png", nullptr, nullptr, "0036"
     ));
 
     auto buttonBar = EditButtonBar::create(
@@ -136,6 +149,16 @@ void loadVisibilityTab(EditorUI* self) {
 void updateVisibilityTab(EditorUI* self) {
     as<EditButtonBar*>(self->getChildByTag(VIEWBUTTONBAR_TAG))
         ->reloadItemsInNormalSize();
+    
+    CCARRAY_FOREACH_B_TYPE(
+        as<EditButtonBar*>(self)->m_pButtonArray, btn, CCMenuItemToggler
+    ) {
+        if (btn->getUserObject() && dynamic_cast<CCString*>(btn->getUserObject())) {
+            btn->toggle(GameManager::sharedState()->getGameVariable(
+                dynamic_cast<CCString*>(btn->getUserObject())->getCString()
+            ));
+        }
+    }
 }
 
 bool shouldHideLDMObject(GameObject* obj) {
