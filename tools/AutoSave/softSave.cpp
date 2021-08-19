@@ -455,7 +455,10 @@ void SoftSaveManager::load() {
 
     g_pManager->m_bDontSave = false;
 
-    g_pManager->clear();
+    // if the editor crashes again, maybe
+    // we don't want to delete progress?
+    
+    // g_pManager->clear();
 }
 
 void SoftSaveManager::clear() {

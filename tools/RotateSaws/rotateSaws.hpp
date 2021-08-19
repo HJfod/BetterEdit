@@ -10,3 +10,4 @@ void resumeRotations(LevelEditorLayer* self);
 void beginRotateSaw(GameObject* obj);
 void stopRotateSaw(GameObject* obj);
 bool shouldRotateSaw();
+void enableRotations(bool);

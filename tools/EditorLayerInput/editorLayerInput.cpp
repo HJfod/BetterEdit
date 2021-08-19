@@ -1,6 +1,7 @@
 #include "editorLayerInput.hpp"
 #include "LayerManager.hpp"
 #include "LayerViewPopup.hpp"
+#include "../VisibilityTab/loadVisibilityTab.hpp"
 
 // #define MAKE_MIDHOOK(addr, func)
 
@@ -135,6 +136,14 @@ void LevelEditorLayer_updateVisibility() {
     __asm {
         mov opacity, eax
         mov [obj], edi
+    }
+
+    if (shouldHideLDMObject(obj)) {
+        opacity = 0;
+        __asm {
+            mov eax, opacity
+        }
+        return;
     }
 
     if (opacity < 255) {

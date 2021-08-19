@@ -1,0 +1,18 @@
+objs = get_selected()
+tgroup = get_free_group()
+
+assert(objs.count > 0, "You need to select some objects to move!")
+
+for obj in objs {
+    obj.groups += tgroup
+}
+
+trgr = new "Move Trigger" {
+    target: tgroup
+    move_x: 50
+    time: 0.5
+    ease: EaseInOut
+} at [
+    calc_midpoint(objs) + [ 0, 50 ]
+]
+

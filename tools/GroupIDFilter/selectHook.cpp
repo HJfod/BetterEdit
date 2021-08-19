@@ -2,12 +2,16 @@
 #include "AdvancedFilterLayer.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../AutoSave/autoSave.hpp"
+#include "../VisibilityTab/loadVisibilityTab.hpp"
 
 using namespace gdmake;
 
 GDMAKE_HOOK(0x86250)
 void __fastcall EditorUI_selectObject(gd::EditorUI* self, edx_t edx, gd::GameObject* obj, bool idk) {
     if (BetterEdit::isEditorViewOnlyMode())
+        return;
+    
+    if (shouldHideLDMObject(obj))
         return;
 
     SoftSaveManager::saveObject(obj);
@@ -24,7 +28,9 @@ void __fastcall EditorUI_selectObjects(gd::EditorUI* self, edx_t edx, cocos2d::C
     CCARRAY_FOREACH_B_BASE(objs, obj, gd::GameObject*, ix) {
         SoftSaveManager::saveObject(obj);
 
-        if (!AdvancedFilterLayer::testSelectObject(obj) || !testSelectObjectLayer(obj))
+        if (!AdvancedFilterLayer::testSelectObject(obj) ||
+            !testSelectObjectLayer(obj) ||
+            shouldHideLDMObject(obj))
             objs->removeObjectAtIndex(ix--);
     }
     

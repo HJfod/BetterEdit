@@ -13,16 +13,7 @@
 #include "tools/EyeDropper/eyeDropper.hpp"
 #include "tools/AutoSave/autoSave.hpp"
 #include "tools/AutoSave/Backup/LevelBackupManager.hpp"
-
-// i have no idea where to place this function
-void __fastcall TeleportPortalobject_setRScale(gd::TeleportPortalObject* self, void*, float scale) {
-    // stupid c++ wont let me call gd::GameObject::setRScale directly
-    reinterpret_cast<void(__thiscall*)(gd::GameObject*, float)>(gd::base + 0xe5280)(self, scale);
-    if (self->m_pOrangePortal) {
-        self->m_pOrangePortal->m_fScale = self->m_fScale;
-        self->m_pOrangePortal->setRScale(1.f);
-    }
-}
+#include "tools/other/teleportScaleFix.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -63,6 +54,7 @@ GDMAKE_MAIN_HM(hMod) {
     loadTemplates();
     loadFavouriteTab();
     loadEnterSearch();
+    loadTeleportScaleFix();
 
     // CCTextureCache::sharedTextureCache()
         // ->addImage("BE_GameSheet01.png", false);
@@ -70,8 +62,6 @@ GDMAKE_MAIN_HM(hMod) {
         // ->addSpriteFramesWithFile("BE_GameSheet01.plist");
 
     ContextMenu::loadRightClick(hMod);
-
-    patch(0x2e3e50, intToBytes(as<uintptr_t>(&TeleportPortalobject_setRScale)));
 
     return true;
 }

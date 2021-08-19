@@ -2,6 +2,7 @@
 #include "../tools/LevelPercent/levelPercent.hpp"
 #include "../tools/RotateSaws/rotateSaws.hpp"
 #include "../tools/AutoSave/autoSave.hpp"
+#include "../tools/other/teleportScaleFix.hpp"
 
 GDMAKE_HOOK(0x15ee00)
 bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameLevel* level) {
@@ -52,12 +53,7 @@ void __fastcall LevelEditorLayer_addSpecial(
     if (shouldRotateSaw() && objectIsSaw(obj))
         beginRotateSaw(obj);
 
-    if (obj->m_nObjectID == 747) {
-        auto op = as<gd::TeleportPortalObject*>(obj)->m_pOrangePortal;
-        // idk why rob uses a negative scale instead of just flip x
-        op->m_fScale = object->m_fScale;
-        op->setRScale(1.f);
-    }
+    fixPortalScale(obj);
 }
 
 GDMAKE_HOOK(0x161cb0)

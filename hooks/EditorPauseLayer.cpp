@@ -1,5 +1,5 @@
 #include <GDMake.h>
-#include "../BetterEdit.hpp"
+#include "EditorPauseLayer.hpp"
 #include "../tools/settings/BESettingsLayer.hpp"
 #include "../tools/LiveCollab/pauseMenuHook.hpp"
 #include "../tools/AutoColorTriggers/autoCT.hpp"
@@ -9,23 +9,27 @@
 #include "../tools/RotateSaws/rotateSaws.hpp"
 #include "../tools/EyeDropper/eyeDropper.hpp"
 #include "../tools/AutoSave/autoSave.hpp"
+#include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 
 using namespace gdmake;
 
 bool g_bRotateSaws = false;
 
 bool shouldRotateSaw() { return g_bRotateSaws; }
+void enableRotations(bool b) { g_bRotateSaws = b; }
 
-class EditorPauseLayer_CB : public gd::EditorPauseLayer {
-    public:
-        void onBESettings(cocos2d::CCObject* pSender) {
-            BESettingsLayer::create(this)->show();
-        }
+void EditorPauseLayer_CB::onBESettings(cocos2d::CCObject* pSender) {
+    BESettingsLayer::create(this)->show();
+}
 
-        void onRotateSaws(CCObject* pSender) {
-            g_bRotateSaws = !as<CCMenuItemToggler*>(pSender)->isToggled();
-        }
-};
+void EditorPauseLayer_CB::onRotateSaws(CCObject* pSender) {
+    g_bRotateSaws = !as<CCMenuItemToggler*>(pSender)->isToggled();
+
+    if (g_bRotateSaws)
+        beginRotations(LevelEditorLayer::get());
+    else
+        stopRotations(LevelEditorLayer::get());
+}
 
 GDMAKE_HOOK(0x758d0)
 void __fastcall EditorPauseLayer_keyDown(EditorPauseLayer* self, edx_t edx, enumKeyCodes key) {
@@ -70,10 +74,7 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
         unpatch(0x921a6);
     }
 
-    if (g_bRotateSaws)
-        beginRotations(self->m_pEditorLayer);
-    else
-        stopRotations(self->m_pEditorLayer);
+    updateVisibilityTab(LevelEditorLayer::get()->getEditorUI());
 
     updatePercentLabelPosition(LevelEditorLayer::get()->getEditorUI());
     // showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
