@@ -37,11 +37,6 @@ GDMAKE_MAIN_HM(hMod) {
         }
     );
 
-    CCTextureCache::sharedTextureCache()
-        ->addImage("BE_GameSheet01-uhd.png", false);
-    CCSpriteFrameCache::sharedSpriteFrameCache()
-        ->addSpriteFramesWithFile("BE_GameSheet01-uhd.plist");
-
     if (!BetterEdit::initGlobal())
         return false;
     if (!LiveManager::initGlobal())
