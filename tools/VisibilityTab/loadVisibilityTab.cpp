@@ -1,5 +1,6 @@
 #include "loadVisibilityTab.hpp"
 #include "../../hooks/EditorPauseLayer.hpp"
+#include "../RotateSaws/rotateSaws.hpp"
 
 // for patching stuff
 static constexpr const float f_96 = 96.0f;
@@ -9,12 +10,39 @@ static constexpr const int VIEWBUTTONBAR_TAG = 0x234592;
 
 bool g_bHideLDM = false;
 
+class CCVoidPointer : public CCObject {
+    public:
+        CCVoidPointer(void* v)
+            : m_pValue(v) {}
+        void* getValue() const {return m_pValue;}
+
+        static CCVoidPointer* create(void* v)
+        {
+            CCVoidPointer* pRet = new CCVoidPointer(v);
+            pRet->autorelease();
+            return pRet;
+        }
+
+    private:
+        void* m_pValue;
+};
+
+enum VisibilityButtonType {
+    kVisibilityNone,
+    kVisibilityFunc,
+    kVisibilityBool,
+    kVisibilityBEFunc,
+    kVisibilityGMVar,
+    kVisibilityGMBool,
+    kVisibilityAddress,
+};
+
 #define UPD_IMG(_var_, _tag_, _tvar_) \
     if (_var_) \
     as<ButtonSprite*>(as<CCMenuItemSpriteExtra*>(_var_)->getNormalImage())  \
         ->updateBGImage(_tvar_ == _tag_ ? "GJ_button_02.png" : "GJ_button_01.png");
 
-class VisibilityToggleCallbacks : public CCObject {
+class VisibilityToggleCallbacks : public EditorUI {
     public:
         void onToggle(CCObject* pSender) {
             auto data = as<bool*>(as<CCNode*>(pSender)->getUserData());
@@ -26,6 +54,23 @@ class VisibilityToggleCallbacks : public CCObject {
             auto var = as<CCString*>(as<CCNode*>(pSender)->getUserObject())->getCString();
 
             GameManager::sharedState()->toggleGameVariable(var);
+
+            this->m_pEditorLayer->updateEditorMode();
+        }
+
+        void onToggleBEFunc(CCObject* pSender) {
+            auto func = as<void(*)(bool)>(as<CCNode*>(pSender)->getUserData());
+
+            func(!as<CCMenuItemToggler*>(pSender)->isToggled());
+        }
+
+        void onToggleAddr(CCObject* pSender) {
+            auto addr = as<uintptr_t>(as<CCNode*>(pSender)->getUserData());
+        
+            if (!as<CCMenuItemToggler*>(pSender)->isToggled())
+                unpatch(addr);
+            else
+                patch(addr, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
         }
 };
 
@@ -41,7 +86,66 @@ ButtonSprite* createBtnSprite(const char* file) {
 CCMenuItemToggler* createEditBtn(
     EditorUI* target,
     const char* file,
-    SEL_MenuHandler cb = nullptr,
+    SEL_MenuHandler cb,
+    bool (*get)(void) = nullptr
+) {
+    auto sprOff = ButtonSprite::create(
+        createBESprite(file),
+        0x32, true, 1.0f, 0, "GJ_button_01.png", true, 0x32
+    );
+    sprOff->m_pSubSprite->setScale(1.25f);
+
+    auto sprOn = ButtonSprite::create(
+        createBESprite(file),
+        0x32, true, 1.0f, 0, "GJ_button_02.png", true, 0x32
+    );
+    sprOn->m_pSubSprite->setScale(1.25f);
+
+    auto btn = CCMenuItemToggler::create(
+        sprOff, sprOn, target, cb
+    );
+
+    btn->toggle(get());
+    btn->setUserData(get);
+    btn->setTag(kVisibilityFunc);
+
+    return btn;
+}
+
+CCMenuItemToggler* createEditBtn(
+    EditorUI* target,
+    const char* file,
+    void (*set)(bool),
+    bool (*get)(void) = nullptr
+) {
+    auto sprOff = ButtonSprite::create(
+        createBESprite(file),
+        0x32, true, 1.0f, 0, "GJ_button_01.png", true, 0x32
+    );
+    sprOff->m_pSubSprite->setScale(1.25f);
+
+    auto sprOn = ButtonSprite::create(
+        createBESprite(file),
+        0x32, true, 1.0f, 0, "GJ_button_02.png", true, 0x32
+    );
+    sprOn->m_pSubSprite->setScale(1.25f);
+
+    auto btn = CCMenuItemToggler::create(
+        sprOff, sprOn, target,
+        (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggleBEFunc
+    );
+
+    btn->setUserData(set);
+    btn->setUserObject(CCVoidPointer::create(get));
+    btn->toggle(get());
+    btn->setTag(kVisibilityBEFunc);
+
+    return btn;
+}
+
+CCMenuItemToggler* createEditBtn(
+    EditorUI* target,
+    const char* file,
     bool* b = nullptr,
     const char* gmVar = nullptr
 ) {
@@ -57,6 +161,8 @@ CCMenuItemToggler* createEditBtn(
     );
     sprOn->m_pSubSprite->setScale(1.25f);
 
+    SEL_MenuHandler cb = nullptr;
+
     if (b) cb = (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggle;
     if (gmVar) cb = (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggleGMVar;
 
@@ -64,12 +170,48 @@ CCMenuItemToggler* createEditBtn(
         sprOff, sprOn, target, cb
     );
 
-    if (b) btn->setUserData(as<void*>(b));
+    btn->setTag(kVisibilityNone);
+    if (b) {
+        btn->setUserData(as<void*>(b));
+        btn->toggle(*b);
+        btn->setTag(kVisibilityBool);
+    }
     if (gmVar) {
         btn->setUserObject(CCString::create(gmVar));
-
         btn->toggle(GameManager::sharedState()->getGameVariable(gmVar));
+        btn->setTag(kVisibilityGMVar);
     }
+
+    return btn;
+}
+
+CCMenuItemToggler* createEditBtn(
+    EditorUI* target,
+    const char* file,
+    uintptr_t addr
+) {
+    auto sprOff = ButtonSprite::create(
+        createBESprite(file),
+        0x32, true, 1.0f, 0, "GJ_button_01.png", true, 0x32
+    );
+    sprOff->m_pSubSprite->setScale(1.25f);
+
+    auto sprOn = ButtonSprite::create(
+        createBESprite(file),
+        0x32, true, 1.0f, 0, "GJ_button_02.png", true, 0x32
+    );
+    sprOn->m_pSubSprite->setScale(1.25f);
+
+    SEL_MenuHandler cb = nullptr;
+
+    auto btn = CCMenuItemToggler::create(
+        sprOff, sprOn, target,
+        (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggleAddr
+    );
+
+    btn->setTag(kVisibilityAddress);
+    btn->setUserData(as<void*>(addr));
+    btn->toggle(ispatched(addr));
 
     return btn;
 }
@@ -82,6 +224,8 @@ void makeVisibilityPatches() {
 }
 
 void loadVisibilityTab(EditorUI* self) {
+    BetterEdit::saveGlobalBool("hide-ldm", &g_bHideLDM);
+
     self->m_pBuildModeBtn->setNormalImage(createBtnSprite("BE_create_01.png"));
     self->m_pBuildModeBtn->setContentSize(
         self->m_pBuildModeBtn->getNormalImage()->getScaledContentSize()
@@ -121,16 +265,32 @@ void loadVisibilityTab(EditorUI* self) {
     auto btns = CCArray::create();
 
     btns->addObject(createEditBtn(
-        self, "BE_v_rotate.png", (SEL_MenuHandler)&EditorPauseLayer_CB::onRotateSaws
+        self, "BE_v_rotate.png", 
+        (SEL_MenuHandler)&EditorPauseLayer_CB::onRotateSaws,
+        &shouldRotateSaw
     ));
     btns->addObject(createEditBtn(
-        self, "BE_v_ldm.png", nullptr, &g_bHideLDM
+        self, "BE_v_ldm.png", &g_bHideLDM
     ));
     btns->addObject(createEditBtn(
-        self, "BE_v_pulse.png"
+        self, "BE_v_pulse.png",
+        &BetterEdit::setPulseObjectsInEditor,
+        &BetterEdit::getPulseObjectsInEditor
     ));
     btns->addObject(createEditBtn(
-        self, "BE_v_prevmode.png", nullptr, nullptr, "0036"
+        self, "BE_v_prevmode.png", nullptr, "0036"
+    ));
+    btns->addObject(createEditBtn(
+        self, "BE_v_bpm_line.png", &GameManager::sharedState()->m_bShowSongMarkers
+    ));
+    btns->addObject(createEditBtn(
+        self, "BE_v_pos_line.png", 0x16e310
+    ));
+    btns->addObject(createEditBtn(
+        self, "BE_v_dur_line.png", nullptr, "0058"
+    ));
+    btns->addObject(createEditBtn(
+        self, "BE_v_eff_line.png", nullptr, "0043"
     ));
 
     auto buttonBar = EditButtonBar::create(
@@ -147,16 +307,43 @@ void loadVisibilityTab(EditorUI* self) {
 }
 
 void updateVisibilityTab(EditorUI* self) {
-    as<EditButtonBar*>(self->getChildByTag(VIEWBUTTONBAR_TAG))
-        ->reloadItemsInNormalSize();
+    auto bbar = as<EditButtonBar*>(self->getChildByTag(VIEWBUTTONBAR_TAG));
+    
+    bbar->reloadItemsInNormalSize();
     
     CCARRAY_FOREACH_B_TYPE(
-        as<EditButtonBar*>(self)->m_pButtonArray, btn, CCMenuItemToggler
+        bbar->m_pButtonArray, btn, CCMenuItemToggler
     ) {
-        if (btn->getUserObject() && dynamic_cast<CCString*>(btn->getUserObject())) {
-            btn->toggle(GameManager::sharedState()->getGameVariable(
-                dynamic_cast<CCString*>(btn->getUserObject())->getCString()
-            ));
+        switch (btn->getTag()) {
+            case kVisibilityGMVar:
+                btn->toggle(GameManager::sharedState()->getGameVariable(
+                    as<CCString*>(btn->getUserObject())->getCString()
+                ));
+                break;
+
+            case kVisibilityBEFunc:
+                // bloody hell
+                btn->toggle(
+                    as<bool(*)(void)>(
+                        as<CCVoidPointer*>(btn->getUserObject())->getValue()
+                    )()
+                );
+                break;
+
+            case kVisibilityFunc:
+                if (btn->getUserData())
+                    btn->toggle(
+                        as<bool(*)(void)>(btn->getUserData())()
+                    );
+                break;
+            
+            case kVisibilityBool:
+                btn->toggle(*as<bool*>(btn->getUserData()));
+                break;
+            
+            case kVisibilityAddress:
+                btn->toggle(ispatched(as<uintptr_t>(btn->getUserData())));
+                break;
         }
     }
 }

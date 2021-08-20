@@ -47,7 +47,11 @@ static void unpatch(uintptr_t addr, bool hardOverwrite = false) {
     if (g_patchedBytes[addr].size())
         patchBytes(addr, g_patchedBytes[addr]);
     
-    g_patchedBytes[addr] = {};
+    g_patchedBytes.erase(addr);
+}
+
+static bool ispatched(uintptr_t addr) {
+    return g_patchedBytes.count(addr);
 }
 
 static cocos2d::CCSprite* createBESprite(const char* name, const char* fallback = nullptr) {

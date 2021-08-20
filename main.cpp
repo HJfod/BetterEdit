@@ -37,6 +37,11 @@ GDMAKE_MAIN_HM(hMod) {
         }
     );
 
+    // CCTextureCache::sharedTextureCache()
+    //     ->addImage("BE_GameSheet01.png", false);
+    // CCSpriteFrameCache::sharedSpriteFrameCache()
+    //     ->addSpriteFramesWithFile("BE_GameSheet01.plist");
+
     if (!BetterEdit::initGlobal())
         return false;
     if (!LiveManager::initGlobal())
@@ -55,11 +60,6 @@ GDMAKE_MAIN_HM(hMod) {
     loadFavouriteTab();
     loadEnterSearch();
     loadTeleportScaleFix();
-
-    // CCTextureCache::sharedTextureCache()
-        // ->addImage("BE_GameSheet01.png", false);
-    // CCSpriteFrameCache::sharedSpriteFrameCache()
-        // ->addSpriteFramesWithFile("BE_GameSheet01.plist");
 
     ContextMenu::loadRightClick(hMod);
 

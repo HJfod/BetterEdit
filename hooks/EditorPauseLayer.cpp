@@ -17,6 +17,7 @@ bool g_bRotateSaws = false;
 
 bool shouldRotateSaw() { return g_bRotateSaws; }
 void enableRotations(bool b) { g_bRotateSaws = b; }
+void setupRotateSaws() { BetterEdit::saveGlobalBool("rotate-saws", &g_bRotateSaws); }
 
 void EditorPauseLayer_CB::onBESettings(cocos2d::CCObject* pSender) {
     BESettingsLayer::create(this)->show();

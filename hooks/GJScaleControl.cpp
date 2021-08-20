@@ -4,6 +4,9 @@
 #include "../BetterEdit.hpp"
 #include "ScaleTextDelegate.hpp"
 
+bool g_bLockPosEnabled;
+bool g_bUnlockScaleEnabled;
+
 using namespace gdmake;
 
 void ScaleTextDelegate::textChanged(gd::CCTextInputNode* input) {
@@ -44,6 +47,7 @@ class GJScaleControl_CB : public gd::GJScaleControl {
             auto std = getSTD();
 
             std->m_bLockPosEnabled = !std->m_bLockPosEnabled;
+            g_bLockPosEnabled = std->m_bLockPosEnabled;
 
             reinterpret_cast<gd::CCMenuItemSpriteExtra*>(pSender)
                 ->setNormalImage(createLockSprite(
@@ -61,6 +65,7 @@ class GJScaleControl_CB : public gd::GJScaleControl {
             auto std = getSTD();
 
             std->m_bUnlockScaleEnabled = !std->m_bUnlockScaleEnabled;
+            g_bUnlockScaleEnabled = std->m_bUnlockScaleEnabled;
 
             reinterpret_cast<gd::CCMenuItemSpriteExtra*>(pSender)
                 ->setNormalImage(createLockSprite(
@@ -175,7 +180,13 @@ bool __fastcall GJScaleControl_init(gd::GJScaleControl* self) {
     if (!GDMAKE_ORIG(self))
         return false;
 
+    BetterEdit::saveGlobalBool("scale-lock-pos",  &g_bLockPosEnabled);
+    BetterEdit::saveGlobalBool("scale-dont-snap", &g_bUnlockScaleEnabled);
+
     auto ed = ScaleTextDelegate::create(self);
+
+    ed->m_bLockPosEnabled = g_bLockPosEnabled;
+    ed->m_bUnlockScaleEnabled = g_bUnlockScaleEnabled;
 
     self->m_pLabel->setVisible(false);
 
@@ -209,13 +220,18 @@ bool __fastcall GJScaleControl_init(gd::GJScaleControl* self) {
     /////////////////////////////////
 
     auto unlockScaleBtn = gd::CCMenuItemSpriteExtra::create(
-        cocos2d::CCSprite::create("GJ_button_01.png"),
+        cocos2d::CCSprite::create(
+            "GJ_button_01.png"
+        ),
         self,
         (cocos2d::SEL_MenuHandler)&GJScaleControl_CB::onUnlockScale
     );
 
     unlockScaleBtn->setNormalImage(
-        createLockSprite("GJ_button_01.png", "GJ_lock_001.png")
+        createLockSprite(
+            ed->m_bUnlockScaleEnabled ? "GJ_button_02.png" : "GJ_button_01.png",
+            "GJ_lock_001.png"
+        )
     );
     unlockScaleBtn->setPosition({ 30.0f, 0.0f });
 
@@ -230,7 +246,10 @@ bool __fastcall GJScaleControl_init(gd::GJScaleControl* self) {
     );
 
     lockPositionBtn->setNormalImage(
-        createLockSprite("GJ_button_04.png", "GJ_lock_open_001.png")
+        createLockSprite(
+            ed->m_bLockPosEnabled ? "GJ_button_02.png" : "GJ_button_04.png",
+            "GJ_lock_open_001.png"
+        )
     );
     lockPositionBtn->setPosition({ -30.0f, 0.0f });
 

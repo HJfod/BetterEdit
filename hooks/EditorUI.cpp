@@ -10,6 +10,7 @@
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/AutoSave/Backup/BackupViewLayer.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
+#include "EditorPauseLayer.hpp"
 #include <thread>
 
 using namespace gdmake;
@@ -189,7 +190,8 @@ public:
         // too lazy to add these to gd.h
         // theyre isMusicPlaying and isPlaybackMode
         if (
-            (*reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + 0x130) || m_pEditorLayer->m_bIsPlaybackMode) &&
+            (*reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + 0x130)
+            || m_pEditorLayer->m_bIsPlaybackMode) &&
             BetterEdit::getPulseObjectsInEditor()
         ) {
             g_hasResetObjectsScale = false;
@@ -230,6 +232,7 @@ public:
 GDMAKE_HOOK(EditorUI::init)
 bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lvl) {
     makeVisibilityPatches();
+    setupRotateSaws();
 
     if (!GDMAKE_ORIG(self, edx, lvl))
         return false;

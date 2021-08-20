@@ -7,3 +7,5 @@ class EditorPauseLayer_CB : public gd::EditorPauseLayer {
         void onBESettings(cocos2d::CCObject* pSender);
         void onRotateSaws(CCObject* pSender);
 };
+
+void setupRotateSaws();

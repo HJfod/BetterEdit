@@ -85,9 +85,16 @@ class BetterEdit : public gd::GManager {
         using FavoritesList = std::vector<int>;
     
     protected:
+        struct save_bool {
+            bool* global;
+            bool loaded;
+            bool skip_loaded = false;
+        };
+
         TemplateManager* m_pTemplateManager;
         std::vector<Preset> m_vPresets;
         std::vector<std::string> m_vScheduledErrors;
+        std::map<std::string, save_bool> m_mSaveBools;
         FavoritesList m_vFavorites;
         bool m_bEditorInitialized;
         bool m_bDisableEditorEditing;
@@ -138,6 +145,19 @@ class BetterEdit : public gd::GManager {
         }
         static void setEditorViewOnlyMode(bool b) {
             BetterEdit::sharedState()->m_bDisableEditorEditing = b;
+        }
+
+        static inline void saveGlobalBool(std::string name, bool* b) {
+            auto be = BetterEdit::sharedState();
+
+            if (be->m_mSaveBools.count(name)) {
+                if (be->m_mSaveBools[name].skip_loaded)
+                    return;
+
+                *b = be->m_mSaveBools[name].loaded;
+            }
+
+            be->m_mSaveBools[name] = { b, *b, true };
         }
 
         bool m_bHookConflictFound = true;

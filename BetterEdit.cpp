@@ -48,6 +48,11 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
         BE_SETTINGS(BE_SAVE_SETTING)
     );
 
+    STEP_SUBDICT(data, "bools",
+        for (auto & [key, val] : m_mSaveBools)
+            data->setBoolForKey(key.c_str(), *val.global);
+    );
+
     STEP_SUBDICT(data, "templates",
         m_pTemplateManager->encodeDataTo(data);
     );
@@ -77,6 +82,11 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
 void BetterEdit::dataLoaded(DS_Dictionary* data) {
     STEP_SUBDICT_NC(data, "settings",
         BE_SETTINGS(BE_LOAD_SETTING)
+    );
+
+    STEP_SUBDICT_NC(data, "bools",
+        for (auto key : data->getAllKeys())
+            m_mSaveBools[key] = { nullptr, data->getBoolForKey(key.c_str()) };
     );
 
     STEP_SUBDICT_NC(data, "templates",
