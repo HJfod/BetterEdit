@@ -44,6 +44,7 @@ using namespace cocos2d::extension;
     __macro__(EnableAutoSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                \
     __macro__(EnableSoftAutoSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
     __macro__(EnableAsyncSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
+    __macro__(DisableVisibilityTab, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \

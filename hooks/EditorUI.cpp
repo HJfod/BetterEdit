@@ -64,6 +64,7 @@ void updateToggleButtonSprite(CCMenuItemSpriteExtra* btn) {
     btn->getNormalImage()->setPosition(spr->getPosition());
     btn->getNormalImage()->setAnchorPoint(spr->getAnchorPoint());
     btn->getNormalImage()->setScale(spr->getScale());
+    btn->setOpacity(g_showUI ? 255 : 90);
 
     spr->release();
 }
@@ -76,6 +77,7 @@ class EditorUI_CB : public EditorUI {
             auto btn = as<CCMenuItemSpriteExtra*>(this->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG));
             if (btn) {
                 btn->setVisible(true);
+                this->m_pPlaytestBtn->setVisible(g_showUI);
                 
                 if (!g_showUI) // it has been updated anyway by showUI
                     updateToggleButtonSprite(btn);
@@ -378,15 +380,21 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
 
     g_showUI = show;
 
+    auto toggleBtn = as<CCMenuItemSpriteExtra*>(
+        self->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG)
+    );
+
     self->m_pTabsMenu->setVisible(self->m_nSelectedMode == 2 && show);
-    CATCH_NULL(self->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG))->setVisible(show);
     CATCH_NULL(self->m_pCopyBtn->getParent()->getChildByTag(7777))->setVisible(show);
     showGridButtons(self, show);
     showLayerControls(self, show);
-    if (show)
-        updateToggleButtonSprite(as<CCMenuItemSpriteExtra*>(
-            self->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG)
-        ));
+    showVisibilityTab(self, show);
+
+    if (toggleBtn) {
+        toggleBtn->setVisible(show);
+        if (show)
+            updateToggleButtonSprite(toggleBtn);
+    }
     // showPositionLabel(self, show);
 }
 
@@ -437,7 +445,7 @@ void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
     )
         return self->selectAll();
     
-    if (key == KEY_Four)
+    if (!BetterEdit::getDisableVisibilityTab() && key == KEY_Four)
         self->toggleMode(self->m_pBuildModeBtn->getParent()->getChildByTag(4));
     
     // wacky hack to make 2-player duals work properly

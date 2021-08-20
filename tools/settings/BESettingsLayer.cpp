@@ -131,7 +131,13 @@ void BESettingsLayer::setup() {
         "Enables the <cr>Up</c> arrow to be used when playtesting",
         BE_SETTING_FUNC_B(UseUpArrowForGameplay)
     );
-    this->incrementPageCount(true);
+    this->addToggle(
+        "Disable View Tab",
+        "Disables the <co>View</c> tab (<cl>requires re-entering the Editor</c>)",
+        BE_SETTING_FUNC_B(DisableVisibilityTab)
+    );
+
+    // this->incrementPageCount(true);
 
     this->addToggle(
         "Enable Auto-Saving",
@@ -149,12 +155,12 @@ void BESettingsLayer::setup() {
         BE_SETTING_FUNC_B(EnableSoftAutoSave),
         true
     );
-    this->addToggle(
-        "Fast Save",
-        "Enables <cl>asynchronous</c> saving\n\n <cr>Ridiculously experimental!</c>",
-        BE_SETTING_FUNC_B(EnableAsyncSave),
-        true
-    );
+    // this->addToggle(
+    //     "Fast Save",
+    //     "Enables <cl>asynchronous</c> saving\n\n <cr>Ridiculously experimental!</c>",
+    //     BE_SETTING_FUNC_B(EnableAsyncSave),
+    //     true
+    // );
     this->addInput("Save Every (min):", BE_SETTING_FUNC(AutoSaveTime), "0123456789");
     this->addInput("Soft Save Freq.:", BE_SETTING_FUNC(SoftSaveFrequency), "0123456789");
     this->incrementPageCount(true);

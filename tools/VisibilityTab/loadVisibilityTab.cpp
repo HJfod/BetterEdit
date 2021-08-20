@@ -1,6 +1,7 @@
 #include "loadVisibilityTab.hpp"
 #include "../../hooks/EditorPauseLayer.hpp"
 #include "../RotateSaws/rotateSaws.hpp"
+#include "VisibilityToggle.hpp"
 
 // for patching stuff
 static constexpr const float f_96 = 96.0f;
@@ -83,148 +84,36 @@ ButtonSprite* createBtnSprite(const char* file) {
     return spr;
 }
 
-CCMenuItemToggler* createEditBtn(
-    EditorUI* target,
-    const char* file,
-    SEL_MenuHandler cb,
-    bool (*get)(void) = nullptr
-) {
-    auto sprOff = ButtonSprite::create(
-        createBESprite(file),
-        0x32, true, 1.0f, 0, "GJ_button_01.png", true, 0x32
-    );
-    sprOff->m_pSubSprite->setScale(1.25f);
-
-    auto sprOn = ButtonSprite::create(
-        createBESprite(file),
-        0x32, true, 1.0f, 0, "GJ_button_02.png", true, 0x32
-    );
-    sprOn->m_pSubSprite->setScale(1.25f);
-
-    auto btn = CCMenuItemToggler::create(
-        sprOff, sprOn, target, cb
-    );
-
-    btn->toggle(get());
-    btn->setUserData(get);
-    btn->setTag(kVisibilityFunc);
-
-    return btn;
-}
-
-CCMenuItemToggler* createEditBtn(
-    EditorUI* target,
-    const char* file,
-    void (*set)(bool),
-    bool (*get)(void) = nullptr
-) {
-    auto sprOff = ButtonSprite::create(
-        createBESprite(file),
-        0x32, true, 1.0f, 0, "GJ_button_01.png", true, 0x32
-    );
-    sprOff->m_pSubSprite->setScale(1.25f);
-
-    auto sprOn = ButtonSprite::create(
-        createBESprite(file),
-        0x32, true, 1.0f, 0, "GJ_button_02.png", true, 0x32
-    );
-    sprOn->m_pSubSprite->setScale(1.25f);
-
-    auto btn = CCMenuItemToggler::create(
-        sprOff, sprOn, target,
-        (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggleBEFunc
-    );
-
-    btn->setUserData(set);
-    btn->setUserObject(CCVoidPointer::create(get));
-    btn->toggle(get());
-    btn->setTag(kVisibilityBEFunc);
-
-    return btn;
-}
-
-CCMenuItemToggler* createEditBtn(
-    EditorUI* target,
-    const char* file,
-    bool* b = nullptr,
-    const char* gmVar = nullptr
-) {
-    auto sprOff = ButtonSprite::create(
-        createBESprite(file),
-        0x32, true, 1.0f, 0, "GJ_button_01.png", true, 0x32
-    );
-    sprOff->m_pSubSprite->setScale(1.25f);
-
-    auto sprOn = ButtonSprite::create(
-        createBESprite(file),
-        0x32, true, 1.0f, 0, "GJ_button_02.png", true, 0x32
-    );
-    sprOn->m_pSubSprite->setScale(1.25f);
-
-    SEL_MenuHandler cb = nullptr;
-
-    if (b) cb = (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggle;
-    if (gmVar) cb = (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggleGMVar;
-
-    auto btn = CCMenuItemToggler::create(
-        sprOff, sprOn, target, cb
-    );
-
-    btn->setTag(kVisibilityNone);
-    if (b) {
-        btn->setUserData(as<void*>(b));
-        btn->toggle(*b);
-        btn->setTag(kVisibilityBool);
-    }
-    if (gmVar) {
-        btn->setUserObject(CCString::create(gmVar));
-        btn->toggle(GameManager::sharedState()->getGameVariable(gmVar));
-        btn->setTag(kVisibilityGMVar);
-    }
-
-    return btn;
-}
-
-CCMenuItemToggler* createEditBtn(
-    EditorUI* target,
-    const char* file,
-    uintptr_t addr
-) {
-    auto sprOff = ButtonSprite::create(
-        createBESprite(file),
-        0x32, true, 1.0f, 0, "GJ_button_01.png", true, 0x32
-    );
-    sprOff->m_pSubSprite->setScale(1.25f);
-
-    auto sprOn = ButtonSprite::create(
-        createBESprite(file),
-        0x32, true, 1.0f, 0, "GJ_button_02.png", true, 0x32
-    );
-    sprOn->m_pSubSprite->setScale(1.25f);
-
-    SEL_MenuHandler cb = nullptr;
-
-    auto btn = CCMenuItemToggler::create(
-        sprOff, sprOn, target,
-        (SEL_MenuHandler)&VisibilityToggleCallbacks::onToggleAddr
-    );
-
-    btn->setTag(kVisibilityAddress);
-    btn->setUserData(as<void*>(addr));
-    btn->toggle(ispatched(addr));
-
-    return btn;
-}
-
 void makeVisibilityPatches() {
+    if (BetterEdit::getDisableVisibilityTab()) {
+        unpatch(0x768ed);
+        unpatch(0x8c9f8);
+        unpatch(0x7af6b);
+        unpatch(0x7cc7b);
+
+        unpatch(0x16e218);
+
+        return;
+    }
+
     patch(0x768ed, intToBytes(as<int>(&f_96)), true);
     patch(0x8c9f8, intToBytes(as<int>(&f_0)), true);
     patch(0x7af6b, intToBytes(as<int>(&f_0)), true);
     patch(0x7cc7b, intToBytes(as<int>(&f_0)), true);
+
+    patch(0x16e218, {
+        0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
+        0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
+        0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
+        0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 
+    }, true);
 }
 
 void loadVisibilityTab(EditorUI* self) {
     BetterEdit::saveGlobalBool("hide-ldm", &g_bHideLDM);
+
+    if (BetterEdit::getDisableVisibilityTab())
+        return;
 
     self->m_pBuildModeBtn->setNormalImage(createBtnSprite("BE_create_01.png"));
     self->m_pBuildModeBtn->setContentSize(
@@ -264,33 +153,99 @@ void loadVisibilityTab(EditorUI* self) {
 
     auto btns = CCArray::create();
 
-    btns->addObject(createEditBtn(
-        self, "BE_v_rotate.png", 
-        (SEL_MenuHandler)&EditorPauseLayer_CB::onRotateSaws,
-        &shouldRotateSaw
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_rotate.png",
+        []() -> bool {
+            return shouldRotateSaw();
+        },
+        [&](bool s, auto p) -> void {
+            reinterpret_cast<EditorPauseLayer_CB*>(self)
+                ->onRotateSaws(p);
+        }
     ));
-    btns->addObject(createEditBtn(
-        self, "BE_v_ldm.png", &g_bHideLDM
+
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_ldm.png",
+        []() -> bool { return g_bHideLDM; },
+        [&](bool b, auto) -> void { g_bHideLDM = b; }
     ));
-    btns->addObject(createEditBtn(
-        self, "BE_v_pulse.png",
-        &BetterEdit::setPulseObjectsInEditor,
-        &BetterEdit::getPulseObjectsInEditor
+
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_pulse.png",
+        []() -> bool { return BetterEdit::getPulseObjectsInEditor(); },
+        [](bool b, auto) -> void { BetterEdit::setPulseObjectsInEditor(b); }
     ));
-    btns->addObject(createEditBtn(
-        self, "BE_v_prevmode.png", nullptr, "0036"
+
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_prevmode.png",
+        [self]() -> bool {
+            return GameManager::sharedState()->getGameVariable("0036");
+        },
+        [self](bool b, auto) -> void {
+            GameManager::sharedState()->setGameVariable("0036", b);
+
+            self->m_pEditorLayer->updateEditorMode();
+        }
     ));
-    btns->addObject(createEditBtn(
-        self, "BE_v_bpm_line.png", &GameManager::sharedState()->m_bShowSongMarkers
+
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_bpm_line.png",
+        [self]() -> bool {
+            return GameManager::sharedState()->m_bShowSongMarkers;
+        },
+        [self](bool b, auto) -> void {
+            GameManager::sharedState()->m_bShowSongMarkers = b;
+        }
     ));
-    btns->addObject(createEditBtn(
-        self, "BE_v_pos_line.png", 0x16e310
+
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_pos_line.png",
+        [self]() -> bool {
+            return ispatched(0x16e310);
+        },
+        [self](bool b, auto) -> void {
+            if (b)
+                unpatch(0x16e310);
+            else
+                patch(0x16e310, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+        }
+    )->invokeSetter());
+
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_dur_line.png",
+        [self]() -> bool {
+            return GameManager::sharedState()->getGameVariable("0058");
+        },
+        [self](bool b, auto) -> void {
+            GameManager::sharedState()->setGameVariable("0058", b);
+
+            self->m_pEditorLayer->updateOptions();
+        }
     ));
-    btns->addObject(createEditBtn(
-        self, "BE_v_dur_line.png", nullptr, "0058"
+
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_eff_line.png",
+        [self]() -> bool {
+            return GameManager::sharedState()->getGameVariable("0043");
+        },
+        [self](bool b, auto) -> void {
+            GameManager::sharedState()->setGameVariable("0043", b);
+
+            self->m_pEditorLayer->updateOptions();
+        }
     ));
-    btns->addObject(createEditBtn(
-        self, "BE_v_eff_line.png", nullptr, "0043"
+
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_grnd.png",
+        [self]() -> bool {
+            return GameManager::sharedState()->getGameVariable("0037");
+        },
+        [self](bool b, auto) -> void {
+            GameManager::sharedState()->setGameVariable("0037", b);
+
+            self->m_pEditorLayer->updateOptions();
+            self->m_pEditorLayer->m_pGroundLayer->setVisible(b);
+        }
     ));
 
     auto buttonBar = EditButtonBar::create(
@@ -312,39 +267,9 @@ void updateVisibilityTab(EditorUI* self) {
     bbar->reloadItemsInNormalSize();
     
     CCARRAY_FOREACH_B_TYPE(
-        bbar->m_pButtonArray, btn, CCMenuItemToggler
+        bbar->m_pButtonArray, btn, VisibilityToggle
     ) {
-        switch (btn->getTag()) {
-            case kVisibilityGMVar:
-                btn->toggle(GameManager::sharedState()->getGameVariable(
-                    as<CCString*>(btn->getUserObject())->getCString()
-                ));
-                break;
-
-            case kVisibilityBEFunc:
-                // bloody hell
-                btn->toggle(
-                    as<bool(*)(void)>(
-                        as<CCVoidPointer*>(btn->getUserObject())->getValue()
-                    )()
-                );
-                break;
-
-            case kVisibilityFunc:
-                if (btn->getUserData())
-                    btn->toggle(
-                        as<bool(*)(void)>(btn->getUserData())()
-                    );
-                break;
-            
-            case kVisibilityBool:
-                btn->toggle(*as<bool*>(btn->getUserData()));
-                break;
-            
-            case kVisibilityAddress:
-                btn->toggle(ispatched(as<uintptr_t>(btn->getUserData())));
-                break;
-        }
+        btn->updateState();
     }
 }
 
@@ -352,9 +277,18 @@ bool shouldHideLDMObject(GameObject* obj) {
     return g_bHideLDM && obj->m_bHighDetail;
 }
 
+void showVisibilityTab(EditorUI* self, bool show) {
+    CATCH_NULL(as<EditButtonBar*>(self->getChildByTag(VIEWBUTTONBAR_TAG)))
+        ->setVisible(show && self->m_nSelectedMode == 4);
+    
+    CATCH_NULL(self->m_pBuildModeBtn->getParent()->getChildByTag(4))
+        ->setVisible(show);
+}
+
 GDMAKE_HOOK(0x7ad20)
 void __fastcall EditorUI_toggleMode(EditorUI* self, edx_t edx, CCObject* pSender) {
-    if (!self->m_pBuildModeBtn->getParent()->getChildByTag(4))
+    if (!self->m_pBuildModeBtn->getParent()->getChildByTag(4) ||
+        BetterEdit::getDisableVisibilityTab())
         return GDMAKE_ORIG_V(self, edx, pSender);
 
     auto tag = pSender->getTag();

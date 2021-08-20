@@ -37,7 +37,7 @@ static void unpatch(uintptr_t addr, bool hardOverwrite = false) {
     if (addr == 0) {
         for (auto const& [key, val] : g_patchedBytes) {
             if (val.size())
-                patchBytesEx(key, val, hardOverwrite);
+                patchBytesEx(key, val, true);
         
             g_patchedBytes[key] = {};
         }

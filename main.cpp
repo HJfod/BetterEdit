@@ -37,10 +37,10 @@ GDMAKE_MAIN_HM(hMod) {
         }
     );
 
-    // CCTextureCache::sharedTextureCache()
-    //     ->addImage("BE_GameSheet01.png", false);
-    // CCSpriteFrameCache::sharedSpriteFrameCache()
-    //     ->addSpriteFramesWithFile("BE_GameSheet01.plist");
+    CCTextureCache::sharedTextureCache()
+        ->addImage("BE_GameSheet01-uhd.png", false);
+    CCSpriteFrameCache::sharedSpriteFrameCache()
+        ->addSpriteFramesWithFile("BE_GameSheet01-uhd.plist");
 
     if (!BetterEdit::initGlobal())
         return false;
