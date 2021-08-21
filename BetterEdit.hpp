@@ -4,6 +4,7 @@
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
 #include "tools/Templates/TemplateManager.hpp"
 #include "utils.hpp"
+#include "utils/InfoButton.hpp"
 #include <set>
 #include <algorithm>
 

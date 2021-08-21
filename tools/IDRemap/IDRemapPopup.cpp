@@ -68,6 +68,22 @@ void IDRemapPopup::setup() {
             .move(0.0f, - this->m_pLrSize.height / 2 + 25.0f)
             .done()
     );
+
+    MAKE_INFOBUTTON(
+        "Remap IDs",
+        
+        "<co>ID Remapping</c> lets you efficiently change a bunch of <cl>group IDs</c> at once. "
+        "All objects with <cl>group IDs</c> between the <cr>start ID</c> and <cb>end ID</c>, "
+        "and triggers targeting those groups will have that ID incremented / decremented by "
+        "the value in <cy>offset</c>.",
+
+        1.0f,
+
+        - m_pLrSize.width / 2 + 25.0f,
+        - m_pLrSize.height / 2 + 25.0f,
+
+        this->m_pButtonMenu
+    );
 }
 
 void IDRemapPopup::onRemap(CCObject* pSender) {

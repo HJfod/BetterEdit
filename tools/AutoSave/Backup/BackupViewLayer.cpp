@@ -1,6 +1,7 @@
 #include "BackupViewLayer.hpp"
 #include "LevelBackupManager.hpp"
 #include "BackupListView.hpp"
+#include "../../../utils/InfoButton.hpp"
 
 bool BackupViewLayer::init(GJGameLevel* level) {
     if (!CCLayer::init())
@@ -60,7 +61,22 @@ bool BackupViewLayer::init(GJGameLevel* level) {
     m_pListLabel->setVisible(false);
     m_pListLabel->setZOrder(1001);
 
-    this->addChild(m_pListLabel);
+    this->m_pButtonMenu->addChild(m_pListLabel);
+
+    MAKE_INFOBUTTON(
+        "Level Backups",
+        
+        "<cy>Backups enable you to save a copy of your level, "
+        "and load it at any time later on.</c>\n "
+        "<cb>Backups are saved in a different location from normal "
+        "levels, so even if you lose your normal GD data, they should "
+        "be recoverable.</c>\n "
+        "<co>To create a backup, press the + button in the corner.</c>",
+        1.0f,
+        - winSize.width / 2 + 30.f,
+        - winSize.height / 2 + 30.f,
+        this->m_pButtonMenu
+    );
 
     this->reloadList();
 

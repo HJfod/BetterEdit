@@ -46,6 +46,19 @@ void LayerSettingsPopup::setup() {
             .done()
     );
 
+    MAKE_INFOBUTTON(
+        "Global Layer Settings",
+
+        "Controls settings for all layers.",
+
+        1.0f,
+
+        - this->m_pLrSize.width / 2 + 25.0f,
+        - this->m_pLrSize.height / 2 + 25.0f,
+
+        this->m_pButtonMenu
+    );
+
     this->sliderChanged(nullptr);
 }
 

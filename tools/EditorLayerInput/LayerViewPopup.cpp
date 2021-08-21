@@ -377,6 +377,24 @@ void LayerViewPopup::setup() {
         );
     }
 
+    MAKE_INFOBUTTON(
+        "Editor Layers",
+
+        "<cy>The lock icon locks layers, meaning objects on that layer can't be selected.</c>\n "
+        "<cg>The eye button toggles layer visibility.</c>\n "
+        "<cc>You can change layer opacity & name by clicking on the gear button in List View, or "
+        "by selecting the Info option on Grid View and clicking the layer.</c>\n "
+        "<cp>The top left controls let you switch between Grid View & List View, and the 3rd button "
+        "hides layers without objects on them.</c>",
+
+        .6f,
+
+        this->m_pLrSize.width / 2 - 60.0f,
+        this->m_pLrSize.height / 2 - 30.0f,
+
+        this->m_pButtonMenu
+    );
+
     // this->m_pEditNode = LayerEditNode::create(this, nullptr);
     // this->m_pEditNode->setPosition(140.0f, 20.0f);
     // this->m_pButtonMenu->addChild(this->m_pEditNode);
