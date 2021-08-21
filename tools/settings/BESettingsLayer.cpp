@@ -80,7 +80,7 @@ void BESettingsLayer::setup() {
         "the screen is not being moved",
         BE_SETTING_FUNC_B(FadeOutPercentage)
     );
-    this->addToggle("Pulse Objects", nullptr, BE_SETTING_FUNC_B(PulseObjectsInEditor), true);
+    // this->addToggle("Pulse Objects", nullptr, BE_SETTING_FUNC_B(PulseObjectsInEditor), true);
     this->addToggle("Rotate Saws", nullptr, BE_SETTING_FUNC_B(RotateSawsInEditor));
     this->addToggle("No Global Clipboard", nullptr, BE_SETTING_FUNC_B(DisableGlobalClipboard));
     // this->addToggle("Disable Position Text", nullptr, BE_SETTING_FUNC_B(DisableEditorPos));
@@ -137,7 +137,7 @@ void BESettingsLayer::setup() {
         BE_SETTING_FUNC_B(DisableVisibilityTab)
     );
 
-    // this->incrementPageCount(true);
+    this->incrementPageCount(true);
 
     this->addToggle(
         "Enable Auto-Saving",
@@ -148,10 +148,12 @@ void BESettingsLayer::setup() {
     );
     this->addToggle(
         "Soft Save",
-        "Saves objects to a file immediately when they're placed\n "
-        "Use the frequency to modify how many blocks have to be placed until data is saved\n "
-        "Can cause lag, but if the game crashes, you can recover the level\n\n"
-        " <cr>Extremely experimental!</c>",
+        "<cy>Saves objects to a file immediately when they're placed</c>\n "
+        "<cg>Use the frequency to modify how many blocks have to be placed until data is saved</c>\n "
+        "<cp>Can cause lag, but if the game crashes, you can recover the level</c>\n "
+        "<cl>Not the same as saving a level; to commit a level to your local data, use auto-saving or "
+        "manually save!</c>\n "
+        "<cr>Extremely experimental!</c>",
         BE_SETTING_FUNC_B(EnableSoftAutoSave),
         true
     );
@@ -217,6 +219,9 @@ void BESettingsLayer::setup() {
         (SEL_MenuHandler)&BESettingsLayer::onURL,
         false
     )->setUserObject(CCString::create("https://www.youtube.com/watch?v=4TnAKurylA8"));
+
+    this->incrementPageCount(true);
+
     this->addButton(
         CCNodeConstructor<ButtonSprite*>()
             .fromButtonSprite("Support Server", "GJ_button_05.png", "goldFont.fnt")
@@ -225,6 +230,15 @@ void BESettingsLayer::setup() {
         (SEL_MenuHandler)&BESettingsLayer::onURL,
         true
     )->setUserObject(CCString::create("https://discord.gg/K9Kuh3hzTC"));
+    this->addTitle("Running version GDMAKE_PROJECT_VERSION", "goldFont.fnt")->setScale(.6f);
+    this->addToggle(
+        "Check for Updates", "Checks for available updates at startup",
+        BE_SETTING_FUNC_B(AutoUpdateEnabled)
+    );
+    // this->addToggle(
+    //     "Beta Test", "If auto-updates are enabled, automatically updates to the latest version, even if it is a beta",
+    //     BE_SETTING_FUNC_B(AutoUpdateEnabled)
+    // );
 }
 
 

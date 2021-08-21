@@ -177,11 +177,11 @@ void loadVisibilityTab(EditorUI* self) {
         [&](bool b, auto) -> void { g_bHideLDM = b; }
     ));
 
-    btns->addObject(VisibilityToggle::create(
-        "BE_v_pulse.png",
-        []() -> bool { return BetterEdit::getPulseObjectsInEditor(); },
-        [](bool b, auto) -> void { BetterEdit::setPulseObjectsInEditor(b); }
-    ));
+    // btns->addObject(VisibilityToggle::create(
+    //     "BE_v_pulse.png",
+    //     []() -> bool { return BetterEdit::getPulseObjectsInEditor(); },
+    //     [](bool b, auto) -> void { BetterEdit::setPulseObjectsInEditor(b); }
+    // ));
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_prevmode.png",

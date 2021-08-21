@@ -27,4 +27,4 @@ cd ..\cocos2d
 
 git add --all
 git commit -a
-git push origin main
+git push origin master

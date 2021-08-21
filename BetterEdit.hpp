@@ -45,6 +45,8 @@ using namespace cocos2d::extension;
     __macro__(EnableSoftAutoSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
     __macro__(EnableAsyncSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(DisableVisibilityTab, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
+    __macro__(AutoUpdateEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
+    __macro__(AutoUpdateBetaTest, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \
@@ -84,6 +86,10 @@ class BetterEdit : public gd::GManager {
         };
     
         using FavoritesList = std::vector<int>;
+
+        enum ScheduleTime {
+            kScheduleTimeMenuLayer,
+        };
     
     protected:
         struct save_bool {
@@ -94,7 +100,7 @@ class BetterEdit : public gd::GManager {
 
         TemplateManager* m_pTemplateManager;
         std::vector<Preset> m_vPresets;
-        std::vector<std::string> m_vScheduledErrors;
+        std::map<ScheduleTime, std::vector<std::string>> m_mScheduledErrors;
         std::map<std::string, save_bool> m_mSaveBools;
         FavoritesList m_vFavorites;
         bool m_bEditorInitialized;
@@ -168,8 +174,15 @@ class BetterEdit : public gd::GManager {
 
         static void showHookConflictMessage();
 
-        inline void scheduleError(std::string const& err) { this->m_vScheduledErrors.push_back(err); }
-        inline std::vector<std::string> & getErrors() { return this->m_vScheduledErrors; }
+        inline void scheduleError(ScheduleTime time, std::string const& err) {
+            if (!this->m_mScheduledErrors.count(time))
+                this->m_mScheduledErrors[time] = std::vector<std::string>();
+
+            this->m_mScheduledErrors[time].push_back(err);
+        }
+        inline std::vector<std::string> & getErrors(ScheduleTime time) {
+            return this->m_mScheduledErrors[time]; 
+        }
 
         inline std::vector<Preset> & getPresets() { return m_vPresets; }
         inline BetterEdit* addPreset(Preset const& preset) { m_vPresets.push_back(preset); return this; }

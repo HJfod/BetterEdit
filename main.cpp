@@ -14,6 +14,7 @@
 #include "tools/AutoSave/autoSave.hpp"
 #include "tools/AutoSave/Backup/LevelBackupManager.hpp"
 #include "tools/other/teleportScaleFix.hpp"
+#include "tools/AutoUpdate/autoUpdate.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -57,6 +58,8 @@ GDMAKE_MAIN_HM(hMod) {
     loadTeleportScaleFix();
 
     ContextMenu::loadRightClick(hMod);
+
+    // checkForUpdates();
 
     return "";
 }

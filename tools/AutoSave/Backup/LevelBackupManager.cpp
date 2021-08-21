@@ -109,6 +109,8 @@ void LevelBackupManager::createBackupForLevel(GJGameLevel* level) {
     }
 
     arr->addObject(new LevelBackup(level, ""));
+
+    this->save();
 }
 
 void LevelBackupManager::removeBackupForLevel(GJGameLevel* level, LevelBackup* backup) {
@@ -116,5 +118,7 @@ void LevelBackupManager::removeBackupForLevel(GJGameLevel* level, LevelBackup* b
         return;
 
     as<CCArray*>(m_pLevels->objectForKey(level->levelName))->removeObject(backup);
+
+    this->save();
 }
 
