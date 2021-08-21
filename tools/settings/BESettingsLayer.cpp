@@ -231,10 +231,10 @@ void BESettingsLayer::setup() {
         true
     )->setUserObject(CCString::create("https://discord.gg/K9Kuh3hzTC"));
     this->addTitle("Running version GDMAKE_PROJECT_VERSION", "goldFont.fnt")->setScale(.6f);
-    this->addToggle(
-        "Check for Updates", "Checks for available updates at startup",
-        BE_SETTING_FUNC_B(AutoUpdateEnabled)
-    );
+    // this->addToggle(
+    //     "Check for Updates", "Checks for available updates at startup",
+    //     BE_SETTING_FUNC_B(AutoUpdateEnabled)
+    // );
     // this->addToggle(
     //     "Beta Test", "If auto-updates are enabled, automatically updates to the latest version, even if it is a beta",
     //     BE_SETTING_FUNC_B(AutoUpdateEnabled)
