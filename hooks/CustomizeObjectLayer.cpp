@@ -214,18 +214,18 @@ CCSprite* createBGSprite() {
     );
     bg->setColor({ 0, 0, 0 });
 
-    auto bg2 = CCScale9Sprite::create(
-        "square02b_001.png", { 0.0f, 0.0f, 80.0f, 80.0f }
-    );
+    // auto bg2 = CCScale9Sprite::create(
+    //     "square02b_001.png", { 0.0f, 0.0f, 80.0f, 80.0f }
+    // );
 
-    bg2->setContentSize({ 182.0f, 145.0f });
-    bg2->setPosition(
-        223.5f, 160.0f
-    );
-    bg2->setColor({ 0, 0, 0 });
+    // bg2->setContentSize({ 182.0f, 145.0f });
+    // bg2->setPosition(
+    //     223.5f, 160.0f
+    // );
+    // bg2->setColor({ 0, 0, 0 });
 
     bg->visit();
-    bg2->visit();
+    // bg2->visit();
 
     bgTexture->end();
 
@@ -362,24 +362,24 @@ bool __fastcall CustomizeObjectLayer_init(
         btn->setTag(channel);
     }
 
-    for (int i = 0; i < 5; i++) {
-        auto label = CCLabelBMFont::create(std::to_string(i + 1).c_str(), "bigFont.fnt");
+    // for (int i = 0; i < 5; i++) {
+    //     auto label = CCLabelBMFont::create(std::to_string(i + 1).c_str(), "bigFont.fnt");
 
-        label->setScale(.6f);
+    //     label->setScale(.6f);
 
-        auto btn = CCMenuItemSpriteExtra::create(
-            label, self, nullptr
-        );
+    //     auto btn = CCMenuItemSpriteExtra::create(
+    //         label, self, nullptr
+    //     );
 
-        auto width = 150.0f;
-        btn->setPosition(
-            (i / 4.0f) * width + 250.0f,
-            225.0f
-        );
+    //     auto width = 150.0f;
+    //     btn->setPosition(
+    //         (i / 4.0f) * width + 250.0f,
+    //         225.0f
+    //     );
 
-        self->m_pColorNodes->addObject(btn);
-        self->addChild(btn);
-    }
+    //     self->m_pColorNodes->addObject(btn);
+    //     self->addChild(btn);
+    // }
 
     auto line = CCSprite::createWithSpriteFrameName("edit_vLine_001.png");
 

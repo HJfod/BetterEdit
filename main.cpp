@@ -38,18 +38,18 @@ GDMAKE_MAIN_HM(hMod) {
     );
 
     if (!BetterEdit::initGlobal())
-        return false;
+        return "Unable to initialize BetterEdit!";
     if (!LiveManager::initGlobal())
-        return false;
+        return "Unable to initialize LiveManager!";
     if (!LayerManager::initGlobal())
-        return false;
+        return "Unable to initialize LayerManager!";
     if (!SoftSaveManager::initGlobal())
-        return false;
+        return "Unable to initialize SoftSaveManager!";
     if (!LevelBackupManager::initGlobal())
-        return false;
+        return "Unable to initialize LevelBackupManager!";
 
     if (!loadUpdateVisibilityHook())
-        return false;
+        return "Unable to hook updateVisibility!";
     
     loadTemplates();
     loadFavouriteTab();
@@ -58,7 +58,7 @@ GDMAKE_MAIN_HM(hMod) {
 
     ContextMenu::loadRightClick(hMod);
 
-    return true;
+    return "";
 }
 
 GDMAKE_UNLOAD {

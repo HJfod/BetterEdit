@@ -115,23 +115,30 @@ void loadVisibilityTab(EditorUI* self) {
     if (BetterEdit::getDisableVisibilityTab())
         return;
 
+    static constexpr const float item_sep = 43.0f;
+
+    auto scr = self->m_pBuildModeBtn->getParent()->convertToNodeSpace({
+        CCDirector::sharedDirector()->getScreenLeft() + 25.0f,
+        CCDirector::sharedDirector()->getScreenBottom() + 23.0f
+    });
+
     self->m_pBuildModeBtn->setNormalImage(createBtnSprite("BE_create_01.png"));
     self->m_pBuildModeBtn->setContentSize(
         self->m_pBuildModeBtn->getNormalImage()->getScaledContentSize()
     );
-    self->m_pBuildModeBtn->setPosition(-260, -93.5f);
+    self->m_pBuildModeBtn->setPosition(scr.x, scr.y + item_sep);
 
     self->m_pEditModeBtn->setNormalImage(createBtnSprite("BE_edit_01.png"));
     self->m_pEditModeBtn->setContentSize(
         self->m_pEditModeBtn->getNormalImage()->getScaledContentSize()
     );
-    self->m_pEditModeBtn->setPosition(-216.5f, -93.5f);
+    self->m_pEditModeBtn->setPosition(scr.x + item_sep, scr.y + item_sep);
 
     self->m_pDeleteModeBtn->setNormalImage(createBtnSprite("BE_delete_01.png"));
     self->m_pDeleteModeBtn->setContentSize(
         self->m_pDeleteModeBtn->getNormalImage()->getScaledContentSize()
     );
-    self->m_pDeleteModeBtn->setPosition(-260, -136.5f);
+    self->m_pDeleteModeBtn->setPosition(scr.x, scr.y);
 
     auto vTabBtn = CCMenuItemSpriteExtra::create(
         createBtnSprite("BE_visible_01.png"),
@@ -140,7 +147,7 @@ void loadVisibilityTab(EditorUI* self) {
     );
 
     vTabBtn->setTag(4);
-    vTabBtn->setPosition(-216.5f, -136.5f);
+    vTabBtn->setPosition(scr.x + item_sep, scr.y);
 
     self->m_pBuildModeBtn->getParent()->addChild(vTabBtn);
 

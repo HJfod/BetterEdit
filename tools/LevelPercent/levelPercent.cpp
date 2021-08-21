@@ -191,7 +191,7 @@ void __fastcall EditorUI_valueFromXPos(EditorUI* self) {
 }
 
 void handleObjectAddForSlider(LevelEditorLayer* self, GameObject* obj) {
-    if (g_bDontUpdateSlider && !self) return;
+    if (g_bDontUpdateSlider || !self) return;
 
     if (obj) updateLastObjectX(self, obj);
 

@@ -46,8 +46,8 @@ void setupCreatePresetButton(gd::EditLevelLayer* self, gd::GJGameLevel* level) {
     auto folderBtn = extra::getChild<gd::CCMenuItemSpriteExtra*>(menu, -1);
 
     btn->setPosition(
-        folderBtn->getPositionX(),
-        folderBtn->getPositionY() + 40.0f
+        folderBtn->getPositionX() + 35.0f,
+        folderBtn->getPositionY()
     );
 
     menu->addChild(btn);

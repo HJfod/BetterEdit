@@ -72,16 +72,13 @@ void updateToggleButtonSprite(CCMenuItemSpriteExtra* btn) {
 class EditorUI_CB : public EditorUI {
     public:
         void onToggleShowUI(CCObject*) {
-            this->showUI(!g_showUI);
+            g_showUI = !g_showUI;
+            this->showUI(g_showUI);
 
             auto btn = as<CCMenuItemSpriteExtra*>(this->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG));
-            if (btn) {
-                btn->setVisible(true);
-                this->m_pPlaytestBtn->setVisible(g_showUI);
-                
-                if (!g_showUI) // it has been updated anyway by showUI
-                    updateToggleButtonSprite(btn);
-            }
+
+            if (btn && !g_showUI)
+                updateToggleButtonSprite(btn);
         }
 
         void onExitViewMode(CCObject*) {
@@ -365,6 +362,10 @@ GDMAKE_HOOK(0x87180)
 void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     if (BetterEdit::isEditorViewOnlyMode())
         show = false;
+    
+    if (!g_showUI) {
+        show = false;
+    }
 
     GDMAKE_ORIG_V(self, edx, show);
 
@@ -378,8 +379,6 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
         }
     }
 
-    g_showUI = show;
-
     auto toggleBtn = as<CCMenuItemSpriteExtra*>(
         self->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG)
     );
@@ -391,7 +390,8 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     showVisibilityTab(self, show);
 
     if (toggleBtn) {
-        toggleBtn->setVisible(show);
+        toggleBtn->setVisible(show || !g_showUI);
+        self->m_pPlaytestBtn->setVisible(g_showUI);
         if (show)
             updateToggleButtonSprite(toggleBtn);
     }

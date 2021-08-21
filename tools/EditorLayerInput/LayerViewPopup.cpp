@@ -176,18 +176,18 @@ void LayerViewPopup::setup() {
         );
     }
     { // toggle, page number, options
-        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
-            .fromNode(CCMenuItemToggler::createWithStandardSprites(
-                this,
-                (SEL_MenuHandler)&LayerViewPopup::onToggler
-            ))
-            .udata(&LayerManager::get()->getLevel()->m_bMultipleVisible)
-            .exec([](CCMenuItemToggler* t) -> void {
-                t->toggle(LayerManager::get()->getLevel()->m_bMultipleVisible);
-            })
-            .move(this->m_pLrSize.width / 2 - 40.0f, -this->m_pLrSize.height / 2 + 90.0f)
-            .done()
-        );
+        // this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
+        //     .fromNode(CCMenuItemToggler::createWithStandardSprites(
+        //         this,
+        //         (SEL_MenuHandler)&LayerViewPopup::onToggler
+        //     ))
+        //     .udata(&LayerManager::get()->getLevel()->m_bMultipleVisible)
+        //     .exec([](CCMenuItemToggler* t) -> void {
+        //         t->toggle(LayerManager::get()->getLevel()->m_bMultipleVisible);
+        //     })
+        //     .move(this->m_pLrSize.width / 2 - 40.0f, -this->m_pLrSize.height / 2 + 90.0f)
+        //     .done()
+        // );
         this->m_pLayer->addChild(
             CCNodeConstructor<CCLabelBMFont*>()
             .fromText("1", "goldFont.fnt")
