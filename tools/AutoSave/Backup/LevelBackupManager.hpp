@@ -52,6 +52,35 @@ struct LevelBackup : public CCObject {
     }
 };
 
+struct LevelBackupSettings : public CCObject {
+    bool m_bAutoBackup;
+    int m_nBackupEvery;
+    int m_nLastBackupObjectCount = 0;
+    CCArray* m_pBackups;
+    static constexpr const int s_defaultBackupEvery = 500;
+
+    ~LevelBackupSettings() {
+        m_pBackups->release();
+    }
+
+    static LevelBackupSettings* create(GJGameLevel* level) {
+        auto ret = new LevelBackupSettings;
+
+        if (ret) {
+            ret->m_bAutoBackup = false;
+            ret->m_nBackupEvery = s_defaultBackupEvery;
+            ret->m_pBackups = CCArray::create();
+            ret->m_pBackups->retain();
+            if (level) ret->m_nLastBackupObjectCount = level->objectCount;
+            ret->autorelease();
+            return ret;
+        }
+
+        CC_SAFE_DELETE(ret);
+        return nullptr;
+    }
+};
+
 class LevelBackupManager : public GManager {
     protected:
         CCDictionary* m_pLevels;
@@ -66,10 +95,10 @@ class LevelBackupManager : public GManager {
         static bool initGlobal();
         static LevelBackupManager* get();
 
-        bool levelHasBackup(GJGameLevel* level);
-        bool levelHasBackup(std::string const& level);
+        bool levelHasBackupSettings(GJGameLevel* level);
+        bool levelHasBackups(GJGameLevel* level);
+        LevelBackupSettings* getBackupSettingsForLevel(GJGameLevel* level, bool = false);
         CCArray* getBackupsForLevel(GJGameLevel* level);
-        CCArray* getBackupsForLevel(std::string const& level);
         void createBackupForLevel(GJGameLevel* level);
         void removeBackupForLevel(GJGameLevel* level, LevelBackup* backup);
 };

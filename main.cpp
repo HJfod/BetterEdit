@@ -15,6 +15,7 @@
 #include "tools/AutoSave/Backup/LevelBackupManager.hpp"
 #include "tools/other/teleportScaleFix.hpp"
 #include "tools/AutoUpdate/autoUpdate.hpp"
+#include "tools/PortalLineColors/portalLineColors.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -50,8 +51,10 @@ GDMAKE_MAIN_HM(hMod) {
         return "Unable to initialize LevelBackupManager!";
 
     if (!loadUpdateVisibilityHook())
-        return "Unable to hook updateVisibility!";
-    
+        return "Unable to midhook updateVisibility!";
+    if (!loadDrawGridLayerMidHook())
+        return "Unable to midhook DrawGridLayer::draw!";
+
     loadTemplates();
     loadFavouriteTab();
     loadEnterSearch();

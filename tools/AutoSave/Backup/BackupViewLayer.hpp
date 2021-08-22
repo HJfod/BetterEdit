@@ -18,6 +18,7 @@ class BackupViewLayer : public CCLayer {
         void onExit(CCObject*);
         void keyDown(enumKeyCodes) override;
         void onNew(CCObject*);
+        void onSchedule(CCObject*);
 
         friend class BackupEditLayer;
 

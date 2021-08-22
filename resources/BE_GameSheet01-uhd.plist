@@ -229,6 +229,36 @@
     <key>textureRotated</key>
     <false/>
    </dict>
+   <key>BE_hourglassBtn_001.png</key>
+   <dict>
+    <key>aliases</key>
+    <array/>
+    <key>spriteOffset</key>
+    <string>{0,0}</string>
+    <key>spriteSize</key>
+    <string>{180,184}</string>
+    <key>spriteSourceSize</key>
+    <string>{180,184}</string>
+    <key>textureRect</key>
+    <string>{{616,302},{180,184}}</string>
+    <key>textureRotated</key>
+    <false/>
+   </dict>
+   <key>BE_timeBtn_001.png</key>
+   <dict>
+    <key>aliases</key>
+    <array/>
+    <key>spriteOffset</key>
+    <string>{0,0}</string>
+    <key>spriteSize</key>
+    <string>{180,184}</string>
+    <key>spriteSourceSize</key>
+    <string>{180,184}</string>
+    <key>textureRect</key>
+    <string>{{0,488},{180,184}}</string>
+    <key>textureRotated</key>
+    <false/>
+   </dict>
    <key>BE_v_bpm_line.png</key>
    <dict>
     <key>aliases</key>
@@ -315,7 +345,7 @@
     <key>spriteSourceSize</key>
     <string>{92,101}</string>
     <key>textureRect</key>
-    <string>{{232,488},{92,101}}</string>
+    <string>{{798,302},{92,101}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -330,7 +360,7 @@
     <key>spriteSourceSize</key>
     <string>{92,101}</string>
     <key>textureRect</key>
-    <string>{{326,488},{92,101}}</string>
+    <string>{{646,488},{92,101}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -345,7 +375,7 @@
     <key>spriteSourceSize</key>
     <string>{92,101}</string>
     <key>textureRect</key>
-    <string>{{420,488},{92,101}}</string>
+    <string>{{740,488},{92,101}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -360,7 +390,7 @@
     <key>spriteSourceSize</key>
     <string>{92,101}</string>
     <key>textureRect</key>
-    <string>{{514,488},{92,101}}</string>
+    <string>{{834,488},{92,101}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -375,7 +405,7 @@
     <key>spriteSourceSize</key>
     <string>{230,179}</string>
     <key>textureRect</key>
-    <string>{{616,302},{230,179}}</string>
+    <string>{{182,488},{230,179}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -390,7 +420,7 @@
     <key>spriteSourceSize</key>
     <string>{230,179}</string>
     <key>textureRect</key>
-    <string>{{0,488},{230,179}}</string>
+    <string>{{414,488},{230,179}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -406,7 +436,7 @@
    <key>realTextureFileName</key>
    <string>BE_GameSheet01-uhd.png</string>
    <key>size</key>
-   <string>{941,669}</string>
+   <string>{941,674}</string>
    <key>smartupdate</key>
    <string>$none</string>
    <key>textureFileName</key>

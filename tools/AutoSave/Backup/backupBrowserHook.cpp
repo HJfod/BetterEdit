@@ -4,7 +4,7 @@ GDMAKE_HOOK(0x5be30)
 void __fastcall LevelCell_loadLocalLevelCell(LevelCell* self) {
     GDMAKE_ORIG_V(self);
 
-    if (LevelBackupManager::get()->levelHasBackup(self->m_pLevel)) {
+    if (LevelBackupManager::get()->levelHasBackups(self->m_pLevel)) {
         auto label = getChild<CCLabelBMFont*>(self->m_pLayer, 0);
 
         auto backupIcon = CCSprite::createWithSpriteFrameName("GJ_colorBtn_001.png");

@@ -1,6 +1,7 @@
 #include "BackupViewLayer.hpp"
 #include "LevelBackupManager.hpp"
 #include "BackupListView.hpp"
+#include "BackupScheduleLayer.hpp"
 #include "../../../utils/InfoButton.hpp"
 
 bool BackupViewLayer::init(GJGameLevel* level) {
@@ -52,6 +53,14 @@ bool BackupViewLayer::init(GJGameLevel* level) {
     addBtn->setPosition(winSize.width / 2 - 40.0f, - winSize.height / 2 + 40.0f);
     this->m_pButtonMenu->addChild(addBtn);
 
+    auto timeBtn = CCMenuItemSpriteExtra::create(
+        createBESprite("BE_timeBtn_001.png"),
+        this,
+        menu_selector(BackupViewLayer::onSchedule)
+    );
+    timeBtn->setPosition(winSize.width / 2 - 40.0f, - winSize.height / 2 + 95.0f);
+    this->m_pButtonMenu->addChild(timeBtn);
+
     m_sTitle = "Backups for " + this->m_pLevel->levelName;
 
     m_pListLabel = CCLabelBMFont::create("No backups found!", "bigFont.fnt");
@@ -94,7 +103,7 @@ void BackupViewLayer::reloadList() {
 
     BackupListView* list = nullptr;
 
-    if (!LevelBackupManager::get()->levelHasBackup(this->m_pLevel)) {
+    if (!LevelBackupManager::get()->levelHasBackupSettings(this->m_pLevel)) {
         m_pListLabel->setVisible(true);
     } else {
         m_pListLabel->setVisible(false);
@@ -126,6 +135,10 @@ void BackupViewLayer::keyDown(enumKeyCodes key) {
 void BackupViewLayer::onNew(CCObject*) {
     LevelBackupManager::get()->createBackupForLevel(this->m_pLevel);
     this->reloadList();
+}
+
+void BackupViewLayer::onSchedule(CCObject*) {
+    BackupScheduleLayer::create(this->m_pLevel)->show();
 }
 
 void BackupViewLayer::onExit(CCObject*) {

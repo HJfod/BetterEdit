@@ -136,8 +136,14 @@ void BESettingsLayer::setup() {
         "Disables the <co>View</c> tab (<cl>requires re-entering the Editor</c>)",
         BE_SETTING_FUNC_B(DisableVisibilityTab)
     );
+    this->addToggle(
+        "Don't Color Borders",
+        "BetterEdit makes portals that are <cy>checked</c> have the line color match "
+        "the portal color",
+        BE_SETTING_FUNC_B(DontColorGamemodeBorders)
+    );
 
-    this->incrementPageCount(true);
+    // this->incrementPageCount(true);
 
     this->addToggle(
         "Enable Auto-Saving",

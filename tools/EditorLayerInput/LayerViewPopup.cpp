@@ -938,6 +938,7 @@ void LayerViewPopup::keyDown(enumKeyCodes key) {
             BrownAlertDelegate::keyDown(key);
     }
 }
+
 LayerViewPopup* LayerViewPopup::create() {
     auto pRet = new LayerViewPopup();
 
