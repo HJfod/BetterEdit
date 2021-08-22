@@ -21,10 +21,8 @@ void BackupScheduleLayer::setup() {
     m_pLabel1->setScale(.5f);
     this->m_pLayer->addChild(m_pLabel1);
 
-    m_pInput = InputNode::create(
-        100.f, "x"
-    );
-    m_pInput->setString(std::to_string(m_pBackup->m_nBackupEvery).c_str());
+    m_pInput = InputNode::create(100.f, "x");
+    // m_pInput->setString(std::to_string(m_pBackup->m_nBackupEvery).c_str());
     m_pInput->setPosition(winSize / 2 + CCPoint { 0.0f, -20.0f });
     m_pInput->getInputNode()->setDelegate(this);
     this->m_pLayer->addChild(m_pInput);

@@ -1,4 +1,5 @@
 #include "portalLineColors.hpp"
+#include "../VisibilityTab/loadVisibilityTab.hpp"
 
 #define MAKE_MIDHOOK(addr, func)        \
     if (MH_CreateHook(                  \
@@ -29,6 +30,10 @@ void DrawGridLayer_draw() {
             case 745: ccDrawColor4B(222, 221, 225, 255); break; // robot
             case 1331:ccDrawColor4B(116, 21,  255, 255); break; // spider
         }
+    
+    // haha this is stupid but eh
+    if (shouldHidePortalLine())
+        ccDrawColor4B(0, 0, 0, 0);
 }
 
 void (*DrawGridLayer_draw_retAddr)();

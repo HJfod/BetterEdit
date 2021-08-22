@@ -10,6 +10,8 @@ static constexpr const float f_0  = 0.0f;
 static constexpr const int VIEWBUTTONBAR_TAG = 0x234592;
 
 bool g_bHideLDM = false;
+bool g_bShowPosLine = false;
+bool g_bShowPortalLines = true;
 
 class CCVoidPointer : public CCObject {
     public:
@@ -111,6 +113,8 @@ void makeVisibilityPatches() {
 
 void loadVisibilityTab(EditorUI* self) {
     BetterEdit::saveGlobalBool("hide-ldm", &g_bHideLDM);
+    BetterEdit::saveGlobalBool("pos-line", &g_bShowPosLine);
+    BetterEdit::saveGlobalBool("portal-borders", &g_bShowPortalLines);
 
     if (BetterEdit::getDisableVisibilityTab())
         return;
@@ -208,10 +212,12 @@ void loadVisibilityTab(EditorUI* self) {
     btns->addObject(VisibilityToggle::create(
         "BE_v_pos_line.png",
         [self]() -> bool {
-            return ispatched(0x16e310);
+            return g_bShowPosLine;
         },
         [self](bool b, auto) -> void {
-            if (b)
+            g_bShowPosLine = b;
+
+            if (g_bShowPosLine)
                 unpatch(0x16e310);
             else
                 patch(0x16e310, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
@@ -267,6 +273,12 @@ void loadVisibilityTab(EditorUI* self) {
         }
     ));
 
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_portal_borders.png",
+        [self]() -> bool { return g_bShowPortalLines; },
+        [self](bool b, auto) -> void { g_bShowPortalLines = b; }
+    ));
+
     auto buttonBar = EditButtonBar::create(
         btns,
         { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f },
@@ -302,6 +314,10 @@ void showVisibilityTab(EditorUI* self, bool show) {
     
     CATCH_NULL(self->m_pBuildModeBtn->getParent()->getChildByTag(4))
         ->setVisible(show);
+}
+
+bool shouldHidePortalLine() {
+    return !g_bShowPortalLines;
 }
 
 GDMAKE_HOOK(0x7ad20)
