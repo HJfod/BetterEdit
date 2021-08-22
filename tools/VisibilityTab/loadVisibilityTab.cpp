@@ -255,6 +255,18 @@ void loadVisibilityTab(EditorUI* self) {
         }
     ));
 
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_grid.png",
+        [self]() -> bool {
+            return GameManager::sharedState()->getGameVariable("0038");
+        },
+        [self](bool b, auto) -> void {
+            GameManager::sharedState()->setGameVariable("0038", b);
+
+            self->m_pEditorLayer->updateOptions();
+        }
+    ));
+
     auto buttonBar = EditButtonBar::create(
         btns,
         { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f },

@@ -304,7 +304,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_grnd.png</key>
+   <key>BE_v_grid.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -319,7 +319,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_ldm.png</key>
+   <key>BE_v_grnd.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -334,7 +334,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_pos_line.png</key>
+   <key>BE_v_ldm.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -349,7 +349,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_prevmode.png</key>
+   <key>BE_v_pos_line.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -364,7 +364,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_pulse.png</key>
+   <key>BE_v_prevmode.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -379,7 +379,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_rotate.png</key>
+   <key>BE_v_pulse.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -391,6 +391,21 @@
     <string>{92,101}</string>
     <key>textureRect</key>
     <string>{{834,488},{92,101}}</string>
+    <key>textureRotated</key>
+    <false/>
+   </dict>
+   <key>BE_v_rotate.png</key>
+   <dict>
+    <key>aliases</key>
+    <array/>
+    <key>spriteOffset</key>
+    <string>{0,0}</string>
+    <key>spriteSize</key>
+    <string>{92,101}</string>
+    <key>spriteSourceSize</key>
+    <string>{92,101}</string>
+    <key>textureRect</key>
+    <string>{{0,674},{92,101}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -436,7 +451,7 @@
    <key>realTextureFileName</key>
    <string>BE_GameSheet01-uhd.png</string>
    <key>size</key>
-   <string>{941,674}</string>
+   <string>{941,777}</string>
    <key>smartupdate</key>
    <string>$none</string>
    <key>textureFileName</key>

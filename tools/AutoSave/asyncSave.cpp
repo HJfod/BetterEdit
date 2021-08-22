@@ -2,6 +2,7 @@
 #include "../RotateSaws/rotateSaws.hpp"
 #include <thread>
 #include <mutex>
+#include "Backup/LevelBackupManager.hpp"
 
 std::mutex g_stringMutex;
 static std::string g_sharedString;
@@ -54,5 +55,8 @@ void __fastcall EditorPauseLayer_saveLevel(EditorPauseLayer* self) {
     GDMAKE_ORIG_V(self);
 
     SoftSaveManager::clear();
+    LevelBackupManager::get()->handleAutoBackupForLevel(
+        self->m_pEditorLayer->m_pLevelSettings->m_pLevel
+    );
 }
 

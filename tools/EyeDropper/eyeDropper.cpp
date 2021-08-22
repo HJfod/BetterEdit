@@ -6,6 +6,7 @@ bool g_bPickingColor = false;
 ccColor3B g_obColorUnderCursor;
 EyeDropperColorOverlay* g_pOverlay;
 HWND g_hwnd;
+bool g_bLoadedResources = false;
 
 HWND glfwGetWin32Window(GLFWwindow* wnd) {
     auto cocosBase = GetModuleHandleA("libcocos2d.dll");
@@ -76,6 +77,17 @@ void __fastcall CCScheduler_update(CCScheduler* self, edx_t edx, float dt) {
             g_pOverlay->setShowColor(g_obColorUnderCursor);
             g_pOverlay->setLabelText(WindowFromPoint(mpos) == g_hwnd);
         }
+    }
+    
+    // debug stuff (has to be done in the GD thread, so i
+    // cant just do this in GDMAKE_MAIN)
+    if (GDMAKE_IS_CONSOLE_ENABLED && !g_bLoadedResources) {
+        g_bLoadedResources = true;
+
+        CCTextureCache::sharedTextureCache()
+            ->addImage("BE_GameSheet01.png", false);
+        CCSpriteFrameCache::sharedSpriteFrameCache()
+            ->addSpriteFramesWithFile("BE_GameSheet01.plist");
     }
 
     return GDMAKE_ORIG_V(self, edx, dt);

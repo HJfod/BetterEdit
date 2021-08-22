@@ -101,4 +101,6 @@ class LevelBackupManager : public GManager {
         CCArray* getBackupsForLevel(GJGameLevel* level);
         void createBackupForLevel(GJGameLevel* level);
         void removeBackupForLevel(GJGameLevel* level, LevelBackup* backup);
+
+        void handleAutoBackupForLevel(GJGameLevel* level);
 };
