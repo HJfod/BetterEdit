@@ -78,14 +78,16 @@ void BackupScheduleLayer::onToggleAutoBackup(CCObject* pSender) {
     
     auto b = m_pBackup->m_bAutoBackup;
 
-    m_pLabel1->setOpacity(b ? 255 : 100);
-    m_pLabel1->setColor(b ? cc3x(0xfff) : cc3x(0x777));
+    if (m_pLabel1) {
+        m_pLabel1->setOpacity(b ? 255 : 100);
+        m_pLabel1->setColor(b ? cc3x(0xfff) : cc3x(0x777));
 
-    m_pLabel2->setOpacity(b ? 255 : 100);
-    m_pLabel2->setColor(b ? cc3x(0xfff) : cc3x(0x777));
+        m_pLabel2->setOpacity(b ? 255 : 100);
+        m_pLabel2->setColor(b ? cc3x(0xfff) : cc3x(0x777));
 
-    m_pInput->setEnabled(b);
-    m_pInput->getInputNode()->m_pTextField->setOpacity(b ? 255 : 100);
+        m_pInput->setEnabled(b);
+        m_pInput->getInputNode()->m_pTextField->setOpacity(b ? 255 : 100);
+    }
 }
 
 BackupScheduleLayer* BackupScheduleLayer::create(GJGameLevel* level) {
