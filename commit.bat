@@ -32,6 +32,10 @@ git add --all
 git commit -a
 git push origin master
 
+echo.
+echo ==== GDNodes ====
+echo.
+
 cd ..\nodes
 
 git add --all

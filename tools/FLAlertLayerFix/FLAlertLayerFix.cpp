@@ -1,26 +1,14 @@
 #include "../../BetterEdit.hpp"
 
-int layer_count = 0;
-
-GDMAKE_HOOK(0x224b0)
-FLAlertLayer * __fastcall FLAlertLayer_constructor(FLAlertLayer* layer) {
-    layer_count++;
-
-    return GDMAKE_ORIG_P(layer);
-}
-
-GDMAKE_HOOK(0x225c0)
-FLAlertLayer * __fastcall FLAlertLayer_destructor(FLAlertLayer* layer) {
-    layer_count--;
-
-    return GDMAKE_ORIG_P(layer);
-}
-
 void fixLayering(FLAlertLayer* layer) {
+    auto target = layer->m_pTargetLayer ?
+        layer->m_pTargetLayer : 
+        CCDirector::sharedDirector()->getRunningScene();
+
+    int layer_count = target->getChildrenCount();
+
     layer->m_nZOrder2 = 100 + layer_count * 200;
     layer->setZOrder(layer->m_nZOrder2);
-
-    std::cout << layer->m_nZOrder2 << "\n";
 }
 
 GDMAKE_HOOK(0x23560)
