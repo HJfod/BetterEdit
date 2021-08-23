@@ -85,7 +85,7 @@ void BackupScheduleLayer::onToggleAutoBackup(CCObject* pSender) {
         m_pLabel2->setOpacity(b ? 255 : 100);
         m_pLabel2->setColor(b ? cc3x(0xfff) : cc3x(0x777));
 
-        m_pInput->setEnabled(b);
+        // m_pInput->setEnabled(b);
         m_pInput->getInputNode()->m_pTextField->setOpacity(b ? 255 : 100);
     }
 }

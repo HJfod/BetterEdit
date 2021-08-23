@@ -465,7 +465,7 @@ void BESettingsLayer::onInfo(CCObject* pSender) {
         nullptr,
         "Info",
         "OK", nullptr,
-        320.0f,
+        380.0f,
         as<CCString*>(as<CCNode*>(pSender)->getUserObject())->getCString()
     )->show();
 }

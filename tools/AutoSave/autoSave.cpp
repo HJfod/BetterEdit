@@ -42,7 +42,7 @@ CCLabelBMFont* AutoSaveTimer::getLabel() {
 
 bool AutoSaveTimer::init() {
     m_pLabel = CCLabelBMFont::create("", "bigFont.fnt");
-    m_pLabel->setScale(.7f);
+    m_pLabel->setScale(.5f);
     m_pLabel->setOpacity(0);
 
     this->addChild(m_pLabel);

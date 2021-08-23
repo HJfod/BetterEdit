@@ -10,7 +10,7 @@ static constexpr const float f_0  = 0.0f;
 static constexpr const int VIEWBUTTONBAR_TAG = 0x234592;
 
 bool g_bHideLDM = false;
-bool g_bShowPosLine = false;
+bool g_bShowPosLine = true;
 bool g_bShowPortalLines = true;
 
 class CCVoidPointer : public CCObject {
@@ -280,7 +280,7 @@ void loadVisibilityTab(EditorUI* self) {
     ));
 
     btns->addObject(VisibilityToggle::create(
-        "GJ_button_01.png",
+        "BE_v_highlight.png",
         []() -> bool { return BetterEdit::getHighlightTriggers(); },
         [](bool value, auto) -> void { BetterEdit::setHighlightTriggers(value); }
     ));

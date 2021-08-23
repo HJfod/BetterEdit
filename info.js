@@ -29,7 +29,7 @@ const rd = (dpath) => {
             case 'png': case 'jpg': resource_count++; break;
         }
 
-        if (!path.join(dpath, file).includes('.git')) {
+        if (!path.join(dpath, file).includes('.git') && !path.join(dpath, file).includes('include')) {
             try {
                 if (fs.statSync(path.join(dpath, file)).isDirectory()) {
                     rd(path.join(dpath, file));
