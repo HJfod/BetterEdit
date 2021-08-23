@@ -38,8 +38,8 @@ void BackupScheduleLayer::setup() {
             std::to_string(m_pLevel->objectCount - m_pBackup->m_nLastBackupObjectCount)
         ).c_str(), "goldFont.fnt"
     );
-    label3->setPosition(winSize / 2 + CCPoint { 0.0f, -70.0f });
-    label3->setScale(.3f);
+    label3->setPosition(winSize / 2 + CCPoint { 0.0f, -65.0f });
+    label3->setScale(.4f);
     this->m_pLayer->addChild(label3);
 
     this->m_pButtonMenu->addChild(

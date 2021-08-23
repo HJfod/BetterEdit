@@ -160,6 +160,7 @@ void LevelBackupManager::handleAutoBackupForLevel(GJGameLevel* level) {
     auto b = getBackupSettingsForLevel(level);
 
     if (!b) return;
+    if (!b->m_bAutoBackup) return;
 
     auto added = level->objectCount - b->m_nLastBackupObjectCount;
     if (added > b->m_nBackupEvery) {
