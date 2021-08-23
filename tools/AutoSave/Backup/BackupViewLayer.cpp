@@ -70,7 +70,7 @@ bool BackupViewLayer::init(GJGameLevel* level) {
     m_pListLabel->setVisible(false);
     m_pListLabel->setZOrder(1001);
 
-    this->m_pButtonMenu->addChild(m_pListLabel);
+    this->addChild(m_pListLabel);
 
     MAKE_INFOBUTTON(
         "Level Backups",
@@ -103,7 +103,7 @@ void BackupViewLayer::reloadList() {
 
     BackupListView* list = nullptr;
 
-    if (!LevelBackupManager::get()->levelHasBackupSettings(this->m_pLevel)) {
+    if (!LevelBackupManager::get()->levelHasBackups(this->m_pLevel)) {
         m_pListLabel->setVisible(true);
     } else {
         m_pListLabel->setVisible(false);
