@@ -12,35 +12,35 @@ void BackupScheduleLayer::setup() {
         this, this->m_pLayer, .7f, .7f, 160.0f,
         "", false, 0, nullptr,
         "Enable Auto-Backups",
-        winSize / 2 + CCPoint { -85.0f, 40.0f },
+        winSize / 2 + CCPoint { -85.0f, 50.0f },
         { 5.0f, 0.0f }
     );
 
-    m_pLabel1 = CCLabelBMFont::create("Backup After", "bigFont.fnt");
-    m_pLabel1->setPosition(winSize / 2 + CCPoint { 0.0f, 10.0f });
+    this->m_pLabel1 = CCLabelBMFont::create("Backup After", "bigFont.fnt");
+    m_pLabel1->setPosition(winSize / 2 + CCPoint { 0.0f, 20.0f });
     m_pLabel1->setScale(.5f);
     this->m_pLayer->addChild(m_pLabel1);
 
     m_pInput = InputNode::create(100.f, "x");
-    // m_pInput->setString(std::to_string(m_pBackup->m_nBackupEvery).c_str());
-    m_pInput->setPosition(winSize / 2 + CCPoint { 0.0f, -20.0f });
+    m_pInput->setString(std::to_string(m_pBackup->m_nBackupEvery).c_str());
+    m_pInput->setPosition(winSize / 2 + CCPoint { 0.0f, -10.0f });
     m_pInput->getInputNode()->setDelegate(this);
     this->m_pLayer->addChild(m_pInput);
 
     m_pLabel2 = CCLabelBMFont::create("Objects Placed", "bigFont.fnt");
-    m_pLabel2->setPosition(winSize / 2 + CCPoint { 0.0f, -50.0f });
+    m_pLabel2->setPosition(winSize / 2 + CCPoint { 0.0f, -40.0f });
     m_pLabel2->setScale(.5f);
     this->m_pLayer->addChild(m_pLabel2);
 
-    // auto label3 = CCLabelBMFont::create(
-    //     (
-    //         "Objects added since last backup: " +
-    //         std::to_string(m_pLevel->objectCount - m_pBackup->m_nLastBackupObjectCount)
-    //     ).c_str(), "goldFont.fnt"
-    // );
-    // label3->setPosition(winSize / 2 + CCPoint { 0.0f, -70.0f });
-    // label3->setScale(.3f);
-    // this->m_pLayer->addChild(label3);
+    auto label3 = CCLabelBMFont::create(
+        (
+            "Objects added since last backup: " +
+            std::to_string(m_pLevel->objectCount - m_pBackup->m_nLastBackupObjectCount)
+        ).c_str(), "goldFont.fnt"
+    );
+    label3->setPosition(winSize / 2 + CCPoint { 0.0f, -70.0f });
+    label3->setScale(.3f);
+    this->m_pLayer->addChild(label3);
 
     this->m_pButtonMenu->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
@@ -85,8 +85,13 @@ void BackupScheduleLayer::onToggleAutoBackup(CCObject* pSender) {
         m_pLabel2->setOpacity(b ? 255 : 100);
         m_pLabel2->setColor(b ? cc3x(0xfff) : cc3x(0x777));
 
-        // m_pInput->setEnabled(b);
-        m_pInput->getInputNode()->m_pTextField->setOpacity(b ? 255 : 100);
+        m_pInput->getInputNode()->getTextField()->detachWithIME();
+        m_pInput->getInputNode()->setTouchEnabled(b);
+        m_pInput->getInputNode()->setMouseEnabled(b);
+        CCARRAY_FOREACH_B_TYPE(m_pInput->getInputNode()->getChildren(), obj, CCNode) {
+            if (dynamic_cast<CCLabelBMFont*>(obj))
+                dynamic_cast<CCLabelBMFont*>(obj)->setOpacity(b ? 255 : 100);
+        }
     }
 }
 
