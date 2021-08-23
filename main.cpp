@@ -16,6 +16,7 @@
 #include "tools/other/teleportScaleFix.hpp"
 #include "tools/AutoUpdate/autoUpdate.hpp"
 #include "tools/PortalLineColors/portalLineColors.hpp"
+#include "tools/FLAlertLayerFix/FLAlertLayerFix.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -63,6 +64,7 @@ GDMAKE_MAIN_HM(hMod) {
     loadFavouriteTab();
     loadEnterSearch();
     loadTeleportScaleFix();
+    loadFLAlertLayerFix();
 
     ContextMenu::loadRightClick(hMod);
 

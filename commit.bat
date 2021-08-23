@@ -31,3 +31,9 @@ cd ..\cocos2d
 git add --all
 git commit -a
 git push origin master
+
+cd ..\nodes
+
+git add --all
+git commit -a
+git push origin master
