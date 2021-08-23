@@ -181,11 +181,11 @@ void loadVisibilityTab(EditorUI* self) {
         [&](bool b, auto) -> void { g_bHideLDM = b; }
     ));
 
-    // btns->addObject(VisibilityToggle::create(
-    //     "BE_v_pulse.png",
-    //     []() -> bool { return BetterEdit::getPulseObjectsInEditor(); },
-    //     [](bool b, auto) -> void { BetterEdit::setPulseObjectsInEditor(b); }
-    // ));
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_pulse.png",
+        []() -> bool { return BetterEdit::getPulseObjectsInEditor(); },
+        [](bool b, auto) -> void { BetterEdit::setPulseObjectsInEditor(b); }
+    ));
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_prevmode.png",
@@ -277,6 +277,12 @@ void loadVisibilityTab(EditorUI* self) {
         "BE_v_portal_borders.png",
         [self]() -> bool { return g_bShowPortalLines; },
         [self](bool b, auto) -> void { g_bShowPortalLines = b; }
+    ));
+
+    btns->addObject(VisibilityToggle::create(
+        "GJ_button_01.png",
+        []() -> bool { return BetterEdit::getHighlightTriggers(); },
+        [](bool value, auto) -> void { BetterEdit::setHighlightTriggers(value); }
     ));
 
     auto buttonBar = EditButtonBar::create(

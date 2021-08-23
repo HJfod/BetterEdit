@@ -49,6 +49,7 @@ using namespace cocos2d::extension;
     __macro__(AutoUpdateEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(AutoUpdateBetaTest, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
     __macro__(DontColorGamemodeBorders, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)      \
+    __macro__(HighlightTriggers, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \

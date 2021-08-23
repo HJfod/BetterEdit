@@ -61,13 +61,14 @@ public:
 GDMAKE_HOOK(0x253D60)
 void __fastcall EffectGameObject_triggerObject(GameObject* self, edx_t, GJBaseGameLayer* layer) {
     GDMAKE_ORIG_V(self, 0, layer);
-    // TODO: have it toggleable, probably in the visibility panel
-    constexpr int TAG = 400123;
-    // this doesnt even work properly, i hate cocos
-    if (auto action = self->getActionByTag(TAG)) {
-        self->stopAction(action);
+    if (BetterEdit::getHighlightTriggers()) {
+        constexpr int TAG = 400123;
+        // this doesnt even work properly, i hate cocos
+        if (auto action = self->getActionByTag(TAG)) {
+            self->stopAction(action);
+        }
+        auto action = ObjectPulseAction::create(.3f, {255, 0, 0});
+        action->setTag(TAG);
+        self->runAction(action);
     }
-    auto action = ObjectPulseAction::create(.3f, {255, 0, 0});
-    action->setTag(TAG);
-    self->runAction(action);
 }
