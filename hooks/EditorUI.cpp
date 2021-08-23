@@ -26,11 +26,6 @@ bool g_hasResetObjectsScale = true;
 // TODO: Clean up this whole file because man is it ugly
 // TODO: (move shit out to their own files)
 
-// TODO: have this somewhere
-// patchBytes(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
-// you dont really have to patch it back to the original, game works fine with
-// the patch always on
-
 CCPoint getShowButtonPosition(EditorUI* self) {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     auto ratio = winSize.width / winSize.height;
