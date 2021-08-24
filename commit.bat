@@ -1,5 +1,14 @@
 @echo off
 
+if "%1"=="pull" (
+    git pull origin master
+    gdmake submodules update gd.h
+    gdmake submodules update Cocos2d
+    gdmake submodules update nodes
+
+    goto done
+)
+
 echo ==== BetterEdit ====
 echo.
 
@@ -41,3 +50,5 @@ cd ..\nodes
 git add --all
 git commit -a
 git push origin master
+
+:done

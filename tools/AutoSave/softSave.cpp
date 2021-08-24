@@ -64,6 +64,9 @@ void SoftSaveManager::saveObject(GameObject* obj) {
     if (!BetterEdit::isEditorInitialized() || g_pManager->m_bDontSave)
         return;
 
+    if (g_pManager->m_pManagedObjects->containsObject(obj))
+        return;
+
     g_pManager->m_pManagedObjects->addObject(obj);
 
     // "what do i hook when i need to know if a color

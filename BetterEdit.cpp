@@ -50,7 +50,8 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
 
     STEP_SUBDICT(data, "bools",
         for (auto & [key, val] : m_mSaveBools)
-            data->setBoolForKey(key.c_str(), *val.global);
+            if (val.global)
+                data->setBoolForKey(key.c_str(), *val.global);
     );
 
     STEP_SUBDICT(data, "templates",
