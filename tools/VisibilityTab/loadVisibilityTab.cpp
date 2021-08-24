@@ -299,6 +299,9 @@ void loadVisibilityTab(EditorUI* self) {
 }
 
 void updateVisibilityTab(EditorUI* self) {
+    if (BetterEdit::getDisableVisibilityTab())
+        return;
+    
     auto bbar = as<EditButtonBar*>(self->getChildByTag(VIEWBUTTONBAR_TAG));
     
     bbar->reloadItemsInNormalSize();
