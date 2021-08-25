@@ -303,6 +303,8 @@ void updateVisibilityTab(EditorUI* self) {
         return;
     
     auto bbar = as<EditButtonBar*>(self->getChildByTag(VIEWBUTTONBAR_TAG));
+
+    if (!bbar) return;
     
     bbar->reloadItemsInNormalSize();
     
@@ -331,9 +333,14 @@ bool shouldHidePortalLine() {
 
 GDMAKE_HOOK(0x7ad20)
 void __fastcall EditorUI_toggleMode(EditorUI* self, edx_t edx, CCObject* pSender) {
-    if (!self->m_pBuildModeBtn->getParent()->getChildByTag(4) ||
-        BetterEdit::getDisableVisibilityTab())
+    if (!pSender) return;
+
+    if (
+        !self->m_pBuildModeBtn->getParent()->getChildByTag(4) ||
+        BetterEdit::getDisableVisibilityTab()
+    ) {
         return GDMAKE_ORIG_V(self, edx, pSender);
+    }
 
     auto tag = pSender->getTag();
 

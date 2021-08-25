@@ -125,6 +125,8 @@ void IDRemapPopup::onRemap(CCObject* pSender) {
 
             RANGE_CHECK(eobj->m_nTargetGroupID);
             RANGE_CHECK(eobj->m_nCenterGroupID);
+
+            eobj->updateLabel();
         }
         
         if (edited)
