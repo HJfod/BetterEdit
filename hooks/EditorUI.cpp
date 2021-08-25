@@ -12,6 +12,7 @@
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include "EditorPauseLayer.hpp"
 #include <thread>
+#include <chrono>
 
 using namespace gdmake;
 using namespace cocos2d;
@@ -22,6 +23,8 @@ static constexpr const int VIEWMODE_BACKBTN_TAG = 59305;
 
 bool g_showUI = true;
 bool g_hasResetObjectsScale = true;
+std::chrono::time_point<std::chrono::system_clock> g_lastTouchTime
+    = std::chrono::system_clock::now();
 
 // TODO: Clean up this whole file because man is it ugly
 // TODO: (move shit out to their own files)
@@ -145,8 +148,43 @@ void __fastcall EditorUI_ccTouchMoved(EditorUI* self_, edx_t edx, CCTouch* touch
 }
 
 GDMAKE_HOOK(0x911a0)
-void __fastcall EditorUI_ccTouchEnded(EditorUI* self, edx_t edx, CCTouch* touch, CCEvent* event) {
+void __fastcall EditorUI_ccTouchEnded(
+    EditorUI* self,
+    edx_t edx,
+    CCTouch* touch,
+    CCEvent* event
+) {
     g_bHoldingDownTouch = false;
+
+    auto now = std::chrono::system_clock::now();
+
+    if (
+        !BetterEdit::getDisableDoubleClick() &&
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            now - g_lastTouchTime
+        ).count() < 250
+    ) {
+        auto self_ = as<EditorUI*>(as<uintptr_t>(self) - 0xEC);
+
+        if (
+            CCDirector::sharedDirector()->getKeyboardDispatcher()
+            ->getControlKeyPressed()
+        ) {
+            self_->editGroup(nullptr);
+        } else {
+            self_->editObject(nullptr);
+        }
+    
+        self_->m_bTouchDown = false;
+        self_->m_nTouchID = -1;
+        self_->stopActionByTag(0x7b);
+
+        g_lastTouchTime = now;
+        
+        return;
+    }
+
+    g_lastTouchTime = now;
 
     GDMAKE_ORIG_V(self, edx, touch, event);
 }

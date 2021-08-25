@@ -142,8 +142,13 @@ void BESettingsLayer::setup() {
         "the portal color",
         BE_SETTING_FUNC_B(DontColorGamemodeBorders)
     );
+    this->addToggle(
+        "Disable Double Click",
+        "Double-clicking an object opens the <cy>Edit Object</c> menu",
+        BE_SETTING_FUNC_B(DisableDoubleClick)
+    );
 
-    // this->incrementPageCount(true);
+    this->incrementPageCount(true);
 
     this->addToggle(
         "Enable Auto-Saving",
