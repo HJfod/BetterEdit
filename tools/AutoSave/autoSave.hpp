@@ -6,6 +6,7 @@
 class AutoSaveTimer : public CCNode {
     protected:
         int m_nTimer;
+        bool m_bPaused = false;
         CCLabelBMFont* m_pLabel;
 
         bool init();
@@ -20,6 +21,11 @@ class AutoSaveTimer : public CCNode {
         void setTimer(int);
         void resetTimer();
         void incrementTimer();
+        void cancel();
+        void pause();
+        void resume();
+        bool paused();
+        bool cancellable();
 
         void showStatus(const char*);
         void showStatusTime();
@@ -27,3 +33,4 @@ class AutoSaveTimer : public CCNode {
 
 void loadAutoSaveTimer(EditorUI*);
 void resetAutoSaveTimer(EditorUI*);
+AutoSaveTimer* getAutoSaveTimer(EditorUI*);

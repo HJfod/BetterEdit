@@ -14,6 +14,9 @@ class EditorUI_Timer : public EditorUI {
                     timer->resetTimer();
                     return;
                 }
+
+                if (timer->paused())
+                    return;
                 
                 timer->incrementTimer();
 
@@ -38,6 +41,28 @@ class EditorUI_Timer : public EditorUI {
 
 CCLabelBMFont* AutoSaveTimer::getLabel() {
     return m_pLabel;
+}
+
+void AutoSaveTimer::cancel() {
+    this->resetTimer();
+
+    this->showStatus("Autosave Cancelled!");
+}
+
+bool AutoSaveTimer::cancellable() {
+    return this->getTimerLeft() <= 10;
+}
+
+void AutoSaveTimer::pause() {
+    this->m_bPaused = true;
+}
+
+void AutoSaveTimer::resume() {
+    this->m_bPaused = false;
+}
+
+bool AutoSaveTimer::paused() {
+    return this->m_bPaused;
 }
 
 bool AutoSaveTimer::init() {
@@ -121,4 +146,10 @@ void resetAutoSaveTimer(EditorUI* ui) {
     }
 
     ui->unschedule(g_timerFunc);
+}
+
+AutoSaveTimer* getAutoSaveTimer(EditorUI* ui) {
+    auto timer = as<AutoSaveTimer*>(ui->getChildByTag(AUTOSAVETIMER_TAG));
+    
+    return timer;
 }

@@ -17,6 +17,7 @@
 #include "tools/AutoUpdate/autoUpdate.hpp"
 #include "tools/PortalLineColors/portalLineColors.hpp"
 #include "tools/FLAlertLayerFix/FLAlertLayerFix.hpp"
+#include "tools/CustomKeybinds/KeybindManager.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -54,6 +55,8 @@ GDMAKE_MAIN_HM(hMod) {
         return "Unable to initialize SoftSaveManager!";
     if (!LevelBackupManager::initGlobal())
         return "Unable to initialize LevelBackupManager!";
+    if (!KeybindManager::initGlobal())
+        return "Unable to initialize KeybindManager!";
 
     if (!loadUpdateVisibilityHook())
         return "Unable to midhook updateVisibility!";

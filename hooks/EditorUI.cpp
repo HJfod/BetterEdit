@@ -10,6 +10,7 @@
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/AutoSave/Backup/BackupViewLayer.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
+#include "../tools/CustomKeybinds/KeybindManager.hpp"
 #include "EditorPauseLayer.hpp"
 #include <thread>
 #include <chrono>
@@ -171,6 +172,11 @@ void __fastcall EditorUI_ccTouchEnded(
             ->getControlKeyPressed()
         ) {
             self_->editGroup(nullptr);
+        } else if (
+            CCDirector::sharedDirector()->getKeyboardDispatcher()
+            ->getShiftKeyPressed()
+        ) {
+            self_->editObject2(nullptr);
         } else {
             self_->editObject(nullptr);
         }
@@ -487,7 +493,12 @@ void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
     else
         unpatch(0x91ac9);
 
-    GDMAKE_ORIG_V(self_, edx, key);
+    if (key == KEY_Escape && getAutoSaveTimer(self)->cancellable())
+        return getAutoSaveTimer(self)->cancel();
+
+    KeybindManager::get()->executeEditorCallbacks(Keybind(key), self);
+
+    // GDMAKE_ORIG_V(self_, edx, key);
 }
 
 GDMAKE_HOOK(0x92180)

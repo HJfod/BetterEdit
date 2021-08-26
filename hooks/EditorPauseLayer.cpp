@@ -75,9 +75,16 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
         unpatch(0x921a6);
     }
 
-    updateVisibilityTab(LevelEditorLayer::get()->getEditorUI());
+    auto ui = LevelEditorLayer::get()->getEditorUI();
 
-    updatePercentLabelPosition(LevelEditorLayer::get()->getEditorUI());
+    updateVisibilityTab(ui);
+
+    if (getAutoSaveTimer(ui)->cancellable())
+        getAutoSaveTimer(ui)->cancel();
+        
+    getAutoSaveTimer(ui)->resume();
+
+    updatePercentLabelPosition(ui);
     // showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
 }
 
@@ -154,6 +161,8 @@ bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, LevelEd
             "<cl>Color Picker</c> enabled - <cr>this will cause a guaranteed crash!</c>"
         )->show();
     }
+
+    getAutoSaveTimer(LevelEditorLayer::get()->getEditorUI())->pause();
 
     return true;
 }

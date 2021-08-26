@@ -1,6 +1,7 @@
 #include "BetterEdit.hpp"
 #include "tools/EditorLayerInput/LayerManager.hpp"
 #include "tools/AutoSave/Backup/LevelBackupManager.hpp"
+#include "tools/CustomKeybinds/KeybindManager.hpp"
 
 using namespace gdmake;
 using namespace gdmake::extra;
@@ -78,6 +79,7 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
     data->setStringForKey("favorites", favStr);
 
     LevelBackupManager::get()->save();
+    KeybindManager::get()->save();
 }
 
 void BetterEdit::dataLoaded(DS_Dictionary* data) {
