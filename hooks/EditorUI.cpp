@@ -487,29 +487,22 @@ void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
     if (!BetterEdit::getDisableVisibilityTab() && key == KEY_Four)
         self->toggleMode(self->m_pBuildModeBtn->getParent()->getChildByTag(4));
     
-    // wacky hack to make 2-player duals work properly
-    if (BetterEdit::getUseUpArrowForGameplay() && key == enumKeyCodes::KEY_Up)
-        patch(0x91ac9, { 0x6a, 0x00 });
-    else
-        unpatch(0x91ac9);
-
+    
     if (key == KEY_Escape && getAutoSaveTimer(self)->cancellable())
         return getAutoSaveTimer(self)->cancel();
 
-    KeybindManager::get()->executeEditorCallbacks(Keybind(key), self);
+    KeybindManager::get()->executeEditorCallbacks(Keybind(key), self, true);
 
     // GDMAKE_ORIG_V(self_, edx, key);
 }
 
 GDMAKE_HOOK(0x92180)
 void __fastcall EditorUI_keyUp(EditorUI* self_, edx_t edx, enumKeyCodes key) {
-    // wacky hack to make 2-player duals work properly
-    if (BetterEdit::getUseUpArrowForGameplay() && key == enumKeyCodes::KEY_Up)
-        patch(0x921b4, { 0x6a, 0x00 });
-    else
-        unpatch(0x921b4);
+    auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xf8);
 
-    GDMAKE_ORIG_V(self_, edx, key);
+    KeybindManager::get()->executeEditorCallbacks(Keybind(key), self, false);
+
+    // GDMAKE_ORIG_V(self_, edx, key);
 }
 
 // Credits to Alk1m123 (https://github.com/altalk23) for this scale fix

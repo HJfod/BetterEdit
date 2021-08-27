@@ -76,6 +76,38 @@ bool KeybindManager::initGlobal() {
 }
 
 void KeybindManager::loadDefaultKeybinds() {
+    this->addPlayKeybind({ "Pause", [](PlayLayer* pl, EditorUI* ui, bool push) -> bool {
+        if (!push) return false;
+        if (ui) ui->onPause(nullptr);
+        return false;
+    }}, {{ KEY_Escape, 0 }});
+    
+    this->addPlayKeybind({ "Jump P1", [](PlayLayer* pl, EditorUI* ui, bool push) -> bool {
+        if (push) {
+            if (ui) ui->m_pEditorLayer->pushButton(0, true);
+        } else {
+            if (ui) ui->m_pEditorLayer->releaseButton(0, true);
+        }
+        return false;
+    }}, {{ KEY_Space, 0 }});
+    
+    this->addPlayKeybind({ "Jump P2", [](PlayLayer* pl, EditorUI* ui, bool push) -> bool {
+        if (push) {
+            if (ui) ui->m_pEditorLayer->pushButton(0, false);
+        } else {
+            if (ui) ui->m_pEditorLayer->releaseButton(0, false);
+        }
+        return false;
+    }}, {{ KEY_Up, 0 }});
+
+    this->addPlayKeybind({ "Place Checkpoint", [](PlayLayer* pl, bool push) -> bool {
+        return false;
+    }}, {{ KEY_Z, 0 }});
+
+    this->addPlayKeybind({ "Delete Checkpoint", [](PlayLayer* pl, bool push) -> bool {
+        return false;
+    }}, {{ KEY_X, 0 }});
+
     this->addEditorKeybind({ "Build Mode", [](EditorUI* ui) -> bool {
         ui->toggleMode(ui->m_pBuildModeBtn);
         return false;
@@ -140,6 +172,7 @@ void KeybindManager::loadDefaultKeybinds() {
     }}, {{ KEY_D, Keybind::kmAlt }});
 
     this->addEditorKeybind({ "Copy", [](EditorUI* ui) -> bool {
+        ui->onCopy(nullptr);
         return false;
     }}, {{ KEY_C, Keybind::kmControl }});
 
@@ -148,51 +181,111 @@ void KeybindManager::loadDefaultKeybinds() {
     // }}, {{ KEY_X, Keybind::kmControl }});
 
     this->addEditorKeybind({ "Paste", [](EditorUI* ui) -> bool {
+        ui->onPaste(nullptr);
         return false;
     }}, {{ KEY_V, Keybind::kmControl }});
 
     this->addEditorKeybind({ "Duplicate", [](EditorUI* ui) -> bool {
+        ui->onDuplicate(nullptr);
         return false;
     }}, {{ KEY_D, Keybind::kmControl }});
 
-    // todo
+    this->addEditorKeybind({ "Rotate", [](EditorUI* ui) -> bool {
+        ui->toggleEnableRotate(nullptr);
+        return false;
+    }}, {{ KEY_R, 0 }});
 
-    this->addEditorKeybind({ "Move Left", [](EditorUI* ui) -> bool {
+    this->addEditorKeybind({ "Free Move", [](EditorUI* ui) -> bool {
+        ui->toggleFreeMove(nullptr);
+        return false;
+    }}, {{ KEY_F, 0 }});
+
+    this->addEditorKeybind({ "Swipe", [](EditorUI* ui) -> bool {
+        ui->toggleSwipe(nullptr);
+        return false;
+    }}, {{ KEY_T, 0 }});
+
+    this->addEditorKeybind({ "Snap", [](EditorUI* ui) -> bool {
+        ui->toggleSnap(nullptr);
+        return false;
+    }}, {{ KEY_G, 0 }});
+
+    this->addEditorKeybind({ "Playtest", [](EditorUI* ui) -> bool {
+        if (ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->onStopPlaytest(nullptr);
+        else
+            ui->onPlaytest(nullptr);
+
+        return false;
+    }}, {{ KEY_Enter, 0 }});
+
+    this->addEditorKeybind({ "Playback Music", [](EditorUI* ui) -> bool {
+        ui->onPlayback(nullptr);
+        return false;
+    }}, {{ KEY_Enter, Keybind::kmControl }});
+
+    this->addEditorKeybind({ "Previous Build Tab", [](EditorUI* ui) -> bool {
+        auto t = ui->m_nSelectedTab - 1;
+        if (t < 0)
+            t = ui->m_pTabsArray->count() - 1;
+        ui->selectBuildTab(t);
+        return false;
+    }}, {{ KEY_F1, 0 }});
+
+    this->addEditorKeybind({ "Next Build Tab", [](EditorUI* ui) -> bool {
+        auto t = ui->m_nSelectedTab + 1;
+        if (t > static_cast<int>(ui->m_pTabsArray->count() - 1))
+            t = 0;
+        ui->selectBuildTab(t);
+        return false;
+    }}, {{ KEY_F2, 0 }});
+
+    this->addEditorKeybind({ "Next Group", [](EditorUI* ui) -> bool {
+        ui->onGroupUp(nullptr);
+        return false;
+    }}, {{ KEY_Right, 0 }});
+
+    this->addEditorKeybind({ "Previous Group", [](EditorUI* ui) -> bool {
+        ui->onGroupDown(nullptr);
+        return false;
+    }}, {{ KEY_Left, 0 }});
+
+    this->addEditorKeybind({ "Object Left", [](EditorUI* ui) -> bool {
         ui->moveObjectCall(kEditCommandLeft);
         return false;
     }}, {{ KEY_A, 0 }});
 
-    this->addEditorKeybind({ "Move Right", [](EditorUI* ui) -> bool {
+    this->addEditorKeybind({ "Object Right", [](EditorUI* ui) -> bool {
         ui->moveObjectCall(kEditCommandRight);
         return false;
     }}, {{ KEY_D, 0 }});
 
-    this->addEditorKeybind({ "Move Up", [](EditorUI* ui) -> bool {
+    this->addEditorKeybind({ "Object Up", [](EditorUI* ui) -> bool {
         ui->moveObjectCall(kEditCommandUp);
         return false;
     }}, {{ KEY_W, 0 }});
 
-    this->addEditorKeybind({ "Move Down", [](EditorUI* ui) -> bool {
+    this->addEditorKeybind({ "Object Down", [](EditorUI* ui) -> bool {
         ui->moveObjectCall(kEditCommandDown);
         return false;
     }}, {{ KEY_S, 0 }});
 
-    this->addEditorKeybind({ "Move Small Left", [](EditorUI* ui) -> bool {
+    this->addEditorKeybind({ "Object Left Small", [](EditorUI* ui) -> bool {
         ui->moveObjectCall(kEditCommandSmallLeft);
         return false;
     }}, {{ KEY_A, Keybind::kmShift }});
 
-    this->addEditorKeybind({ "Move Small Right", [](EditorUI* ui) -> bool {
+    this->addEditorKeybind({ "Object Right Small", [](EditorUI* ui) -> bool {
         ui->moveObjectCall(kEditCommandSmallRight);
         return false;
     }}, {{ KEY_D, Keybind::kmShift }});
 
-    this->addEditorKeybind({ "Move Small Up", [](EditorUI* ui) -> bool {
+    this->addEditorKeybind({ "Object Up Small", [](EditorUI* ui) -> bool {
         ui->moveObjectCall(kEditCommandSmallUp);
         return false;
     }}, {{ KEY_W, Keybind::kmShift }});
 
-    this->addEditorKeybind({ "Move Small Down", [](EditorUI* ui) -> bool {
+    this->addEditorKeybind({ "Object Down Small", [](EditorUI* ui) -> bool {
         ui->moveObjectCall(kEditCommandSmallDown);
         return false;
     }}, {{ KEY_S, Keybind::kmShift }});
@@ -203,13 +296,13 @@ std::vector<KeybindCallback*> const& KeybindManager::getCallbacks(KeybindType ty
 }
 
 KeybindManager::KeybindList KeybindManager::getKeybindsForCallback(
-    KeybindType type, size_t ix
+    KeybindType type, KeybindCallback* cb
 ) {
     std::set<Keybind> res;
 
     for (auto & [key, vals] : m_mKeybinds) {
         for (auto & val : vals)
-            if (val.type == type && val.index == ix)
+            if (val.type == type && val.bind == cb)
                 res.insert(key);
     }
 
@@ -219,7 +312,7 @@ KeybindManager::KeybindList KeybindManager::getKeybindsForCallback(
 size_t KeybindManager::getIndexOfCallback(KeybindType type, KeybindCallback* cb) {
     size_t ix = 0;
     for (auto const& cb_ : this->m_mCallbacks[type]) {
-        if (*cb_ == *cb)
+        if (cb_ == cb)
             return ix;
         
         ix++;
@@ -239,7 +332,7 @@ void KeybindManager::addCallback(
     m_mCallbacks[type].push_back(cb);
 
     for (auto bind : binds) {
-        this->addKeybind(type, index, bind);
+        this->addKeybind(type, cb, bind);
     }
 }
 
@@ -264,26 +357,39 @@ void KeybindManager::addGlobalKeybind(
     this->addCallback(new KeybindGlobal(cb), kKBGlobal, binds);
 }
 
-void KeybindManager::addKeybind(KeybindType type, size_t cbIx, Keybind const& bind) {
+void KeybindManager::addKeybind(KeybindType type, KeybindCallback* cb, Keybind const& bind) {
     if (m_mKeybinds.count(bind) && m_mKeybinds[bind].size())
-        m_mKeybinds[bind].push_back({ type, cbIx });
+        m_mKeybinds[bind].push_back({ type, cb });
     else
-        m_mKeybinds[bind] = {{ type, cbIx }};
+        m_mKeybinds[bind] = {{ type, cb }};
 }
 
-void KeybindManager::clearKeybinds(KeybindType type, size_t cbIx) {
+void KeybindManager::clearKeybinds(KeybindType type, KeybindCallback* cb) {
     for (auto & [key, vals] : m_mKeybinds)
         for (auto & val : vals)
-            if (val.type == type && val.index == cbIx)
+            if (val.type == type && val.bind == cb)
                 m_mKeybinds.erase(key);
 }
 
-void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui) {
+void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, bool keydown) {
     if (!m_mKeybinds.count(bind))
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
-        as<KeybindEditor*>(m_mCallbacks[kKBEditor][target.index])->call(ui);
+        switch (target.type) {
+            case kKBEditor: {
+                auto c = as<KeybindEditor*>(target.bind);
+                if (c->call_b)
+                    c->call_b(ui, keydown);
+                else if (keydown)
+                    c->call(ui);
+            } break;
+            
+            case kKBPlayLayer: {
+                if (as<KeybindPlayLayer*>(target.bind)->editor)
+                    as<KeybindPlayLayer*>(target.bind)->call_e(nullptr, ui, keydown);
+            } break;
+        }
     }
 }
 

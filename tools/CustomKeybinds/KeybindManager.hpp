@@ -52,11 +52,20 @@ struct KeybindGlobal : public KeybindCallback {
 };
 
 struct KeybindEditor : public KeybindCallback {
-    bool(__fastcall* call)(EditorUI*);
+    std::function<bool(EditorUI*, bool)> call_b = nullptr;
+    std::function<bool(EditorUI*)> call = nullptr;
 
     inline KeybindEditor(
         std::string const& keybind,
-        bool(__fastcall* bind)(EditorUI*)
+        decltype(call_b) bind
+    ) {
+        this->name = keybind;
+        this->call_b = bind;
+    }
+
+    inline KeybindEditor(
+        std::string const& keybind,
+        decltype(call) bind
     ) {
         this->name = keybind;
         this->call = bind;
@@ -64,14 +73,37 @@ struct KeybindEditor : public KeybindCallback {
 };
 
 struct KeybindPlayLayer : public KeybindCallback {
-    std::function<void(PlayLayer*)> call;
+    std::function<bool(PlayLayer*, bool)> call;
+    std::function<bool(PlayLayer*, EditorUI*, bool)> call_e;
+    bool editor;
+
+    inline KeybindPlayLayer(
+        KeybindPlayLayer const& copy,
+        bool alsoInEditor
+    ) {
+        this->name = copy.name;
+        this->call = copy.call;
+        this->call_e = copy.call_e;
+        this->id = copy.id;
+        this->editor = alsoInEditor;
+    }
 
     inline KeybindPlayLayer(
         std::string const& keybind,
-        std::function<void(PlayLayer*)> bind
+        decltype(call) bind
     ) {
         this->name = keybind;
         this->call = bind;
+        this->editor = false;
+    }
+
+    inline KeybindPlayLayer(
+        std::string const& keybind,
+        decltype(call_e) bind
+    ) {
+        this->name = keybind;
+        this->call_e = bind;
+        this->editor = true;
     }
 };
 
@@ -87,7 +119,7 @@ class KeybindManager : public GManager {
         using CallbackList = std::vector<KeybindCallback*>;
         struct Target {
             KeybindType type;
-            size_t index;
+            KeybindCallback* bind;
         };
 
     protected:
@@ -110,11 +142,11 @@ class KeybindManager : public GManager {
         void addGlobalKeybind(KeybindGlobal, KeybindList const&);
 
         CallbackList const& getCallbacks(KeybindType);
-        KeybindList getKeybindsForCallback(KeybindType, size_t ix);
+        KeybindList getKeybindsForCallback(KeybindType, KeybindCallback*);
         size_t getIndexOfCallback(KeybindType, KeybindCallback*);
-        void addKeybind(KeybindType, size_t cbIx, Keybind const&);
-        void clearKeybinds(KeybindType, size_t cbIx);
-        void executeEditorCallbacks(Keybind const&, EditorUI*);
+        void addKeybind(KeybindType, KeybindCallback*, Keybind const&);
+        void clearKeybinds(KeybindType, KeybindCallback*);
+        void executeEditorCallbacks(Keybind const&, EditorUI*, bool keydown);
 
         static KeybindManager* get();
         static bool initGlobal();
