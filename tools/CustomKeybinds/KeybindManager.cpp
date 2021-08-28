@@ -1,4 +1,6 @@
 #include "KeybindManager.hpp"
+#include <algorithm>
+#include <functional>
 
 KeybindManager* g_manager;
 
@@ -10,6 +12,32 @@ bool Keybind::operator==(Keybind const& other) const {
 
 bool Keybind::operator<(Keybind const& other) const {
     return this->key < other.key;
+}
+
+std::string Keybind::toString() const {
+    std::string res = "";
+
+    if (this->modifiers & kmControl)  res += "Ctrl + ";
+    if (this->modifiers & kmAlt)   res += "Alt + ";
+    if (this->modifiers & kmShift) res += "Shift + ";
+
+    if (this->key != cocos2d::enumKeyCodes::KEY_None)
+        if (this->key == cocos2d::enumKeyCodes::KEY_C)
+            // because for some reason keyToString thinks C is a V
+            res += "C";
+        else
+            res += cocos2d::CCDirector::sharedDirector()
+                ->getKeyboardDispatcher()
+                ->keyToString(this->key);
+    else
+        res = res.substr(0, res.size() - 3);
+
+    return res;
+}
+
+Keybind::Keybind() {
+    this->key = KEY_None;
+    this->modifiers = 0;
 }
 
 Keybind::Keybind(enumKeyCodes pressed) {
@@ -362,6 +390,23 @@ void KeybindManager::addKeybind(KeybindType type, KeybindCallback* cb, Keybind c
         m_mKeybinds[bind].push_back({ type, cb });
     else
         m_mKeybinds[bind] = {{ type, cb }};
+}
+
+void KeybindManager::removeKeybind(KeybindType type, KeybindCallback* cb, Keybind const& bind) {
+    if (m_mKeybinds.count(bind) && m_mKeybinds[bind].size()) {
+        std::vector<KeybindManager::Target>::iterator iter;
+        for (iter = m_mKeybinds[bind].begin(); iter != m_mKeybinds[bind].end(); ) {
+            if (iter->bind == cb)
+                iter = m_mKeybinds[bind].erase(iter);
+            else
+                iter++;
+        }
+    }
+}
+
+void KeybindManager::editKeybind(KeybindType type, KeybindCallback* cb, Keybind const& old, Keybind const& bind) {
+    this->removeKeybind(type, cb, old);
+    this->addKeybind(type, cb, bind);
 }
 
 void KeybindManager::clearKeybinds(KeybindType type, KeybindCallback* cb) {

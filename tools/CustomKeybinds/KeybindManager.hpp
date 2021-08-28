@@ -18,6 +18,9 @@ struct Keybind {
     bool operator==(Keybind const&) const;
     bool operator<(Keybind const&) const;
 
+    std::string toString() const;
+
+    Keybind();
     Keybind(enumKeyCodes);
     Keybind(enumKeyCodes, Modifiers);
     Keybind(enumKeyCodes, int);
@@ -145,6 +148,8 @@ class KeybindManager : public GManager {
         KeybindList getKeybindsForCallback(KeybindType, KeybindCallback*);
         size_t getIndexOfCallback(KeybindType, KeybindCallback*);
         void addKeybind(KeybindType, KeybindCallback*, Keybind const&);
+        void removeKeybind(KeybindType, KeybindCallback*, Keybind const&);
+        void editKeybind(KeybindType, KeybindCallback*, Keybind const& old, Keybind const& rep);
         void clearKeybinds(KeybindType, KeybindCallback*);
         void executeEditorCallbacks(Keybind const&, EditorUI*, bool keydown);
 

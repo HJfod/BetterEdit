@@ -1,6 +1,7 @@
 #include "../../BetterEdit.hpp"
 #include "../CustomKeybinds/KeybindManager.hpp"
 #include <InputNode.hpp>
+#include "KeybindListView.hpp"
 
 class KeybindingsLayer : public FLAlertLayer {
     public:
@@ -34,112 +35,6 @@ class KeybindingsLayer : public FLAlertLayer {
             reinterpret_cast<void(__thiscall*)(KeybindingsLayer*, int)>(
                 base + 0x153ce0
             )(this, page);
-        }
-};
-
-static constexpr const float g_fItemHeight = 27.5f;
-static constexpr const BoomListType kBoomListType_Keybind
-    = static_cast<BoomListType>(0x421);
-
-struct KeybindItem : public CCObject {
-    KeybindCallback* bind;
-    const char* text;
-
-    KeybindItem(KeybindCallback* b) {
-        bind = b;
-        text = nullptr;
-        this->autorelease();
-    }
-
-    KeybindItem(const char* t) {
-        bind = nullptr;
-        text = t;
-        this->autorelease();
-    }
-};
-
-class KeybindCell : public TableViewCell {
-    protected:
-        KeybindCallback* m_pBind;
-
-		KeybindCell(const char* name, CCSize size) :
-	        TableViewCell(name, size.width, size.height) {}
-
-    public:
-        void loadFromItem(KeybindItem* bind) {
-            m_pBind = bind->bind;
-
-            m_pBGLayer->setOpacity(255);
-
-            auto name = bind->text;
-            if (!name)
-                name = m_pBind->name.c_str();
-
-            auto nameLabel = CCLabelBMFont::create(name, "bigFont.fnt");
-            nameLabel->limitLabelWidth(260.0f, .5f, .0f);
-            nameLabel->setPosition(15.0f, this->m_fHeight / 2);
-            nameLabel->setAnchorPoint({ 0.0f, 0.5f });
-            if (!m_pBind) {
-                nameLabel->setOpacity(180);
-                nameLabel->setColor({ 180, 180, 180 });
-            }
-            this->m_pLayer->addChild(nameLabel);
-        }
-
-        void updateBGColor(int index) {
-            this->m_pBGLayer->setColor({ 0, 0, 0 });
-            this->m_pBGLayer->setOpacity(index % 2 ? 120 : 70);
-        }
-
-		static KeybindCell* create(const char* key, CCSize size) {
-            auto pRet = new KeybindCell(key, size);
-
-            if (pRet) {
-                pRet->autorelease();
-                return pRet;
-            }
-
-            CC_SAFE_DELETE(pRet);
-            return nullptr;
-        }
-};
-
-class KeybindListView : public CustomListView {
-    protected:
-        void setupList() override {
-            this->m_fItemSeparation = g_fItemHeight;
-            this->m_pTableView->m_fScrollLimitTop = g_fItemHeight - 10.0f;
-
-            this->m_pTableView->reloadData();
-
-            if (this->m_pEntries->count() == 1)
-                this->m_pTableView->moveToTopWithOffset(this->m_fItemSeparation);
-            
-            this->m_pTableView->moveToTop();
-        }
-        
-        TableViewCell* getListCell(const char* key) override {
-            return KeybindCell::create(key, { this->m_fWidth, this->m_fItemSeparation });
-        }
-        
-        void loadCell(TableViewCell* cell, unsigned int index) override {
-            as<KeybindCell*>(cell)->loadFromItem(
-                as<KeybindItem*>(this->m_pEntries->objectAtIndex(index))
-            );
-            as<KeybindCell*>(cell)->updateBGColor(index);
-        }
-    
-    public:
-        static KeybindListView* create(CCArray* binds, float width, float height) {
-            auto pRet = new KeybindListView;
-
-            if (pRet && pRet->init(binds, kBoomListType_Keybind, width, height)) {
-                pRet->autorelease();
-                return pRet;
-            }
-
-            CC_SAFE_DELETE(pRet);
-            return nullptr;
         }
 };
 
@@ -202,21 +97,13 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     title->setScale(.8f);
     self->m_pLayer->addChild(title);
     
-    // auto infoLabel = CCLabelBMFont::create(
-    //     "Click a keybind to Customize it!",
-    //     "goldFont.fnt"
-    // );
-    // infoLabel->setPosition(title->getPosition() + CCPoint { 0.0f, -20.0f });
-    // infoLabel->setScale(.6f);
-    // self->m_pLayer->addChild(infoLabel);
-
-    auto input = InputNode::create(350.0f, "Search Keybinds");
+    auto input = InputNode::create(425.0f, "Search Keybinds");
     input->setPosition(title->getPosition() + CCPoint { 0.0f, -35.0f });
-    input->getInputNode()->setPositionX(input->getInputNode()->getPositionX() - 170.0f);
+    input->getInputNode()->setPositionX(input->getInputNode()->getPositionX() - 200.0f);
     CCARRAY_FOREACH_B_TYPE(
         input->getInputNode()->getChildren(), c, CCNode
     ) c->setAnchorPoint({ .0f, .5f });
-    input->setScale(.7f);
+    input->setScale(.8f);
     self->m_pLayer->addChild(input);
 
     self->m_pPages = CCDictionary::create();
@@ -232,17 +119,73 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
 
     arr->addObject(new KeybindItem("Gameplay"));
     for (auto bind : KeybindManager::get()->getCallbacks(kKBPlayLayer))
-        arr->addObject(new KeybindItem(bind));
+        arr->addObject(new KeybindItem(bind, kKBPlayLayer));
     arr->addObject(new KeybindItem("Global"));
     for (auto bind : KeybindManager::get()->getCallbacks(kKBGlobal))
-        arr->addObject(new KeybindItem(bind));
+        arr->addObject(new KeybindItem(bind, kKBGlobal));
     arr->addObject(new KeybindItem("Editor"));
     for (auto bind : KeybindManager::get()->getCallbacks(kKBEditor))
-        arr->addObject(new KeybindItem(bind));
+        arr->addObject(new KeybindItem(bind, kKBEditor));
 
-    auto list = KeybindListView::create(arr, 380.0f, 180.0f);
-    list->setPosition(winSize / 2 - CCPoint { 190.0f, 120.0f });
+    auto list = KeybindListView::create(arr, 340.0f, 180.0f);
+    list->setPosition(winSize / 2 - CCPoint { 170.0f, 120.0f });
     self->m_pLayer->addChild(list);
+
+    self->registerWithTouchDispatcher();
+    CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
+
+    {
+        // auto topGradient = CCSprite::createWithSpriteFrameName("d_gradient_c_01_001.png");
+        // topGradient->setPosition({
+        //     winSize.width / 2,
+        //     winSize.height / 2 + 45.0f
+        // });
+        // topGradient->setFlipY(true);
+        // topGradient->setScaleX(11.5f);
+        // topGradient->setColor(cc3x(0x953));
+        // self->m_pLayer->addChild(topGradient);
+
+        // auto bottomGradient = CCSprite::createWithSpriteFrameName("d_gradient_c_01_001.png");
+        // bottomGradient->setPosition({
+        //     winSize.width / 2,
+        //     winSize.height / 2 - 105.0f
+        // });
+        // bottomGradient->setScaleX(11.5f);
+        // bottomGradient->setColor(cc3x(0x953));
+        // self->m_pLayer->addChild(bottomGradient);
+
+        auto topItem = CCSprite::createWithSpriteFrameName("GJ_commentTop_001.png");
+        topItem->setPosition({
+            winSize.width / 2,
+            winSize.height / 2 + 55.0f
+        });
+        self->m_pLayer->addChild(topItem);
+
+        auto bottomItem = CCSprite::createWithSpriteFrameName("GJ_commentTop_001.png");
+        bottomItem->setPosition({
+            winSize.width / 2,
+            winSize.height / 2 - 115.0f
+        });
+        bottomItem->setFlipY(true);
+        self->m_pLayer->addChild(bottomItem);
+
+        auto sideItem = CCSprite::createWithSpriteFrameName("GJ_commentSide_001.png");
+        sideItem->setPosition({
+            winSize.width / 2 - 173.5f,
+            winSize.height / 2 - 29.0f
+        });
+        sideItem->setScaleY(5.0f);
+        self->m_pLayer->addChild(sideItem);
+
+        auto sideItemRight = CCSprite::createWithSpriteFrameName("GJ_commentSide_001.png");
+        sideItemRight->setPosition({
+            winSize.width / 2 + 173.5f,
+            winSize.height / 2 - 29.0f
+        });
+        sideItemRight->setScaleY(5.0f);
+        sideItemRight->setFlipX(true);
+        self->m_pLayer->addChild(sideItemRight);
+    }
 
     auto closeBtn = CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png"),
@@ -252,25 +195,6 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     closeBtn->setPosition(-210.0f + 5.0f, 140.0f - 5.0f);
     closeBtn->setSizeMult(1.5f);
     self->m_pButtonMenu->addChild(closeBtn);
-
-    // self->m_pLeftArrow = CCMenuItemSpriteExtra::create(
-    //     CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"),
-    //     self,
-    //     (SEL_MenuHandler)&KeybindingsLayer::onPrevPage
-    // );
-    // self->m_pLeftArrow->setPosition(- winSize.width / 2 + 24.0f, 0.0f);
-    // self->m_pButtonMenu->addChild(self->m_pLeftArrow);
-
-    // self->m_pRightArrow = CCMenuItemSpriteExtra::create(
-    //     CCNodeConstructor()
-    //         .fromFrameName("GJ_arrow_01_001.png")
-    //         .flipX()
-    //         .done(),
-    //     self,
-    //     (SEL_MenuHandler)&KeybindingsLayer::onNextPage
-    // );
-    // self->m_pRightArrow->setPosition(winSize.width / 2 - 24.0f, 0.0f);
-    // self->m_pButtonMenu->addChild(self->m_pRightArrow);
 
     self->setKeypadEnabled(true);
     self->setTouchEnabled(true);
