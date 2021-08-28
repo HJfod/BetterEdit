@@ -48,12 +48,18 @@ class KeybindCell : public TableViewCell {
 		static KeybindCell* create(const char* key, CCSize size);
 };
 
-class KeybindListView : public CustomListView {
+class KeybindListView : public CustomListView, public TextInputDelegate {
     protected:
+        CCArray* m_pRawEntries;
+
         void setupList() override;
         TableViewCell* getListCell(const char* key) override;
         void loadCell(TableViewCell* cell, unsigned int index) override;
+
+        void textChanged(CCTextInputNode*) override;
     
     public:
+        void search(std::string const& query);
+    
         static KeybindListView* create(CCArray* binds, float width, float height);
 };

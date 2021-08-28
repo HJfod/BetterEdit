@@ -131,6 +131,8 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     list->setPosition(winSize / 2 - CCPoint { 170.0f, 120.0f });
     self->m_pLayer->addChild(list);
 
+    input->getInputNode()->setDelegate(list);
+
     self->registerWithTouchDispatcher();
     CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
 

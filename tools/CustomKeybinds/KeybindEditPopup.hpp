@@ -18,10 +18,14 @@ class KeybindEditPopup : public BrownAlertDelegate {
         KeybindCell* m_pCell;
         KeybindStoreItem* m_pStoreItem;
         Keybind m_obTypedBind;
+        CCLabelBMFont* m_pTypeLabel;
+        CCLabelBMFont* m_pPreLabel;
 
         void setup() override;
         void onRemove(CCObject*);
         void onSet(CCObject*);
+        void onClose(CCObject*) override;
+        void keyDown(enumKeyCodes) override;
 
     public:
         static KeybindEditPopup* create(KeybindCell*, KeybindStoreItem*);

@@ -21,16 +21,25 @@ std::string Keybind::toString() const {
     if (this->modifiers & kmAlt)   res += "Alt + ";
     if (this->modifiers & kmShift) res += "Shift + ";
 
-    if (this->key != cocos2d::enumKeyCodes::KEY_None)
-        if (this->key == cocos2d::enumKeyCodes::KEY_C)
+    switch (this->key) {
+        case KEY_None:
+            res = res.substr(0, res.size() - 3);
+            break;
+        
+        case KEY_C:
             // because for some reason keyToString thinks C is a V
             res += "C";
-        else
+            break;
+        
+        case static_cast<enumKeyCodes>(-1):
+            res += "Unk";
+            break;
+        
+        default:
             res += cocos2d::CCDirector::sharedDirector()
                 ->getKeyboardDispatcher()
                 ->keyToString(this->key);
-    else
-        res = res.substr(0, res.size() - 3);
+    }
 
     return res;
 }
@@ -107,14 +116,17 @@ void KeybindManager::loadDefaultKeybinds() {
     this->addPlayKeybind({ "Pause", [](PlayLayer* pl, EditorUI* ui, bool push) -> bool {
         if (!push) return false;
         if (ui) ui->onPause(nullptr);
+        if (pl) pl->m_uiLayer->onPause(nullptr);
         return false;
     }}, {{ KEY_Escape, 0 }});
     
     this->addPlayKeybind({ "Jump P1", [](PlayLayer* pl, EditorUI* ui, bool push) -> bool {
         if (push) {
             if (ui) ui->m_pEditorLayer->pushButton(0, true);
+            else pl->pushButton(0, true);
         } else {
             if (ui) ui->m_pEditorLayer->releaseButton(0, true);
+            else pl->releaseButton(0, true);
         }
         return false;
     }}, {{ KEY_Space, 0 }});
@@ -122,17 +134,25 @@ void KeybindManager::loadDefaultKeybinds() {
     this->addPlayKeybind({ "Jump P2", [](PlayLayer* pl, EditorUI* ui, bool push) -> bool {
         if (push) {
             if (ui) ui->m_pEditorLayer->pushButton(0, false);
+            else pl->pushButton(0, false);
         } else {
             if (ui) ui->m_pEditorLayer->releaseButton(0, false);
+            else pl->releaseButton(0, false);
         }
         return false;
     }}, {{ KEY_Up, 0 }});
 
     this->addPlayKeybind({ "Place Checkpoint", [](PlayLayer* pl, bool push) -> bool {
+        if (push) {
+            pl->m_uiLayer->onCheck(nullptr);
+        }
         return false;
     }}, {{ KEY_Z, 0 }});
 
     this->addPlayKeybind({ "Delete Checkpoint", [](PlayLayer* pl, bool push) -> bool {
+        if (push) {
+            pl->m_uiLayer->onDeleteCheck(nullptr);
+        }
         return false;
     }}, {{ KEY_X, 0 }});
 
@@ -433,6 +453,23 @@ void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, b
             case kKBPlayLayer: {
                 if (as<KeybindPlayLayer*>(target.bind)->editor)
                     as<KeybindPlayLayer*>(target.bind)->call_e(nullptr, ui, keydown);
+            } break;
+        }
+    }
+}
+
+void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bool keydown) {
+    if (!m_mKeybinds.count(bind))
+        return;
+
+    for (auto & target : m_mKeybinds[bind]) {
+        switch (target.type) {
+            case kKBPlayLayer: {
+                auto c = as<KeybindPlayLayer*>(target.bind);
+                if (c->call_e)
+                    c->call_e(pl, nullptr, keydown);
+                else
+                    c->call(pl, keydown);
             } break;
         }
     }

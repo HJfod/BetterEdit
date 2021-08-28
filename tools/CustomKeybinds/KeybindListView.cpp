@@ -69,7 +69,7 @@ void KeybindCell::updateMenu() {
         );
         auto width = spr->getScaledContentSize().width;
         btn->setPosition(x - width / 2, 0.0f);
-        btn->setUserData(new KeybindStoreItem(bind));
+        btn->setUserObject(new KeybindStoreItem(bind));
         m_pMenu->addChild(btn);
 
         x -= width + 5.0f;
@@ -106,6 +106,13 @@ void KeybindListView::setupList() {
     this->m_fItemSeparation = g_fItemHeight;
     this->m_pTableView->m_fScrollLimitTop = g_fItemHeight - 8.0f;
 
+    this->m_pRawEntries = CCArray::create();
+    // TODO: call release
+    this->m_pRawEntries->retain();
+
+    CCARRAY_FOREACH_B(this->m_pEntries, e)
+        this->m_pRawEntries->addObject(e);
+
     this->m_pTableView->reloadData();
 
     if (this->m_pEntries->count() == 1)
@@ -123,6 +130,41 @@ void KeybindListView::loadCell(TableViewCell* cell, unsigned int index) {
         as<KeybindItem*>(this->m_pEntries->objectAtIndex(index))
     );
     as<KeybindCell*>(cell)->updateBGColor(index);
+}
+
+void KeybindListView::textChanged(CCTextInputNode* input) {
+    if (input->getString() && strlen(input->getString()))
+        this->search(input->getString());
+    else
+        this->search("");
+}
+
+void KeybindListView::search(std::string const& query) {
+    m_pEntries->removeAllObjects();
+
+    CCARRAY_FOREACH_B_TYPE(m_pRawEntries, entry, KeybindItem) {
+        m_pEntries->addObject(entry);
+    }
+
+    if (query.size())
+        CCARRAY_FOREACH_B_TYPE(m_pEntries, entry, KeybindItem) {
+            if (entry->bind) {
+                if (entry->bind->name.find(query) == std::string::npos) {
+                    std::cout << "r";
+                    m_pEntries->removeObject(entry);
+                }
+            }
+        }
+    
+    std::cout << "eload: ";
+    std::cout << m_pEntries->count() << "\n";
+
+    this->m_pTableView->reloadData();
+
+    if (this->m_pEntries->count() == 1)
+        this->m_pTableView->moveToTopWithOffset(this->m_fItemSeparation);
+    
+    this->m_pTableView->moveToTop();
 }
 
 KeybindListView* KeybindListView::create(CCArray* binds, float width, float height) {

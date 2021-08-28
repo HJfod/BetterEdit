@@ -152,6 +152,7 @@ class KeybindManager : public GManager {
         void editKeybind(KeybindType, KeybindCallback*, Keybind const& old, Keybind const& rep);
         void clearKeybinds(KeybindType, KeybindCallback*);
         void executeEditorCallbacks(Keybind const&, EditorUI*, bool keydown);
+        void executePlayCallbacks(Keybind const&, PlayLayer*, bool keydown);
 
         static KeybindManager* get();
         static bool initGlobal();
