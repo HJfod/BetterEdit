@@ -19,11 +19,13 @@ struct Keybind {
     bool operator<(Keybind const&) const;
 
     std::string toString() const;
+    void save(DS_Dictionary*) const;
 
     Keybind();
     Keybind(enumKeyCodes);
     Keybind(enumKeyCodes, Modifiers);
     Keybind(enumKeyCodes, int);
+    Keybind(DS_Dictionary*);
 };
 
 namespace std {
@@ -130,10 +132,16 @@ class KeybindManager : public GManager {
     protected:
         std::map<KeybindType, CallbackList> m_mCallbacks;
         std::unordered_map<Keybind, std::vector<Target>> m_mKeybinds;
+        // what the hell
+        std::unordered_map<
+            KeybindType,
+            std::unordered_map<std::string, KeybindList>
+        > m_mLoadedBinds;
 
         bool init();
 
         void addCallback(KeybindCallback*, KeybindType, KeybindList const&);
+        KeybindList getLoadedBinds(KeybindType, KeybindCallback*, bool*);
 
     public:
         void encodeDataTo(DS_Dictionary*) override;
@@ -147,6 +155,7 @@ class KeybindManager : public GManager {
         void addGlobalKeybind(KeybindGlobal, KeybindList const&);
 
         CallbackList const& getCallbacks(KeybindType);
+        CallbackList getCallbacksForKeybind(KeybindType, Keybind const&);
         KeybindList getKeybindsForCallback(KeybindType, KeybindCallback*);
         size_t getIndexOfCallback(KeybindType, KeybindCallback*);
         void addKeybind(KeybindType, KeybindCallback*, Keybind const&);

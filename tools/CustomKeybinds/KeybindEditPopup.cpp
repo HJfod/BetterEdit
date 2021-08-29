@@ -28,6 +28,16 @@ void KeybindEditPopup::setup() {
     m_pTypeLabel->setVisible(false);
     this->m_pLayer->addChild(m_pTypeLabel);
 
+    m_pInfoLabel = CCLabelBMFont::create("", "bigFont.fnt");
+    m_pInfoLabel->setPosition(
+        winSize.width / 2,
+        winSize.height / 2 - this->m_pLrSize.height / 2 + 50.0f
+    );
+    m_pInfoLabel->setColor({ 200, 255, 70 });
+    m_pInfoLabel->setScale(.5f);
+    m_pInfoLabel->setVisible(false);
+    this->m_pLayer->addChild(m_pInfoLabel);
+
     auto setBtn = CCMenuItemSpriteExtra::create(
         CCNodeConstructor<ButtonSprite*>()
             .fromButtonSprite(
@@ -69,6 +79,26 @@ void KeybindEditPopup::keyDown(enumKeyCodes key) {
 
     m_pTypeLabel->setString(m_obTypedBind.toString().c_str());
     m_pTypeLabel->limitLabelWidth(this->m_pLrSize.width - 40.0f, .8f, .2f);
+
+    auto binds = KeybindManager::get()->getCallbacksForKeybind(
+        this->m_pCell->m_pItem->type,
+        this->m_obTypedBind
+    );
+
+    if (binds.size()) {
+        m_pInfoLabel->setVisible(true);
+
+        std::string bs = "Also assigned to ";
+        for (auto const& bind : binds)
+            bs += bind->name + ", ";
+        bs = bs.substr(0, bs.size() - 2);
+        bs += "!";
+
+        m_pInfoLabel->setString(bs.c_str());
+        m_pInfoLabel->limitLabelWidth(this->m_pLrSize.width - 40.0f, .4f, .1f);
+    } else {
+        m_pInfoLabel->setVisible(false);
+    }
 }
 
 void KeybindEditPopup::onRemove(CCObject*) {

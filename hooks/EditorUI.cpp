@@ -234,10 +234,6 @@ public:
         ) {
             g_hasResetObjectsScale = false;
 
-            // incredible
-            const auto arr = m_pEditorLayer->m_pBatchNodeAddBottom->getChildren();
-            const auto arr2 = m_pEditorLayer->m_pBatchNodeBottom->getChildren();
-
             auto fmod = gd::FMODAudioEngine::sharedEngine();
             auto pulse = fmod->m_fPulse1 + fmod->m_fPulse2 + fmod->m_fPulse3;
             pulse /= 3.f;
@@ -247,9 +243,31 @@ public:
                 if (obj != nullptr && obj->m_unk32C)
                     obj->setRScale(pulse);
             };
-            CCARRAY_FOREACH_B(arr, obj_)
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeAddBottom->getChildren(), obj_)
                 f(obj_);
-            CCARRAY_FOREACH_B(arr2, obj_)
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeBottom2->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeBottom3->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeBottom4->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeBottom->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeAddBottom2->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeAddBottom3->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeAddBottom4->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNode->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeAddTop2->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeAddTop3->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeTop2->getChildren(), obj_)
+                f(obj_);
+            CCARRAY_FOREACH_B(m_pEditorLayer->m_pBatchNodeTop3->getChildren(), obj_)
                 f(obj_);
 
         } else if (!g_hasResetObjectsScale) {

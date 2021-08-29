@@ -18,6 +18,7 @@
 #include "tools/PortalLineColors/portalLineColors.hpp"
 #include "tools/FLAlertLayerFix/FLAlertLayerFix.hpp"
 #include "tools/CustomKeybinds/KeybindManager.hpp"
+#include "tools/CustomKeybinds/BEKeybinds.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -63,15 +64,7 @@ GDMAKE_MAIN_HM(hMod) {
     if (!loadDrawGridLayerMidHook())
         return "Unable to midhook DrawGridLayer::draw!";
 
-    KeybindManager::get()->addEditorKeybind({ "Cancel Autosave", [](EditorUI* self) -> bool {
-        if (getAutoSaveTimer(self)->cancellable()) {
-            getAutoSaveTimer(self)->cancel();
-            return true;
-        }
-        
-        return false;
-    }}, {{ KEY_Escape, 0 }});
-
+    loadBEKeybinds();
     loadTemplates();
     loadFavouriteTab();
     loadEnterSearch();

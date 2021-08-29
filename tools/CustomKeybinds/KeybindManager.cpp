@@ -3,16 +3,48 @@
 #include <functional>
 #include "../VisibilityTab/loadVisibilityTab.hpp"
 
+#define STEP_SUBDICT_NC(dict, key, ...)         \
+    if (dict->stepIntoSubDictWithKey(key)) {    \
+        __VA_ARGS__                             \
+        dict->stepOutOfSubDict();               \
+    }
+
+#define STEP_SUBDICT(dict, key, ...)            \
+    {                                           \
+    if (!dict->stepIntoSubDictWithKey(key)) {   \
+        dict->setSubDictForKey(key);            \
+        if (!dict->stepIntoSubDictWithKey(key)) \
+            return;                             \
+    }                                           \
+    __VA_ARGS__                                 \
+    dict->stepOutOfSubDict();                   \
+    }
+
 KeybindManager* g_manager;
+
+static DS_Dictionary* copyDict(DS_Dictionary* other) {
+    auto res = new DS_Dictionary;
+    if (!res) return nullptr;
+
+    res->doc.reset(other->doc);
+    res->dictTree = other->dictTree;
+    res->compatible = other->compatible;
+
+    return res;
+}
 
 bool Keybind::operator==(Keybind const& other) const {
     return
         other.key == this->key &&
-        other.modifiers == this->modifiers;
+        other.modifiers == this->modifiers &&
+        other.click == this->click;
 }
 
 bool Keybind::operator<(Keybind const& other) const {
-    return this->key < other.key;
+    return
+        this->key < other.key ||
+        this->modifiers < other.modifiers ||
+        this->click << other.click;
 }
 
 std::string Keybind::toString() const {
@@ -45,6 +77,12 @@ std::string Keybind::toString() const {
     return res;
 }
 
+void Keybind::save(DS_Dictionary* dict) const {
+    dict->setIntegerForKey("key", this->key);
+    dict->setIntegerForKey("modifiers", this->modifiers);
+    dict->setIntegerForKey("click", this->click);
+}
+
 Keybind::Keybind() {
     this->key = KEY_None;
     this->modifiers = 0;
@@ -74,6 +112,12 @@ Keybind::Keybind(enumKeyCodes key, int mods) {
     this->modifiers = static_cast<Modifiers>(mods);
 }
 
+Keybind::Keybind(DS_Dictionary* dict) {
+    this->key = static_cast<enumKeyCodes>(dict->getIntegerForKey("key"));
+    this->modifiers = dict->getIntegerForKey("modifiers");
+    this->click = static_cast<decltype(this->click)>(dict->getIntegerForKey("click"));
+}
+
 std::size_t std::hash<Keybind>::operator()(Keybind const& key) const {
     return (key.key << 8) + (key.modifiers << 4) + (key.click);
 }
@@ -82,10 +126,48 @@ bool KeybindCallback::operator==(KeybindCallback const& other) const {
     return this->id == other.id;
 }
 
-void KeybindManager::encodeDataTo(DS_Dictionary*) {
+void KeybindManager::encodeDataTo(DS_Dictionary* dict) {
+    STEP_SUBDICT(dict, "binds",
+        for (auto const& [type, val] : m_mCallbacks) {
+            STEP_SUBDICT(dict, CCString::createWithFormat("k%d", type)->getCString(),
+                for (auto const& cb : val) {
+                    STEP_SUBDICT(dict, cb->name.c_str(),
+                        int ix = 0;
+                        for (auto const& bind : getKeybindsForCallback(type, cb)) {
+                            auto k = CCString::createWithFormat("k%d", ix++)->getCString();
+                            STEP_SUBDICT(dict, k,
+                                bind.save(dict);
+                            );
+                        }
+                    );
+                }
+            );
+        }
+    );
 }
 
-void KeybindManager::dataLoaded(DS_Dictionary*) {
+void KeybindManager::dataLoaded(DS_Dictionary* dict) {
+    STEP_SUBDICT_NC(dict, "binds",
+        for (auto const& typeKey : dict->getAllKeys()) {
+            auto type = static_cast<KeybindType>(std::stoi(typeKey.substr(1)));
+
+            m_mLoadedBinds[type] = std::unordered_map<std::string, KeybindList>();
+
+            STEP_SUBDICT_NC(dict, typeKey.c_str(),
+                for (auto const& nameKey : dict->getAllKeys()) {
+                    m_mLoadedBinds[type][nameKey] = KeybindList();
+
+                    STEP_SUBDICT_NC(dict, nameKey.c_str(),
+                        for (auto const& key : dict->getAllKeys()) {
+                            STEP_SUBDICT_NC(dict, key.c_str(),
+                                m_mLoadedBinds[type][nameKey].insert(Keybind(dict));
+                            );
+                        }
+                    );
+                }
+            );
+        }
+    );
 }
 
 void KeybindManager::firstLoad() {
@@ -96,9 +178,9 @@ bool KeybindManager::init() {
         return false;
     
     this->m_sFileName = "BEKeybindManager.dat";
-    this->loadDefaultKeybinds();
 
     this->setup();
+    this->loadDefaultKeybinds();
     
     return true;
 }
@@ -509,6 +591,18 @@ size_t KeybindManager::getIndexOfCallback(KeybindType type, KeybindCallback* cb)
     return 0;
 }
 
+KeybindList KeybindManager::getLoadedBinds(KeybindType type, KeybindCallback* cb, bool* exists) {
+    KeybindList res;
+    *exists = false;
+
+    if (m_mLoadedBinds[type].count(cb->name)) {
+        *exists = true;
+        return m_mLoadedBinds[type][cb->name];
+    }
+
+    return res;
+}
+
 void KeybindManager::addCallback(
     KeybindCallback* cb,
     KeybindType type,
@@ -521,9 +615,17 @@ void KeybindManager::addCallback(
 
     m_mCallbacks[type].push_back(cb);
 
-    for (auto bind : binds) {
-        this->addKeybind(type, cb, bind);
-    }
+    bool custom;
+    auto cbinds = getLoadedBinds(type, cb, &custom);
+
+    if (custom) {
+        for (auto bind : cbinds) {
+            this->addKeybind(type, cb, bind);
+        }
+    } else
+        for (auto bind : binds) {
+            this->addKeybind(type, cb, bind);
+        }
 }
 
 void KeybindManager::addEditorKeybind(
@@ -576,6 +678,19 @@ void KeybindManager::clearKeybinds(KeybindType type, KeybindCallback* cb) {
         for (auto & val : vals)
             if (val.type == type && val.bind == cb)
                 m_mKeybinds.erase(key);
+}
+
+KeybindManager::CallbackList KeybindManager::getCallbacksForKeybind(KeybindType type, Keybind const& bind) {
+    if (!m_mKeybinds.count(bind))
+        return {};
+    
+    CallbackList res;
+
+    for (auto & target : m_mKeybinds[bind])
+        if (target.type == type)
+            res.push_back(target.bind);
+    
+    return res;
 }
 
 void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, bool keydown, bool onlyPlay) {

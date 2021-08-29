@@ -153,13 +153,17 @@ void KeybindCell::updateMenu() {
             editable = true;
         }
     
-        if (std::find(
-            m_pBind->defaults.begin(),
-            m_pBind->defaults.end(),
-            bind
-        ) == m_pBind->defaults.end())
+        if (
+            std::find(
+                m_pBind->defaults.begin(),
+                m_pBind->defaults.end(),
+                bind
+            ) == m_pBind->defaults.end()
+        )
             resettable = true;
     }
+    if (!binds.size() && m_pBind->defaults.size())
+        resettable = true;
 
     if (editable) {
         auto spr = createKeybindBtnSprite("+");
