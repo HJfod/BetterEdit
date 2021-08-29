@@ -33,9 +33,12 @@ namespace std {
     };
 }
 
+using KeybindList = std::set<Keybind>;
+
 struct KeybindCallback {
     int id;
     std::string name;
+    KeybindList defaults;
 
     bool operator==(KeybindCallback const&) const;
 
@@ -118,7 +121,6 @@ enum KeybindType {
 
 class KeybindManager : public GManager {
     public:
-        using KeybindList = std::set<Keybind>;
         using CallbackList = std::vector<KeybindCallback*>;
         struct Target {
             KeybindType type;
@@ -153,6 +155,8 @@ class KeybindManager : public GManager {
         void clearKeybinds(KeybindType, KeybindCallback*);
         void executeEditorCallbacks(Keybind const&, EditorUI*, bool keydown);
         void executePlayCallbacks(Keybind const&, PlayLayer*, bool keydown);
+        void resetToDefault(KeybindType, KeybindCallback*);
+        void resetAllToDefaults();
 
         static KeybindManager* get();
         static bool initGlobal();

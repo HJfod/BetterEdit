@@ -7,6 +7,7 @@ ccColor3B g_obColorUnderCursor;
 EyeDropperColorOverlay* g_pOverlay;
 HWND g_hwnd;
 bool g_bLoadedResources = false;
+std::map<int, bool> g_bPressedButtons;
 
 HWND glfwGetWin32Window(GLFWwindow* wnd) {
     auto cocosBase = GetModuleHandleA("libcocos2d.dll");
@@ -16,6 +17,10 @@ HWND glfwGetWin32Window(GLFWwindow* wnd) {
     )(wnd);
 
     return pRet;
+}
+
+bool isLeftMouseButtonPressed() {
+    return g_bPressedButtons[0];
 }
 
 class PickCallback : public CCObject {
@@ -55,6 +60,8 @@ void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwi
         BringWindowToTop(g_hwnd);
         return;
     }
+
+    g_bPressedButtons[btn] = pressed;
 
     return GDMAKE_ORIG_V(self, edx, wnd, btn, pressed, z);
 }

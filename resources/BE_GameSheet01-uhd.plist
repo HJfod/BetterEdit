@@ -259,6 +259,36 @@
     <key>textureRotated</key>
     <false/>
    </dict>
+   <key>BE_scrollbar.png</key>
+   <dict>
+    <key>aliases</key>
+    <array/>
+    <key>spriteOffset</key>
+    <string>{0,0}</string>
+    <key>spriteSize</key>
+    <string>{40,120}</string>
+    <key>spriteSourceSize</key>
+    <string>{40,120}</string>
+    <key>textureRect</key>
+    <string>{{1189,121},{40,120}}</string>
+    <key>textureRotated</key>
+    <false/>
+   </dict>
+   <key>BE_square_001_small.png</key>
+   <dict>
+    <key>aliases</key>
+    <array/>
+    <key>spriteOffset</key>
+    <string>{0,0}</string>
+    <key>spriteSize</key>
+    <string>{160,160}</string>
+    <key>spriteSourceSize</key>
+    <string>{160,160}</string>
+    <key>textureRect</key>
+    <string>{{1231,121},{160,160}}</string>
+    <key>textureRotated</key>
+    <false/>
+   </dict>
    <key>BE_timeBtn_001.png</key>
    <dict>
     <key>aliases</key>
@@ -435,7 +465,7 @@
     <key>spriteSourceSize</key>
     <string>{92,101}</string>
     <key>textureRect</key>
-    <string>{{1653,121},{92,101}}</string>
+    <string>{{1857,121},{92,101}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -450,7 +480,7 @@
     <key>spriteSourceSize</key>
     <string>{92,101}</string>
     <key>textureRect</key>
-    <string>{{1747,121},{92,101}}</string>
+    <string>{{1951,121},{92,101}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -465,7 +495,7 @@
     <key>spriteSourceSize</key>
     <string>{230,179}</string>
     <key>textureRect</key>
-    <string>{{1189,121},{230,179}}</string>
+    <string>{{1393,121},{230,179}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -480,7 +510,7 @@
     <key>spriteSourceSize</key>
     <string>{230,179}</string>
     <key>textureRect</key>
-    <string>{{1421,121},{230,179}}</string>
+    <string>{{1625,121},{230,179}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>

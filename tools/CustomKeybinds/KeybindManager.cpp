@@ -157,17 +157,20 @@ void KeybindManager::loadDefaultKeybinds() {
     }}, {{ KEY_X, 0 }});
 
     this->addEditorKeybind({ "Build Mode", [](EditorUI* ui) -> bool {
-        ui->toggleMode(ui->m_pBuildModeBtn);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->toggleMode(ui->m_pBuildModeBtn);
         return false;
     }}, {{ KEY_One, 0 }});
 
     this->addEditorKeybind({ "Edit Mode", [](EditorUI* ui) -> bool {
-        ui->toggleMode(ui->m_pEditModeBtn);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->toggleMode(ui->m_pEditModeBtn);
         return false;
     }}, {{ KEY_Two, 0 }});
 
     this->addEditorKeybind({ "Delete Mode", [](EditorUI* ui) -> bool {
-        ui->toggleMode(ui->m_pDeleteModeBtn);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->toggleMode(ui->m_pDeleteModeBtn);
         return false;
     }}, {{ KEY_Three, 0 }});
 
@@ -175,52 +178,64 @@ void KeybindManager::loadDefaultKeybinds() {
         return false;
     }}, {{ KEY_None, Keybind::kmShift }});
 
-    this->addEditorKeybind({ "Move modifier", [](EditorUI* ui) -> bool {
+    this->addEditorKeybind({ "Move modifier", [](EditorUI* ui, bool push) -> bool {
+        ui->m_bSpaceKeyPressed = push;
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->m_bMoveModifier = push;
         return false;
     }}, {{ KEY_Space, 0 }});
 
     this->addEditorKeybind({ "Rotate CCW", [](EditorUI* ui) -> bool {
-        ui->transformObjectCall(kEditCommandRotateCCW);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->transformObjectCall(kEditCommandRotateCCW);
         return false;
     }}, {{ KEY_Q, 0 }});
 
     this->addEditorKeybind({ "Rotate CW", [](EditorUI* ui) -> bool {
-        ui->transformObjectCall(kEditCommandRotateCW);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->transformObjectCall(kEditCommandRotateCW);
         return false;
     }}, {{ KEY_E, 0 }});
 
     this->addEditorKeybind({ "Flip X", [](EditorUI* ui) -> bool {
-        ui->transformObjectCall(kEditCommandFlipX);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->transformObjectCall(kEditCommandFlipX);
         return false;
     }}, {{ KEY_Q, Keybind::kmAlt }});
 
     this->addEditorKeybind({ "Flip Y", [](EditorUI* ui) -> bool {
-        ui->transformObjectCall(kEditCommandFlipY);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->transformObjectCall(kEditCommandFlipY);
         return false;
     }}, {{ KEY_E, Keybind::kmAlt }});
 
     this->addEditorKeybind({ "Delete Selected", [](EditorUI* ui) -> bool {
-        ui->onDeleteSelected(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->onDeleteSelected(nullptr);
         return false;
     }}, {{ KEY_E, Keybind::kmAlt }});
 
     this->addEditorKeybind({ "Undo", [](EditorUI* ui) -> bool {
-        ui->undoLastAction(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->undoLastAction(nullptr);
         return false;
     }}, {{ KEY_Z, Keybind::kmControl }});
 
     this->addEditorKeybind({ "Redo", [](EditorUI* ui) -> bool {
-        ui->redoLastAction(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->redoLastAction(nullptr);
         return false;
     }}, {{ KEY_Z, Keybind::kmControl | Keybind::kmShift }});
 
     this->addEditorKeybind({ "Deselect", [](EditorUI* ui) -> bool {
-        ui->deselectAll();
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->deselectAll();
         return false;
     }}, {{ KEY_D, Keybind::kmAlt }});
 
     this->addEditorKeybind({ "Copy", [](EditorUI* ui) -> bool {
-        ui->onCopy(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->onCopy(nullptr);
         return false;
     }}, {{ KEY_C, Keybind::kmControl }});
 
@@ -229,32 +244,38 @@ void KeybindManager::loadDefaultKeybinds() {
     // }}, {{ KEY_X, Keybind::kmControl }});
 
     this->addEditorKeybind({ "Paste", [](EditorUI* ui) -> bool {
-        ui->onPaste(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->onPaste(nullptr);
         return false;
     }}, {{ KEY_V, Keybind::kmControl }});
 
     this->addEditorKeybind({ "Duplicate", [](EditorUI* ui) -> bool {
-        ui->onDuplicate(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->onDuplicate(nullptr);
         return false;
     }}, {{ KEY_D, Keybind::kmControl }});
 
     this->addEditorKeybind({ "Rotate", [](EditorUI* ui) -> bool {
-        ui->toggleEnableRotate(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->toggleEnableRotate(nullptr);
         return false;
     }}, {{ KEY_R, 0 }});
 
     this->addEditorKeybind({ "Free Move", [](EditorUI* ui) -> bool {
-        ui->toggleFreeMove(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->toggleFreeMove(nullptr);
         return false;
     }}, {{ KEY_F, 0 }});
 
     this->addEditorKeybind({ "Swipe", [](EditorUI* ui) -> bool {
-        ui->toggleSwipe(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->toggleSwipe(nullptr);
         return false;
     }}, {{ KEY_T, 0 }});
 
     this->addEditorKeybind({ "Snap", [](EditorUI* ui) -> bool {
-        ui->toggleSnap(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->toggleSnap(nullptr);
         return false;
     }}, {{ KEY_G, 0 }});
 
@@ -268,11 +289,15 @@ void KeybindManager::loadDefaultKeybinds() {
     }}, {{ KEY_Enter, 0 }});
 
     this->addEditorKeybind({ "Playback Music", [](EditorUI* ui) -> bool {
-        ui->onPlayback(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->onPlayback(nullptr);
         return false;
     }}, {{ KEY_Enter, Keybind::kmControl }});
 
     this->addEditorKeybind({ "Previous Build Tab", [](EditorUI* ui) -> bool {
+        if (ui->m_pEditorLayer->m_bIsPlaybackMode)
+            return false;
+        
         auto t = ui->m_nSelectedTab - 1;
         if (t < 0)
             t = ui->m_pTabsArray->count() - 1;
@@ -281,6 +306,9 @@ void KeybindManager::loadDefaultKeybinds() {
     }}, {{ KEY_F1, 0 }});
 
     this->addEditorKeybind({ "Next Build Tab", [](EditorUI* ui) -> bool {
+        if (ui->m_pEditorLayer->m_bIsPlaybackMode)
+            return false;
+
         auto t = ui->m_nSelectedTab + 1;
         if (t > static_cast<int>(ui->m_pTabsArray->count() - 1))
             t = 0;
@@ -289,52 +317,62 @@ void KeybindManager::loadDefaultKeybinds() {
     }}, {{ KEY_F2, 0 }});
 
     this->addEditorKeybind({ "Next Group", [](EditorUI* ui) -> bool {
-        ui->onGroupUp(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->onGroupUp(nullptr);
         return false;
     }}, {{ KEY_Right, 0 }});
 
     this->addEditorKeybind({ "Previous Group", [](EditorUI* ui) -> bool {
-        ui->onGroupDown(nullptr);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->onGroupDown(nullptr);
         return false;
     }}, {{ KEY_Left, 0 }});
 
     this->addEditorKeybind({ "Object Left", [](EditorUI* ui) -> bool {
-        ui->moveObjectCall(kEditCommandLeft);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandLeft);
         return false;
     }}, {{ KEY_A, 0 }});
 
     this->addEditorKeybind({ "Object Right", [](EditorUI* ui) -> bool {
-        ui->moveObjectCall(kEditCommandRight);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandRight);
         return false;
     }}, {{ KEY_D, 0 }});
 
     this->addEditorKeybind({ "Object Up", [](EditorUI* ui) -> bool {
-        ui->moveObjectCall(kEditCommandUp);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandUp);
         return false;
     }}, {{ KEY_W, 0 }});
 
     this->addEditorKeybind({ "Object Down", [](EditorUI* ui) -> bool {
-        ui->moveObjectCall(kEditCommandDown);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandDown);
         return false;
     }}, {{ KEY_S, 0 }});
 
     this->addEditorKeybind({ "Object Left Small", [](EditorUI* ui) -> bool {
-        ui->moveObjectCall(kEditCommandSmallLeft);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandSmallLeft);
         return false;
     }}, {{ KEY_A, Keybind::kmShift }});
 
     this->addEditorKeybind({ "Object Right Small", [](EditorUI* ui) -> bool {
-        ui->moveObjectCall(kEditCommandSmallRight);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandSmallRight);
         return false;
     }}, {{ KEY_D, Keybind::kmShift }});
 
     this->addEditorKeybind({ "Object Up Small", [](EditorUI* ui) -> bool {
-        ui->moveObjectCall(kEditCommandSmallUp);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandSmallUp);
         return false;
     }}, {{ KEY_W, Keybind::kmShift }});
 
     this->addEditorKeybind({ "Object Down Small", [](EditorUI* ui) -> bool {
-        ui->moveObjectCall(kEditCommandSmallDown);
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandSmallDown);
         return false;
     }}, {{ KEY_S, Keybind::kmShift }});
 }
@@ -343,7 +381,7 @@ std::vector<KeybindCallback*> const& KeybindManager::getCallbacks(KeybindType ty
     return m_mCallbacks[type];
 }
 
-KeybindManager::KeybindList KeybindManager::getKeybindsForCallback(
+KeybindList KeybindManager::getKeybindsForCallback(
     KeybindType type, KeybindCallback* cb
 ) {
     std::set<Keybind> res;
@@ -371,11 +409,12 @@ size_t KeybindManager::getIndexOfCallback(KeybindType type, KeybindCallback* cb)
 void KeybindManager::addCallback(
     KeybindCallback* cb,
     KeybindType type,
-    KeybindManager::KeybindList const& binds
+    KeybindList const& binds
 ) {
     auto index = m_mCallbacks[type].size();
 
     cb->id = m_mCallbacks[type].size();
+    cb->defaults = binds;
 
     m_mCallbacks[type].push_back(cb);
 
@@ -386,21 +425,21 @@ void KeybindManager::addCallback(
 
 void KeybindManager::addEditorKeybind(
     KeybindEditor cb,
-    KeybindManager::KeybindList const& binds
+    KeybindList const& binds
 ) {
     this->addCallback(new KeybindEditor(cb), kKBEditor, binds);
 }
 
 void KeybindManager::addPlayKeybind(
     KeybindPlayLayer cb,
-    KeybindManager::KeybindList const& binds
+    KeybindList const& binds
 ) {
     this->addCallback(new KeybindPlayLayer(cb), kKBPlayLayer, binds);
 }
 
 void KeybindManager::addGlobalKeybind(
     KeybindGlobal cb,
-    KeybindManager::KeybindList const& binds
+    KeybindList const& binds
 ) {
     this->addCallback(new KeybindGlobal(cb), kKBGlobal, binds);
 }
@@ -473,6 +512,18 @@ void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bo
             } break;
         }
     }
+}
+
+void KeybindManager::resetToDefault(KeybindType type, KeybindCallback* cb) {
+    this->clearKeybinds(type, cb);
+    for (auto const& bind : cb->defaults)
+        this->addKeybind(type, cb, bind);
+}
+
+void KeybindManager::resetAllToDefaults() {
+    for (auto const& [type, cbs] : m_mCallbacks)
+        for (auto const& cb : cbs)
+            this->resetToDefault(type, cb);
 }
 
 KeybindManager* KeybindManager::get() {

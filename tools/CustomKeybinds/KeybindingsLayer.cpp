@@ -1,42 +1,113 @@
 #include "../../BetterEdit.hpp"
 #include "../CustomKeybinds/KeybindManager.hpp"
 #include <InputNode.hpp>
+#include "KeybindingsLayer.hpp"
 #include "KeybindListView.hpp"
+#include "Scrollbar.hpp"
 
-class KeybindingsLayer : public FLAlertLayer {
-    public:
-        int m_nCurrentPage;
-        int m_nItemCount;
-        int m_nPageCount;
-        cocos2d::CCDictionary* m_pPages;
-        cocos2d::CCDictionary* m_pUnused;
-        cocos2d::CCNode* m_pLeftArrow;
-        cocos2d::CCNode* m_pRightArrow;
+static constexpr const int KBLDELEGATE_TAG = 0x44432;
+static constexpr const int KBLLIST_TAG = 0x44431;
+static constexpr const int KBLSCROLLBAR_TAG = 0x44430;
+std::string searchQuery = "";
 
-        void onClose(CCObject* pSender) {
-            reinterpret_cast<void(__thiscall*)(KeybindingsLayer*, CCObject*)>(
-                base + 0x49c60
-            )(this, pSender);
+std::map<std::string, bool> KeybindingsLayerDelegate::m_mFoldedCategories = std::map<std::string, bool>();
+
+void KeybindingsLayerDelegate::textChanged(CCTextInputNode* input) {
+    if (input->getString() && strlen(input->getString()))
+        searchQuery = input->getString();
+    else
+        searchQuery = "";
+    
+    this->m_pLayer->reloadList();
+}
+
+void KeybindingsLayerDelegate::FLAlert_Clicked(FLAlertLayer*, bool btn2) {
+    if (btn2) {
+        KeybindManager::get()->resetAllToDefaults();
+
+        this->m_pLayer->reloadList();
+    }
+}
+
+KeybindingsLayerDelegate* KeybindingsLayerDelegate::create(KeybindingsLayer_CB* layer) {
+    auto ret = new KeybindingsLayerDelegate;
+
+    if (ret && ret->init()) {
+        ret->setTag(KBLDELEGATE_TAG);
+        ret->m_pLayer = layer;
+        ret->autorelease();
+        return ret;
+    }
+
+    CC_SAFE_DELETE(ret);
+    return nullptr;
+}
+
+
+bool matchSearchQuery(KeybindType type, KeybindCallback* bind) {
+    if (stringToLower(bind->name).find(stringToLower(searchQuery)) != std::string::npos)
+        return true;
+    
+    std::string keyStr = "";
+    for (auto const& key : KeybindManager::get()->getKeybindsForCallback(type, bind))
+        keyStr += key.toString() + ", ";
+
+    return stringToLower(keyStr).find(stringToLower(searchQuery)) != std::string::npos;
+}
+
+void KeybindingsLayer_CB::reloadList() {
+    this->m_pLayer->removeChildByTag(KBLLIST_TAG);
+
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    auto delegate = as<KeybindingsLayerDelegate*>(this->getChildByTag(KBLDELEGATE_TAG));
+
+    auto arr = CCArray::create();
+
+    arr->addObject(new KeybindItem("Gameplay", delegate));
+    if (!delegate->m_mFoldedCategories["Gameplay"])
+        for (auto bind : KeybindManager::get()->getCallbacks(kKBPlayLayer)) {
+            if (
+                !searchQuery.size() || matchSearchQuery(kKBPlayLayer, bind)
+            )
+                arr->addObject(new KeybindItem(bind, kKBPlayLayer));
         }
 
-        void onPrevPage(CCObject* pSender) {
-            reinterpret_cast<void(__thiscall*)(KeybindingsLayer*, CCObject*)>(
-                base + 0x153cd0
-            )(this, pSender);
+    // arr->addObject(new KeybindItem("Global", delegate));
+    // if (!delegate->m_mFoldedCategories["Global"])
+    //     for (auto bind : KeybindManager::get()->getCallbacks(kKBGlobal)) {
+    //         if (
+    //             !searchQuery.size() || matchSearchQuery(kKBGlobal, bind)
+    //         )
+    //             arr->addObject(new KeybindItem(bind, kKBGlobal));
+    //     }
+
+    arr->addObject(new KeybindItem("Editor", delegate));
+    if (!delegate->m_mFoldedCategories["Editor"])
+        for (auto bind : KeybindManager::get()->getCallbacks(kKBEditor)) {
+            if (
+                !searchQuery.size() || matchSearchQuery(kKBEditor, bind)
+            )
+                arr->addObject(new KeybindItem(bind, kKBEditor));
         }
 
-        void onNextPage(CCObject* pSender) {
-            reinterpret_cast<void(__thiscall*)(KeybindingsLayer*, CCObject*)>(
-                base + 0x153cc0
-            )(this, pSender);
-        }
+    auto list = KeybindListView::create(arr, 340.0f, 180.0f);
+    list->setPosition(winSize / 2 - CCPoint { 170.0f, 120.0f });
+    list->setTag(KBLLIST_TAG);
+    this->m_pLayer->addChild(list);
 
-        void goToPage(int page) {
-            reinterpret_cast<void(__thiscall*)(KeybindingsLayer*, int)>(
-                base + 0x153ce0
-            )(this, page);
-        }
-};
+    CATCH_NULL(as<Scrollbar*>(this->m_pLayer->getChildByTag(KBLSCROLLBAR_TAG)))
+        ->setList(list);
+}
+
+void KeybindingsLayer_CB::onResetAll(CCObject*) {
+    FLAlertLayer::create(
+        as<KeybindingsLayerDelegate*>(this->getChildByTag(KBLDELEGATE_TAG)),
+        "Reset Keybinds",
+        "Cancel", "Reset",
+        "Are you sure you want to <cr>reset</c> ALL <cy>keybinds</c> "
+        "to <cl>default</c>?"
+    )->show();
+}
 
 GDMAKE_HOOK(0x153670)
 CCLabelBMFont* __fastcall KeybindingsLayer_addKeyPair(
@@ -86,6 +157,9 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
 
     self->m_pLayer = cocos2d::CCLayer::create();
     self->addChild(self->m_pLayer);
+
+    auto delegate = KeybindingsLayerDelegate::create(as<KeybindingsLayer_CB*>(self));
+    self->addChild(delegate);
     
     auto bg = cocos2d::extension::CCScale9Sprite::create("GJ_square01.png", { 0.0f, 0.0f, 80.0f, 80.0f });
     bg->setContentSize({ 420.0f, 280.0f });
@@ -104,6 +178,7 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
         input->getInputNode()->getChildren(), c, CCNode
     ) c->setAnchorPoint({ .0f, .5f });
     input->setScale(.8f);
+    input->getInputNode()->setDelegate(delegate);
     self->m_pLayer->addChild(input);
 
     self->m_pPages = CCDictionary::create();
@@ -115,23 +190,12 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     self->m_pButtonMenu = cocos2d::CCMenu::create();
     self->m_pLayer->addChild(self->m_pButtonMenu);
 
-    auto arr = CCArray::create();
+    auto bar = Scrollbar::create(nullptr);
+    bar->setPosition(winSize.width / 2 + 190.0f, winSize.height / 2 - 30.0f);
+    bar->setTag(KBLSCROLLBAR_TAG);
+    self->m_pLayer->addChild(bar, 800);
 
-    arr->addObject(new KeybindItem("Gameplay"));
-    for (auto bind : KeybindManager::get()->getCallbacks(kKBPlayLayer))
-        arr->addObject(new KeybindItem(bind, kKBPlayLayer));
-    arr->addObject(new KeybindItem("Global"));
-    for (auto bind : KeybindManager::get()->getCallbacks(kKBGlobal))
-        arr->addObject(new KeybindItem(bind, kKBGlobal));
-    arr->addObject(new KeybindItem("Editor"));
-    for (auto bind : KeybindManager::get()->getCallbacks(kKBEditor))
-        arr->addObject(new KeybindItem(bind, kKBEditor));
-
-    auto list = KeybindListView::create(arr, 340.0f, 180.0f);
-    list->setPosition(winSize / 2 - CCPoint { 170.0f, 120.0f });
-    self->m_pLayer->addChild(list);
-
-    input->getInputNode()->setDelegate(list);
+    as<KeybindingsLayer_CB*>(self)->reloadList();
 
     self->registerWithTouchDispatcher();
     CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
@@ -161,6 +225,7 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
             winSize.width / 2,
             winSize.height / 2 + 55.0f
         });
+        topItem->setZOrder(500);
         self->m_pLayer->addChild(topItem);
 
         auto bottomItem = CCSprite::createWithSpriteFrameName("GJ_commentTop_001.png");
@@ -168,6 +233,7 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
             winSize.width / 2,
             winSize.height / 2 - 115.0f
         });
+        bottomItem->setZOrder(500);
         bottomItem->setFlipY(true);
         self->m_pLayer->addChild(bottomItem);
 
@@ -176,6 +242,7 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
             winSize.width / 2 - 173.5f,
             winSize.height / 2 - 29.0f
         });
+        sideItem->setZOrder(500);
         sideItem->setScaleY(5.0f);
         self->m_pLayer->addChild(sideItem);
 
@@ -184,10 +251,24 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
             winSize.width / 2 + 173.5f,
             winSize.height / 2 - 29.0f
         });
+        sideItemRight->setZOrder(500);
         sideItemRight->setScaleY(5.0f);
         sideItemRight->setFlipX(true);
         self->m_pLayer->addChild(sideItemRight);
     }
+
+    auto resetBtn = CCMenuItemSpriteExtra::create(
+        CCNodeConstructor<ButtonSprite*>()
+            .fromButtonSprite(
+                "Reset", "GJ_button_05.png", "bigFont.fnt"
+            )
+            .scale(.6f)
+            .done(),
+        self,
+        menu_selector(KeybindingsLayer_CB::onResetAll)
+    );
+    resetBtn->setPosition(210.0f - 40.0f, 140.0f - 25.0f);
+    self->m_pButtonMenu->addChild(resetBtn);
 
     auto closeBtn = CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png"),
