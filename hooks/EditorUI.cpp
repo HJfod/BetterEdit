@@ -469,29 +469,13 @@ void __fastcall EditorUI_updateZoom(gd::EditorUI* self) {
 
 GDMAKE_HOOK(0x91a30)
 void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t edx, enumKeyCodes key) {
-    if (BetterEdit::isEditorViewOnlyMode() &&
-        (key != KEY_Up || key != KEY_Space || key != KEY_Escape))
-        return;
-
     auto kb = cocos2d::CCDirector::sharedDirector()->getKeyboardDispatcher();
     
     auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xf8);
-
-    if (
-        BetterEdit::getEnableControlA() &&
-        key == enumKeyCodes::KEY_A &&
-        kb->getControlKeyPressed()
-    )
-        return self->selectAll();
     
-    if (!BetterEdit::getDisableVisibilityTab() && key == KEY_Four)
-        self->toggleMode(self->m_pBuildModeBtn->getParent()->getChildByTag(4));
-    
-    
-    if (key == KEY_Escape && getAutoSaveTimer(self)->cancellable())
-        return getAutoSaveTimer(self)->cancel();
-
-    KeybindManager::get()->executeEditorCallbacks(Keybind(key), self, true);
+    KeybindManager::get()->executeEditorCallbacks(
+        Keybind(key), self, true, BetterEdit::isEditorViewOnlyMode()
+    );
 
     // GDMAKE_ORIG_V(self_, edx, key);
 }
@@ -500,7 +484,9 @@ GDMAKE_HOOK(0x92180)
 void __fastcall EditorUI_keyUp(EditorUI* self_, edx_t edx, enumKeyCodes key) {
     auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xf8);
 
-    KeybindManager::get()->executeEditorCallbacks(Keybind(key), self, false);
+    KeybindManager::get()->executeEditorCallbacks(
+        Keybind(key), self, false, BetterEdit::isEditorViewOnlyMode()
+    );
 
     // GDMAKE_ORIG_V(self_, edx, key);
 }

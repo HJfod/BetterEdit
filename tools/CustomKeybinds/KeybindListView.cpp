@@ -5,12 +5,27 @@
 KeybindCell::KeybindCell(const char* name, CCSize size) :
     TableViewCell(name, size.width, size.height) {}
 
-ButtonSprite* createKeybindBtnSprite(const char* text, bool gold = true) {
+ButtonSprite* createKeybindBtnSprite(const char* text, bool gold = true, const char* sprite = nullptr) {
     auto sprName = "square02_small.png";
 
     // dumb way to check if sprite exists
     if (CCSprite::create("BE_square_001_small.png"))
         sprName = "BE_square_001_small.png";
+
+    if (sprite) {
+        auto spr = ButtonSprite::create(
+            CCSprite::createWithSpriteFrameName(sprite),
+            18, true, 1.2f, 0, sprName,
+            true, 0
+        );
+
+        spr->setScale(.45f);
+        spr->m_pSubBGSprite->setOpacity(85);
+        spr->m_pSubSprite->setScale(1.0f);
+        spr->m_pSubSprite->setOpacity(200);
+
+        return spr;
+    }
 
     auto spr = ButtonSprite::create(
         text, gold ? 0 : 18, !gold,
@@ -48,7 +63,7 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
     m_pMenu->setPosition(m_fWidth / 2, m_fHeight / 2);
     this->m_pLayer->addChild(m_pMenu);
 
-    if (m_pItem->delegate) {
+    if (m_pItem->text) {
         auto foldBtn = CCMenuItemToggler::create(
             createKeybindBtnSprite("-", false),
             createKeybindBtnSprite("+", false),
@@ -64,7 +79,7 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
 }
 
 void KeybindCell::onFold(CCObject* pSender) {
-    if (m_pItem->delegate) {
+    if (m_pItem->text) {
         m_pItem->delegate->m_mFoldedCategories[m_pItem->text] =
             !as<CCMenuItemToggler*>(pSender)->isToggled();
 
@@ -75,7 +90,28 @@ void KeybindCell::onFold(CCObject* pSender) {
 void KeybindCell::onEdit(CCObject* pSender) {
     auto item = as<KeybindStoreItem*>(as<CCNode*>(pSender)->getUserObject());
 
+    this->m_pItem->delegate->m_pLayer->detachInput();
+
     KeybindEditPopup::create(this, item)->show();
+}
+
+void KeybindCell::onReset(CCObject* pSender) {
+    FLAlertLayer::create(
+        this,
+        "Reset Keybind",
+        "Cancel", "Reset",
+        "Are you sure you want to <cr>reset</c> <cc>"_s + this->m_pBind->name + "</c>?"
+    )->show();
+}
+
+void KeybindCell::FLAlert_Clicked(FLAlertLayer*, bool btn2) {
+    if (btn2) {
+        KeybindManager::get()->resetToDefault(
+            this->m_pItem->type, this->m_pBind
+        );
+
+        this->updateMenu();
+    }
 }
 
 void KeybindCell::updateMenu() {
@@ -90,7 +126,8 @@ void KeybindCell::updateMenu() {
 
     auto x = this->m_fWidth / 2 - 10.0f;
 
-    bool editable = false;
+    bool editable = !binds.size();
+    bool resettable = false;
     for (auto & bind : binds) {
         // cba to fix Swipe Modifier rn
         if (bind.key == KEY_None) {
@@ -115,6 +152,13 @@ void KeybindCell::updateMenu() {
 
             editable = true;
         }
+    
+        if (std::find(
+            m_pBind->defaults.begin(),
+            m_pBind->defaults.end(),
+            bind
+        ) == m_pBind->defaults.end())
+            resettable = true;
     }
 
     if (editable) {
@@ -125,6 +169,16 @@ void KeybindCell::updateMenu() {
         btn->setPosition(x - spr->getScaledContentSize().width / 2, 0.0f);
         btn->setUserObject(nullptr);
         m_pMenu->addChild(btn);
+        x -= spr->getScaledContentSize().width + 5.0f;
+    
+        if (resettable) {
+            auto spr = createKeybindBtnSprite(nullptr, true, "edit_cwBtn_001.png");
+            auto btn = CCMenuItemSpriteExtra::create(
+                spr, this, menu_selector(KeybindCell::onReset)
+            );
+            btn->setPosition(x - spr->getScaledContentSize().width / 2, 0.0f);
+            m_pMenu->addChild(btn);
+        }
     }
 }
 
@@ -148,13 +202,14 @@ KeybindCell* KeybindCell::create(const char* key, CCSize size) {
 
 void KeybindListView::setupList() {
     this->m_fItemSeparation = g_fItemHeight;
-    this->m_pTableView->m_fScrollLimitTop = g_fItemHeight -
-        min(1.0f, 9.f / this->m_pEntries->count()) * g_fItemHeight;
 
     this->m_pTableView->reloadData();
 
-    if (this->m_pEntries->count() == 1)
-        this->m_pTableView->moveToTopWithOffset(this->m_fItemSeparation);
+    this->m_pTableView->m_fScrollLimitTop = g_fItemHeight *
+        (this->m_pTableView->m_pContentLayer->getScaledContentSize().height / 1500.0f);
+
+    // if (this->m_pEntries->count() == 1)
+        // this->m_pTableView->moveToTopWithOffset(this->m_fItemSeparation);
     
     this->m_pTableView->moveToTop();
 }

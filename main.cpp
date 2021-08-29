@@ -63,6 +63,15 @@ GDMAKE_MAIN_HM(hMod) {
     if (!loadDrawGridLayerMidHook())
         return "Unable to midhook DrawGridLayer::draw!";
 
+    KeybindManager::get()->addEditorKeybind({ "Cancel Autosave", [](EditorUI* self) -> bool {
+        if (getAutoSaveTimer(self)->cancellable()) {
+            getAutoSaveTimer(self)->cancel();
+            return true;
+        }
+        
+        return false;
+    }}, {{ KEY_Escape, 0 }});
+
     loadTemplates();
     loadFavouriteTab();
     loadEnterSearch();

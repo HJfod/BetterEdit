@@ -14,10 +14,15 @@ struct KeybindItem : public CCObject {
     KeybindingsLayerDelegate* delegate = nullptr;
     const char* text;
 
-    inline KeybindItem(KeybindCallback* b, KeybindType t) {
+    inline KeybindItem(
+        KeybindCallback* b,
+        KeybindType t,
+        KeybindingsLayerDelegate* d
+    ) {
         bind = b;
         type = t;
         text = nullptr;
+        delegate = d;
         this->autorelease();
     }
 
@@ -35,13 +40,15 @@ struct KeybindItem : public CCObject {
 
 class KeybindEditPopup;
 
-class KeybindCell : public TableViewCell {
+class KeybindCell : public TableViewCell, public FLAlertLayerProtocol {
     protected:
         KeybindCallback* m_pBind;
         KeybindItem* m_pItem;
         CCMenu* m_pMenu;
 
 		KeybindCell(const char* name, CCSize size);
+
+        void FLAlert_Clicked(FLAlertLayer*, bool) override;
 
         friend class KeybindEditPopup;
 
@@ -51,6 +58,7 @@ class KeybindCell : public TableViewCell {
         void updateMenu();
         void onEdit(CCObject*);
         void onFold(CCObject*);
+        void onReset(CCObject*);
 
 		static KeybindCell* create(const char* key, CCSize size);
 };

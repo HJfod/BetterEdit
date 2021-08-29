@@ -5,6 +5,7 @@
 class KeybindingsLayer_CB : public KeybindingsLayer {
     public:
         void reloadList();
+        void detachInput();
         void onResetAll(CCObject*);
 };
 

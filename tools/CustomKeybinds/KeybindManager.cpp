@@ -1,6 +1,7 @@
 #include "KeybindManager.hpp"
 #include <algorithm>
 #include <functional>
+#include "../VisibilityTab/loadVisibilityTab.hpp"
 
 KeybindManager* g_manager;
 
@@ -174,6 +175,16 @@ void KeybindManager::loadDefaultKeybinds() {
         return false;
     }}, {{ KEY_Three, 0 }});
 
+    this->addEditorKeybind({ "View Mode", [](EditorUI* ui) -> bool {
+        if (
+            !ui->m_pEditorLayer->m_bIsPlaybackMode &&
+            !BetterEdit::getDisableVisibilityTab()
+        )
+            ui->toggleMode(ui->m_pBuildModeBtn->getParent()->getChildByTag(4));
+    
+        return false;
+    }}, {{ KEY_Four, 0 }});
+
     this->addEditorKeybind({ "Swipe modifier", [](EditorUI* ui) -> bool {
         return false;
     }}, {{ KEY_None, Keybind::kmShift }});
@@ -213,7 +224,7 @@ void KeybindManager::loadDefaultKeybinds() {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->onDeleteSelected(nullptr);
         return false;
-    }}, {{ KEY_E, Keybind::kmAlt }});
+    }}, {{ KEY_Delete, 0 }});
 
     this->addEditorKeybind({ "Undo", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
@@ -233,15 +244,37 @@ void KeybindManager::loadDefaultKeybinds() {
         return false;
     }}, {{ KEY_D, Keybind::kmAlt }});
 
+    this->addEditorKeybind({ "Select All", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->selectAll();
+        return false;
+    }}, {});
+
+    this->addEditorKeybind({ "Select All Left", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->selectAllWithDirection(false);
+        return false;
+    }}, {});
+
+    this->addEditorKeybind({ "Select All Right", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->selectAllWithDirection(true);
+        return false;
+    }}, {});
+
     this->addEditorKeybind({ "Copy", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->onCopy(nullptr);
         return false;
     }}, {{ KEY_C, Keybind::kmControl }});
 
-    // this->addEditorKeybind({ "Cut", [](EditorUI* ui) -> bool {
-    //     return false;
-    // }}, {{ KEY_X, Keybind::kmControl }});
+    this->addEditorKeybind({ "Cut", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode) {
+            ui->onCopy(nullptr);
+            ui->onDeleteSelected(nullptr);
+        }
+        return false;
+    }}, {});
 
     this->addEditorKeybind({ "Paste", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
@@ -328,6 +361,28 @@ void KeybindManager::loadDefaultKeybinds() {
         return false;
     }}, {{ KEY_Left, 0 }});
 
+    this->addEditorKeybind({ "Scroll Up", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveGameLayer({ 0.0f, 10.0f });
+        return false;
+    }}, {{ KEY_OEMPlus, 0 }});
+
+    this->addEditorKeybind({ "Scroll Down", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveGameLayer({ 0.0f, -10.0f });
+        return false;
+    }}, {{ KEY_OEMMinus, 0 }});
+
+    this->addEditorKeybind({ "Zoom In", [](EditorUI* ui) -> bool {
+        ui->zoomIn(nullptr);
+        return false;
+    }}, {{ KEY_OEMPlus, Keybind::kmShift }});
+
+    this->addEditorKeybind({ "Zoom Out", [](EditorUI* ui) -> bool {
+        ui->zoomOut(nullptr);
+        return false;
+    }}, {{ KEY_OEMMinus, Keybind::kmShift }});
+
     this->addEditorKeybind({ "Object Left", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->moveObjectCall(kEditCommandLeft);
@@ -375,6 +430,54 @@ void KeybindManager::loadDefaultKeybinds() {
             ui->moveObjectCall(kEditCommandSmallDown);
         return false;
     }}, {{ KEY_S, Keybind::kmShift }});
+    
+    this->addEditorKeybind({ "Object Left Tiny", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandTinyLeft);
+        return false;
+    }}, {});
+
+    this->addEditorKeybind({ "Object Right Tiny", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandTinyRight);
+        return false;
+    }}, {});
+
+    this->addEditorKeybind({ "Object Up Tiny", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandTinyUp);
+        return false;
+    }}, {});
+
+    this->addEditorKeybind({ "Object Down Tiny", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandTinyDown);
+        return false;
+    }}, {});
+
+    this->addEditorKeybind({ "Object Left Big", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandBigLeft);
+        return false;
+    }}, {});
+
+    this->addEditorKeybind({ "Object Right Big", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandBigRight);
+        return false;
+    }}, {});
+
+    this->addEditorKeybind({ "Object Up Big", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandBigUp);
+        return false;
+    }}, {});
+
+    this->addEditorKeybind({ "Object Down Big", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandBigDown);
+        return false;
+    }}, {});
 }
 
 std::vector<KeybindCallback*> const& KeybindManager::getCallbacks(KeybindType type) {
@@ -475,13 +578,14 @@ void KeybindManager::clearKeybinds(KeybindType type, KeybindCallback* cb) {
                 m_mKeybinds.erase(key);
 }
 
-void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, bool keydown) {
+void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, bool keydown, bool onlyPlay) {
     if (!m_mKeybinds.count(bind))
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
         switch (target.type) {
             case kKBEditor: {
+                if (onlyPlay) break;
                 auto c = as<KeybindEditor*>(target.bind);
                 if (c->call_b)
                     c->call_b(ui, keydown);

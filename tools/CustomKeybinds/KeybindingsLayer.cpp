@@ -8,6 +8,7 @@
 static constexpr const int KBLDELEGATE_TAG = 0x44432;
 static constexpr const int KBLLIST_TAG = 0x44431;
 static constexpr const int KBLSCROLLBAR_TAG = 0x44430;
+static constexpr const int KBLINPUT_TAG = 0x44429;
 std::string searchQuery = "";
 
 std::map<std::string, bool> KeybindingsLayerDelegate::m_mFoldedCategories = std::map<std::string, bool>();
@@ -69,7 +70,7 @@ void KeybindingsLayer_CB::reloadList() {
             if (
                 !searchQuery.size() || matchSearchQuery(kKBPlayLayer, bind)
             )
-                arr->addObject(new KeybindItem(bind, kKBPlayLayer));
+                arr->addObject(new KeybindItem(bind, kKBPlayLayer, delegate));
         }
 
     // arr->addObject(new KeybindItem("Global", delegate));
@@ -78,7 +79,7 @@ void KeybindingsLayer_CB::reloadList() {
     //         if (
     //             !searchQuery.size() || matchSearchQuery(kKBGlobal, bind)
     //         )
-    //             arr->addObject(new KeybindItem(bind, kKBGlobal));
+    //             arr->addObject(new KeybindItem(bind, kKBGlobal, delegate));
     //     }
 
     arr->addObject(new KeybindItem("Editor", delegate));
@@ -87,7 +88,7 @@ void KeybindingsLayer_CB::reloadList() {
             if (
                 !searchQuery.size() || matchSearchQuery(kKBEditor, bind)
             )
-                arr->addObject(new KeybindItem(bind, kKBEditor));
+                arr->addObject(new KeybindItem(bind, kKBEditor, delegate));
         }
 
     auto list = KeybindListView::create(arr, 340.0f, 180.0f);
@@ -107,6 +108,15 @@ void KeybindingsLayer_CB::onResetAll(CCObject*) {
         "Are you sure you want to <cr>reset</c> ALL <cy>keybinds</c> "
         "to <cl>default</c>?"
     )->show();
+}
+
+void KeybindingsLayer_CB::detachInput() {
+    auto input = as<InputNode*>(this->m_pLayer->getChildByTag(KBLINPUT_TAG));
+
+    if (input) {
+        input->getInputNode()->m_pTextField->detachWithIME();
+        input->getInputNode()->detachWithIME();
+    }
 }
 
 GDMAKE_HOOK(0x153670)
@@ -174,6 +184,8 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     auto input = InputNode::create(425.0f, "Search Keybinds");
     input->setPosition(title->getPosition() + CCPoint { 0.0f, -35.0f });
     input->getInputNode()->setPositionX(input->getInputNode()->getPositionX() - 200.0f);
+    input->setTag(KBLINPUT_TAG);
+    input->setString(searchQuery.c_str());
     CCARRAY_FOREACH_B_TYPE(
         input->getInputNode()->getChildren(), c, CCNode
     ) c->setAnchorPoint({ .0f, .5f });

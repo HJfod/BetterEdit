@@ -153,7 +153,7 @@ class KeybindManager : public GManager {
         void removeKeybind(KeybindType, KeybindCallback*, Keybind const&);
         void editKeybind(KeybindType, KeybindCallback*, Keybind const& old, Keybind const& rep);
         void clearKeybinds(KeybindType, KeybindCallback*);
-        void executeEditorCallbacks(Keybind const&, EditorUI*, bool keydown);
+        void executeEditorCallbacks(Keybind const&, EditorUI*, bool keydown, bool onlyPlay = false);
         void executePlayCallbacks(Keybind const&, PlayLayer*, bool keydown);
         void resetToDefault(KeybindType, KeybindCallback*);
         void resetAllToDefaults();
