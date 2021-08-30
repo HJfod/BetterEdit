@@ -32,7 +32,11 @@ std::chrono::time_point<std::chrono::system_clock> g_lastTouchTime
 // TODO: (move shit out to their own files)
 
 void toggleShowUI(EditorUI* self) {
-    self->showUI(!g_showUI);
+    self->showUI(
+        !as<CCNode*>(
+            self->m_pHideableUIElementArray->objectAtIndex(0)
+        )->isVisible()
+    );
 }
 
 CCPoint getShowButtonPosition(EditorUI* self) {

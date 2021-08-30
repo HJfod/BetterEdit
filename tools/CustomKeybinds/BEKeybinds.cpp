@@ -261,7 +261,7 @@ void loadBEKeybinds() {
     }}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Preview Mode", [](EditorUI* ui) -> bool {
-        b = GameManager::sharedState()->getGameVariable("0036");
+        auto b = GameManager::sharedState()->getGameVariable("0036");
 
         GameManager::sharedState()->setGameVariable("0036", !b);
 
