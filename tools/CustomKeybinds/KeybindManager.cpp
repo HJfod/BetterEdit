@@ -665,10 +665,18 @@ void KeybindManager::editKeybind(KeybindType type, KeybindCallback* cb, Keybind 
 }
 
 void KeybindManager::clearKeybinds(KeybindType type, KeybindCallback* cb) {
-    for (auto & [key, vals] : m_mKeybinds)
-        for (auto & val : vals)
-            if (val.type == type && val.bind == cb)
-                m_mKeybinds.erase(key);
+    for (auto & [key, vals] : m_mKeybinds) {
+        auto ix = 0;
+        for (auto & val : vals) {
+            if (val.type == type && val.bind == cb) {
+                vals.erase(vals.begin() + ix);
+                ix--;
+                if (!vals.size())
+                    m_mKeybinds.erase(key);
+            }
+            ix++;
+        }
+    }
 }
 
 KeybindManager::CallbackList KeybindManager::getCallbacksForKeybind(KeybindType type, Keybind const& bind) {
