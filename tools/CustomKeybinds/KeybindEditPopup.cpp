@@ -31,7 +31,7 @@ void KeybindEditPopup::setup() {
     m_pInfoLabel = CCLabelBMFont::create("", "bigFont.fnt");
     m_pInfoLabel->setPosition(
         winSize.width / 2,
-        winSize.height / 2 - this->m_pLrSize.height / 2 + 50.0f
+        winSize.height / 2 - this->m_pLrSize.height / 2 + 55.0f
     );
     m_pInfoLabel->setColor({ 200, 255, 70 });
     m_pInfoLabel->setScale(.5f);
@@ -69,6 +69,32 @@ void KeybindEditPopup::setup() {
 
     setBtn->setPositionY(-this->m_pLrSize.height / 2 + 30.0f);
     if (removeBtn) removeBtn->setPositionY(-this->m_pLrSize.height / 2 + 30.0f);
+
+    // if (this->m_pCell->m_pBind->repeatable) {
+    //     auto repeatLabel = CCLabelBMFont::create("Repeat", "bigFont.fnt");
+    //     repeatLabel->setPosition(
+    //         winSize.width / 2 + this->m_pLrSize.width / 2 - 30.0f,
+    //         winSize.height / 2 - this->m_pLrSize.height / 2 + 35.0f
+    //     );
+    //     repeatLabel->setScale(.3f);
+    //     this->m_pLayer->addChild(repeatLabel);
+
+    //     auto toggle = CCMenuItemToggler::createWithStandardSprites(
+    //         this, (SEL_MenuHandler)&KeybindEditPopup::onRepeat, .5f
+    //     );
+    //     toggle->setPosition(
+    //         this->m_pLrSize.width / 2 - 30.0f,
+    //         - this->m_pLrSize.height / 2 + 20.0f
+    //     );
+    //     toggle->toggle(this->m_pCell->m_pBind->repeat);
+    //     this->m_pButtonMenu->addChild(toggle);
+    // }
+}
+
+void KeybindEditPopup::onRepeat(CCObject* pSender) {
+    auto t = as<CCMenuItemToggler*>(pSender);
+
+    this->m_pCell->m_pBind->repeat = !t->isToggled();
 }
 
 void KeybindEditPopup::keyDown(enumKeyCodes key) {

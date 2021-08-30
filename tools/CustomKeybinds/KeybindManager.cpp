@@ -698,6 +698,16 @@ void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, b
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
+        if (target.bind->repeatable) {
+            if (keydown) {
+                if (!m_mHeldKeys[target.type].keys.count(bind.key))
+                    m_mHeldKeys[target.type].keys[bind.key] = 0;
+            } else {
+                m_mHeldKeys[target.type].keys.erase(bind.key);
+            }
+            m_mHeldKeys[target.type].ui = ui;
+        }
+
         switch (target.type) {
             case kKBEditor: {
                 if (onlyPlay) break;
@@ -721,6 +731,16 @@ void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bo
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
+        if (target.bind->repeatable) {
+            if (keydown) {
+                if (!m_mHeldKeys[target.type].keys.count(bind.key))
+                    m_mHeldKeys[target.type].keys[bind.key] = 0;
+            } else {
+                m_mHeldKeys[target.type].keys.erase(bind.key);
+            }
+            m_mHeldKeys[target.type].pl = pl;
+        }
+
         switch (target.type) {
             case kKBPlayLayer: {
                 auto c = as<KeybindPlayLayer*>(target.bind);
@@ -743,6 +763,50 @@ void KeybindManager::resetAllToDefaults() {
     for (auto const& [type, cbs] : m_mCallbacks)
         for (auto const& cb : cbs)
             this->resetToDefault(type, cb);
+}
+
+void KeybindManager::handleRepeats(float dt) {
+    if (
+        !BetterEdit::isEditorInitialized() &&
+        !GameManager::sharedState()->getPlayLayer()
+    ) {
+        m_mHeldKeys.clear();
+        return;
+    }
+
+    // im sorry what
+    for (auto & [type, hold] : m_mHeldKeys) {
+        for (auto & [k, t] : hold.keys) {
+            hold.keys[k] += static_cast<int>(1 / dt);
+            auto bind = Keybind(k);
+            auto cbs = this->getCallbacksForKeybind(type, bind);
+            for (auto const& cb : cbs) {
+                if (cb->repeatable && cb->repeat) {
+                    if (t >= cb->repeatStart) {
+                        if (
+                            (t - cb->repeatStart) >=
+                            cb->repeatInterval
+                        ) {
+                            hold.keys[k] -= cb->repeatInterval;
+                            switch (type) {
+                                case kKBEditor:
+                                    this->executeEditorCallbacks(
+                                        bind, hold.ui, true
+                                    );
+                                    break;
+                                
+                                case kKBPlayLayer:
+                                    this->executePlayCallbacks(
+                                        bind, hold.pl, true
+                                    );
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 KeybindManager* KeybindManager::get() {

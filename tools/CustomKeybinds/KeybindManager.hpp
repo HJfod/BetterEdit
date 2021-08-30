@@ -41,6 +41,10 @@ struct KeybindCallback {
     int id;
     std::string name;
     KeybindList defaults;
+    bool repeat = true;
+    bool repeatable = true;
+    int repeatInterval = 500;
+    int repeatStart = 1000;
 
     bool operator==(KeybindCallback const&) const;
 
@@ -111,6 +115,7 @@ struct KeybindPlayLayer : public KeybindCallback {
     ) {
         this->name = keybind;
         this->call_e = bind;
+        this->repeatable = false;
         this->editor = true;
     }
 };
@@ -129,14 +134,21 @@ class KeybindManager : public GManager {
             KeybindCallback* bind;
         };
 
+        struct Hold {
+            std::unordered_map<enumKeyCodes, int> keys;
+            EditorUI* ui;
+            PlayLayer* pl;
+        };
+
     protected:
-        std::map<KeybindType, CallbackList> m_mCallbacks;
+        std::unordered_map<KeybindType, CallbackList> m_mCallbacks;
         std::unordered_map<Keybind, std::vector<Target>> m_mKeybinds;
         // what the hell
         std::unordered_map<
             KeybindType,
             std::unordered_map<std::string, KeybindList>
         > m_mLoadedBinds;
+        std::unordered_map<KeybindType, Hold> m_mHeldKeys;
 
         bool init();
 
@@ -166,6 +178,7 @@ class KeybindManager : public GManager {
         void executePlayCallbacks(Keybind const&, PlayLayer*, bool keydown);
         void resetToDefault(KeybindType, KeybindCallback*);
         void resetAllToDefaults();
+        void handleRepeats(float);
 
         static KeybindManager* get();
         static bool initGlobal();

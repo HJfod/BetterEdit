@@ -23,6 +23,7 @@ class KeybindEditPopup : public BrownAlertDelegate {
         CCLabelBMFont* m_pInfoLabel;
 
         void setup() override;
+        void onRepeat(CCObject*);
         void onRemove(CCObject*);
         void onSet(CCObject*);
         void onClose(CCObject*) override;

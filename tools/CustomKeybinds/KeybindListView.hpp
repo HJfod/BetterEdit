@@ -51,12 +51,14 @@ class KeybindCell : public TableViewCell, public FLAlertLayerProtocol {
         void FLAlert_Clicked(FLAlertLayer*, bool) override;
 
         friend class KeybindEditPopup;
+        friend class KeybindRepeatPopup;
 
     public:
         void loadFromItem(KeybindItem* bind);
         void updateBGColor(int index);
         void updateMenu();
         void onEdit(CCObject*);
+        void onRepeat(CCObject*);
         void onFold(CCObject*);
         void onReset(CCObject*);
 

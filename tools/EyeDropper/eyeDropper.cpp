@@ -1,5 +1,6 @@
 #include "eyeDropper.hpp"
 #include "EyeDropperColorOverlay.hpp"
+#include "../CustomKeybinds/KeybindManager.hpp"
 
 static constexpr const int DROPPER_TAG = 0xb00b;
 bool g_bPickingColor = false;
@@ -96,6 +97,8 @@ void __fastcall CCScheduler_update(CCScheduler* self, edx_t edx, float dt) {
         CCSpriteFrameCache::sharedSpriteFrameCache()
             ->addSpriteFramesWithFile("BE_GameSheet01.plist");
     }
+
+    KeybindManager::get()->handleRepeats(dt);
 
     return GDMAKE_ORIG_V(self, edx, dt);
 }

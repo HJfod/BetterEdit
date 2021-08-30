@@ -1,6 +1,7 @@
 #include "KeybindListView.hpp"
 #include "KeybindEditPopup.hpp"
 #include "KeybindingsLayer.hpp"
+#include "KeybindRepeatPopup.hpp"
 
 KeybindCell::KeybindCell(const char* name, CCSize size) :
     TableViewCell(name, size.width, size.height) {}
@@ -95,6 +96,12 @@ void KeybindCell::onEdit(CCObject* pSender) {
     KeybindEditPopup::create(this, item)->show();
 }
 
+void KeybindCell::onRepeat(CCObject* pSender) {
+    this->m_pItem->delegate->m_pLayer->detachInput();
+
+    KeybindRepeatPopup::create(this)->show();
+}
+
 void KeybindCell::onReset(CCObject* pSender) {
     FLAlertLayer::create(
         this,
@@ -179,6 +186,16 @@ void KeybindCell::updateMenu() {
             auto spr = createKeybindBtnSprite(nullptr, true, "edit_cwBtn_001.png");
             auto btn = CCMenuItemSpriteExtra::create(
                 spr, this, menu_selector(KeybindCell::onReset)
+            );
+            btn->setPosition(x - spr->getScaledContentSize().width / 2, 0.0f);
+            x -= spr->getScaledContentSize().width + 5.0f;
+            m_pMenu->addChild(btn);
+        }
+
+        if (m_pBind->repeatable) {
+            auto spr = createKeybindBtnSprite(nullptr, true, "GJ_timeIcon_001.png");
+            auto btn = CCMenuItemSpriteExtra::create(
+                spr, this, menu_selector(KeybindCell::onRepeat)
             );
             btn->setPosition(x - spr->getScaledContentSize().width / 2, 0.0f);
             m_pMenu->addChild(btn);
