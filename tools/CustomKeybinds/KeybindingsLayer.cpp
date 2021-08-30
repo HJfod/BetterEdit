@@ -4,6 +4,7 @@
 #include "KeybindingsLayer.hpp"
 #include "KeybindListView.hpp"
 #include "Scrollbar.hpp"
+#include "KeybindSettingsLayer.hpp"
 
 static constexpr const int KBLDELEGATE_TAG = 0x44432;
 static constexpr const int KBLLIST_TAG = 0x44431;
@@ -108,6 +109,12 @@ void KeybindingsLayer_CB::onResetAll(CCObject*) {
         "Are you sure you want to <cr>reset</c> ALL <cy>keybinds</c> "
         "to <cl>default</c>?"
     )->show();
+}
+
+void KeybindingsLayer_CB::onGlobalSettings(CCObject*) {
+    this->detachInput();
+
+    KeybindSettingsLayer::create()->show();
 }
 
 void KeybindingsLayer_CB::detachInput() {
@@ -281,6 +288,17 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     );
     resetBtn->setPosition(210.0f - 40.0f, 140.0f - 25.0f);
     self->m_pButtonMenu->addChild(resetBtn);
+
+    auto settingsBtn = CCMenuItemSpriteExtra::create(
+        CCNodeConstructor()
+            .fromFrameName("GJ_optionsBtn_001.png")
+            .scale(.6f)
+            .done(),
+        self,
+        menu_selector(KeybindingsLayer_CB::onGlobalSettings)
+    );
+    settingsBtn->setPosition(- 210.0f + 5.0f, - 140.0f + 5.0f);
+    self->m_pButtonMenu->addChild(settingsBtn);
 
     auto closeBtn = CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png"),

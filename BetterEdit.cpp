@@ -25,9 +25,17 @@ using namespace cocos2d;
     dict->stepOutOfSubDict();                   \
     }
 
-#define BE_SAVE_SETTING(__name__, _, __, __ctype__, _0, _1, _2, _3) data->set##__ctype__##ForKey(#__name__, get##__name__());
-#define BE_LOAD_SETTING(__name__, _, __, __ctype__, _0, _1, _2, _3) set##__name__##OrDefault(data->get##__ctype__##ForKey(#__name__));
-#define BE_DEFAULT_SETTING(__name__, _, __value__, __, ___, _0, _1, _2) set##__name__(__value__);
+bool hasKey(DS_Dictionary* dict, std::string const& key) {
+    return dict->getKey(dict->getIndexOfKey(key.c_str())) == key;
+}
+
+#define BE_SAVE_SETTING(__name__, _, __, __ctype__, _0, _1, _2, _3) \
+    data->set##__ctype__##ForKey(#__name__, get##__name__());
+#define BE_LOAD_SETTING(__name__, _, __, __ctype__, _0, _1, _2, _3) \
+    if (hasKey(data, #__name__)) \
+        set##__name__##OrDefault(data->get##__ctype__##ForKey(#__name__));
+#define BE_DEFAULT_SETTING(__name__, _, __value__, __, ___, _0, _1, _2) \
+    set##__name__(__value__);
 
 BetterEdit* g_betterEdit;
 

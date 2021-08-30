@@ -243,19 +243,19 @@ void KeybindManager::loadDefaultKeybinds() {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->toggleMode(ui->m_pBuildModeBtn);
         return false;
-    }}, {{ KEY_One, 0 }});
+    }, false}, {{ KEY_One, 0 }});
 
     this->addEditorKeybind({ "Edit Mode", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->toggleMode(ui->m_pEditModeBtn);
         return false;
-    }}, {{ KEY_Two, 0 }});
+    }, false}, {{ KEY_Two, 0 }});
 
     this->addEditorKeybind({ "Delete Mode", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->toggleMode(ui->m_pDeleteModeBtn);
         return false;
-    }}, {{ KEY_Three, 0 }});
+    }, false}, {{ KEY_Three, 0 }});
 
     this->addEditorKeybind({ "View Mode", [](EditorUI* ui) -> bool {
         if (
@@ -265,11 +265,11 @@ void KeybindManager::loadDefaultKeybinds() {
             ui->toggleMode(ui->m_pBuildModeBtn->getParent()->getChildByTag(4));
     
         return false;
-    }}, {{ KEY_Four, 0 }});
+    }, false}, {{ KEY_Four, 0 }});
 
     this->addEditorKeybind({ "Swipe modifier", [](EditorUI* ui) -> bool {
         return false;
-    }}, {{ KEY_None, Keybind::kmShift }});
+    }, false}, {{ KEY_None, Keybind::kmShift }});
 
     this->addEditorKeybind({ "Move modifier", [](EditorUI* ui, bool push) -> bool {
         ui->m_bSpaceKeyPressed = push;
@@ -306,7 +306,7 @@ void KeybindManager::loadDefaultKeybinds() {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->onDeleteSelected(nullptr);
         return false;
-    }}, {{ KEY_Delete, 0 }});
+    }, false}, {{ KEY_Delete, 0 }});
 
     this->addEditorKeybind({ "Undo", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
@@ -324,13 +324,13 @@ void KeybindManager::loadDefaultKeybinds() {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->deselectAll();
         return false;
-    }}, {{ KEY_D, Keybind::kmAlt }});
+    }, false}, {{ KEY_D, Keybind::kmAlt }});
 
     this->addEditorKeybind({ "Copy", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->onCopy(nullptr);
         return false;
-    }}, {{ KEY_C, Keybind::kmControl }});
+    }, false}, {{ KEY_C, Keybind::kmControl }});
 
     this->addEditorKeybind({ "Cut", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode) {
@@ -338,7 +338,7 @@ void KeybindManager::loadDefaultKeybinds() {
             ui->onDeleteSelected(nullptr);
         }
         return false;
-    }}, {});
+    }, false}, {});
 
     this->addEditorKeybind({ "Paste", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
@@ -548,6 +548,15 @@ std::vector<KeybindCallback*> const& KeybindManager::getCallbacks(KeybindType ty
     return m_mCallbacks[type];
 }
 
+std::vector<KeybindCallback*> KeybindManager::getAllCallbacks() {
+    CallbackList res;
+
+    for (auto const& [_, c] : m_mCallbacks)
+        res.insert(res.end(), c.begin(), c.end());
+
+    return res;
+}
+
 KeybindList KeybindManager::getKeybindsForCallback(
     KeybindType type, KeybindCallback* cb
 ) {
@@ -680,16 +689,6 @@ void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, b
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
-        if (target.bind->repeatable) {
-            if (keydown) {
-                if (!m_mHeldKeys[target.type].keys.count(bind.key))
-                    m_mHeldKeys[target.type].keys[bind.key] = 0;
-            } else {
-                m_mHeldKeys[target.type].keys.erase(bind.key);
-            }
-            m_mHeldKeys[target.type].ui = ui;
-        }
-
         switch (target.type) {
             case kKBEditor: {
                 if (onlyPlay) break;
@@ -713,16 +712,6 @@ void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bo
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
-        if (target.bind->repeatable) {
-            if (keydown) {
-                if (!m_mHeldKeys[target.type].keys.count(bind.key))
-                    m_mHeldKeys[target.type].keys[bind.key] = 0;
-            } else {
-                m_mHeldKeys[target.type].keys.erase(bind.key);
-            }
-            m_mHeldKeys[target.type].pl = pl;
-        }
-
         switch (target.type) {
             case kKBPlayLayer: {
                 auto c = as<KeybindPlayLayer*>(target.bind);
@@ -735,16 +724,30 @@ void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bo
     }
 }
 
-void KeybindManager::resetToDefault(KeybindType type, KeybindCallback* cb) {
-    this->clearKeybinds(type, cb);
-    for (auto const& bind : cb->defaults)
-        this->addKeybind(type, cb, bind);
+void KeybindManager::resetToDefault(KeybindType type, KeybindCallback* cb, bool resetBinds) {
+    if (resetBinds && cb->defaults.size()) {
+        this->clearKeybinds(type, cb);
+        for (auto const& bind : cb->defaults)
+            this->addKeybind(type, cb, bind);
+    }
+
+    cb->repeatStart = BetterEdit::getKeybindRepeatStart();
+    cb->repeatInterval = BetterEdit::getKeybindRepeatInterval();
+    cb->repeat = BetterEdit::getKeybindRepeatEnabled();
+    cb->repeatChanged = false;
 }
 
 void KeybindManager::resetAllToDefaults() {
     for (auto const& [type, cbs] : m_mCallbacks)
         for (auto const& cb : cbs)
             this->resetToDefault(type, cb);
+}
+
+void KeybindManager::resetUnmodifiedRepeatTimes() {
+    for (auto const& [type, cbs] : m_mCallbacks)
+        for (auto const& cb : cbs)
+            if (!cb->repeatChanged)
+                this->resetToDefault(type, cb, false);
 }
 
 void KeybindManager::handleRepeats(float dt) {
@@ -756,38 +759,44 @@ void KeybindManager::handleRepeats(float dt) {
         return;
     }
 
-    // im sorry what
-    for (auto & [type, hold] : m_mHeldKeys) {
-        for (auto & [k, t] : hold.keys) {
-            hold.keys[k] += static_cast<int>(1 / dt);
-            auto bind = Keybind(k);
-            auto cbs = this->getCallbacksForKeybind(type, bind);
-            for (auto const& cb : cbs) {
-                if (cb->repeatable && cb->repeat) {
-                    if (t >= cb->repeatStart) {
-                        if (
-                            (t - cb->repeatStart) >=
-                            cb->repeatInterval
-                        ) {
-                            hold.keys[k] -= cb->repeatInterval;
-                            switch (type) {
-                                case kKBEditor:
-                                    this->executeEditorCallbacks(
-                                        bind, hold.ui, true
-                                    );
-                                    break;
-                                
-                                case kKBPlayLayer:
-                                    this->executePlayCallbacks(
-                                        bind, hold.pl, true
-                                    );
-                                    break;
-                            }
-                        }
+    for (auto & [key, time] : m_mHeldKeys) {
+        time += dt * 1000.0f;
+
+        auto k = Keybind(key);
+
+        for (auto const& [type, bind] : m_mKeybinds[k]) {
+            if (bind->repeatable && bind->repeat) {
+                if (
+                    (time - bind->repeatStart) >=
+                    0
+                ) {
+                    time -= bind->repeatInterval;
+                    switch (type) {
+                        case kKBEditor: {
+                            auto ui = LevelEditorLayer::get()->getEditorUI();
+                            if (ui)
+                                this->executeEditorCallbacks(k, ui, true);
+                        } break;
+                        
+                        case kKBPlayLayer:
+                            auto pl = PlayLayer::get();
+
+                            if (pl)
+                                this->executePlayCallbacks(k, pl, true);
+                            break;
                     }
                 }
             }
         }
+    }
+}
+
+void KeybindManager::registerKeyPress(enumKeyCodes key, bool down) {
+    if (down) {
+        if (!m_mHeldKeys.count(key))
+            m_mHeldKeys[key] = 0;
+    } else {
+        m_mHeldKeys.erase(key);
     }
 }
 

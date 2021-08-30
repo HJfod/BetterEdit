@@ -51,6 +51,9 @@ using namespace cocos2d::extension;
     __macro__(DontColorGamemodeBorders, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)      \
     __macro__(HighlightTriggers, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(DisableDoubleClick, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
+    __macro__(KeybindRepeatEnabled, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
+    __macro__(KeybindRepeatInterval, int, 300, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1,10000)\
+    __macro__(KeybindRepeatStart, int, 700, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 10000) \
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \

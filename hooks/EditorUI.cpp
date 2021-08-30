@@ -24,6 +24,7 @@ static constexpr const int TOGGLEUI_TAG = 6979;
 static constexpr const int VIEWMODE_BACKBTN_TAG = 59305;
 
 bool g_showUI = true;
+bool g_uiIsVisible = true;
 bool g_hasResetObjectsScale = true;
 std::chrono::time_point<std::chrono::system_clock> g_lastTouchTime
     = std::chrono::system_clock::now();
@@ -32,11 +33,7 @@ std::chrono::time_point<std::chrono::system_clock> g_lastTouchTime
 // TODO: (move shit out to their own files)
 
 void toggleShowUI(EditorUI* self) {
-    self->showUI(
-        !as<CCNode*>(
-            self->m_pHideableUIElementArray->objectAtIndex(0)
-        )->isVisible()
-    );
+    self->showUI(!g_uiIsVisible);
 }
 
 CCPoint getShowButtonPosition(EditorUI* self) {
@@ -434,6 +431,8 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     }
 
     GDMAKE_ORIG_V(self, edx, show);
+
+    g_uiIsVisible = show;
 
     if (BetterEdit::isEditorViewOnlyMode()) {
         CCARRAY_FOREACH_B_TYPE(

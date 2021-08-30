@@ -1,18 +1,9 @@
-#include "KeybindRepeatPopup.hpp"
+#include "KeybindSettingsLayer.hpp"
 
-void KeybindRepeatPopup::setup() {
+void KeybindSettingsLayer::setup() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     this->m_bNoElasticity = true;
-
-    auto subTitle = CCLabelBMFont::create(m_pCell->m_pBind->name.c_str(), "bigFont.fnt");
-    subTitle->setColor({ 50, 155, 255 });
-    subTitle->setPosition(
-        winSize.width / 2,
-        winSize.height / 2 + this->m_pLrSize.height / 2 - 45.0f
-    );
-    subTitle->setScale(.5f);
-    this->m_pLayer->addChild(subTitle);
 
     this->m_pLayer->addChild(
         CCNodeConstructor<CCLabelBMFont*>()
@@ -26,9 +17,9 @@ void KeybindRepeatPopup::setup() {
         CCNodeConstructor<InputNode*>()
             .fromNode(InputNode::create(100.0f, "ms"))
             .exec([this](auto i) -> void {
-                i->setString(BetterEdit::formatToString(
-                    this->m_pCell->m_pBind->repeatInterval
-                ).c_str());
+                i->setString(
+                    BetterEdit::getKeybindRepeatIntervalAsString().c_str()
+                );
                 i->getInputNode()->setTag(0);
                 i->getInputNode()->setDelegate(this);
             })
@@ -48,9 +39,9 @@ void KeybindRepeatPopup::setup() {
         CCNodeConstructor<InputNode*>()
             .fromNode(InputNode::create(100.0f, "ms"))
             .exec([this](auto i) -> void {
-                i->setString(BetterEdit::formatToString(
-                    this->m_pCell->m_pBind->repeatStart
-                ).c_str());
+                i->setString(
+                    BetterEdit::getKeybindRepeatStartAsString().c_str()
+                );
                 i->getInputNode()->setTag(1);
                 i->getInputNode()->setDelegate(this);
             })
@@ -59,8 +50,8 @@ void KeybindRepeatPopup::setup() {
     );
 
     GameToolbox::createToggleButton(
-        menu_selector(KeybindRepeatPopup::onEnable),
-        this->m_pCell->m_pBind->repeat,
+        menu_selector(KeybindSettingsLayer::onEnable),
+        BetterEdit::getKeybindRepeatEnabled(),
         this->m_pButtonMenu, this,
         this->m_pLayer, .7f, .4f,
         120.0f, "", false, 0,
@@ -79,28 +70,31 @@ void KeybindRepeatPopup::setup() {
                     .scale(.8f)
                     .done(),
                 this,
-                (SEL_MenuHandler)&KeybindRepeatPopup::onClose
+                (SEL_MenuHandler)&KeybindSettingsLayer::onClose
             ))
             .move(0.0f, - this->m_pLrSize.height / 2 + 25.0f)
             .done()
     );
 }
 
-void KeybindRepeatPopup::onEnable(CCObject* pSender) {
-    this->m_pCell->m_pBind->repeat =
-        !as<CCMenuItemToggler*>(pSender)->isToggled();
+void KeybindSettingsLayer::onClose(CCObject* pSender) {
+    KeybindManager::get()->resetUnmodifiedRepeatTimes();
 
-    this->m_pCell->m_pBind->repeatChanged = true;
-    this->m_pCell->updateMenu();
+    BrownAlertDelegate::onClose(pSender);
 }
 
-void KeybindRepeatPopup::textChanged(CCTextInputNode* input) {
+void KeybindSettingsLayer::onEnable(CCObject* pSender) {
+    BetterEdit::setKeybindRepeatEnabled(
+        !as<CCMenuItemToggler*>(pSender)->isToggled()
+    );
+}
+
+void KeybindSettingsLayer::textChanged(CCTextInputNode* input) {
     switch (input->getTag()) {
         case 0: {
             if (input->getString() && strlen(input->getString())) {
                 try {
-                this->m_pCell->m_pBind->repeatInterval =
-                    std::stoi(input->getString());
+                BetterEdit::setKeybindRepeatIntervalFromString(input->getString());
                 } catch (...) {}
             }
         } break;
@@ -108,24 +102,19 @@ void KeybindRepeatPopup::textChanged(CCTextInputNode* input) {
         case 1: {
             if (input->getString() && strlen(input->getString())) {
                 try {
-                this->m_pCell->m_pBind->repeatStart =
-                    std::stoi(input->getString());
+                BetterEdit::setKeybindRepeatStartFromString(input->getString());
                 } catch (...) {}
             }
         } break;
     }
-
-    this->m_pCell->m_pBind->repeatChanged = true;
-    this->m_pCell->updateMenu();
 }
 
-KeybindRepeatPopup* KeybindRepeatPopup::create(KeybindCell* cell) {
-    auto ret = new KeybindRepeatPopup;
+KeybindSettingsLayer* KeybindSettingsLayer::create() {
+    auto ret = new KeybindSettingsLayer;
 
     if (
         ret &&
-        ((ret->m_pCell = cell) || true) &&
-        ret->init(220.0f, 240.0f, "GJ_square01.png", "Repeat Keybind")
+        ret->init(220.0f, 240.0f, "GJ_square01.png", "Keybind Settings")
     ) {
         ret->autorelease();
         return ret;

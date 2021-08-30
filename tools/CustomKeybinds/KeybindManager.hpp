@@ -41,10 +41,11 @@ struct KeybindCallback {
     int id;
     std::string name;
     KeybindList defaults;
-    bool repeat = true;
     bool repeatable = true;
-    int repeatInterval = 500;
-    int repeatStart = 1000;
+    bool repeatChanged = false;
+    bool repeat = BetterEdit::getKeybindRepeatEnabled();
+    int repeatInterval = BetterEdit::getKeybindRepeatInterval();
+    int repeatStart = BetterEdit::getKeybindRepeatStart();
 
     bool operator==(KeybindCallback const&) const;
 
@@ -73,14 +74,17 @@ struct KeybindEditor : public KeybindCallback {
     ) {
         this->name = keybind;
         this->call_b = bind;
+        this->repeatable = false;
     }
-
+    
     inline KeybindEditor(
         std::string const& keybind,
-        decltype(call) bind
+        decltype(call) bind,
+        bool isRepeatable = true
     ) {
         this->name = keybind;
         this->call = bind;
+        this->repeatable = isRepeatable;
     }
 };
 
@@ -98,6 +102,7 @@ struct KeybindPlayLayer : public KeybindCallback {
         this->call_e = copy.call_e;
         this->id = copy.id;
         this->editor = alsoInEditor;
+        this->repeatable = copy.repeatable;
     }
 
     inline KeybindPlayLayer(
@@ -134,12 +139,6 @@ class KeybindManager : public GManager {
             KeybindCallback* bind;
         };
 
-        struct Hold {
-            std::unordered_map<enumKeyCodes, int> keys;
-            EditorUI* ui;
-            PlayLayer* pl;
-        };
-
     protected:
         std::unordered_map<KeybindType, CallbackList> m_mCallbacks;
         std::unordered_map<Keybind, std::vector<Target>> m_mKeybinds;
@@ -148,7 +147,7 @@ class KeybindManager : public GManager {
             KeybindType,
             std::unordered_map<std::string, KeybindList>
         > m_mLoadedBinds;
-        std::unordered_map<KeybindType, Hold> m_mHeldKeys;
+        std::unordered_map<enumKeyCodes, float> m_mHeldKeys;
 
         bool init();
 
@@ -167,6 +166,7 @@ class KeybindManager : public GManager {
         void addGlobalKeybind(KeybindGlobal, KeybindList const&);
 
         CallbackList const& getCallbacks(KeybindType);
+        CallbackList getAllCallbacks();
         CallbackList getCallbacksForKeybind(KeybindType, Keybind const&);
         KeybindList getKeybindsForCallback(KeybindType, KeybindCallback*);
         size_t getIndexOfCallback(KeybindType, KeybindCallback*);
@@ -176,9 +176,11 @@ class KeybindManager : public GManager {
         void clearKeybinds(KeybindType, KeybindCallback*);
         void executeEditorCallbacks(Keybind const&, EditorUI*, bool keydown, bool onlyPlay = false);
         void executePlayCallbacks(Keybind const&, PlayLayer*, bool keydown);
-        void resetToDefault(KeybindType, KeybindCallback*);
+        void resetToDefault(KeybindType, KeybindCallback*, bool = true);
         void resetAllToDefaults();
+        void resetUnmodifiedRepeatTimes();
         void handleRepeats(float);
+        void registerKeyPress(enumKeyCodes, bool);
 
         static KeybindManager* get();
         static bool initGlobal();

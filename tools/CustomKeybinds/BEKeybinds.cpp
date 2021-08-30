@@ -170,6 +170,31 @@ void loadBEKeybinds() {
     g_pSelectedObjects = CCArray::create();
     g_pSelectedObjects->retain();
 
+    KeybindManager::get()->addEditorKeybind({ "Rotate 45 CW", [](EditorUI* ui) -> bool {
+        ui->transformObjectCall(kEditCommandRotateCW45);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Rotate 45 CCW", [](EditorUI* ui) -> bool {
+        ui->transformObjectCall(kEditCommandRotateCCW45);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Rotate Snap", [](EditorUI* ui) -> bool {
+        ui->transformObjectCall(kEditCommandRotateSnap);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Show Rotate Control", [](EditorUI* ui) -> bool {
+        ui->activateRotationControl(nullptr);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Show Scale Control", [](EditorUI* ui) -> bool {
+        ui->activateScaleControl(nullptr);
+        return false;
+    }, false}, {});
+
     KeybindManager::get()->addEditorKeybind({ "Cancel Autosave", [](EditorUI* ui) -> bool {
         if (getAutoSaveTimer(ui)->cancellable()) {
             getAutoSaveTimer(ui)->cancel();
@@ -177,7 +202,7 @@ void loadBEKeybinds() {
         }
         
         return false;
-    }}, {{ KEY_Escape, 0 }});
+    }, false}, {{ KEY_Escape, 0 }});
 
     KeybindManager::get()->addEditorKeybind({ "Scroll Zoom Modifier", [](EditorUI* ui) -> bool {
         return false;
@@ -205,25 +230,25 @@ void loadBEKeybinds() {
         saveLabel->release();
         
         return false;
-    }}, {});
+    }, false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select All", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->selectAll();
         return false;
-    }}, {});
+    }, false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select All Left", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->selectAllWithDirection(false);
         return false;
-    }}, {});
+    }, false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select All Right", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->selectAllWithDirection(true);
         return false;
-    }}, {});
+    }, false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select Object Left", [](EditorUI* ui) -> bool {
         selectObjectDirection(ui, kDirLeft);
@@ -284,13 +309,86 @@ void loadBEKeybinds() {
         return false;
     }}, {});
 
-    KeybindManager::get()->addEditorKeybind({ "Increment Hue", [](EditorUI* ui) -> bool {
-        // todo
-        return false;
-    }}, {});
+    // KeybindManager::get()->addEditorKeybind({ "Increment Hue", [](EditorUI* ui) -> bool {
+    //     // todo
+    //     return false;
+    // }}, {});
 
-    KeybindManager::get()->addEditorKeybind({ "Repeat Copy + Paste", [](EditorUI* ui) -> bool {
-        // todo
+    // KeybindManager::get()->addEditorKeybind({ "Repeat Copy + Paste", [](EditorUI* ui) -> bool {
+    //     // todo
+    //     return false;
+    // }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Open Level Settings", [](EditorUI* ui) -> bool {
+        ui->onSettings(nullptr);
         return false;
-    }}, {});
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Build Helper", [](EditorUI* ui) -> bool {
+        ui->dynamicGroupUpdate(false);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Create Base", [](EditorUI* ui) -> bool {
+        ui->createRockBase();
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Create Edges", [](EditorUI* ui) -> bool {
+        ui->createRockEdges();
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Create Outline", [](EditorUI* ui) -> bool {
+        ui->createRockOutline();
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Uncheck All", [](EditorUI* ui) -> bool {
+        auto p = EditorPauseLayer::create(ui->m_pEditorLayer);
+        p->uncheckAllPortals(nullptr);
+        p->release();
+
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Copy Values", [](EditorUI* ui) -> bool {
+        ui->onCopyState(nullptr);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Paste State", [](EditorUI* ui) -> bool {
+        ui->onPasteState(nullptr);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Paste Color", [](EditorUI* ui) -> bool {
+        ui->onPasteColor(nullptr);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Toggle HSV Picker", [](EditorUI* ui) -> bool {
+        ui->editColor(nullptr);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Link Objects", [](EditorUI* ui) -> bool {
+        ui->onGroupSticky(nullptr);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Unlink Objects", [](EditorUI* ui) -> bool {
+        ui->onUngroupSticky(nullptr);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Go To Layer", [](EditorUI* ui) -> bool {
+        ui->onGoToLayer(nullptr);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Go To Base Layer", [](EditorUI* ui) -> bool {
+        ui->onGoToBaseLayer(nullptr);
+        return false;
+    }, false}, {});
 }
