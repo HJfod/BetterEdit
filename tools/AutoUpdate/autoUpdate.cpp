@@ -36,9 +36,6 @@ void UpdateChecker::onCheckLatestRelease(CCHttpClient*, CCHttpResponse* res) {
         auto oldVer = getVersionInt(jsond["tag_name"]);
         auto newVer = getVersionInt("GDMAKE_PROJECT_VERSION");
 
-        std::cout << oldVer << " <=> " << newVer << " = ";
-        std::cout << (oldVer <=> newVer)._Value << "\n";
-
     } else
         BetterEdit::sharedState()->scheduleError(
             BetterEdit::kScheduleTimeMenuLayer,
