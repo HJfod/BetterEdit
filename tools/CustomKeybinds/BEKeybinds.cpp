@@ -1,5 +1,6 @@
 #include "BEKeybinds.hpp"
 #include "../AutoSave/autoSave.hpp"
+#include "../../hooks/EditorUI.hpp"
 
 enum Direction {
     kDirLeft, kDirRight, kDirUp, kDirDown,
@@ -206,23 +207,90 @@ void loadBEKeybinds() {
         return false;
     }}, {});
 
+    KeybindManager::get()->addEditorKeybind({ "Select All", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->selectAll();
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Select All Left", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->selectAllWithDirection(false);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Select All Right", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->selectAllWithDirection(true);
+        return false;
+    }}, {});
+
     KeybindManager::get()->addEditorKeybind({ "Select Object Left", [](EditorUI* ui) -> bool {
         selectObjectDirection(ui, kDirLeft);
         return false;
-    }}, {{ KEY_Left, Keybind::kmControl }});
+    }}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select Object Right", [](EditorUI* ui) -> bool {
         selectObjectDirection(ui, kDirRight);
         return false;
-    }}, {{ KEY_Right, Keybind::kmControl }});
+    }}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select Object Up", [](EditorUI* ui) -> bool {
         selectObjectDirection(ui, kDirUp);
         return false;
-    }}, {{ KEY_Up, Keybind::kmControl }});
+    }}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select Object Down", [](EditorUI* ui) -> bool {
         selectObjectDirection(ui, kDirDown);
         return false;
-    }}, {{ KEY_Down, Keybind::kmControl }});
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Toggle UI", [](EditorUI* ui) -> bool {
+        toggleShowUI(ui);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Show UI", [](EditorUI* ui) -> bool {
+        ui->showUI(true);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Hide UI", [](EditorUI* ui) -> bool {
+        ui->showUI(false);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Preview Mode", [](EditorUI* ui) -> bool {
+        b = GameManager::sharedState()->getGameVariable("0036");
+
+        GameManager::sharedState()->setGameVariable("0036", !b);
+
+        ui->m_pEditorLayer->updateEditorMode();
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Edit Object", [](EditorUI* ui) -> bool {
+        ui->editObject(nullptr);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Edit Group", [](EditorUI* ui) -> bool {
+        ui->editGroup(nullptr);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Edit Special", [](EditorUI* ui) -> bool {
+        ui->editObject2(nullptr);
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Increment Hue", [](EditorUI* ui) -> bool {
+        // todo
+        return false;
+    }}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Repeat Copy + Paste", [](EditorUI* ui) -> bool {
+        // todo
+        return false;
+    }}, {});
 }

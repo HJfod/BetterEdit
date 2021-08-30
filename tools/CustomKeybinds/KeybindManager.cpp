@@ -326,24 +326,6 @@ void KeybindManager::loadDefaultKeybinds() {
         return false;
     }}, {{ KEY_D, Keybind::kmAlt }});
 
-    this->addEditorKeybind({ "Select All", [](EditorUI* ui) -> bool {
-        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
-            ui->selectAll();
-        return false;
-    }}, {});
-
-    this->addEditorKeybind({ "Select All Left", [](EditorUI* ui) -> bool {
-        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
-            ui->selectAllWithDirection(false);
-        return false;
-    }}, {});
-
-    this->addEditorKeybind({ "Select All Right", [](EditorUI* ui) -> bool {
-        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
-            ui->selectAllWithDirection(true);
-        return false;
-    }}, {});
-
     this->addEditorKeybind({ "Copy", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->onCopy(nullptr);

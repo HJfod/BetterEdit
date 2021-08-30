@@ -12,6 +12,7 @@
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include "../tools/CustomKeybinds/KeybindManager.hpp"
 #include "EditorPauseLayer.hpp"
+#include "EditorUI.hpp"
 #include <thread>
 #include <chrono>
 
@@ -29,6 +30,10 @@ std::chrono::time_point<std::chrono::system_clock> g_lastTouchTime
 
 // TODO: Clean up this whole file because man is it ugly
 // TODO: (move shit out to their own files)
+
+void toggleShowUI(EditorUI* self) {
+    self->showUI(!g_showUI);
+}
 
 CCPoint getShowButtonPosition(EditorUI* self) {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
