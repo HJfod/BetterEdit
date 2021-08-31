@@ -136,7 +136,7 @@ class KeybindManager : public GManager {
         using CallbackList = std::vector<KeybindCallback*>;
         struct Target {
             KeybindType type;
-            KeybindCallback* bind;
+            KeybindCallback* bind = nullptr;
         };
 
     protected:
@@ -170,6 +170,7 @@ class KeybindManager : public GManager {
         CallbackList getCallbacksForKeybind(KeybindType, Keybind const&);
         KeybindList getKeybindsForCallback(KeybindType, KeybindCallback*);
         size_t getIndexOfCallback(KeybindType, KeybindCallback*);
+        Target getCallbackByName(std::string const&);
         void addKeybind(KeybindType, KeybindCallback*, Keybind const&);
         void removeKeybind(KeybindType, KeybindCallback*, Keybind const&);
         void editKeybind(KeybindType, KeybindCallback*, Keybind const& old, Keybind const& rep);

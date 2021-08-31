@@ -29,7 +29,7 @@ ButtonSprite* createKeybindBtnSprite(const char* text, bool gold = true, const c
     }
 
     auto spr = ButtonSprite::create(
-        text, gold ? 0 : 18, !gold,
+        text, gold ? 0 : 18, !gold, 
         gold ? "goldFont.fnt" : "bigFont.fnt", sprName,
         0, gold ? .8f : .6f
     );

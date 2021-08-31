@@ -11,6 +11,7 @@
 #include "../tools/AutoSave/Backup/BackupViewLayer.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include "../tools/CustomKeybinds/KeybindManager.hpp"
+#include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
 #include "EditorPauseLayer.hpp"
 #include "EditorUI.hpp"
 #include <thread>
@@ -80,7 +81,7 @@ class EditorUI_CB : public EditorUI {
             g_showUI = !g_showUI;
             this->showUI(g_showUI);
 
-            auto btn = as<CCMenuItemSpriteExtra*>(this->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG));
+            auto btn = as<CCMenuItemSpriteExtra*>(this->m_pSwipeBtn->getParent()->getChildByTag(TOGGLEUI_TAG));
 
             if (btn && !g_showUI)
                 updateToggleButtonSprite(btn);
@@ -210,8 +211,8 @@ void __fastcall EditorUI_clickOnPosition(EditorUI* self, edx_t edx, CCPoint poin
 GDMAKE_HOOK(0x76090)
 void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
     saveClipboard(self);
-
     resetSliderPercent(self);
+    clearEditorKeybindIndicators(self);
 
     return GDMAKE_ORIG_V(self);
 }
@@ -310,7 +311,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     self->addChild(currentZoomLabel);
 
     CCMenuItemSpriteExtra* toggleBtn;
-    self->m_pButton4->getParent()->addChild(
+    self->m_pSwipeBtn->getParent()->addChild(
         CCNodeConstructor<CCMenuItemSpriteExtra*>()
             .fromNode(
                 CCMenuItemSpriteExtra::create(
@@ -340,6 +341,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     loadPasteRepeatButton(self);
     loadAutoSaveTimer(self);
     loadVisibilityTab(self);
+    loadEditorKeybindIndicators(self);
 
     if (BetterEdit::isEditorViewOnlyMode()) {
         auto viewOnlyLabel = CCLabelBMFont::create("View-Only Mode", "bigFont.fnt");
@@ -445,7 +447,7 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     }
 
     auto toggleBtn = as<CCMenuItemSpriteExtra*>(
-        self->m_pButton4->getParent()->getChildByTag(TOGGLEUI_TAG)
+        self->m_pSwipeBtn->getParent()->getChildByTag(TOGGLEUI_TAG)
     );
 
     self->m_pTabsMenu->setVisible(self->m_nSelectedMode == 2 && show);

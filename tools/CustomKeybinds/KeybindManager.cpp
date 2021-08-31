@@ -808,6 +808,20 @@ void KeybindManager::registerKeyPress(enumKeyCodes key, bool down) {
     }
 }
 
+KeybindManager::Target KeybindManager::getCallbackByName(std::string const& cbName) {
+    for (auto const& [type, binds] : this->m_mCallbacks) {
+        for (auto const& bind : binds) {
+            if (bind->name == cbName)
+                return {
+                    type,
+                    bind
+                };
+        }
+    }
+
+    return KeybindManager::Target();
+}
+
 KeybindManager* KeybindManager::get() {
     return g_manager;
 }
