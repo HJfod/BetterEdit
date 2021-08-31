@@ -226,14 +226,14 @@ void KeybindManager::loadDefaultKeybinds() {
     }}, {{ KEY_Up, 0 }});
 
     this->addPlayKeybind({ "Place Checkpoint", [](PlayLayer* pl, bool push) -> bool {
-        if (push) {
+        if (push && pl->m_isPracticeMode) {
             pl->m_uiLayer->onCheck(nullptr);
         }
         return false;
     }}, {{ KEY_Z, 0 }});
 
     this->addPlayKeybind({ "Delete Checkpoint", [](PlayLayer* pl, bool push) -> bool {
-        if (push) {
+        if (push && pl->m_isPracticeMode) {
             pl->m_uiLayer->onDeleteCheck(nullptr);
         }
         return false;
