@@ -174,27 +174,27 @@ void loadBEKeybinds() {
     KeybindManager::get()->addEditorKeybind({ "Rotate 45 CW", [](EditorUI* ui) -> bool {
         ui->transformObjectCall(kEditCommandRotateCW45);
         return false;
-    }}, {});
+    }, "editor.modify"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Rotate 45 CCW", [](EditorUI* ui) -> bool {
         ui->transformObjectCall(kEditCommandRotateCCW45);
         return false;
-    }}, {});
+    }, "editor.modify"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Rotate Snap", [](EditorUI* ui) -> bool {
         ui->transformObjectCall(kEditCommandRotateSnap);
         return false;
-    }}, {});
+    }, "editor.modify"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Show Rotate Control", [](EditorUI* ui) -> bool {
         ui->activateRotationControl(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.ui", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Show Scale Control", [](EditorUI* ui) -> bool {
         ui->activateScaleControl(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.ui", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Cancel Autosave", [](EditorUI* ui) -> bool {
         if (getAutoSaveTimer(ui)->cancellable()) {
@@ -203,15 +203,15 @@ void loadBEKeybinds() {
         }
         
         return false;
-    }, false}, {{ KEY_Escape, 0 }});
+    }, "editor.global", false}, {{ KEY_Escape, 0 }});
 
     KeybindManager::get()->addEditorKeybind({ "Scroll Zoom Modifier", [](EditorUI* ui) -> bool {
         return false;
-    }}, {{ KEY_None, Keybind::kmControl }});
+    }, "editor.ui"}, {{ KEY_None, Keybind::kmControl }});
 
     KeybindManager::get()->addEditorKeybind({ "Scroll Horizontal Modifier", [](EditorUI* ui) -> bool {
         return false;
-    }}, {{ KEY_None, Keybind::kmShift }});
+    }, "editor.ui"}, {{ KEY_None, Keybind::kmShift }});
 
     KeybindManager::get()->addEditorKeybind({ "Save Level", [](EditorUI* ui) -> bool {
         auto saveLabel = CCLabelBMFont::create("Saving...", "bigFont.fnt");
@@ -231,60 +231,60 @@ void loadBEKeybinds() {
         saveLabel->release();
         
         return false;
-    }, false}, {});
+    }, "editor.global", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select All", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->selectAll();
         return false;
-    }, false}, {});
+    }, "editor.select", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select All Left", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->selectAllWithDirection(false);
         return false;
-    }, false}, {});
+    }, "editor.select", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select All Right", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->selectAllWithDirection(true);
         return false;
-    }, false}, {});
+    }, "editor.select", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select Object Left", [](EditorUI* ui) -> bool {
         selectObjectDirection(ui, kDirLeft);
         return false;
-    }}, {});
+    }, "editor.select"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select Object Right", [](EditorUI* ui) -> bool {
         selectObjectDirection(ui, kDirRight);
         return false;
-    }}, {});
+    }, "editor.select"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select Object Up", [](EditorUI* ui) -> bool {
         selectObjectDirection(ui, kDirUp);
         return false;
-    }}, {});
+    }, "editor.select"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Select Object Down", [](EditorUI* ui) -> bool {
         selectObjectDirection(ui, kDirDown);
         return false;
-    }}, {});
+    }, "editor.select"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Toggle UI", [](EditorUI* ui) -> bool {
         toggleShowUI(ui);
         return false;
-    }}, {});
+    }, "editor.ui"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Show UI", [](EditorUI* ui) -> bool {
         ui->showUI(true);
         return false;
-    }}, {});
+    }, "editor.ui"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Hide UI", [](EditorUI* ui) -> bool {
         ui->showUI(false);
         return false;
-    }}, {});
+    }, "editor.ui"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Preview Mode", [](EditorUI* ui) -> bool {
         auto b = GameManager::sharedState()->getGameVariable("0036");
@@ -293,22 +293,22 @@ void loadBEKeybinds() {
 
         ui->m_pEditorLayer->updateEditorMode();
         return false;
-    }}, {});
+    }, "editor.ui"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Edit Object", [](EditorUI* ui) -> bool {
         ui->editObject(nullptr);
         return false;
-    }}, {});
+    }, "editor.modify"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Edit Group", [](EditorUI* ui) -> bool {
         ui->editGroup(nullptr);
         return false;
-    }}, {});
+    }, "editor.modify"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Edit Special", [](EditorUI* ui) -> bool {
         ui->editObject2(nullptr);
         return false;
-    }}, {});
+    }, "editor.modify"}, {});
 
     // KeybindManager::get()->addEditorKeybind({ "Increment Hue", [](EditorUI* ui) -> bool {
     //     // todo
@@ -323,27 +323,27 @@ void loadBEKeybinds() {
     KeybindManager::get()->addEditorKeybind({ "Open Level Settings", [](EditorUI* ui) -> bool {
         ui->onSettings(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.global", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Build Helper", [](EditorUI* ui) -> bool {
         ui->dynamicGroupUpdate(false);
         return false;
-    }, false}, {});
+    }, "editor.special", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Create Base", [](EditorUI* ui) -> bool {
         ui->createRockBase();
         return false;
-    }, false}, {});
+    }, "editor.special", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Create Edges", [](EditorUI* ui) -> bool {
         ui->createRockEdges();
         return false;
-    }, false}, {});
+    }, "editor.special", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Create Outline", [](EditorUI* ui) -> bool {
         ui->createRockOutline();
         return false;
-    }, false}, {});
+    }, "editor.special", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Uncheck All", [](EditorUI* ui) -> bool {
         auto p = EditorPauseLayer::create(ui->m_pEditorLayer);
@@ -351,50 +351,50 @@ void loadBEKeybinds() {
         p->release();
 
         return false;
-    }, false}, {});
+    }, "editor.global", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Copy Values", [](EditorUI* ui) -> bool {
         ui->onCopyState(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.modify", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Paste State", [](EditorUI* ui) -> bool {
         ui->onPasteState(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.modify", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Paste Color", [](EditorUI* ui) -> bool {
         ui->onPasteColor(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.modify", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Toggle HSV Picker", [](EditorUI* ui) -> bool {
         ui->editColor(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.ui", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Link Objects", [](EditorUI* ui) -> bool {
         ui->onGroupSticky(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.modify", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Unlink Objects", [](EditorUI* ui) -> bool {
         ui->onUngroupSticky(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.modify", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Go To Layer", [](EditorUI* ui) -> bool {
         ui->onGoToLayer(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.ui", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Go To Base Layer", [](EditorUI* ui) -> bool {
         ui->onGoToBaseLayer(nullptr);
         return false;
-    }, false}, {});
+    }, "editor.ui", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Open Advanced Filter", [](EditorUI* ui) -> bool {
         AdvancedFilterLayer::create()->show();
         return false;
-    }, false}, {});
+    }, "editor.modify", false}, {});
 }

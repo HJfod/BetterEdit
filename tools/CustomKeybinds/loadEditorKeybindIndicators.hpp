@@ -8,4 +8,4 @@ void updateEditorKeybindIndicators();
 void showEditorKeybindIndicators(bool);
 // lol
 void showEditorKeybindIndicatorIfItsTargetIsBeingHovered();
-void addIndicator(EditorUI*, CCNode* target, const char* keybind);
+void addKeybindIndicator(EditorUI*, CCNode* target, const char* keybind);

@@ -40,6 +40,7 @@ using KeybindList = std::set<Keybind>;
 struct KeybindCallback {
     int id;
     std::string name;
+    std::string subcategory = "";
     KeybindList defaults;
     bool repeatable = true;
     bool repeatChanged = false;
@@ -70,21 +71,25 @@ struct KeybindEditor : public KeybindCallback {
 
     inline KeybindEditor(
         std::string const& keybind,
-        decltype(call_b) bind
+        decltype(call_b) bind,
+        std::string const& cat = ""
     ) {
         this->name = keybind;
         this->call_b = bind;
         this->repeatable = false;
+        this->subcategory = cat;
     }
     
     inline KeybindEditor(
         std::string const& keybind,
         decltype(call) bind,
+        std::string const& cat = "",
         bool isRepeatable = true
     ) {
         this->name = keybind;
         this->call = bind;
         this->repeatable = isRepeatable;
+        this->subcategory = cat;
     }
 };
 
@@ -166,6 +171,8 @@ class KeybindManager : public GManager {
         void addGlobalKeybind(KeybindGlobal, KeybindList const&);
 
         CallbackList const& getCallbacks(KeybindType);
+        std::map<std::string, CallbackList> getCallbacksSorted(KeybindType);
+        std::string getCategoryName(std::string const&);
         CallbackList getAllCallbacks();
         CallbackList getCallbacksForKeybind(KeybindType, Keybind const&);
         KeybindList getKeybindsForCallback(KeybindType, KeybindCallback*);

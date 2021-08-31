@@ -46,8 +46,8 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
 
     m_pBGLayer->setOpacity(255);
 
-    auto name = bind->text;
-    if (!name)
+    auto name = bind->text.c_str();
+    if (!bind->text.size())
         name = m_pBind->name.c_str();
 
     auto nameLabel = CCLabelBMFont::create(name, "bigFont.fnt");
@@ -64,7 +64,7 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
     m_pMenu->setPosition(m_fWidth / 2, m_fHeight / 2);
     this->m_pLayer->addChild(m_pMenu);
 
-    if (m_pItem->text) {
+    if (m_pItem->text.size()) {
         auto foldBtn = CCMenuItemToggler::create(
             createKeybindBtnSprite("-", false),
             createKeybindBtnSprite("+", false),
@@ -80,7 +80,7 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
 }
 
 void KeybindCell::onFold(CCObject* pSender) {
-    if (m_pItem->text) {
+    if (m_pItem->text.size()) {
         m_pItem->delegate->m_mFoldedCategories[m_pItem->text] =
             !as<CCMenuItemToggler*>(pSender)->isToggled();
 

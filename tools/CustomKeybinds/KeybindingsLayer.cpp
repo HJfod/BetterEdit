@@ -58,7 +58,12 @@ bool matchSearchQuery(KeybindType type, KeybindCallback* bind) {
 }
 
 void KeybindingsLayer_CB::reloadList() {
-    this->m_pLayer->removeChildByTag(KBLLIST_TAG);
+    auto oldList = as<KeybindListView*>(this->m_pLayer->getChildByTag(KBLLIST_TAG));
+    auto y = 0.0f;
+
+    if (oldList) {
+        oldList->removeFromParent();
+    }
 
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     auto delegate = as<KeybindingsLayerDelegate*>(this->getChildByTag(KBLDELEGATE_TAG));
@@ -85,16 +90,30 @@ void KeybindingsLayer_CB::reloadList() {
 
     arr->addObject(new KeybindItem("Editor", delegate));
     if (!delegate->m_mFoldedCategories["Editor"])
-        for (auto bind : KeybindManager::get()->getCallbacks(kKBEditor)) {
-            if (
-                !searchQuery.size() || matchSearchQuery(kKBEditor, bind)
-            )
-                arr->addObject(new KeybindItem(bind, kKBEditor, delegate));
+        for (auto const& [cat, binds] : KeybindManager::get()->getCallbacksSorted(kKBEditor)) {
+            arr->addObject(
+                new KeybindItem(
+                    KeybindManager::get()->getCategoryName(cat).c_str(),
+                    delegate
+                )
+            );
+
+            if (!delegate->m_mFoldedCategories[
+                KeybindManager::get()->getCategoryName(cat)
+            ])
+                for (auto const& bind : binds) {
+                    if (!searchQuery.size() || matchSearchQuery(kKBEditor, bind))
+                        arr->addObject(new KeybindItem(bind, kKBEditor, delegate));
+                }
         }
 
     auto list = KeybindListView::create(arr, 340.0f, 180.0f);
     list->setPosition(winSize / 2 - CCPoint { 170.0f, 120.0f });
     list->setTag(KBLLIST_TAG);
+    list->m_pTableView->m_pContentLayer->setPositionY(
+        list->m_pTableView->m_pContentLayer->getPositionY() +
+        y
+    );
     this->m_pLayer->addChild(list);
 
     CATCH_NULL(as<Scrollbar*>(this->m_pLayer->getChildByTag(KBLSCROLLBAR_TAG)))

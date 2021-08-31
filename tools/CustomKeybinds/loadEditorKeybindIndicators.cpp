@@ -2,8 +2,10 @@
 #include "KeybindNode.hpp"
 #include "../../hooks/EditorPauseLayer.hpp"
 
-void addIndicator(EditorUI* ui, CCNode* target, const char* keybind) {
-    ui->addChild(KeybindNode::create(target, keybind));
+void addKeybindIndicator(EditorUI* ui, CCNode* target, const char* keybind) {
+    auto k = KeybindNode::create(target, keybind);
+    ui->addChild(k);
+    k->setVisible(shouldShowKeybindIndicator());
 }
 
 void clearEditorKeybindIndicators(EditorUI*) {
@@ -19,43 +21,79 @@ void showEditorKeybindIndicators(bool show) {
 }
 
 void loadEditorKeybindIndicators(EditorUI* ui) {
-    addIndicator(ui, ui->m_pBuildModeBtn, "Build Mode");
-    addIndicator(ui, ui->m_pEditModeBtn, "Edit Mode");
-    addIndicator(ui, ui->m_pDeleteModeBtn, "Delete Mode");
-    addIndicator(ui, ui->m_pSwipeBtn, "Swipe");
-    addIndicator(ui, ui->m_pFreeMoveBtn, "Free Move");
-    addIndicator(ui, ui->m_pDeselectBtn, "Deselect");
-    addIndicator(ui, ui->m_pSnapBtn, "Snap");
-    addIndicator(ui, ui->m_pRotateBtn, "Rotate");
-    addIndicator(ui, ui->m_pPlaybackBtn, "Playback Music");
-    addIndicator(ui, ui->m_pPlaytestBtn, "Playtest");
-    addIndicator(ui, ui->m_pPlaytestStopBtn, "Playtest");
-    addIndicator(ui, ui->m_pTrashBtn, "Delete Selected");
-    addIndicator(ui, ui->m_pLinkBtn, "Link Objects");
-    addIndicator(ui, ui->m_pUnlinkBtn, "Unlink Objects");
-    addIndicator(ui, ui->m_pUndoBtn, "Undo");
-    addIndicator(ui, ui->m_pRedoBtn, "Redo");
-    addIndicator(ui, ui->m_pEditObjectBtn, "Edit Object");
-    addIndicator(ui, ui->m_pEditGroupBtn, "Edit Group");
-    addIndicator(ui, ui->m_pEditHSVBtn, "Toggle HSV Picker");
-    addIndicator(ui, ui->m_pEditSpecialBtn, "Edit Special");
-    addIndicator(ui, ui->m_pCopyPasteBtn, "Duplicate");
-    addIndicator(ui, ui->m_pCopyBtn, "Copy");
-    addIndicator(ui, ui->m_pPasteBtn, "Paste");
-    addIndicator(ui, ui->m_pCopyValuesBtn, "Copy Values");
-    addIndicator(ui, ui->m_pPasteStateBtn, "Paste State");
-    addIndicator(ui, ui->m_pPasteColorBtn, "Paste Color");
-    addIndicator(ui, ui->m_pGoToLayerBtn, "Go To Layer");
-    addIndicator(ui, ui->m_pGuideToggle, "Toggle Guide");
-    addIndicator(ui, ui->m_pLayerNextBtn, "Next Group");
-    addIndicator(ui, ui->m_pLayerPrevBtn, "Previous Group");
-    addIndicator(ui, ui->m_pGoToBaseBtn, "Go To Base Layer");
+    addKeybindIndicator(ui, ui->m_pBuildModeBtn, "Build Mode");
+    addKeybindIndicator(ui, ui->m_pEditModeBtn, "Edit Mode");
+    addKeybindIndicator(ui, ui->m_pDeleteModeBtn, "Delete Mode");
+    addKeybindIndicator(ui, ui->m_pSwipeBtn, "Swipe");
+    addKeybindIndicator(ui, ui->m_pFreeMoveBtn, "Free Move");
+    addKeybindIndicator(ui, ui->m_pDeselectBtn, "Deselect");
+    addKeybindIndicator(ui, ui->m_pSnapBtn, "Snap");
+    addKeybindIndicator(ui, ui->m_pRotateBtn, "Rotate");
+    addKeybindIndicator(ui, ui->m_pPlaybackBtn, "Playback Music");
+    addKeybindIndicator(ui, ui->m_pPlaytestBtn, "Playtest");
+    addKeybindIndicator(ui, ui->m_pPlaytestStopBtn, "Playtest");
+    addKeybindIndicator(ui, ui->m_pTrashBtn, "Delete Selected");
+    addKeybindIndicator(ui, ui->m_pLinkBtn, "Link Objects");
+    addKeybindIndicator(ui, ui->m_pUnlinkBtn, "Unlink Objects");
+    addKeybindIndicator(ui, ui->m_pUndoBtn, "Undo");
+    addKeybindIndicator(ui, ui->m_pRedoBtn, "Redo");
+    addKeybindIndicator(ui, ui->m_pEditObjectBtn, "Edit Object");
+    addKeybindIndicator(ui, ui->m_pEditGroupBtn, "Edit Group");
+    addKeybindIndicator(ui, ui->m_pEditHSVBtn, "Toggle HSV Picker");
+    addKeybindIndicator(ui, ui->m_pEditSpecialBtn, "Edit Special");
+    addKeybindIndicator(ui, ui->m_pCopyPasteBtn, "Duplicate");
+    addKeybindIndicator(ui, ui->m_pCopyBtn, "Copy");
+    addKeybindIndicator(ui, ui->m_pPasteBtn, "Paste");
+    addKeybindIndicator(ui, ui->m_pCopyValuesBtn, "Copy Values");
+    addKeybindIndicator(ui, ui->m_pPasteStateBtn, "Paste State");
+    addKeybindIndicator(ui, ui->m_pPasteColorBtn, "Paste Color");
+    addKeybindIndicator(ui, ui->m_pGoToLayerBtn, "Go To Layer");
+    addKeybindIndicator(ui, ui->m_pGuideToggle, "Toggle Guide");
+    addKeybindIndicator(ui, ui->m_pLayerNextBtn, "Next Group");
+    addKeybindIndicator(ui, ui->m_pLayerPrevBtn, "Previous Group");
+    addKeybindIndicator(ui, ui->m_pGoToBaseBtn, "Go To Base Layer");
+    
+    auto ix = 0;
+    for (auto editKeybind : {
+        "Object Up Small",
+        "Object Down Small",
+        "Object Left Small",
+        "Object Right Small",
+        "Object Up",
+        "Object Down",
+        "Object Left",
+        "Object Right",
+        "Flip X",
+        "Flip Y",
+        "Rotate CW",
+        "Rotate CCW",
+        "Rotate 45 CW",
+        "Rotate 45 CCW",
+        "Object Up Big",
+        "Object Down Big",
+        "Object Left Big",
+        "Object Right Big",
+        "Object Up Tiny",
+        "Object Down Tiny",
+        "Object Left Tiny",
+        "Object Right Tiny",
+        "Rotate",
+        "Rotate Snap",
+        "Show Scale Control",
+    }) {
+        addKeybindIndicator(
+            ui,
+            as<CCNode*>(ui->m_pEditButtonBar->m_pButtonArray->objectAtIndex(ix++)),
+            editKeybind
+        );
+    }
 
-    showEditorKeybindIndicators(shouldShowKeybindIndicator());
+    updateEditorKeybindIndicators();
 }
 
 void showEditorKeybindIndicatorIfItsTargetIsBeingHovered() {
     if (!BetterEdit::getShowKeybindOnHover()) return;
+    if (shouldShowKeybindIndicator()) return;
 
     CCARRAY_FOREACH_B_TYPE(KeybindNode::getList(), node, KeybindNode) {
         auto csize = node->getTarget()->getScaledContentSize();

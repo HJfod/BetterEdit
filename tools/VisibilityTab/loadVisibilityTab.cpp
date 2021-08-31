@@ -2,6 +2,7 @@
 #include "../../hooks/EditorPauseLayer.hpp"
 #include "../RotateSaws/rotateSaws.hpp"
 #include "VisibilityToggle.hpp"
+#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 // for patching stuff
 static constexpr const float f_96 = 96.0f;
@@ -152,6 +153,7 @@ void loadVisibilityTab(EditorUI* self) {
 
     vTabBtn->setTag(4);
     vTabBtn->setPosition(scr.x + item_sep, scr.y);
+    addKeybindIndicator(self, vTabBtn, "View Mode");
 
     self->m_pBuildModeBtn->getParent()->addChild(vTabBtn);
 
@@ -362,5 +364,7 @@ void __fastcall EditorUI_toggleMode(EditorUI* self, edx_t edx, CCObject* pSender
         self->m_pEditButtonBar->setVisible(tag == 3);
         self->updateGridNodeSize();
         self->getChildByTag(VIEWBUTTONBAR_TAG)->setVisible(tag == 4);
+
+        updateEditorKeybindIndicators();
     }
 }

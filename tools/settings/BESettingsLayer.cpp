@@ -84,11 +84,11 @@ void BESettingsLayer::setup() {
     this->addToggle("Rotate Saws", nullptr, BE_SETTING_FUNC_B(RotateSawsInEditor));
     this->addToggle("No Global Clipboard", nullptr, BE_SETTING_FUNC_B(DisableGlobalClipboard));
     // this->addToggle("Disable Position Text", nullptr, BE_SETTING_FUNC_B(DisableEditorPos));
-    this->addToggle(
-        "Enable Ctrl + A",
-        "Pressing Ctrl + A selects all objects",
-        BE_SETTING_FUNC_B(EnableControlA)
-    );
+    // this->addToggle(
+    //     "Enable Ctrl + A",
+    //     "Pressing Ctrl + A selects all objects",
+    //     BE_SETTING_FUNC_B(EnableControlA)
+    // );
     this->addToggle("Disable Zoom Text", nullptr, BE_SETTING_FUNC_B(DisableZoomText));
     this->addToggle("Disable Percentage", nullptr, BE_SETTING_FUNC_B(DisablePercentage));
     this->addToggle("Disable Extra Object Info", nullptr, BE_SETTING_FUNC_B(DisableExtraObjectInfo));
@@ -146,6 +146,11 @@ void BESettingsLayer::setup() {
         "Disable Double Click",
         "Double-clicking an object opens the <cy>Edit Object</c> menu",
         BE_SETTING_FUNC_B(DisableDoubleClick)
+    );
+    this->addToggle(
+        "Show Keybind On Hover",
+        "Hovering a button will show its associated <cy>keybind</c>, if it has one",
+        BE_SETTING_FUNC_B(ShowKeybindOnHover)
     );
 
     this->incrementPageCount(true);

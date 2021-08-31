@@ -12,7 +12,7 @@ struct KeybindItem : public CCObject {
     KeybindCallback* bind;
     KeybindType type;
     KeybindingsLayerDelegate* delegate = nullptr;
-    const char* text;
+    std::string text;
 
     inline KeybindItem(
         KeybindCallback* b,
@@ -21,13 +21,13 @@ struct KeybindItem : public CCObject {
     ) {
         bind = b;
         type = t;
-        text = nullptr;
+        text = "";
         delegate = d;
         this->autorelease();
     }
 
     inline KeybindItem(
-        const char* t,
+        std::string const& t,
         KeybindingsLayerDelegate* d
     ) {
         bind = nullptr;
