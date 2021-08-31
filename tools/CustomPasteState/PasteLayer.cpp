@@ -10,9 +10,6 @@ using namespace cocos2d::extension;
 std::set<PasteLayer::State>* g_pStates = nullptr;
 bool g_bPasteState = false;
 
-template <typename T>
-bool bool_cast(T const v) { return static_cast<bool>(reinterpret_cast<int>(v)); }
-
 void PasteLayer::setup() {
     this->m_pButtonMenu->addChild(
         CCNodeConstructor<CCScale9Sprite*>()
@@ -26,6 +23,8 @@ void PasteLayer::setup() {
             .z(-100)
             .done()
     );
+
+    this->m_bNoElasticity = true;
 
     // this->addStateToggle("Obj ID", PasteLayer::ObjID);
     this->addStateToggle("Group IDs", PasteLayer::Groups);

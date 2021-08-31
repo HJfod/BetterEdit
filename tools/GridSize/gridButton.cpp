@@ -3,6 +3,7 @@
 #include <InputNode.hpp>
 #include <string>
 #include <sstream>
+#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 using namespace gd;
 using namespace gdmake;
@@ -47,28 +48,32 @@ CCMenu* getGridButtonParent(EditorUI* self) {
     return as<CCMenu*>(self->m_pLinkBtn->getParent());
 }
 
+void zoomEditorGrid(EditorUI* ui, bool zoomIn) {
+    auto size = BetterEdit::sharedState()->getGridSize();
+    if (zoomIn)
+        size /= 2;
+    else
+        size *= 2;
+
+    BetterEdit::sharedState()->setGridSize(size);
+    if (!BetterEdit::sharedState()->getAlwaysUseCustomGridSize())
+        BetterEdit::sharedState()->setGridSizeEnabled(size != 30.0f);
+    else
+        BetterEdit::sharedState()->setGridSizeEnabled(true);
+    
+    GameManager::sharedState()->setGameVariable("0038", true);
+    ui->m_pEditorLayer->updateOptions();
+
+    ui->updateGridNodeSize();
+
+    CATCH_NULL(as<CCTextInputNode*>(getGridButtonParent(ui)->getChildByTag(ZOOMINPUT_TAG)))
+        ->setString(BetterEdit::sharedState()->getGridSizeAsString().c_str());
+}
+
 class EditorUI_CB : public EditorUI {
     public:
         void zoomGrid(CCObject* pSender) {
-            auto size = BetterEdit::sharedState()->getGridSize();
-            if (as<int>(as<CCNode*>(pSender)->getUserData()))
-                size /= 2;
-            else
-                size *= 2;
-
-            BetterEdit::sharedState()->setGridSize(size);
-            if (!BetterEdit::sharedState()->getAlwaysUseCustomGridSize())
-                BetterEdit::sharedState()->setGridSizeEnabled(size != 30.0f);
-            else
-                BetterEdit::sharedState()->setGridSizeEnabled(true);
-            
-            GameManager::sharedState()->setGameVariable("0038", true);
-            this->m_pEditorLayer->updateOptions();
-
-            this->updateGridNodeSize();
-
-            CATCH_NULL(as<CCTextInputNode*>(getGridButtonParent(this)->getChildByTag(ZOOMINPUT_TAG)))
-                ->setString(BetterEdit::sharedState()->getGridSizeAsString().c_str());
+            zoomEditorGrid(this, bool_cast(as<CCNode*>(pSender)->getUserData()));
         }
 };
 
@@ -138,6 +143,9 @@ void loadGridButtons(EditorUI* self) {
                 )
             )
             .udata(1)
+            .exec([self](auto t) -> void {
+                addKeybindIndicator(self, t, "Increase Grid Size");
+            })
             .tag(ZOOMIN_TAG)
             .move(getGridButtonPosition(self, 1))
             .done()
@@ -169,6 +177,9 @@ void loadGridButtons(EditorUI* self) {
                     (SEL_MenuHandler)&EditorUI_CB::zoomGrid
                 )
             )
+            .exec([self](auto t) -> void {
+                addKeybindIndicator(self, t, "Decrease Grid Size");
+            })
             .udata(0)
             .tag(ZOOMOUT_TAG)
             .move(getGridButtonPosition(self, -1))

@@ -2,6 +2,7 @@
 #include "LayerManager.hpp"
 #include "LayerViewPopup.hpp"
 #include "../VisibilityTab/loadVisibilityTab.hpp"
+#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 // #define MAKE_MIDHOOK(addr, func)
 
@@ -40,57 +41,54 @@
     __asm jmp name##_retAddr                  \
     }
 
-class EditorUI_CB : public EditorUI {
-    public:
-        void onNextFreeEditorLayer(CCObject*) {
-            auto objs = this->m_pEditorLayer->getAllObjects();
+void EditorUI_CB::onNextFreeEditorLayer(CCObject*) {
+    auto objs = this->m_pEditorLayer->getAllObjects();
 
-            std::set<int> layers;
+    std::set<int> layers;
 
-            CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
-                layers.insert(obj->m_nEditorLayer);
-                layers.insert(obj->m_nEditorLayer2);
-            }
+    CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+        layers.insert(obj->m_nEditorLayer);
+        layers.insert(obj->m_nEditorLayer2);
+    }
 
-            int last = -1;
-            for (auto const& layer : layers) {
-                if (last + 1 != layer)
-                    break;
-                last = layer;
-            }
+    int last = -1;
+    for (auto const& layer : layers) {
+        if (last + 1 != layer)
+            break;
+        last = layer;
+    }
 
-            this->m_pEditorLayer->setCurrentLayer(last + 1);
-            this->m_pCurrentLayerLabel->setString(
-                CCString::createWithFormat("%d", last + 1)->getCString()
-            );
+    this->m_pEditorLayer->setCurrentLayer(last + 1);
+    this->m_pCurrentLayerLabel->setString(
+        CCString::createWithFormat("%d", last + 1)->getCString()
+    );
 
-            LayerManager::get()->getLevel()->clearVisible();
+    LayerManager::get()->getLevel()->clearVisible();
 
-            updateEditorLayerInputText(this);
+    updateEditorLayerInputText(this);
+}
+
+void EditorUI_CB::onLockLayer(CCObject*) {
+    if (LayerManager::get()->getLevel()->isMultiple()) {
+        for (auto const& num : LayerManager::get()->getLevel()->m_vVisibleLayers) {
+            auto layer = LayerManager::get()->getLayer(num);
+
+            if (layer)
+                layer->m_bLocked = !layer->m_bLocked;
         }
+    } else {
+        auto layer = LayerManager::get()->getLayer(this->m_pEditorLayer->m_nCurrentLayer);
 
-        void onLockLayer(CCObject*) {
-            if (LayerManager::get()->getLevel()->isMultiple()) {
-                for (auto const& num : LayerManager::get()->getLevel()->m_vVisibleLayers) {
-                    auto layer = LayerManager::get()->getLayer(num);
+        if (layer)
+            layer->m_bLocked = !layer->m_bLocked;
+    }
 
-                    if (layer)
-                        layer->m_bLocked = !layer->m_bLocked;
-                }
-            } else {
-                auto layer = LayerManager::get()->getLayer(this->m_pEditorLayer->m_nCurrentLayer);
+    updateEditorLayerInputText(this);
+}
 
-                if (layer)
-                    layer->m_bLocked = !layer->m_bLocked;
-            }
-
-            updateEditorLayerInputText(this);
-        }
-
-        void onShowLayerPopup(CCObject*) {
-            LayerViewPopup::create()->show();
-        }
-};
+void EditorUI_CB::onShowLayerPopup(CCObject*) {
+    LayerViewPopup::create()->show();
+}
 
 GDMAKE_HOOK(0x886b0)
 void __fastcall EditorUI_onGoToLayer(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
@@ -358,6 +356,11 @@ void loadEditorLayerInput(EditorUI* self) {
                 self,
                 (SEL_MenuHandler)&EditorUI_CB::onNextFreeEditorLayer
             ))
+            .exec([self](auto t) -> void {
+                addKeybindIndicator(
+                    self, t, "Go To Next Free Layer"
+                );
+            })
             .move(9.0f, goToAllBtn->getPositionY())
             .tag(NEXTFREELAYER_TAG)
             .done()
@@ -373,6 +376,9 @@ void loadEditorLayerInput(EditorUI* self) {
                 self,
                 (SEL_MenuHandler)&EditorUI_CB::onLockLayer
             ))
+            .exec([self](auto t) -> void {
+                addKeybindIndicator(self, t, "Lock Layer");
+            })
             .move(-106.0f, goToAllBtn->getPositionY())
             .tag(LOCKLAYER_TAG)
             .done()
@@ -388,6 +394,9 @@ void loadEditorLayerInput(EditorUI* self) {
                 self,
                 (SEL_MenuHandler)&EditorUI_CB::onShowLayerPopup
             ))
+            .exec([self](auto t) -> void {
+                addKeybindIndicator(self, t, "View Layers");
+            })
             .move(-130.0f, goToAllBtn->getPositionY())
             .tag(VIEWLAYERS_TAG)
             .done()

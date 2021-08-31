@@ -62,6 +62,9 @@ void KeybindingsLayer_CB::reloadList() {
     auto y = 0.0f;
 
     if (oldList) {
+        y = oldList->m_pTableView->getMinY() -
+            oldList->m_pTableView->m_pContentLayer->getPositionY();
+
         oldList->removeFromParent();
     }
 
@@ -111,8 +114,7 @@ void KeybindingsLayer_CB::reloadList() {
     list->setPosition(winSize / 2 - CCPoint { 170.0f, 120.0f });
     list->setTag(KBLLIST_TAG);
     list->m_pTableView->m_pContentLayer->setPositionY(
-        list->m_pTableView->m_pContentLayer->getPositionY() +
-        y
+        list->m_pTableView->getMinY() - y
     );
     this->m_pLayer->addChild(list);
 

@@ -29,6 +29,8 @@ void AdvancedFilterLayer::setup() {
     constexpr const char* rangeFilterF = "0123456789.: ";
     constexpr const char* rangeFilterC = "0123456789:bglineojdpwhtackrBGLINEOJDPWHTACKR ";
 
+    this->m_bNoElasticity = true;
+
     if (!g_pFilter) g_pFilter = new AdvancedFilterLayer::ObjFilter;
 
     {   // Group ID

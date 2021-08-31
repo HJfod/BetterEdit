@@ -2,6 +2,11 @@
 #include "../AutoSave/autoSave.hpp"
 #include "../../hooks/EditorUI.hpp"
 #include "../GroupIDFilter/AdvancedFilterLayer.hpp"
+#include "../GridSize/gridButton.hpp"
+#include "../../hooks/EditorPauseLayer.hpp"
+#include "../RotateSaws/rotateSaws.hpp"
+#include "../VisibilityTab/loadVisibilityTab.hpp"
+#include "../EditorLayerInput/editorLayerInput.hpp"
 
 enum Direction {
     kDirLeft, kDirRight, kDirUp, kDirDown,
@@ -288,12 +293,11 @@ void loadBEKeybinds() {
 
     KeybindManager::get()->addEditorKeybind({ "Preview Mode", [](EditorUI* ui) -> bool {
         auto b = GameManager::sharedState()->getGameVariable("0036");
-
         GameManager::sharedState()->setGameVariable("0036", !b);
-
         ui->m_pEditorLayer->updateEditorMode();
+        updateVisibilityTab(ui);
         return false;
-    }, "editor.ui"}, {});
+    }, "editor.visibility"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Edit Object", [](EditorUI* ui) -> bool {
         ui->editObject(nullptr);
@@ -388,6 +392,11 @@ void loadBEKeybinds() {
         return false;
     }, "editor.ui", false}, {});
 
+    KeybindManager::get()->addEditorKeybind({ "Go To Next Free Layer", [](EditorUI* ui) -> bool {
+        as<EditorUI_CB*>(ui)->onNextFreeEditorLayer(nullptr);
+        return false;
+    }, "editor.ui", false}, {});
+
     KeybindManager::get()->addEditorKeybind({ "Go To Base Layer", [](EditorUI* ui) -> bool {
         ui->onGoToBaseLayer(nullptr);
         return false;
@@ -397,4 +406,47 @@ void loadBEKeybinds() {
         AdvancedFilterLayer::create()->show();
         return false;
     }, "editor.modify", false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Increase Grid Size", [](EditorUI* ui) -> bool {
+        zoomEditorGrid(ui, true);
+        return false;
+    }, "editor.global", false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Decrease Grid Size", [](EditorUI* ui) -> bool {
+        zoomEditorGrid(ui, false);
+        return false;
+    }, "editor.global", false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Toggle Grid", [](EditorUI* ui) -> bool {
+        GameManager::sharedState()->toggleGameVariable("0038");
+        ui->m_pEditorLayer->updateOptions();
+        updateVisibilityTab(ui);
+        return false;
+    }, "editor.visibility", false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Rotate Saws", [](EditorUI* ui) -> bool {
+        enableRotations(!shouldRotateSaw());
+        if (shouldRotateSaw())
+            beginRotations(LevelEditorLayer::get());
+        else
+            stopRotations(LevelEditorLayer::get());
+        updateVisibilityTab(ui);
+        return false;
+    }, "editor.visibility", false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Toggle LDM", [](EditorUI* ui) -> bool {
+        setHideLDMObjects();
+        updateVisibilityTab(ui);
+        return false;
+    }, "editor.visibility", false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Lock Layer", [](EditorUI* ui) -> bool {
+        as<EditorUI_CB*>(ui)->onLockLayer(nullptr);
+        return false;
+    }, "editor.ui", false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "View Layers", [](EditorUI* ui) -> bool {
+        as<EditorUI_CB*>(ui)->onShowLayerPopup(nullptr);
+        return false;
+    }, "editor.ui", false}, {});
 }

@@ -14,6 +14,9 @@ bool g_bHideLDM = false;
 bool g_bShowPosLine = true;
 bool g_bShowPortalLines = true;
 
+void setHideLDMObjects() { g_bHideLDM = !g_bHideLDM; }
+void setHideLDMObjects(bool b) { g_bHideLDM = b; }
+
 class CCVoidPointer : public CCObject {
     public:
         CCVoidPointer(void* v)
@@ -176,12 +179,14 @@ void loadVisibilityTab(EditorUI* self) {
                 ->onRotateSaws(p);
         }
     ));
+    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "Rotate Saws");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_ldm.png",
         []() -> bool { return g_bHideLDM; },
         [&](bool b, auto) -> void { g_bHideLDM = b; }
     ));
+    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "Toggle LDM");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_pulse.png",
@@ -200,6 +205,7 @@ void loadVisibilityTab(EditorUI* self) {
             self->m_pEditorLayer->updateEditorMode();
         }
     ));
+    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "Preview Mode");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_bpm_line.png",
@@ -274,6 +280,7 @@ void loadVisibilityTab(EditorUI* self) {
             self->m_pEditorLayer->updateOptions();
         }
     ));
+    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "Toggle Grid");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_portal_borders.png",

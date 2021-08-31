@@ -48,10 +48,14 @@ void loadEditorKeybindIndicators(EditorUI* ui) {
     addKeybindIndicator(ui, ui->m_pPasteStateBtn, "Paste State");
     addKeybindIndicator(ui, ui->m_pPasteColorBtn, "Paste Color");
     addKeybindIndicator(ui, ui->m_pGoToLayerBtn, "Go To Layer");
+    addKeybindIndicator(ui, ui->m_pGoToBaseBtn, "Go To Base Layer");
     addKeybindIndicator(ui, ui->m_pGuideToggle, "Toggle Guide");
     addKeybindIndicator(ui, ui->m_pLayerNextBtn, "Next Group");
     addKeybindIndicator(ui, ui->m_pLayerPrevBtn, "Previous Group");
-    addKeybindIndicator(ui, ui->m_pGoToBaseBtn, "Go To Base Layer");
+    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pPlaybackBtn->getParent(), 13), "Zoom In");
+    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pPlaybackBtn->getParent(), 14), "Zoom Out");
+    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pLayerPrevBtn->getParent(), 0), "Pause");
+    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pLayerPrevBtn->getParent(), 1), "Open Level Settings");
     
     auto ix = 0;
     for (auto editKeybind : {

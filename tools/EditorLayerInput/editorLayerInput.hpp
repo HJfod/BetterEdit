@@ -33,6 +33,16 @@ class EUITextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
         }
 };
 
+class EditorUI_CB : public EditorUI {
+    public:
+        void onNextFreeEditorLayer(CCObject*);
+        void onLockLayer(CCObject*);
+        void onShowLayerPopup(CCObject*);
+        void onToggleShowUI(CCObject*);
+        void onExitViewMode(CCObject*);
+        void onGoToPercentage(CCObject* pSender);
+};
+
 void showLayerControls(EditorUI*, bool);
 void updateEditorLayerInputText(EditorUI*);
 void loadEditorLayerInput(EditorUI*);

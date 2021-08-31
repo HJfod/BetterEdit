@@ -326,6 +326,9 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
                     (SEL_MenuHandler)&EditorUI_CB::onToggleShowUI
                 )
             )
+            .exec([self](auto p) -> void {
+                addKeybindIndicator(self, p, "Toggle UI");
+            })
             .tag(TOGGLEUI_TAG)
             .move(getShowButtonPosition(self))
             .save(&toggleBtn)

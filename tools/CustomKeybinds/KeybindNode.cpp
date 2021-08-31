@@ -74,10 +74,21 @@ void KeybindNode::updateLabel() {
         txt.size() && isNodeVisible(this->m_pTarget)
     );
 
-    this->setPosition(this->m_pTarget->convertToWorldSpace({
+    auto pos = this->m_pTarget->convertToWorldSpace({
         this->m_pTarget->getContentSize().width / 2,
         5.0f
-    }));
+    });
+
+    auto w = this->m_pSprite->getScaledContentSize().width *
+        this->getScale();
+
+    if (pos.x - w / 2 < CCDirector::sharedDirector()->getScreenLeft())
+        pos.x += w / 2;
+
+    if (pos.x + w / 2 > CCDirector::sharedDirector()->getScreenRight())
+        pos.x -= w / 2;
+
+    this->setPosition(pos);
 }
 
 CCArray* KeybindNode::getList() {

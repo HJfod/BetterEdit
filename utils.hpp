@@ -113,11 +113,11 @@ static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
 }
 
 static cocos2d::CCPoint getMousePos() {
-    auto winSize = CCDirector::sharedDirector()->getWinSize();
-    auto winSizePx = CCDirector::sharedDirector()->getOpenGLView()->getViewPortRect();
+    auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
+    auto winSizePx = cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getViewPortRect();
     auto ratio_w = winSize.width / winSizePx.size.width;
     auto ratio_h = winSize.height / winSizePx.size.height;
-    auto mpos = CCDirector::sharedDirector()->getOpenGLView()->getMousePosition();
+    auto mpos = cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getMousePosition();
     mpos.y = winSizePx.size.height - mpos.y;
     mpos.x *= ratio_w;
     mpos.y *= ratio_h;
@@ -135,6 +135,9 @@ static constexpr R union_cast(T v) {
     x.t = v;
     return x.r;
 }
+
+template <typename T>
+bool bool_cast(T const v) { return static_cast<bool>(reinterpret_cast<int>(v)); }
 
 #define CATCH_NULL(x) if (x) x
 
