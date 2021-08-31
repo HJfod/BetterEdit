@@ -1,6 +1,7 @@
 #include "eyeDropper.hpp"
 #include "EyeDropperColorOverlay.hpp"
 #include "../CustomKeybinds/KeybindManager.hpp"
+#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 static constexpr const int DROPPER_TAG = 0xb00b;
 bool g_bPickingColor = false;
@@ -99,6 +100,8 @@ void __fastcall CCScheduler_update(CCScheduler* self, edx_t edx, float dt) {
     }
 
     KeybindManager::get()->handleRepeats(dt);
+
+    showEditorKeybindIndicatorIfItsTargetIsBeingHovered();
 
     return GDMAKE_ORIG_V(self, edx, dt);
 }

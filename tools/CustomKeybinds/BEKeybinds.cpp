@@ -1,6 +1,7 @@
 #include "BEKeybinds.hpp"
 #include "../AutoSave/autoSave.hpp"
 #include "../../hooks/EditorUI.hpp"
+#include "../GroupIDFilter/AdvancedFilterLayer.hpp"
 
 enum Direction {
     kDirLeft, kDirRight, kDirUp, kDirDown,
@@ -389,6 +390,11 @@ void loadBEKeybinds() {
 
     KeybindManager::get()->addEditorKeybind({ "Go To Base Layer", [](EditorUI* ui) -> bool {
         ui->onGoToBaseLayer(nullptr);
+        return false;
+    }, false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Open Advanced Filter", [](EditorUI* ui) -> bool {
+        AdvancedFilterLayer::create()->show();
         return false;
     }, false}, {});
 }

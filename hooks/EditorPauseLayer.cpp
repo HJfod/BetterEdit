@@ -10,17 +10,26 @@
 #include "../tools/EyeDropper/eyeDropper.hpp"
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
+#include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 using namespace gdmake;
 
 bool g_bRotateSaws = false;
+bool g_bShowKeybinds = false;
 
 bool shouldRotateSaw() { return g_bRotateSaws; }
+bool shouldShowKeybindIndicator() { return g_bShowKeybinds; }
 void enableRotations(bool b) { g_bRotateSaws = b; }
 void setupRotateSaws() { BetterEdit::saveGlobalBool("rotate-saws", &g_bRotateSaws); }
 
 void EditorPauseLayer_CB::onBESettings(cocos2d::CCObject* pSender) {
     BESettingsLayer::create(this)->show();
+}
+
+void EditorPauseLayer_CB::onShowKeybinds(CCObject* pSender) {
+    g_bShowKeybinds = !as<CCMenuItemToggler*>(pSender)->isToggled();
+
+    showEditorKeybindIndicators(g_bShowKeybinds);
 }
 
 void EditorPauseLayer_CB::onRotateSaws(CCObject* pSender) {
@@ -83,6 +92,8 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
         getAutoSaveTimer(ui)->cancel();
         
     getAutoSaveTimer(ui)->resume();
+
+    updateEditorKeybindIndicators();
 
     updatePercentLabelPosition(ui);
     // showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
@@ -148,6 +159,18 @@ bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, LevelEd
         {
             CCDirector::sharedDirector()->getScreenLeft() + 25.0f,
             CCDirector::sharedDirector()->getScreenBottom() + 192.0f
+        },
+        { 8.0f, 0.0f }
+    );
+
+    GameToolbox::createToggleButton(
+        (SEL_MenuHandler)&EditorPauseLayer_CB::onShowKeybinds,
+        g_bShowKeybinds, as<CCMenu*>(self->m_pButton0->getParent()),
+        self, self, .55f, .42f, 85.0f, "", false, 0, nullptr,
+        "Show Keybinds",
+        {
+            CCDirector::sharedDirector()->getScreenLeft() + 25.0f,
+            CCDirector::sharedDirector()->getScreenBottom() + 216.0f
         },
         { 8.0f, 0.0f }
     );

@@ -4,4 +4,8 @@
 
 void loadEditorKeybindIndicators(EditorUI*);
 void clearEditorKeybindIndicators(EditorUI*);
-void addIndicator(CCNode* target, const char* keybind);
+void updateEditorKeybindIndicators();
+void showEditorKeybindIndicators(bool);
+// lol
+void showEditorKeybindIndicatorIfItsTargetIsBeingHovered();
+void addIndicator(EditorUI*, CCNode* target, const char* keybind);

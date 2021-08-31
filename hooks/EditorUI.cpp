@@ -456,6 +456,8 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     showLayerControls(self, show);
     showVisibilityTab(self, show);
 
+    updateEditorKeybindIndicators();
+
     if (toggleBtn) {
         toggleBtn->setVisible(show || !g_showUI);
         self->m_pPlaytestBtn->setVisible(g_showUI);

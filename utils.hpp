@@ -112,6 +112,19 @@ static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
     return nullptr;
 }
 
+static cocos2d::CCPoint getMousePos() {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    auto winSizePx = CCDirector::sharedDirector()->getOpenGLView()->getViewPortRect();
+    auto ratio_w = winSize.width / winSizePx.size.width;
+    auto ratio_h = winSize.height / winSizePx.size.height;
+    auto mpos = CCDirector::sharedDirector()->getOpenGLView()->getMousePosition();
+    mpos.y = winSizePx.size.height - mpos.y;
+    mpos.x *= ratio_w;
+    mpos.y *= ratio_h;
+
+    return mpos;
+}
+
 template<typename R, typename T>
 static constexpr R union_cast(T v) {
     static_assert(sizeof T == sizeof R, "union_cast: R and T don't match in size!");
