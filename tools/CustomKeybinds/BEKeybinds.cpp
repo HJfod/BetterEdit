@@ -7,6 +7,7 @@
 #include "../RotateSaws/rotateSaws.hpp"
 #include "../VisibilityTab/loadVisibilityTab.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
+#include "../HalfMove/moveForCommand.hpp"
 
 enum Direction {
     kDirLeft, kDirRight, kDirUp, kDirDown,
@@ -175,6 +176,54 @@ void selectObjectDirection(EditorUI* ui, Direction dir) {
 void loadBEKeybinds() {
     g_pSelectedObjects = CCArray::create();
     g_pSelectedObjects->retain();
+
+    KeybindManager::get()->addEditorKeybind({ "Object Left Half", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandHalfLeft);
+        return false;
+    }, "editor.move"}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Object Right Half", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandHalfRight);
+        return false;
+    }, "editor.move"}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Object Up Half", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandHalfUp);
+        return false;
+    }, "editor.move"}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Object Down Half", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandHalfDown);
+        return false;
+    }, "editor.move"}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Object Left Quarter", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandQuarterLeft);
+        return false;
+    }, "editor.move"}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Object Right Quarter", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandQuarterRight);
+        return false;
+    }, "editor.move"}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Object Up Quarter", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandQuarterUp);
+        return false;
+    }, "editor.move"}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Object Down Quarter", [](EditorUI* ui) -> bool {
+        if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            ui->moveObjectCall(kEditCommandQuarterDown);
+        return false;
+    }, "editor.move"}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Rotate 45 CW", [](EditorUI* ui) -> bool {
         ui->transformObjectCall(kEditCommandRotateCW45);

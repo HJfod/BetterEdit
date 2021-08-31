@@ -58,7 +58,7 @@ void Scrollbar::draw() {
     auto trackHeight = min(p, 1.0f) * this->m_pList->m_fHeight / .4f;
     auto trackPosY = this->m_pTrack->getPositionY();
 
-    auto o = 100;
+    GLubyte o = 100;
 
     if (CCRect {
         - this->m_fWidth / 2,
@@ -93,8 +93,7 @@ void Scrollbar::draw() {
     }
 
     this->m_pTrack->setScale(.4f);
-    this->m_pTrack->setColor({ 255, 255, 255 });
-    this->m_pTrack->setOpacity(o);
+    this->m_pTrack->setColor({ o, o, o });
 
 
     auto y = this->m_pList->m_pTableView->m_pContentLayer->getPositionY();
