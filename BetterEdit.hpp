@@ -55,6 +55,7 @@ using namespace cocos2d::extension;
     __macro__(KeybindRepeatInterval, int, 300, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1,10000)\
     __macro__(KeybindRepeatStart, int, 700, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 10000)  \
     __macro__(ShowKeybindOnHover, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
+    __macro__(MoveCameraWhenMovingObjects, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)    \
 
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \

@@ -2,6 +2,7 @@
 #include <InputPrompt.hpp>
 #include "../RotateSaws/rotateSaws.hpp"
 #include "../AutoSave/autoSave.hpp"
+#include "../CustomKeybinds/BEKeybinds.hpp"
 
 static constexpr const int SLIDERLABEL_TAG = 420;
 static constexpr const int EPOSITION_TAG = 421;
@@ -20,33 +21,30 @@ float getLevelLength() {
     return res;
 }
 
-class EditorUI_CB : public EditorUI {
-    public:
-        void onGoToPercentage(CCObject* pSender) {
-            auto p = InputPrompt::create("Go To %", "%", [this](const char* txt) -> void {
-                if (!g_lastObject) return;
+void EditorUI_CB::onGoToPercentage(CCObject* pSender) {
+    auto p = InputPrompt::create("Go To %", "%", [this](const char* txt) -> void {
+        if (!g_lastObject) return;
 
-                if (txt && strlen(txt)) {
-                    float val = 0.0f;
-                    try { val = std::stof(txt); } catch(...) {}
+        if (txt && strlen(txt)) {
+            float val = 0.0f;
+            try { val = std::stof(txt); } catch(...) {}
 
-                    auto width = CCDirector::sharedDirector()->getWinSize().width;
+            auto width = CCDirector::sharedDirector()->getWinSize().width;
 
-                    this->m_pEditorLayer->getObjectLayer()->setPosition({
-                        (- getLevelLength() * min(val, 100.0f) / 100.0f + width / 2) *
-                            this->m_pEditorLayer->getObjectLayer()->getScale(),
-                        this->m_pEditorLayer->getObjectLayer()->getPositionY()
-                    });
+            this->m_pEditorLayer->getObjectLayer()->setPosition({
+                (- getLevelLength() * min(val, 100.0f) / 100.0f + width / 2) *
+                    this->m_pEditorLayer->getObjectLayer()->getScale(),
+                this->m_pEditorLayer->getObjectLayer()->getPositionY()
+            });
 
-                    this->constrainGameLayerPosition();
-                    this->updateSlider();
-                }
-            }, "Go");
-            p->getInputNode()->getInputNode()->setAllowedChars("0123456789.");
-            p->getInputNode()->getInputNode()->setMaxLabelLength(6);
-            p->show();
+            this->constrainGameLayerPosition();
+            this->updateSlider();
         }
-};
+    }, "Go");
+    p->getInputNode()->getInputNode()->setAllowedChars("0123456789.");
+    p->getInputNode()->getInputNode()->setMaxLabelLength(6);
+    p->show();
+}
 
 void updateLastObjectX(LevelEditorLayer* lel, GameObject* obj = nullptr) {
     if (obj == nullptr) {
@@ -220,6 +218,9 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
     updateLastObjectX(self->m_pEditorLayer, obj);
 
     updatePercentLabelPosition(self);
+
+    if (BetterEdit::getMoveCameraWhenMovingObjects())
+        focusGameLayerToSelection(self);
 
     self->updateSlider();
 }

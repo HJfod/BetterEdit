@@ -9,6 +9,8 @@
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../HalfMove/moveForCommand.hpp"
 
+static constexpr const float w_edge = 120.0f;
+
 enum Direction {
     kDirLeft, kDirRight, kDirUp, kDirDown,
 };
@@ -23,6 +25,44 @@ void moveGameLayerSmooth(EditorUI* ui, CCPoint const& pos) {
             2.0f
         )
     );
+}
+
+void focusGameLayerOnObject(EditorUI* ui, GameObject* obj) {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+    auto pos = ui->m_pEditorLayer->getObjectLayer()
+        ->convertToWorldSpace(obj->getPosition());
+    
+    auto rpos = pos - winSize;
+
+    moveGameLayerSmooth(ui, rpos);
+}
+
+void focusGameLayerToSelection(EditorUI* ui) {
+    CCPoint pos;
+
+    if (ui->m_pSelectedObject)
+        pos = ui->m_pSelectedObject->getPosition();
+    else if (ui->m_pSelectedObjects)
+        pos = ui->getGroupCenter(ui->m_pSelectedObjects, false);
+    else return;
+
+    auto gpos = ui->m_pEditorLayer->getObjectLayer()
+        ->convertToWorldSpace(pos);
+
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+    if (
+        gpos.x < w_edge ||
+        gpos.x > winSize.width - w_edge
+    )
+        moveGameLayerSmooth(ui, { -gpos.x + winSize.width / 2, 0.0f });
+
+    if (
+        gpos.y < w_edge ||
+        gpos.y > winSize.height - w_edge
+    )
+        moveGameLayerSmooth(ui, { 0.0f, -gpos.y + winSize.height / 2 });
 }
 
 CCArray* g_pSelectedObjects = nullptr;
@@ -62,7 +102,6 @@ void selectObjectDirection(EditorUI* ui, Direction dir) {
     static constexpr const float range = 200.0f;
     static constexpr const float too_far = 500.0f;
     static constexpr const float too_near = 15.0f;
-    static constexpr const float w_edge = 120.0f;
 
     GameObject* nearest = nullptr;
 

@@ -152,6 +152,12 @@ void BESettingsLayer::setup() {
         "Hovering a button will show its associated <cy>keybind</c>, if it has one",
         BE_SETTING_FUNC_B(ShowKeybindOnHover)
     );
+    this->addToggle(
+        "Move Camera On Object Move",
+        "When moving object(s), if they go outside the camera, the camera will "
+        "reposition to show them again",
+        BE_SETTING_FUNC_B(MoveCameraWhenMovingObjects)
+    );
 
     this->incrementPageCount(true);
 
