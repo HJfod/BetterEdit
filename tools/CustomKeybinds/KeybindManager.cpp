@@ -239,6 +239,12 @@ void KeybindManager::loadDefaultKeybinds() {
         return false;
     }}, {{ KEY_X, 0 }});
 
+    this->addPlayKeybind({ "Practice Mode", [](PlayLayer* pl, bool push) -> bool {
+        if (push)
+            pl->togglePracticeMode(!pl->m_isPracticeMode);
+        return false;
+    }}, {});
+
     this->addEditorKeybind({ "Build Mode", [](EditorUI* ui) -> bool {
         if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
             ui->toggleMode(ui->m_pBuildModeBtn);

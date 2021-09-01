@@ -5,6 +5,7 @@
 #include "KeybindListView.hpp"
 #include "Scrollbar.hpp"
 #include "KeybindSettingsLayer.hpp"
+#include "KeymapLayer.hpp"
 
 static constexpr const int KBLDELEGATE_TAG = 0x44432;
 static constexpr const int KBLLIST_TAG = 0x44431;
@@ -113,9 +114,10 @@ void KeybindingsLayer_CB::reloadList() {
     auto list = KeybindListView::create(arr, 340.0f, 180.0f);
     list->setPosition(winSize / 2 - CCPoint { 170.0f, 120.0f });
     list->setTag(KBLLIST_TAG);
-    list->m_pTableView->m_pContentLayer->setPositionY(
-        list->m_pTableView->getMinY() - y
-    );
+    y = list->m_pTableView->getMinY() - y;
+    if (y > list->m_pTableView->getMaxY())
+        y = list->m_pTableView->getMaxY();
+    list->m_pTableView->m_pContentLayer->setPositionY(y);
     this->m_pLayer->addChild(list);
 
     CATCH_NULL(as<Scrollbar*>(this->m_pLayer->getChildByTag(KBLSCROLLBAR_TAG)))
@@ -136,6 +138,12 @@ void KeybindingsLayer_CB::onGlobalSettings(CCObject*) {
     this->detachInput();
 
     KeybindSettingsLayer::create()->show();
+}
+
+void KeybindingsLayer_CB::onKeymap(CCObject*) {
+    this->detachInput();
+
+    KeymapLayer::create()->show();
 }
 
 void KeybindingsLayer_CB::detachInput() {
@@ -309,6 +317,19 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     );
     resetBtn->setPosition(210.0f - 40.0f, 140.0f - 25.0f);
     self->m_pButtonMenu->addChild(resetBtn);
+
+    auto mapBtn = CCMenuItemSpriteExtra::create(
+        CCNodeConstructor<ButtonSprite*>()
+            .fromButtonSprite(
+                "Map", "GJ_button_05.png", "bigFont.fnt"
+            )
+            .scale(.4f)
+            .done(),
+        self,
+        menu_selector(KeybindingsLayer_CB::onKeymap)
+    );
+    mapBtn->setPosition(210.0f, - 140.0f);
+    self->m_pButtonMenu->addChild(mapBtn);
 
     auto settingsBtn = CCMenuItemSpriteExtra::create(
         CCNodeConstructor()

@@ -75,24 +75,21 @@ void updateToggleButtonSprite(CCMenuItemSpriteExtra* btn) {
     spr->release();
 }
 
-class EditorUI_CB : public EditorUI {
-    public:
-        void onToggleShowUI(CCObject*) {
-            g_showUI = !g_showUI;
-            this->showUI(g_showUI);
+void EditorUI_CB::onToggleShowUI(CCObject*) {
+    g_showUI = !g_showUI;
+    this->showUI(g_showUI);
 
-            auto btn = as<CCMenuItemSpriteExtra*>(this->m_pSwipeBtn->getParent()->getChildByTag(TOGGLEUI_TAG));
+    auto btn = as<CCMenuItemSpriteExtra*>(this->m_pSwipeBtn->getParent()->getChildByTag(TOGGLEUI_TAG));
 
-            if (btn && !g_showUI)
-                updateToggleButtonSprite(btn);
-        }
+    if (btn && !g_showUI)
+        updateToggleButtonSprite(btn);
+}
 
-        void onExitViewMode(CCObject*) {
-            CCDirector::sharedDirector()->popSceneWithTransition(
-                0.5f, cocos2d::kPopTransitionFade
-            );
-        }
-};
+void EditorUI_CB::onExitViewMode(CCObject*) {
+    CCDirector::sharedDirector()->popSceneWithTransition(
+        0.5f, cocos2d::kPopTransitionFade
+    );
+}
 
 bool touchIntersectsInput(CCNode* input, CCTouch* touch) {
     if (!input)
@@ -166,13 +163,14 @@ void __fastcall EditorUI_ccTouchEnded(
 
     auto now = std::chrono::system_clock::now();
 
+    auto self_ = as<EditorUI*>(as<uintptr_t>(self) - 0xEC);
     if (
         !BetterEdit::getDisableDoubleClick() &&
+        !self_->m_pEditorLayer->m_bIsPlaybackMode &&
         std::chrono::duration_cast<std::chrono::milliseconds>(
             now - g_lastTouchTime
         ).count() < 250
     ) {
-        auto self_ = as<EditorUI*>(as<uintptr_t>(self) - 0xEC);
 
         if (
             CCDirector::sharedDirector()->getKeyboardDispatcher()

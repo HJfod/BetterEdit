@@ -8,6 +8,7 @@ class KeybindingsLayer_CB : public KeybindingsLayer {
         void detachInput();
         void onResetAll(CCObject*);
         void onGlobalSettings(CCObject*);
+        void onKeymap(CCObject*);
 };
 
 class KeybindingsLayerDelegate :

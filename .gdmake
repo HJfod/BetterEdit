@@ -2,7 +2,7 @@
   "ProjectName": "BetterEdit",
   "EntryPoint": null,
   "Version": "v4.0.1-beta",
-  "ConsoleEnabled": false,
+  "ConsoleEnabled": true,
   "Compiler": 0,
   "Platform": 0,
   "Submodules": [

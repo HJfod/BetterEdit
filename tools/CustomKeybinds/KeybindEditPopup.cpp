@@ -144,6 +144,9 @@ void KeybindEditPopup::onClose(CCObject*) {
 }
 
 void KeybindEditPopup::onSet(CCObject*) {
+    if (this->m_obTypedBind.key == KEY_None)
+        return;
+
     if (this->m_pStoreItem)
         KeybindManager::get()->editKeybind(
             this->m_pCell->m_pItem->type,
