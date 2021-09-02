@@ -57,6 +57,33 @@ using namespace cocos2d::extension;
     __macro__(ShowKeybindOnHover, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(MoveCameraWhenMovingObjects, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)    \
 
+#define STEP_SUBDICT_NC(dict, key, ...)         \
+    if (dict->stepIntoSubDictWithKey(key)) {    \
+        __VA_ARGS__                             \
+        dict->stepOutOfSubDict();               \
+    }
+
+#define ITERATE_STEP_SUBDICT_NC(dict, key, ...) \
+    for (auto const& key :                      \
+        dict->getAllKeys()) {                   \
+        STEP_SUBDICT_NC(                        \
+            dict,                               \
+            key.c_str(),                        \
+            __VA_ARGS__                         \
+        );                                      \
+    }                                           \
+
+#define STEP_SUBDICT(dict, key, ...)            \
+    {                                           \
+    if (!dict->stepIntoSubDictWithKey(key)) {   \
+        dict->setSubDictForKey(key);            \
+        if (!dict->stepIntoSubDictWithKey(key)) \
+            return;                             \
+    }                                           \
+    __VA_ARGS__                                 \
+    dict->stepOutOfSubDict();                   \
+    }
+
 #define BE_MAKE_SFUNC(__name__, __type__, _, __, ___)       \
     static void set##__name__##(__type__ value) {           \
         sharedState()->m_Sett##__name__ = value;            \

@@ -3,23 +3,6 @@
 #include <functional>
 #include "../VisibilityTab/loadVisibilityTab.hpp"
 
-#define STEP_SUBDICT_NC(dict, key, ...)         \
-    if (dict->stepIntoSubDictWithKey(key)) {    \
-        __VA_ARGS__                             \
-        dict->stepOutOfSubDict();               \
-    }
-
-#define STEP_SUBDICT(dict, key, ...)            \
-    {                                           \
-    if (!dict->stepIntoSubDictWithKey(key)) {   \
-        dict->setSubDictForKey(key);            \
-        if (!dict->stepIntoSubDictWithKey(key)) \
-            return;                             \
-    }                                           \
-    __VA_ARGS__                                 \
-    dict->stepOutOfSubDict();                   \
-    }
-
 KeybindManager* g_manager;
 
 static DS_Dictionary* copyDict(DS_Dictionary* other) {
@@ -831,6 +814,10 @@ void KeybindManager::registerKeyPress(enumKeyCodes key, bool down) {
     } else {
         m_mHeldKeys.erase(key);
     }
+}
+
+decltype(KeybindManager::m_mKeybinds) const& KeybindManager::getAllKeybinds() {
+    return m_mKeybinds;
 }
 
 KeybindManager::Target KeybindManager::getCallbackByName(std::string const& cbName) {

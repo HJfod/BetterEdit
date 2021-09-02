@@ -8,32 +8,29 @@ using namespace gdmake::extra;
 using namespace gd;
 using namespace cocos2d;
 
-#define STEP_SUBDICT_NC(dict, key, ...)         \
-    if (dict->stepIntoSubDictWithKey(key)) {    \
-        __VA_ARGS__                             \
-        dict->stepOutOfSubDict();               \
-    }
-
-#define STEP_SUBDICT(dict, key, ...)            \
-    {                                           \
-    if (!dict->stepIntoSubDictWithKey(key)) {   \
-        dict->setSubDictForKey(key);            \
-        if (!dict->stepIntoSubDictWithKey(key)) \
-            return;                             \
-    }                                           \
-    __VA_ARGS__                                 \
-    dict->stepOutOfSubDict();                   \
-    }
-
 bool hasKey(DS_Dictionary* dict, std::string const& key) {
     return dict->getKey(dict->getIndexOfKey(key.c_str())) == key;
 }
 
-#define BE_SAVE_SETTING(__name__, _, __, __ctype__, _0, _1, _2, _3) \
-    data->set##__ctype__##ForKey(#__name__, get##__name__());
-#define BE_LOAD_SETTING(__name__, _, __, __ctype__, _0, _1, _2, _3) \
+#define BE_SAVE_Bool(_name_, _get_, _def_) \
+    data->setBoolForKey(_name_, _get_ ^ _def_)
+#define BE_SAVE_Float(_name_, _get_, _def_) \
+    data->setFloatForKey(_name_, _get_)
+#define BE_SAVE_Integer(_name_, _get_, _def_) \
+    data->setIntegerForKey(_name_, _get_)
+
+#define BE_LOAD_Bool(_name_, _get_, _def_) \
+    set##_name_(_get_(#_name_) ^ _def_)
+#define BE_LOAD_Integer(_name_, _get_, _def_) \
+    set##_name_(_get_(#_name_))
+#define BE_LOAD_Float(_name_, _get_, _def_) \
+    set##_name_(_get_(#_name_))
+
+#define BE_SAVE_SETTING(__name__, _, _d_, __ctype__, _0, _1, _2, _3) \
+    BE_SAVE_##__ctype__##(#__name__, get##__name__(), _d_);
+#define BE_LOAD_SETTING(__name__, _, _d_, __ctype__, _0, _1, _2, _3) \
     if (hasKey(data, #__name__)) \
-        set##__name__##OrDefault(data->get##__ctype__##ForKey(#__name__));
+        BE_LOAD_##__ctype__##(__name__, data->get##__ctype__##ForKey, _d_);
 #define BE_DEFAULT_SETTING(__name__, _, __value__, __, ___, _0, _1, _2) \
     set##__name__(__value__);
 
@@ -44,6 +41,9 @@ BetterEdit* g_betterEdit;
 bool BetterEdit::init() {
     this->m_pTemplateManager = TemplateManager::sharedState();
     this->m_sFileName = "BetterEdit.dat";
+
+    if (!LayerManager::initGlobal())
+        return false;
 
     // BE_SETTINGS(BE_DEFAULT_SETTING)
 

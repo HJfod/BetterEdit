@@ -2,23 +2,6 @@
 
 LevelBackupManager* g_manager;
 
-#define STEP_SUBDICT_NC(dict, key, ...)         \
-    if (dict->stepIntoSubDictWithKey(key)) {    \
-        __VA_ARGS__                             \
-        dict->stepOutOfSubDict();               \
-    }
-
-#define STEP_SUBDICT(dict, key, ...)            \
-    {                                           \
-    if (!dict->stepIntoSubDictWithKey(key)) {   \
-        dict->setSubDictForKey(key);            \
-        if (!dict->stepIntoSubDictWithKey(key)) \
-            return;                             \
-    }                                           \
-    __VA_ARGS__                                 \
-    dict->stepOutOfSubDict();                   \
-    }
-
 bool LevelBackupManager::init() {
     this->m_sFileName = "BEBackupManager.dat";
 

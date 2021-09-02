@@ -50,8 +50,6 @@ GDMAKE_MAIN_HM(hMod) {
         return "Unable to initialize BetterEdit!";
     if (!LiveManager::initGlobal())
         return "Unable to initialize LiveManager!";
-    if (!LayerManager::initGlobal())
-        return "Unable to initialize LayerManager!";
     if (!SoftSaveManager::initGlobal())
         return "Unable to initialize SoftSaveManager!";
     if (!LevelBackupManager::initGlobal())

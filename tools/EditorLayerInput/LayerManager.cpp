@@ -36,9 +36,41 @@ LayerManager::Level * LayerManager::getLevel() {
     return m_mLevels[lvl];
 }
 
-void LayerManager::dataLoaded(DS_Dictionary* data) {}
+void LayerManager::dataLoaded(DS_Dictionary* dict) {
+    ITERATE_STEP_SUBDICT_NC(dict, lvl,
+        auto level = (m_mLevels[lvl] = new Level());
+        STEP_SUBDICT_NC(dict, "layers",
+            ITERATE_STEP_SUBDICT_NC(dict, l,
+                auto num = std::stoi(l);
+                auto layer = (level->m_mLayers[num] = new Layer(num));
+                layer->m_bLocked = dict->getBoolForKey("locked");
+                layer->m_bVisible = dict->getBoolForKey("visible");
+                layer->m_nOpacity = dict->getIntegerForKey("opacity");
+                layer->m_sName = dict->getStringForKey("name");
+            );
+        );
+    );
+}
 
-void LayerManager::encodeDataTo(DS_Dictionary* data) {}
+void LayerManager::encodeDataTo(DS_Dictionary* dict) {
+    for (auto const& [name, lvl] : m_mLevels) {
+        STEP_SUBDICT(dict, name.c_str(),
+            STEP_SUBDICT(dict, "layers",
+                for (auto const& layer : lvl->m_mLayers) {
+                    if (layer) {
+                        STEP_SUBDICT(dict, std::to_string(layer->m_nLayerNumber).c_str(),
+                            dict->setBoolForKey("locked", layer->m_bLocked);
+                            dict->setBoolForKey("visible", layer->m_bVisible);
+                            dict->setIntegerForKey("opacity", layer->m_nOpacity);
+                            if (layer->m_sName.size())
+                                dict->setStringForKey("name", layer->m_sName);
+                        );
+                    }
+                }
+            );
+        );
+    }
+}
 
 bool LayerManager::init() {
     return true;

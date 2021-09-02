@@ -170,6 +170,7 @@ class KeybindManager : public GManager {
         void addPlayKeybind(KeybindPlayLayer, KeybindList const&);
         void addGlobalKeybind(KeybindGlobal, KeybindList const&);
 
+        decltype(m_mKeybinds) const& getAllKeybinds();
         CallbackList const& getCallbacks(KeybindType);
         std::map<std::string, CallbackList> getCallbacksSorted(KeybindType);
         std::string getCategoryName(std::string const&);

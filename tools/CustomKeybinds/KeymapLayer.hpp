@@ -13,6 +13,9 @@ class KeymapLayer : public BrownAlertDelegate {
         CCMenuItemToggler* m_pControlToggle;
         CCMenuItemToggler* m_pShiftToggle;
         CCMenuItemToggler* m_pAltToggle;
+        TextArea* m_pCallbackLabel;
+        Keybind m_obHovered;
+        std::string m_sLabelString = "";
 
         void setup() override;
         CCMenuItemSpriteExtra* getKeyButton(const char*, int, int, CCPoint const&);
@@ -22,8 +25,13 @@ class KeymapLayer : public BrownAlertDelegate {
         void keyUp(enumKeyCodes) override;
         void visit() override;
 
+        void onToggle(CCObject*);
+
         ~KeymapLayer();
 
     public:
+        void updateKeys();
+        void showHoveredKey();
+    
         static KeymapLayer* create();
 };
