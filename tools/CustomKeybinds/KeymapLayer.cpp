@@ -72,128 +72,111 @@ void KeymapLayer::setup() {
     this->m_pKeyBtns = CCArray::create();
     this->m_pKeyBtns->retain();
 
-    auto map = std::vector<std::string> {
-        "1234567890",
-        "QWERTYUIOP",
-        "ASDFGHJKL",
-        "ZXCVBNM",
+    struct keybtn {
+        enumKeyCodes key;
+        std::string text = "";
+        CCMenuItemToggler** target = nullptr;
+        int width;
+        std::vector<keybtn> sub;
+
+        keybtn(enumKeyCodes k) {
+            key = k;
+            width = s_fItemWidth;
+            text = keyToStringFixed(k);
+        }
+
+        keybtn(enumKeyCodes k, CCMenuItemToggler** b) {
+            key = k;
+            width = s_fItemWidth;
+            text = keyToStringFixed(k);
+            target = b;
+        }
+
+        keybtn(enumKeyCodes k, std::string const& t) {
+            key = k;
+            text = t;
+            width = s_fItemWidth;
+        }
+
+        keybtn(enumKeyCodes k, float w) {
+            key = k;
+            width = static_cast<int>(s_fItemWidth * w);
+            text = keyToStringFixed(k);
+        }
+
+        keybtn(std::string const& keys) {
+            key = KEY_None;
+
+            for (auto const& key : keys)
+                sub.push_back({ static_cast<enumKeyCodes>(key) });
+        }
+
+        keybtn(int keys, std::string const& prefix, enumKeyCodes start) {
+            key = KEY_None;
+
+            for (auto ix = 0; ix < keys; ix++)
+                sub.push_back({
+                    static_cast<enumKeyCodes>(start + ix),
+                    prefix + std::to_string(ix + 1)
+                });
+        }
     };
-    auto ix = 0;
-    for (auto const& k : map) {
-        auto ypos = m_fItemSeparation * 2 - ix / static_cast<float>(map.size() - 1) *
-            (m_fItemSeparation * map.size());
 
-        auto i = 0;
-        for (auto c : k) {
-            auto xpos = i / static_cast<float>(9) *
-                m_fItemSeparation * 11 - m_fItemSeparation * 6 +
-                ix * (m_fItemSeparation / 2.f);
+    auto map = std::initializer_list<std::initializer_list<keybtn>> {
+        { KEY_Escape, { 12, "F", KEY_F1 }, KEY_Print, KEY_ScrollLock, KEY_Pause, },
+        { "1234567890"_s, { KEY_Backspace, 1.25f }, KEY_Insert, KEY_Home, KEY_PageUp,
+            KEY_Numlock, KEY_Divide, KEY_Multiply, KEY_OEMMinus, },
+        { KEY_Tab, "QWERTYUIOP"_s, KEY_Enter, KEY_Delete, KEY_End, KEY_PageDown,
+            KEY_NumPad7, KEY_NumPad8, KEY_NumPad9, KEY_OEMPlus, },
+        { KEY_CapsLock, "ASDFGHJKL"_s,
+            KEY_NumPad5, KEY_NumPad6, KEY_NumPad7, },
+        { { KEY_Shift, &m_pShiftToggle }, "ZXCVBNM"_s, KEY_OEMComma, KEY_OEMPeriod, 
+            KEY_NumPad1, KEY_NumPad2, KEY_NumPad3, },
+        { { KEY_Control, &m_pControlToggle }, { KEY_Alt, &m_pAltToggle }, { KEY_Space, 2.5f }, 
+            KEY_Left, KEY_Up, KEY_Right, KEY_Down, KEY_NumPad0, },
+    };
 
-            this->m_pButtonMenu->addChild(
-                this->getKeyButton(
-                    std::string(1, c).c_str(), c, 0, { xpos, ypos }
-                )
-            );
+    auto m_ix = 0;
+    for (auto const& m : map) {
+        auto ypos = (s_fItemSeparation + s_fItemWidth) * 4 - m_ix % 6 * (s_fItemSeparation + s_fItemWidth);
 
-            i++;
-        }
+        auto xpos = - (s_fItemSeparation + s_fItemWidth) * 9;
+        for (auto const& k : m) {
+            if (k.sub.size()) {
+                for (auto const& s : k.sub) {
+                    this->m_pButtonMenu->addChild(
+                        this->getKeyButton(s.text.c_str(), s.key, s.width, {
+                            static_cast<float>(xpos + s.width / 2),
+                            static_cast<float>(ypos)
+                        })
+                    );
 
-        ix++;
-    }
-
-    this->m_pButtonMenu->addChild(
-        this->getKeyButton("Esc", KEY_Escape, 0, {
-            - m_fItemSeparation * 7.25f,
-            m_fItemSeparation * 3.5f
-        })
-    );
-
-    for (auto i = 0; i < 12; i++) {
-        this->m_pButtonMenu->addChild(
-            this->getKeyButton(("F"_s + std::to_string(i + 1)).c_str(),
-                static_cast<enumKeyCodes>(KEY_F1 + i), 0,
-                {
-                    i / static_cast<float>(10) * m_fItemSeparation * 12 -
-                        m_fItemSeparation * 6,
-                    m_fItemSeparation * 3.5f
+                    xpos += s.width + s_fItemSeparation;
                 }
-            )
-        );
+            } else {
+                if (k.target) {
+                    this->m_pButtonMenu->addChild(
+                        this->getKeyToggle(k.text.c_str(), k.width, k.target,
+                            menu_selector(KeymapLayer::onToggle), {
+                            static_cast<float>(xpos + k.width / 2),
+                            static_cast<float>(ypos)
+                        })
+                    );
+                } else {
+                    this->m_pButtonMenu->addChild(
+                        this->getKeyButton(k.text.c_str(), k.key, k.width, {
+                            static_cast<float>(xpos + k.width / 2),
+                            static_cast<float>(ypos)
+                        })
+                    );
+                }
+
+                xpos += k.width + s_fItemSeparation;
+            }
+        }
+
+        m_ix++;
     }
-
-    this->m_pButtonMenu->addChild(
-        this->getKeyButton("Tab", KEY_Tab, 24, {
-            -m_fItemSeparation * 7.f, m_fItemSeparation * .65f
-        })
-    );
-
-    this->m_pButtonMenu->addChild(
-        this->getKeyButton("Caps\nLock", KEY_CapsLock, 35, {
-            -m_fItemSeparation * 6.75f, -m_fItemSeparation * .65f
-        })
-    );
-
-    this->m_pButtonMenu->addChild(this->getKeyToggle("Shift", 45, &this->m_pShiftToggle,
-        menu_selector(KeymapLayer::onToggle), {
-            -m_fItemSeparation * 7 + 7.5f, -m_fItemSeparation * 2.0f
-        }
-    ));
-
-    this->m_pButtonMenu->addChild(this->getKeyToggle("Ctrl", 30, &this->m_pControlToggle,
-        menu_selector(KeymapLayer::onToggle), {
-            -m_fItemSeparation * 7, -m_fItemSeparation * 3.5f
-        }
-    ));
-    
-    this->m_pButtonMenu->addChild(this->getKeyToggle("Alt", 40, &this->m_pAltToggle,
-        menu_selector(KeymapLayer::onToggle), {
-            -m_fItemSeparation * 4.75f, -m_fItemSeparation * 3.5f
-        }
-    ));
-    
-    this->m_pButtonMenu->addChild(
-        this->getKeyButton("Space", KEY_Space, static_cast<int>(m_fItemSeparation * 5), {
-            -m_fItemSeparation * 1, -m_fItemSeparation * 3.5f
-        })
-    );
-
-    this->m_pButtonMenu->addChild(
-        this->getKeyButton("PgUp", KEY_PageUp, 25, {
-            m_fItemSeparation * 2.5f, -m_fItemSeparation * 3.5f
-        })
-    );
-
-    this->m_pButtonMenu->addChild(
-        this->getKeyButton("PgDown", KEY_PageDown, 25, {
-            m_fItemSeparation * 4.5f, -m_fItemSeparation * 3.5f
-        })
-    );
-
-    this->m_pButtonMenu->addChild(
-        this->getKeyButton("<", KEY_Left, 0, {
-            m_fItemSeparation * 6.f, -m_fItemSeparation * 3.5f
-        })
-    );
-
-    this->m_pButtonMenu->addChild(
-        this->getKeyButton(">", KEY_Right, 0, {
-            m_fItemSeparation * 8.f, -m_fItemSeparation * 3.5f
-        })
-    );
-
-    auto btnDown = 
-        this->getKeyButton("<", KEY_Down, 0, {
-            m_fItemSeparation * 7.f, -m_fItemSeparation * 3.5f
-        });
-    as<ButtonSprite*>(btnDown->getNormalImage())->m_pLabel->setRotation(270);
-    this->m_pButtonMenu->addChild(btnDown);
-
-    auto btnUp = 
-        this->getKeyButton(">", KEY_Up, 0, {
-            m_fItemSeparation * 7.f, -m_fItemSeparation * 2.5f
-        });
-    as<ButtonSprite*>(btnUp->getNormalImage())->m_pLabel->setRotation(270);
-    this->m_pButtonMenu->addChild(btnUp);
 
     auto bg = CCScale9Sprite::create(
         "square02b_001.png", { 0.0f, 0.0f, 80.0f, 80.0f }
@@ -220,7 +203,7 @@ KeymapLayer::~KeymapLayer() {
 }
 
 void KeymapLayer::onToggle(CCObject*) {
-    this->updateKeys();
+    this->m_bUpdateOnNextVisit = true;
 }
 
 void KeymapLayer::visit() {
@@ -246,7 +229,26 @@ void KeymapLayer::visit() {
         this->updateKeys();
     }
     
+    if (this->m_bUpdateOnNextVisit) {
+        this->updateKeys();
+        this->m_bUpdateOnNextVisit = false;
+    }
+
     this->showHoveredKey();
+}
+
+Keybind KeymapLayer::getKeybind(enumKeyCodes key) {
+    auto k = Keybind(key);
+    k.modifiers = 0;
+
+    if (this->m_pControlToggle->isToggled())
+        k.modifiers |= k.kmControl;
+    if (this->m_pShiftToggle->isToggled())
+        k.modifiers |= k.kmShift;
+    if (this->m_pAltToggle->isToggled())
+        k.modifiers |= k.kmAlt;
+    
+    return k;
 }
 
 void KeymapLayer::keyDown(enumKeyCodes key) {
@@ -274,7 +276,7 @@ void KeymapLayer::updateKeys() {
 
     for (auto const& [bind, cb] : KeybindManager::get()->getAllKeybinds()) {
         CCARRAY_FOREACH_B_TYPE(this->m_pKeyBtns, btn, ButtonSprite) {
-            auto k = Keybind(enum_cast<enumKeyCodes>(btn->getUserData()));
+            auto k = this->getKeybind(enum_cast<enumKeyCodes>(btn->getUserData()));
 
             if (k == bind) {
                 btn->updateBGImage("GJ_button_01.png");
@@ -305,7 +307,7 @@ void KeymapLayer::showHoveredKey() {
         if (rect.containsPoint(mpos)) {
             std::string str = "";
 
-            auto k = Keybind(enum_cast<enumKeyCodes>(btn->getUserData()));
+            auto k = this->getKeybind(enum_cast<enumKeyCodes>(btn->getUserData()));
 
             isHovering = true;
 

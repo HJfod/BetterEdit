@@ -2,6 +2,8 @@
 
 #include "../../BetterEdit.hpp"
 
+std::string keyToStringFixed(enumKeyCodes code);
+
 struct Keybind {
     enumKeyCodes key;
     enum Modifiers : int {

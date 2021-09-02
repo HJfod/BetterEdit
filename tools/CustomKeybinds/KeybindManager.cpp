@@ -5,6 +5,27 @@
 
 KeybindManager* g_manager;
 
+std::string keyToStringFixed(enumKeyCodes code) {
+    switch (code) {
+        case KEY_None:
+            return "";
+
+        case KEY_C:
+            // because for some reason keyToString thinks C is a V
+            return "C";
+            break;
+        
+        case static_cast<enumKeyCodes>(-1):
+            return "Unk";
+            break;
+        
+        default:
+            return cocos2d::CCDirector::sharedDirector()
+                ->getKeyboardDispatcher()
+                ->keyToString(code);
+    }
+}
+
 static DS_Dictionary* copyDict(DS_Dictionary* other) {
     auto res = new DS_Dictionary;
     if (!res) return nullptr;
@@ -37,26 +58,13 @@ std::string Keybind::toString() const {
     if (this->modifiers & kmAlt)   res += "Alt + ";
     if (this->modifiers & kmShift) res += "Shift + ";
 
-    switch (this->key) {
-        case KEY_None:
-            res = res.substr(0, res.size() - 3);
-            break;
-        
-        case KEY_C:
-            // because for some reason keyToString thinks C is a V
-            res += "C";
-            break;
-        
-        case static_cast<enumKeyCodes>(-1):
-            res += "Unk";
-            break;
-        
-        default:
-            res += cocos2d::CCDirector::sharedDirector()
-                ->getKeyboardDispatcher()
-                ->keyToString(this->key);
-    }
+    auto r = keyToStringFixed(this->key);
 
+    if (r.size())
+        res += r;
+    else
+        res = res.substr(0, res.size() - 3;
+        
     return res;
 }
 

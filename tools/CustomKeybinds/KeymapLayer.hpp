@@ -5,11 +5,13 @@
 
 class KeymapLayer : public BrownAlertDelegate {
     protected:
-        float m_fItemSeparation = 20.0f;
+        static constexpr int s_fItemWidth = 12;
+        static constexpr int s_fItemSeparation = 10;
         CCArray* m_pKeyBtns;
         bool m_bControlDown = false;
         bool m_bShiftDown = false;
         bool m_bAltDown = false;
+        bool m_bUpdateOnNextVisit = false;
         CCMenuItemToggler* m_pControlToggle;
         CCMenuItemToggler* m_pShiftToggle;
         CCMenuItemToggler* m_pAltToggle;
@@ -24,6 +26,8 @@ class KeymapLayer : public BrownAlertDelegate {
         void keyDown(enumKeyCodes) override;
         void keyUp(enumKeyCodes) override;
         void visit() override;
+
+        Keybind getKeybind(enumKeyCodes);
 
         void onToggle(CCObject*);
 
