@@ -7,17 +7,14 @@ KeybindManager* g_manager;
 
 std::string keyToStringFixed(enumKeyCodes code) {
     switch (code) {
-        case KEY_None:
-            return "";
-
-        case KEY_C:
-            // because for some reason keyToString thinks C is a V
-            return "C";
-            break;
+        case KEY_None: return "";
+        case KEY_C: return "C";
+        case KEY_Multiply: return "*";
+        case KEY_Divide: return "/";
+        case KEY_OEMPlus: return "+";
         
         case static_cast<enumKeyCodes>(-1):
             return "Unk";
-            break;
         
         default:
             return cocos2d::CCDirector::sharedDirector()
@@ -63,7 +60,7 @@ std::string Keybind::toString() const {
     if (r.size())
         res += r;
     else
-        res = res.substr(0, res.size() - 3;
+        res = res.substr(0, res.size() - 3);
         
     return res;
 }
@@ -693,6 +690,23 @@ void KeybindManager::clearKeybinds(KeybindType type, KeybindCallback* cb) {
             ix++;
         }
     }
+}
+
+void KeybindManager::clearCallbacks(Keybind const& bind) {
+    if (bind.key != KEY_None && m_mKeybinds.count(bind))
+        m_mKeybinds.erase(bind);
+}
+
+std::vector<KeybindManager::Target> KeybindManager::getAllCallbacksForKeybind(Keybind const& bind) {
+    if (!m_mKeybinds.count(bind))
+        return {};
+    
+    std::vector<KeybindManager::Target> res;
+
+    for (auto & target : m_mKeybinds[bind])
+        res.push_back(target);
+    
+    return res;
 }
 
 KeybindManager::CallbackList KeybindManager::getCallbacksForKeybind(KeybindType type, Keybind const& bind) {

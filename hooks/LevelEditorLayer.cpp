@@ -3,6 +3,7 @@
 #include "../tools/RotateSaws/rotateSaws.hpp"
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/other/teleportScaleFix.hpp"
+#include "../tools/SickAnimation/sickAnimation.hpp"
 
 GDMAKE_HOOK(0x15ee00)
 bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameLevel* level) {
@@ -27,6 +28,8 @@ bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameL
     }
     
     updatePercentLabelPosition(self->m_pEditorUI);
+
+    doTheSickAnimation(self);
 
     return true;
 }

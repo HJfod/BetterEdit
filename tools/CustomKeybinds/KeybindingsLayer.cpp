@@ -6,12 +6,17 @@
 #include "Scrollbar.hpp"
 #include "KeybindSettingsLayer.hpp"
 #include "KeymapLayer.hpp"
+#include "../../utils/BGLabel.hpp"
 
 static constexpr const int KBLDELEGATE_TAG = 0x44432;
 static constexpr const int KBLLIST_TAG = 0x44431;
 static constexpr const int KBLSCROLLBAR_TAG = 0x44430;
 static constexpr const int KBLINPUT_TAG = 0x44429;
+static constexpr const int KBLCANCELSELECT_TAG = 0x44428;
+static constexpr const int KBLSELECTLABEL_TAG = 0x44427;
 std::string searchQuery = "";
+bool g_bSelectMode = false;
+Keybind g_obSelectKeybind;
 
 std::map<std::string, bool> KeybindingsLayerDelegate::m_mFoldedCategories = std::map<std::string, bool>();
 
@@ -80,17 +85,10 @@ void KeybindingsLayer_CB::reloadList() {
             if (
                 !searchQuery.size() || matchSearchQuery(kKBPlayLayer, bind)
             )
-                arr->addObject(new KeybindItem(bind, kKBPlayLayer, delegate));
+                arr->addObject(new KeybindItem(
+                    bind, kKBPlayLayer, delegate, g_bSelectMode, g_obSelectKeybind
+                ));
         }
-
-    // arr->addObject(new KeybindItem("Global", delegate));
-    // if (!delegate->m_mFoldedCategories["Global"])
-    //     for (auto bind : KeybindManager::get()->getCallbacks(kKBGlobal)) {
-    //         if (
-    //             !searchQuery.size() || matchSearchQuery(kKBGlobal, bind)
-    //         )
-    //             arr->addObject(new KeybindItem(bind, kKBGlobal, delegate));
-    //     }
 
     arr->addObject(new KeybindItem("Editor", delegate));
     if (!delegate->m_mFoldedCategories["Editor"])
@@ -107,7 +105,9 @@ void KeybindingsLayer_CB::reloadList() {
             ])
                 for (auto const& bind : binds) {
                     if (!searchQuery.size() || matchSearchQuery(kKBEditor, bind))
-                        arr->addObject(new KeybindItem(bind, kKBEditor, delegate));
+                        arr->addObject(new KeybindItem(
+                            bind, kKBEditor, delegate, g_bSelectMode, g_obSelectKeybind
+                        ));
                 }
         }
 
@@ -143,7 +143,7 @@ void KeybindingsLayer_CB::onGlobalSettings(CCObject*) {
 void KeybindingsLayer_CB::onKeymap(CCObject*) {
     this->detachInput();
 
-    KeymapLayer::create()->show();
+    KeymapLayer::create(this)->show();
 }
 
 void KeybindingsLayer_CB::detachInput() {
@@ -153,6 +153,38 @@ void KeybindingsLayer_CB::detachInput() {
         input->getInputNode()->m_pTextField->detachWithIME();
         input->getInputNode()->detachWithIME();
     }
+}
+
+void KeybindingsLayer_CB::onFinishSelect(CCObject*) {
+    g_bSelectMode = false;
+
+    auto btn = this->m_pButtonMenu->getChildByTag(KBLCANCELSELECT_TAG);
+    if (btn) btn->setVisible(false);
+    auto lbl = as<BGLabel*>(this->m_pLayer->getChildByTag(KBLSELECTLABEL_TAG));
+    if (lbl) lbl->setVisible(false);
+
+    this->reloadList();
+    this->detachInput();
+
+    auto l = KeymapLayer::create(this);
+    l->loadKeybind(g_obSelectKeybind);
+    l->show();
+}
+
+void KeybindingsLayer_CB::setSelectMode(bool b, Keybind const& kb) {
+    g_bSelectMode = b;
+    g_obSelectKeybind = kb;
+
+    auto btn = this->m_pButtonMenu->getChildByTag(KBLCANCELSELECT_TAG);
+    if (btn) btn->setVisible(b);
+
+    auto lbl = as<BGLabel*>(this->m_pLayer->getChildByTag(KBLSELECTLABEL_TAG));
+    if (lbl) {
+        lbl->setVisible(b);
+        lbl->setString(g_obSelectKeybind.toString().c_str());
+    }
+
+    this->reloadList();
 }
 
 GDMAKE_HOOK(0x153670)
@@ -305,6 +337,12 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
         self->m_pLayer->addChild(sideItemRight);
     }
 
+    auto selectLabel = BGLabel::create("", "goldFont.fnt");
+    selectLabel->setVisible(false);
+    selectLabel->setTag(KBLSELECTLABEL_TAG);
+    selectLabel->setPosition(winSize.width / 2, winSize.height / 2 + 120.0f);
+    self->m_pLayer->addChild(selectLabel);
+
     auto resetBtn = CCMenuItemSpriteExtra::create(
         CCNodeConstructor<ButtonSprite*>()
             .fromButtonSprite(
@@ -330,6 +368,21 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     );
     mapBtn->setPosition(210.0f, - 140.0f);
     self->m_pButtonMenu->addChild(mapBtn);
+
+    auto selectBtn = CCMenuItemSpriteExtra::create(
+        CCNodeConstructor<ButtonSprite*>()
+            .fromButtonSprite(
+                "Cancel", "GJ_button_06.png", "bigFont.fnt"
+            )
+            .scale(.7f)
+            .done(),
+        self,
+        menu_selector(KeybindingsLayer_CB::onFinishSelect)
+    );
+    selectBtn->setPosition(0.0f, - 140.0f);
+    selectBtn->setVisible(false);
+    selectBtn->setTag(KBLCANCELSELECT_TAG);
+    self->m_pButtonMenu->addChild(selectBtn);
 
     auto settingsBtn = CCMenuItemSpriteExtra::create(
         CCNodeConstructor()

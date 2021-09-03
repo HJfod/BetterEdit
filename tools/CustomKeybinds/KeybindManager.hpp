@@ -177,6 +177,7 @@ class KeybindManager : public GManager {
         std::map<std::string, CallbackList> getCallbacksSorted(KeybindType);
         std::string getCategoryName(std::string const&);
         CallbackList getAllCallbacks();
+        std::vector<Target> getAllCallbacksForKeybind(Keybind const&);
         CallbackList getCallbacksForKeybind(KeybindType, Keybind const&);
         KeybindList getKeybindsForCallback(KeybindType, KeybindCallback*);
         size_t getIndexOfCallback(KeybindType, KeybindCallback*);
@@ -185,6 +186,7 @@ class KeybindManager : public GManager {
         void removeKeybind(KeybindType, KeybindCallback*, Keybind const&);
         void editKeybind(KeybindType, KeybindCallback*, Keybind const& old, Keybind const& rep);
         void clearKeybinds(KeybindType, KeybindCallback*);
+        void clearCallbacks(Keybind const&);
         void executeEditorCallbacks(Keybind const&, EditorUI*, bool keydown, bool onlyPlay = false);
         void executePlayCallbacks(Keybind const&, PlayLayer*, bool keydown);
         void resetToDefault(KeybindType, KeybindCallback*, bool = true);

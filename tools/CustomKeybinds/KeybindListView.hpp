@@ -13,16 +13,22 @@ struct KeybindItem : public CCObject {
     KeybindType type;
     KeybindingsLayerDelegate* delegate = nullptr;
     std::string text;
+    bool selectMode = false;
+    Keybind selectKeybind;
 
     inline KeybindItem(
         KeybindCallback* b,
         KeybindType t,
-        KeybindingsLayerDelegate* d
+        KeybindingsLayerDelegate* d,
+        bool select = false,
+        Keybind const& kb = Keybind()
     ) {
         bind = b;
         type = t;
         text = "";
         delegate = d;
+        selectMode = select;
+        selectKeybind = kb;
         this->autorelease();
     }
 
@@ -61,6 +67,7 @@ class KeybindCell : public TableViewCell, public FLAlertLayerProtocol {
         void onRepeat(CCObject*);
         void onFold(CCObject*);
         void onReset(CCObject*);
+        void onSelect(CCObject*);
 
 		static KeybindCell* create(const char* key, CCSize size);
 };

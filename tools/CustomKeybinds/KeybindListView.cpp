@@ -96,19 +96,34 @@ void KeybindCell::onEdit(CCObject* pSender) {
     KeybindEditPopup::create(this, item)->show();
 }
 
-void KeybindCell::onRepeat(CCObject* pSender) {
+void KeybindCell::onRepeat(CCObject*) {
     this->m_pItem->delegate->m_pLayer->detachInput();
 
     KeybindRepeatPopup::create(this)->show();
 }
 
-void KeybindCell::onReset(CCObject* pSender) {
+void KeybindCell::onReset(CCObject*) {
     FLAlertLayer::create(
         this,
         "Reset Keybind",
         "Cancel", "Reset",
         "Are you sure you want to <cr>reset</c> <cc>"_s + this->m_pBind->name + "</c>?"
     )->show();
+}
+
+void KeybindCell::onSelect(CCObject*) {
+    if (this->m_pItem->selectKeybind.key != KEY_None) {
+        KeybindManager::get()->clearKeybinds(
+            this->m_pItem->type,
+            this->m_pBind
+        );
+        KeybindManager::get()->addKeybind(
+            this->m_pItem->type,
+            this->m_pBind,
+            this->m_pItem->selectKeybind
+        );
+    }
+    this->m_pItem->delegate->m_pLayer->onFinishSelect(nullptr);
 }
 
 void KeybindCell::FLAlert_Clicked(FLAlertLayer*, bool btn2) {
@@ -125,18 +140,34 @@ void KeybindCell::updateMenu() {
     if (!m_pBind)
         return;
 
+    auto x = this->m_fWidth / 2 - 10.0f;
+
+    if (m_pItem->selectMode) {
+        for (auto & bind : KeybindManager::get()->getKeybindsForCallback(
+            m_pItem->type, m_pBind
+        )) 
+            if (bind.key == KEY_None) return;
+        
+        auto spr = createKeybindBtnSprite("Select");
+        auto btn = CCMenuItemSpriteExtra::create(
+            spr, this, menu_selector(KeybindCell::onSelect)
+        );
+        auto width = spr->getScaledContentSize().width;
+        btn->setPosition(x - width / 2, 0.0f);
+        m_pMenu->addChild(btn);
+
+        return;
+    }
+
     auto binds = KeybindManager::get()->getKeybindsForCallback(
         m_pItem->type, m_pBind
     );
 
     m_pMenu->removeAllChildren();
 
-    auto x = this->m_fWidth / 2 - 10.0f;
-
     bool editable = !binds.size();
     bool resettable = false;
     for (auto & bind : binds) {
-        // cba to fix Swipe Modifier rn
         if (bind.key == KEY_None) {
             auto label = CCLabelBMFont::create(bind.toString().c_str(), "goldFont.fnt");
             label->setScale(.5f);

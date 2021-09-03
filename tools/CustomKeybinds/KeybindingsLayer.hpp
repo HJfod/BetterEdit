@@ -9,6 +9,8 @@ class KeybindingsLayer_CB : public KeybindingsLayer {
         void onResetAll(CCObject*);
         void onGlobalSettings(CCObject*);
         void onKeymap(CCObject*);
+        void onFinishSelect(CCObject*);
+        void setSelectMode(bool, Keybind const&);
 };
 
 class KeybindingsLayerDelegate :
