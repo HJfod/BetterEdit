@@ -537,4 +537,14 @@ void loadBEKeybinds() {
         as<EditorUI_CB*>(ui)->onShowLayerPopup(nullptr);
         return false;
     }, "editor.ui", false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Align X", [](EditorUI* ui) -> bool {
+        ui->alignObjects(ui->getSelectedObjects(), false);
+        return false;
+    }, "editor.modify", false}, {});
+
+    KeybindManager::get()->addEditorKeybind({ "Align Y", [](EditorUI* ui) -> bool {
+        ui->alignObjects(ui->getSelectedObjects(), true);
+        return false;
+    }, "editor.modify", false}, {});
 }

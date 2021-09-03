@@ -361,7 +361,7 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
             .fromButtonSprite(
                 "Map", "GJ_button_05.png", "bigFont.fnt"
             )
-            .scale(.4f)
+            .scale(.6f)
             .done(),
         self,
         menu_selector(KeybindingsLayer_CB::onKeymap)

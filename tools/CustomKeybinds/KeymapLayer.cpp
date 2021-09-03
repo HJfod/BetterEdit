@@ -275,6 +275,20 @@ void KeymapLayer::setup() {
     this->m_pSelected = nullptr;
 
     this->updateKeys();
+
+    MAKE_INFOBUTTON(
+        "Keymap",
+        
+        "Use the <cp>keymap</c> to quickly see which keys are already assigned "
+        "and assign new keybinds\n\n "
+
+        "Some keys are <cr>missing</c>, because they are <cy>not supported</c> "
+        "by <cb>Cocos2d</c> :(",
+        1.0f,
+        this->m_pLrSize.width / 2 - 30.0f,
+        this->m_pLrSize.height / 2 - 30.0f,
+        this->m_pButtonMenu
+    );
 }
 
 KeymapLayer::~KeymapLayer() {
