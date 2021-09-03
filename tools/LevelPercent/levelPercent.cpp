@@ -3,6 +3,7 @@
 #include "../RotateSaws/rotateSaws.hpp"
 #include "../AutoSave/autoSave.hpp"
 #include "../CustomKeybinds/BEKeybinds.hpp"
+#include "../EditorLayerInput/editorLayerInput.hpp"
 
 static constexpr const int SLIDERLABEL_TAG = 420;
 static constexpr const int EPOSITION_TAG = 421;
