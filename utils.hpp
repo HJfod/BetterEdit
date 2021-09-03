@@ -112,6 +112,14 @@ static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
     return nullptr;
 }
 
+template<typename T, typename R = T>
+static constexpr R vtable_cast(T obj, uintptr_t vtable) {
+    if (obj && (*as<uintptr_t*>(obj) - gd::base == vtable))
+        return as<R>(obj);
+    
+    return nullptr;
+}
+
 static cocos2d::CCPoint getMousePos() {
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
     auto winSizePx = cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getViewPortRect();
@@ -138,6 +146,11 @@ static constexpr R union_cast(T v) {
 
 template <typename T>
 bool bool_cast(T const v) { return static_cast<bool>(reinterpret_cast<int>(v)); }
+
+template<typename T, typename R>
+static constexpr T offset_cast(R const v, uintptr_t offset) {
+    return reinterpret_cast<T>(reinterpret_cast<uintptr_t>(v) + offset);
+}
 
 #define CATCH_NULL(x) if (x) x
 
