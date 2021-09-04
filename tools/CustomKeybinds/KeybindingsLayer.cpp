@@ -229,17 +229,17 @@ GDMAKE_HOOK(0x152f40)
 bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     if (!self->initWithColor({ 0, 0, 0, 105 })) return false;
 
-    auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     self->m_bNoElasticity = true;
 
-    self->m_pLayer = cocos2d::CCLayer::create();
+    self->m_pLayer = CCLayer::create();
     self->addChild(self->m_pLayer);
 
     auto delegate = KeybindingsLayerDelegate::create(as<KeybindingsLayer_CB*>(self));
     self->addChild(delegate);
     
-    auto bg = cocos2d::extension::CCScale9Sprite::create("GJ_square01.png", { 0.0f, 0.0f, 80.0f, 80.0f });
+    auto bg = CCScale9Sprite::create("GJ_square01.png", { 0.0f, 0.0f, 80.0f, 80.0f });
     bg->setContentSize({ 420.0f, 280.0f });
     bg->setPosition(winSize / 2);
     self->m_pLayer->addChild(bg);
@@ -403,6 +403,20 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     closeBtn->setPosition(-210.0f + 5.0f, 140.0f - 5.0f);
     closeBtn->setSizeMult(1.5f);
     self->m_pButtonMenu->addChild(closeBtn);
+
+    MAKE_INFOBUTTON(
+        "Keybinds",
+        
+        "You can <cy>customize</c> all keybinds to whatever "
+        "shortcut you want.\n\n "
+        "<cp>Repeating</c> means that when you hold down a shortcut, "
+        "it'll start repeating at the set <cg>interval</c> after "
+        "the set <cb>start</c> time.",
+        .65f,
+        210.0f - 90.0f,
+        140.0f - 25.0f,
+        self->m_pButtonMenu
+    );
 
     self->setKeypadEnabled(true);
     self->setTouchEnabled(true);

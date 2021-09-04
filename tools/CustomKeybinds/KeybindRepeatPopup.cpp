@@ -84,6 +84,22 @@ void KeybindRepeatPopup::setup() {
             .move(0.0f, - this->m_pLrSize.height / 2 + 25.0f)
             .done()
     );
+
+    MAKE_INFOBUTTON(
+        "Keybind Repeating",
+        
+        "<cp>Repeating</c> means that when you hold down a shortcut, "
+        "it will start repeating after a certain amount of time. "
+        "For example, you can hold to move an object continuously instead "
+        "of spamming the shortcut to do it.\n\n "
+        "<cg>Interval:</c> How fast the shortcut should be repeated\n "
+        "<cy>Start:</c> How long should the shortcut be held down until "
+        "repeating starts\n ",
+        .65f,
+        this->m_pLrSize.width / 2 - 25.0f,
+        - this->m_pLrSize.height / 2 + 25.0f,
+        this->m_pButtonMenu
+    );
 }
 
 void KeybindRepeatPopup::onEnable(CCObject* pSender) {

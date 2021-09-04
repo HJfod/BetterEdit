@@ -277,7 +277,7 @@ void loadBEKeybinds() {
     KeybindManager::get()->addEditorKeybind({ "Rotate Snap", [](EditorUI* ui) -> bool {
         ui->transformObjectCall(kEditCommandRotateSnap);
         return false;
-    }, "editor.modify"}, {});
+    }, "editor.modify", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Show Rotate Control", [](EditorUI* ui) -> bool {
         ui->activateRotationControl(nullptr);
@@ -367,17 +367,17 @@ void loadBEKeybinds() {
     KeybindManager::get()->addEditorKeybind({ "Toggle UI", [](EditorUI* ui) -> bool {
         toggleShowUI(ui);
         return false;
-    }, "editor.ui"}, {});
+    }, "editor.ui", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Show UI", [](EditorUI* ui) -> bool {
         ui->showUI(true);
         return false;
-    }, "editor.ui"}, {});
+    }, "editor.ui", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Hide UI", [](EditorUI* ui) -> bool {
         ui->showUI(false);
         return false;
-    }, "editor.ui"}, {});
+    }, "editor.ui", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Preview Mode", [](EditorUI* ui) -> bool {
         auto b = GameManager::sharedState()->getGameVariable("0036");
@@ -385,22 +385,22 @@ void loadBEKeybinds() {
         ui->m_pEditorLayer->updateEditorMode();
         updateVisibilityTab(ui);
         return false;
-    }, "editor.visibility"}, {});
+    }, "editor.visibility", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Edit Object", [](EditorUI* ui) -> bool {
         ui->editObject(nullptr);
         return false;
-    }, "editor.modify"}, {});
+    }, "editor.modify", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Edit Group", [](EditorUI* ui) -> bool {
         ui->editGroup(nullptr);
         return false;
-    }, "editor.modify"}, {});
+    }, "editor.modify", false}, {});
 
     KeybindManager::get()->addEditorKeybind({ "Edit Special", [](EditorUI* ui) -> bool {
         ui->editObject2(nullptr);
         return false;
-    }, "editor.modify"}, {});
+    }, "editor.modify", false}, {});
 
     // KeybindManager::get()->addEditorKeybind({ "Increment Hue", [](EditorUI* ui) -> bool {
     //     // todo
