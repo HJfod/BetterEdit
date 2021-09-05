@@ -60,6 +60,16 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
     }
     this->m_pLayer->addChild(nameLabel);
 
+    if (m_pBind) {
+        auto idLabel = CCLabelBMFont::create(m_pBind->id.c_str(), "bigFont.fnt");
+        idLabel->limitLabelWidth(260.0f, .15f, .0f);
+        idLabel->setPosition(15.0f, this->m_fHeight / 2 - 10.0f);
+        idLabel->setAnchorPoint({ 0.0f, 0.5f });
+        idLabel->setColor(cc3x(0xc));
+        idLabel->setOpacity(100);
+        this->m_pLayer->addChild(idLabel);
+    }
+
     m_pMenu = CCMenu::create();
     m_pMenu->setPosition(m_fWidth / 2, m_fHeight / 2);
     this->m_pLayer->addChild(m_pMenu);

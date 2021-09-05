@@ -82,9 +82,9 @@ static cocos2d::CCSprite* createBESprite(const char* name, const char* fallback 
 static constexpr cocos2d::ccColor3B cc3x(int hexValue) {
     if (hexValue <= 0xf)
         return cocos2d::ccColor3B {
-            static_cast<GLubyte>(hexValue),
-            static_cast<GLubyte>(hexValue),
-            static_cast<GLubyte>(hexValue)
+            static_cast<GLubyte>(hexValue * 17),
+            static_cast<GLubyte>(hexValue * 17),
+            static_cast<GLubyte>(hexValue * 17)
         };
     if (hexValue > 0xfff)
         return cocos2d::ccColor3B {

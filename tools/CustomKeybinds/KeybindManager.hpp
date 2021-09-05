@@ -30,17 +30,31 @@ struct Keybind {
     Keybind(DS_Dictionary*);
 };
 
+struct keybind_id {
+    std::string value;
+
+    keybind_id(std::string const&);
+    keybind_id(const char*);
+    const char* c_str() const;
+    bool operator==(keybind_id const&) const;
+    keybind_id operator=(std::string const&);
+};
+
 namespace std {
     template<>
     struct hash<Keybind> {
         std::size_t operator()(Keybind const&) const;
+    };
+    template<>
+    struct hash<keybind_id> {
+        std::size_t operator()(keybind_id const&) const;
     };
 }
 
 using KeybindList = std::set<Keybind>;
 
 struct KeybindCallback {
-    int id;
+    keybind_id id = "";
     std::string name;
     std::string subcategory = "";
     KeybindList defaults;
@@ -73,10 +87,12 @@ struct KeybindEditor : public KeybindCallback {
 
     inline KeybindEditor(
         std::string const& keybind,
+        std::string const& id,
         decltype(call_b) bind,
         std::string const& cat = ""
     ) {
         this->name = keybind;
+        this->id = id;
         this->call_b = bind;
         this->repeatable = false;
         this->subcategory = cat;
@@ -84,11 +100,13 @@ struct KeybindEditor : public KeybindCallback {
     
     inline KeybindEditor(
         std::string const& keybind,
+        std::string const& id,
         decltype(call) bind,
         std::string const& cat = "",
         bool isRepeatable = true
     ) {
         this->name = keybind;
+        this->id = id;
         this->call = bind;
         this->repeatable = isRepeatable;
         this->subcategory = cat;
@@ -105,6 +123,7 @@ struct KeybindPlayLayer : public KeybindCallback {
         bool alsoInEditor
     ) {
         this->name = copy.name;
+        this->id = copy.id;
         this->call = copy.call;
         this->call_e = copy.call_e;
         this->id = copy.id;
@@ -114,18 +133,22 @@ struct KeybindPlayLayer : public KeybindCallback {
 
     inline KeybindPlayLayer(
         std::string const& keybind,
+        std::string const& id,
         decltype(call) bind
     ) {
         this->name = keybind;
+        this->id = id;
         this->call = bind;
         this->editor = false;
     }
 
     inline KeybindPlayLayer(
         std::string const& keybind,
+        std::string const& id,
         decltype(call_e) bind
     ) {
         this->name = keybind;
+        this->id = id;
         this->call_e = bind;
         this->repeatable = false;
         this->editor = true;
@@ -152,7 +175,7 @@ class KeybindManager : public GManager {
         // what the hell
         std::unordered_map<
             KeybindType,
-            std::unordered_map<std::string, KeybindList>
+            std::unordered_map<keybind_id, KeybindList>
         > m_mLoadedBinds;
         std::unordered_map<enumKeyCodes, float> m_mHeldKeys;
 
