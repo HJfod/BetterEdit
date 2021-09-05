@@ -27,7 +27,7 @@ bool KeybindNode::init(CCNode* t, const char* cb, bool addToList) {
 
     this->m_pTarget = t;
 
-    this->m_obTarget = KeybindManager::get()->getCallbackByName(cb);
+    this->m_obTarget = KeybindManager::get()->getTargetByID(cb);
 
     auto sprName = "square02_small.png";
 

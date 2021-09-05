@@ -88,7 +88,12 @@ Keybind::Keybind() {
 }
 
 Keybind::Keybind(enumKeyCodes pressed) {
-    this->key = pressed;
+    switch (pressed) {
+        case KEY_Control:   this->key = KEY_None; break;
+        case KEY_Shift:     this->key = KEY_None; break;
+        case KEY_Alt:       this->key = KEY_None; break;
+        default:            this->key = pressed;  break;
+    }
 
     auto kb = CCDirector::sharedDirector()->getKeyboardDispatcher();
 
@@ -297,18 +302,11 @@ void KeybindManager::loadDefaultKeybinds() {
     }, {{ KEY_Four, 0 }});
 
     this->addEditorKeybind({ "Swipe modifier", "gd.edit.swipe_modifier",
-        [](EditorUI* ui) -> bool {
-            return false;
-        }, "editor.global", false
+        true, "editor.global"
     }, {{ KEY_None, Keybind::kmShift }});
 
     this->addEditorKeybind({ "Move modifier", "gd.edit.move_modifier",
-        [](EditorUI* ui, bool push) -> bool {
-            ui->m_bSpaceKeyPressed = push;
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
-                ui->m_bMoveModifier = push;
-            return false;
-        }, "editor.global"
+        true, "editor.global"
     }, {{ KEY_Space, 0 }});
 
     this->addEditorKeybind({ "Rotate CCW", "gd.edit.rotate_ccw",
@@ -858,6 +856,9 @@ void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, b
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
+        if (target.bind->modifier)
+            continue;
+
         switch (target.type) {
             case kKBEditor: {
                 if (onlyPlay) break;
@@ -881,6 +882,9 @@ void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bo
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
+        if (target.bind->modifier)
+            continue;
+
         switch (target.type) {
             case kKBPlayLayer: {
                 auto c = as<KeybindPlayLayer*>(target.bind);
@@ -985,6 +989,56 @@ KeybindManager::Target KeybindManager::getCallbackByName(std::string const& cbNa
     }
 
     return KeybindManager::Target();
+}
+
+KeybindManager::Target KeybindManager::getTargetByID(keybind_id const& cbID) {
+    for (auto const& [type, binds] : this->m_mCallbacks) {
+        for (auto const& bind : binds) {
+            if (bind->id == cbID)
+                return {
+                    type,
+                    bind
+                };
+        }
+    }
+
+    return KeybindManager::Target();
+}
+
+bool KeybindManager::isModifierPressed(keybind_id const& id) {
+    auto cb = this->getTargetByID(id);
+    if (!cb.bind) return false;
+
+    auto kbs = this->getKeybindsForCallback(cb.type, cb.bind);
+
+    for (auto const& kb : kbs) {
+        bool res = true;
+
+        if (kb.key != KEY_None && !this->m_mHeldKeys.count(kb.key))    
+            res = false;
+        
+        if (
+            static_cast<bool>(kb.modifiers & kb.kmControl) !=
+            static_cast<bool>(this->m_mHeldKeys.count(KEY_Control))
+        )
+            res = false;
+        
+        if (
+            static_cast<bool>(kb.modifiers & kb.kmShift) !=
+            static_cast<bool>(this->m_mHeldKeys.count(KEY_Shift))
+        )
+            res = false;
+        
+        if (
+            static_cast<bool>(kb.modifiers & kb.kmAlt) !=
+            static_cast<bool>(this->m_mHeldKeys.count(KEY_Alt))
+        )
+            res = false;
+        
+        if (res) return true;
+    }
+    
+    return false;
 }
 
 KeybindManager* KeybindManager::get() {

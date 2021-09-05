@@ -144,7 +144,7 @@ void loadGridButtons(EditorUI* self) {
             )
             .udata(1)
             .exec([self](auto t) -> void {
-                addKeybindIndicator(self, t, "Increase Grid Size");
+                addKeybindIndicator(self, t, "betteredit.increase_grid_size");
             })
             .tag(ZOOMIN_TAG)
             .move(getGridButtonPosition(self, 1))
@@ -178,7 +178,7 @@ void loadGridButtons(EditorUI* self) {
                 )
             )
             .exec([self](auto t) -> void {
-                addKeybindIndicator(self, t, "Decrease Grid Size");
+                addKeybindIndicator(self, t, "betteredit.decrease_grid_size");
             })
             .udata(0)
             .tag(ZOOMOUT_TAG)

@@ -1,17 +1,17 @@
 #include "../../BetterEdit.hpp"
 #include "../LevelPercent/levelPercent.hpp"
+#include "../CustomKeybinds/KeybindManager.hpp"
 
 GDMAKE_HOOK(0x921d0)
 void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, float b) {
     // get the actual EditorUI since this function is a virtual that messes it up
     auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xfc);
-    auto kb = cocos2d::CCDirector::sharedDirector()->getKeyboardDispatcher();
 
     float prevScale = self->m_pEditorLayer->m_pObjectLayer->getScale();
     auto swipeStart =
         self->m_pEditorLayer->m_pObjectLayer->convertToNodeSpace(self->m_obSwipeStart) * prevScale;
 
-    if (kb->getControlKeyPressed()) {
+    if (KeybindManager::get()->isModifierPressed("betteredit.zoom_modifier")) {
         auto zoom = self->m_pEditorLayer->getObjectLayer()->getScale();
 
         // std::log defaults to base e, and since c++ doesnt have it anywhere, just hardcode it in
@@ -55,7 +55,7 @@ void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, 
         auto layer = self->m_pEditorLayer->getObjectLayer();
         constexpr float mult = 2.f;
 
-        if (kb->getShiftKeyPressed())
+        if (KeybindManager::get()->isModifierPressed("betteredit.horizontal_modifier"))
             layer->setPositionX(layer->getPositionX() - amt * mult);
         else
             layer->setPositionY(layer->getPositionY() + amt * mult);

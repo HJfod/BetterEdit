@@ -358,7 +358,7 @@ void loadEditorLayerInput(EditorUI* self) {
             ))
             .exec([self](auto t) -> void {
                 addKeybindIndicator(
-                    self, t, "Go To Next Free Layer"
+                    self, t, "betteredit.go_to_next_free_layer"
                 );
             })
             .move(9.0f, goToAllBtn->getPositionY())
@@ -377,7 +377,7 @@ void loadEditorLayerInput(EditorUI* self) {
                 (SEL_MenuHandler)&EditorUI_CB::onLockLayer
             ))
             .exec([self](auto t) -> void {
-                addKeybindIndicator(self, t, "Lock Layer");
+                addKeybindIndicator(self, t, "betteredit.lock_layer");
             })
             .move(-106.0f, goToAllBtn->getPositionY())
             .tag(LOCKLAYER_TAG)
@@ -395,7 +395,7 @@ void loadEditorLayerInput(EditorUI* self) {
                 (SEL_MenuHandler)&EditorUI_CB::onShowLayerPopup
             ))
             .exec([self](auto t) -> void {
-                addKeybindIndicator(self, t, "View Layers");
+                addKeybindIndicator(self, t, "betteredit.view_layer_list");
             })
             .move(-130.0f, goToAllBtn->getPositionY())
             .tag(VIEWLAYERS_TAG)

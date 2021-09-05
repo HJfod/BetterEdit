@@ -331,15 +331,11 @@ void loadBEKeybinds() {
     }, {{ KEY_Escape, 0 }});
 
     kbm->addEditorKeybind({ "Scroll Zoom Modifier", "betteredit.zoom_modifier",
-        [](EditorUI* ui) -> bool {
-            return false;
-        }, "editor.ui"
+        true, "editor.global"
     }, {{ KEY_None, Keybind::kmControl }});
 
     kbm->addEditorKeybind({ "Scroll Horizontal Modifier", "betteredit.horizontal_modifier",
-        [](EditorUI* ui) -> bool {
-            return false;
-        }, "editor.ui"
+        true, "editor.global"
     }, {{ KEY_None, Keybind::kmShift }});
 
     kbm->addEditorKeybind({ "Save Level", "betteredit.save_level",

@@ -63,6 +63,7 @@ struct KeybindCallback {
     bool repeat = BetterEdit::getKeybindRepeatEnabled();
     int repeatInterval = BetterEdit::getKeybindRepeatInterval();
     int repeatStart = BetterEdit::getKeybindRepeatStart();
+    bool modifier = false;
 
     bool operator==(KeybindCallback const&) const;
 
@@ -85,6 +86,19 @@ struct KeybindEditor : public KeybindCallback {
     std::function<bool(EditorUI*, bool)> call_b = nullptr;
     std::function<bool(EditorUI*)> call = nullptr;
 
+    inline KeybindEditor(
+        std::string const& keybind,
+        std::string const& id,
+        bool isModifier,
+        std::string const& cat = ""
+    ) {
+        this->name = keybind;
+        this->id = id;
+        this->modifier = isModifier;
+        this->repeatable = false;
+        this->subcategory = cat;
+    }
+    
     inline KeybindEditor(
         std::string const& keybind,
         std::string const& id,
@@ -205,6 +219,7 @@ class KeybindManager : public GManager {
         KeybindList getKeybindsForCallback(KeybindType, KeybindCallback*);
         size_t getIndexOfCallback(KeybindType, KeybindCallback*);
         Target getCallbackByName(std::string const&);
+        Target getTargetByID(keybind_id const&);
         void addKeybind(KeybindType, KeybindCallback*, Keybind const&);
         void removeKeybind(KeybindType, KeybindCallback*, Keybind const&);
         void editKeybind(KeybindType, KeybindCallback*, Keybind const& old, Keybind const& rep);
@@ -217,6 +232,7 @@ class KeybindManager : public GManager {
         void resetUnmodifiedRepeatTimes();
         void handleRepeats(float);
         void registerKeyPress(enumKeyCodes, bool);
+        bool isModifierPressed(keybind_id const&);
 
         static KeybindManager* get();
         static bool initGlobal();

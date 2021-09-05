@@ -156,7 +156,7 @@ void loadVisibilityTab(EditorUI* self) {
 
     vTabBtn->setTag(4);
     vTabBtn->setPosition(scr.x + item_sep, scr.y);
-    addKeybindIndicator(self, vTabBtn, "View Mode");
+    addKeybindIndicator(self, vTabBtn, "betteredit.view_mode");
 
     self->m_pBuildModeBtn->getParent()->addChild(vTabBtn);
 
@@ -179,14 +179,14 @@ void loadVisibilityTab(EditorUI* self) {
                 ->onRotateSaws(p);
         }
     ));
-    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "Rotate Saws");
+    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "betteredit.rotate_saws");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_ldm.png",
         []() -> bool { return g_bHideLDM; },
         [&](bool b, auto) -> void { g_bHideLDM = b; }
     ));
-    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "Toggle LDM");
+    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "betteredit.toggle_ldm");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_pulse.png",
@@ -205,7 +205,7 @@ void loadVisibilityTab(EditorUI* self) {
             self->m_pEditorLayer->updateEditorMode();
         }
     ));
-    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "Preview Mode");
+    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "betteredit.preview_mode");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_bpm_line.png",
@@ -280,7 +280,7 @@ void loadVisibilityTab(EditorUI* self) {
             self->m_pEditorLayer->updateOptions();
         }
     ));
-    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "Toggle Grid");
+    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "betteredit.toggle_grid");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_portal_borders.png",

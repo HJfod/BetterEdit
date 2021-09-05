@@ -9,7 +9,7 @@ void KeybindEditPopup::setup() {
     this->m_bNoElasticity = true;
 
     auto subTitle = CCLabelBMFont::create(m_pCell->m_pBind->name.c_str(), "bigFont.fnt");
-    subTitle->setColor({ 50, 155, 255 });
+    subTitle->setColor(m_pCell->m_pBind->modifier ? cc3x(0x8fa) : cc3x(0x3af));
     subTitle->setPosition(
         winSize.width / 2,
         winSize.height / 2 + this->m_pLrSize.height / 2 - 50.0f
@@ -127,6 +127,11 @@ void KeybindEditPopup::keyDown(enumKeyCodes key) {
     }
 }
 
+void KeybindEditPopup::keyDownSuper(enumKeyCodes key) {
+    if (this->m_pCell->m_pBind->modifier)
+        this->keyDown(key);
+}
+
 void KeybindEditPopup::onRemove(CCObject*) {
     KeybindManager::get()->removeKeybind(
         this->m_pCell->m_pItem->type,
@@ -144,7 +149,7 @@ void KeybindEditPopup::onClose(CCObject*) {
 }
 
 void KeybindEditPopup::onSet(CCObject*) {
-    if (this->m_obTypedBind.key == KEY_None)
+    if (!this->m_pCell->m_pBind->modifier && this->m_obTypedBind.key == KEY_None)
         return;
 
     if (this->m_pStoreItem)

@@ -26,9 +26,11 @@ static constexpr E enum_cast(T type) { return static_cast<E>(reinterpret_cast<in
 
 static std::unordered_map<uintptr_t, std::vector<uint8_t>> g_patchedBytes;
 
-static std::vector<uint8_t> patch(uintptr_t addr, std::vector<uint8_t> bytes, bool hardOverwrite = false) {
+static std::vector<uint8_t> patch(uintptr_t addr, std::vector<uint8_t> bytes, bool hardOverwrite = false, bool repatch = false) {
     if (!g_patchedBytes[addr].size())
         g_patchedBytes[addr] = patchBytesEx(addr, bytes, hardOverwrite);
+    else if (repatch)
+        patchBytesEx(addr, bytes, hardOverwrite);
 
     return g_patchedBytes[addr];
 }

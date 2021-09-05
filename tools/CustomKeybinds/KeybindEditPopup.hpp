@@ -3,6 +3,7 @@
 #include "KeybindManager.hpp"
 #include "KeybindListView.hpp"
 #include <BrownAlertDelegate.hpp>
+#include "SuperKeyboardManager.hpp"
 
 struct KeybindStoreItem : public CCObject {
     Keybind m_obBind;
@@ -13,7 +14,7 @@ struct KeybindStoreItem : public CCObject {
     }
 };
 
-class KeybindEditPopup : public BrownAlertDelegate {
+class KeybindEditPopup : public BrownAlertDelegate, public SuperKeyboardDelegate {
     protected:
         KeybindCell* m_pCell;
         KeybindStoreItem* m_pStoreItem;
@@ -28,6 +29,7 @@ class KeybindEditPopup : public BrownAlertDelegate {
         void onSet(CCObject*);
         void onClose(CCObject*) override;
         void keyDown(enumKeyCodes) override;
+        void keyDownSuper(enumKeyCodes) override;
 
     public:
         static KeybindEditPopup* create(KeybindCell*, KeybindStoreItem*);

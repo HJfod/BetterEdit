@@ -57,18 +57,11 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
     if (!m_pBind) {
         nameLabel->setOpacity(180);
         nameLabel->setColor({ 180, 180, 180 });
+    } else {
+        if (m_pBind->modifier)
+            nameLabel->setColor(cc3x(0x8fa));
     }
     this->m_pLayer->addChild(nameLabel);
-
-    if (m_pBind) {
-        auto idLabel = CCLabelBMFont::create(m_pBind->id.c_str(), "bigFont.fnt");
-        idLabel->limitLabelWidth(260.0f, .15f, .0f);
-        idLabel->setPosition(15.0f, this->m_fHeight / 2 - 10.0f);
-        idLabel->setAnchorPoint({ 0.0f, 0.5f });
-        idLabel->setColor(cc3x(0xc));
-        idLabel->setOpacity(100);
-        this->m_pLayer->addChild(idLabel);
-    }
 
     m_pMenu = CCMenu::create();
     m_pMenu->setPosition(m_fWidth / 2, m_fHeight / 2);
@@ -178,28 +171,18 @@ void KeybindCell::updateMenu() {
     bool editable = !binds.size();
     bool resettable = false;
     for (auto & bind : binds) {
-        if (bind.key == KEY_None) {
-            auto label = CCLabelBMFont::create(bind.toString().c_str(), "goldFont.fnt");
-            label->setScale(.5f);
-            label->setPosition(
-                m_fWidth - label->getScaledContentSize().width / 2 - 10.0f,
-                m_fHeight / 2
-            );
-            m_pLayer->addChild(label);
-        } else {
-            auto spr = createKeybindBtnSprite(bind.toString().c_str());
-            auto btn = CCMenuItemSpriteExtra::create(
-                spr, this, menu_selector(KeybindCell::onEdit)
-            );
-            auto width = spr->getScaledContentSize().width;
-            btn->setPosition(x - width / 2, 0.0f);
-            btn->setUserObject(new KeybindStoreItem(bind));
-            m_pMenu->addChild(btn);
+        auto spr = createKeybindBtnSprite(bind.toString().c_str());
+        auto btn = CCMenuItemSpriteExtra::create(
+            spr, this, menu_selector(KeybindCell::onEdit)
+        );
+        auto width = spr->getScaledContentSize().width;
+        btn->setPosition(x - width / 2, 0.0f);
+        btn->setUserObject(new KeybindStoreItem(bind));
+        m_pMenu->addChild(btn);
 
-            x -= width + 5.0f;
+        x -= width + 5.0f;
 
-            editable = true;
-        }
+        editable = true;
     
         if (
             std::find(

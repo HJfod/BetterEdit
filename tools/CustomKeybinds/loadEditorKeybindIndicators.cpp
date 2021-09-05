@@ -21,69 +21,69 @@ void showEditorKeybindIndicators(bool show) {
 }
 
 void loadEditorKeybindIndicators(EditorUI* ui) {
-    addKeybindIndicator(ui, ui->m_pBuildModeBtn, "Build Mode");
-    addKeybindIndicator(ui, ui->m_pEditModeBtn, "Edit Mode");
-    addKeybindIndicator(ui, ui->m_pDeleteModeBtn, "Delete Mode");
-    addKeybindIndicator(ui, ui->m_pSwipeBtn, "Swipe");
-    addKeybindIndicator(ui, ui->m_pFreeMoveBtn, "Free Move");
-    addKeybindIndicator(ui, ui->m_pDeselectBtn, "Deselect");
-    addKeybindIndicator(ui, ui->m_pSnapBtn, "Snap");
-    addKeybindIndicator(ui, ui->m_pRotateBtn, "Rotate");
-    addKeybindIndicator(ui, ui->m_pPlaybackBtn, "Playback Music");
-    addKeybindIndicator(ui, ui->m_pPlaytestBtn, "Playtest");
-    addKeybindIndicator(ui, ui->m_pPlaytestStopBtn, "Playtest");
-    addKeybindIndicator(ui, ui->m_pTrashBtn, "Delete Selected");
-    addKeybindIndicator(ui, ui->m_pLinkBtn, "Link Objects");
-    addKeybindIndicator(ui, ui->m_pUnlinkBtn, "Unlink Objects");
-    addKeybindIndicator(ui, ui->m_pUndoBtn, "Undo");
-    addKeybindIndicator(ui, ui->m_pRedoBtn, "Redo");
-    addKeybindIndicator(ui, ui->m_pEditObjectBtn, "Edit Object");
-    addKeybindIndicator(ui, ui->m_pEditGroupBtn, "Edit Group");
-    addKeybindIndicator(ui, ui->m_pEditHSVBtn, "Toggle HSV Picker");
-    addKeybindIndicator(ui, ui->m_pEditSpecialBtn, "Edit Special");
-    addKeybindIndicator(ui, ui->m_pCopyPasteBtn, "Duplicate");
-    addKeybindIndicator(ui, ui->m_pCopyBtn, "Copy");
-    addKeybindIndicator(ui, ui->m_pPasteBtn, "Paste");
-    addKeybindIndicator(ui, ui->m_pCopyValuesBtn, "Copy Values");
-    addKeybindIndicator(ui, ui->m_pPasteStateBtn, "Paste State");
-    addKeybindIndicator(ui, ui->m_pPasteColorBtn, "Paste Color");
-    addKeybindIndicator(ui, ui->m_pGoToLayerBtn, "Go To Layer");
-    addKeybindIndicator(ui, ui->m_pGoToBaseBtn, "Go To Base Layer");
-    addKeybindIndicator(ui, ui->m_pGuideToggle, "Toggle Guide");
-    addKeybindIndicator(ui, ui->m_pLayerNextBtn, "Next Group");
-    addKeybindIndicator(ui, ui->m_pLayerPrevBtn, "Previous Group");
-    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pPlaybackBtn->getParent(), 13), "Zoom In");
-    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pPlaybackBtn->getParent(), 14), "Zoom Out");
-    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pLayerPrevBtn->getParent(), 0), "Pause");
-    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pLayerPrevBtn->getParent(), 1), "Open Level Settings");
+    addKeybindIndicator(ui, ui->m_pBuildModeBtn, "gd.edit.build_mode");
+    addKeybindIndicator(ui, ui->m_pEditModeBtn, "gd.edit.edit_mode");
+    addKeybindIndicator(ui, ui->m_pDeleteModeBtn, "gd.edit.delete_mode");
+    addKeybindIndicator(ui, ui->m_pSwipeBtn, "gd.edit.toggle_swipe");
+    addKeybindIndicator(ui, ui->m_pFreeMoveBtn, "gd.edit.toggle_free_move");
+    addKeybindIndicator(ui, ui->m_pDeselectBtn, "gd.edit.deselect");
+    addKeybindIndicator(ui, ui->m_pSnapBtn, "gd.edit.toggle_snap");
+    addKeybindIndicator(ui, ui->m_pRotateBtn, "gd.edit.toggle_rotate");
+    addKeybindIndicator(ui, ui->m_pPlaybackBtn, "gd.edit.playback_music");
+    addKeybindIndicator(ui, ui->m_pPlaytestBtn, "gd.edit.playtest");
+    addKeybindIndicator(ui, ui->m_pPlaytestStopBtn, "gd.edit.playtest");
+    addKeybindIndicator(ui, ui->m_pTrashBtn, "gd.edit.delete_selected");
+    addKeybindIndicator(ui, ui->m_pLinkBtn, "betteredit.link_objects");
+    addKeybindIndicator(ui, ui->m_pUnlinkBtn, "betteredit.unlink_objects");
+    addKeybindIndicator(ui, ui->m_pUndoBtn, "gd.edit.undo");
+    addKeybindIndicator(ui, ui->m_pRedoBtn, "gd.edit.redo");
+    addKeybindIndicator(ui, ui->m_pEditObjectBtn, "betteredit.edit_object");
+    addKeybindIndicator(ui, ui->m_pEditGroupBtn, "betteredit.edit_group");
+    addKeybindIndicator(ui, ui->m_pEditHSVBtn, "betteredit.toggle_hsv_picker");
+    addKeybindIndicator(ui, ui->m_pEditSpecialBtn, "betteredit.edit_special");
+    addKeybindIndicator(ui, ui->m_pCopyPasteBtn, "gd.edit.copy_and_paste");
+    addKeybindIndicator(ui, ui->m_pCopyBtn, "gd.edit.copy");
+    addKeybindIndicator(ui, ui->m_pPasteBtn, "gd.edit.paste");
+    addKeybindIndicator(ui, ui->m_pCopyValuesBtn, "betteredit.copy_values");
+    addKeybindIndicator(ui, ui->m_pPasteStateBtn, "betteredit.paste_state");
+    addKeybindIndicator(ui, ui->m_pPasteColorBtn, "betteredit.paste_color");
+    addKeybindIndicator(ui, ui->m_pGoToLayerBtn, "betteredit.go_to_layer");
+    addKeybindIndicator(ui, ui->m_pGoToBaseBtn, "betteredit.go_to_base_layer");
+    // addKeybindIndicator(ui, ui->m_pGuideToggle, "Toggle Guide");
+    addKeybindIndicator(ui, ui->m_pLayerNextBtn, "gd.edit.next_layer");
+    addKeybindIndicator(ui, ui->m_pLayerPrevBtn, "gd.edit.prev_layer");
+    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pPlaybackBtn->getParent(), 13), "gd.edit.zoom_in");
+    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pPlaybackBtn->getParent(), 14), "gd.edit.zoom_out");
+    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pLayerPrevBtn->getParent(), 0), "gd.play.pause");
+    addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pLayerPrevBtn->getParent(), 1), "betteredit.open_level_settings");
     
     auto ix = 0;
     for (auto editKeybind : {
-        "Object Up Small",
-        "Object Down Small",
-        "Object Left Small",
-        "Object Right Small",
-        "Object Up",
-        "Object Down",
-        "Object Left",
-        "Object Right",
-        "Flip X",
-        "Flip Y",
-        "Rotate CW",
-        "Rotate CCW",
-        "Rotate 45 CW",
-        "Rotate 45 CCW",
-        "Object Up Big",
-        "Object Down Big",
-        "Object Left Big",
-        "Object Right Big",
-        "Object Up Tiny",
-        "Object Down Tiny",
-        "Object Left Tiny",
-        "Object Right Tiny",
-        "Rotate",
-        "Rotate Snap",
-        "Show Scale Control",
+        "gd.edit.move_obj_small_up",
+        "gd.edit.move_obj_small_down",
+        "gd.edit.move_obj_small_left",
+        "gd.edit.move_obj_small_right",
+        "gd.edit.move_obj_up",
+        "gd.edit.move_obj_down",
+        "gd.edit.move_obj_left",
+        "gd.edit.move_obj_right",
+        "gd.edit.flip_x",
+        "gd.edit.flip_y",
+        "gd.edit.rotate_cw",
+        "gd.edit.rotate_ccw",
+        "betteredit.rotate_45_cw",
+        "betteredit.rotate_45_ccw",
+        "gd.edit.move_obj_big_up",
+        "gd.edit.move_obj_big_down",
+        "gd.edit.move_obj_big_left",
+        "gd.edit.move_obj_big_right",
+        "gd.edit.move_obj_tiny_up",
+        "gd.edit.move_obj_tiny_down",
+        "gd.edit.move_obj_tiny_left",
+        "gd.edit.move_obj_tiny_right",
+        "gd.edit.toggle_rotate",
+        "betteredit.rotate_snap",
+        "betteredit.show_scale_control",
     }) {
         addKeybindIndicator(
             ui,

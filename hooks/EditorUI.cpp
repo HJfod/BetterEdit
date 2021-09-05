@@ -128,6 +128,30 @@ bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,
     
     if (BetterEdit::sharedState()->m_bHookConflictFound)
         BetterEdit::showHookConflictMessage();
+    
+    bool swipe = KeybindManager::get()->isModifierPressed("gd.edit.swipe_modifier");
+
+    patch(0x90951, swipe ? 
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0xe9, 0x6b, 0x02, 0x00, 0x00, 0x00 } :
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, },
+        false, true
+    );
+    patch(0x90be1, swipe ? 
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90, } :
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0xeb, 0x23, },
+        false, true
+    );
+    patch(0x90c20, swipe ? 
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90, } :
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0xeb, 0x04, },
+        false, true
+    );
+
+    bool move = KeybindManager::get()->isModifierPressed("gd.edit.move_modifier");
+    
+    self_->m_bSpaceKeyPressed = move;
+    if (!self_->m_pEditorLayer->m_bIsPlaybackMode)
+        self_->m_bMoveModifier = move;
 
     return GDMAKE_ORIG(self, edx, touch, event);
 }
@@ -140,6 +164,14 @@ void __fastcall EditorUI_ccTouchMoved(EditorUI* self_, edx_t edx, CCTouch* touch
     auto swipeStart =
         self->m_pEditorLayer->m_pObjectLayer->convertToNodeSpace(self->m_obSwipeStart) * prevScale;
         
+    bool swipe = KeybindManager::get()->isModifierPressed("gd.edit.swipe_modifier");
+
+    patch(0x90ff6, swipe ? 
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0xeb, 0x0d, } :
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90, },
+        false, true
+    );
+
     GDMAKE_ORIG_V(self_, edx, touch, event);
 
     auto nSwipeStart = 
@@ -211,6 +243,7 @@ void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
     saveClipboard(self);
     resetSliderPercent(self);
     clearEditorKeybindIndicators(self);
+    getAutoSaveTimer(self)->resetTimer();
 
     return GDMAKE_ORIG_V(self);
 }
@@ -325,7 +358,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
                 )
             )
             .exec([self](auto p) -> void {
-                addKeybindIndicator(self, p, "Toggle UI");
+                addKeybindIndicator(self, p, "betteredit.toggle_ui");
             })
             .tag(TOGGLEUI_TAG)
             .move(getShowButtonPosition(self))

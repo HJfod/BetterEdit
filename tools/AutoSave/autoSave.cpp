@@ -9,7 +9,7 @@ class EditorUI_Timer : public EditorUI {
             auto timer = as<AutoSaveTimer*>(this->getChildByTag(AUTOSAVETIMER_TAG));
 
             if (timer) {
-                if (!BetterEdit::getEnableAutoSave()) {
+                if (!BetterEdit::getEnableAutoSave() || BetterEdit::isEditorViewOnlyMode()) {
                     timer->getLabel()->setOpacity(0);
                     timer->resetTimer();
                     return;

@@ -19,6 +19,7 @@
 #include "tools/FLAlertLayerFix/FLAlertLayerFix.hpp"
 #include "tools/CustomKeybinds/KeybindManager.hpp"
 #include "tools/CustomKeybinds/BEKeybinds.hpp"
+#include "tools/CustomKeybinds/SuperKeyboardManager.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -56,6 +57,8 @@ GDMAKE_MAIN_HM(hMod) {
         return "Unable to initialize LevelBackupManager!";
     if (!KeybindManager::initGlobal())
         return "Unable to initialize KeybindManager!";
+    if (!SuperKeyboardManager::initGlobal())
+        return "Unable to initialize SuperKeyboardManager!";
 
     if (!loadUpdateVisibilityHook())
         return "Unable to midhook updateVisibility!";
