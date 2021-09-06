@@ -3,6 +3,15 @@
 #include "KeybindManager.hpp"
 #include "loadEditorKeybindIndicators.hpp"
 #include "SuperKeyboardManager.hpp"
+#include "SuperMouseManager.hpp"
+
+GDMAKE_HOOK("libcocos2d.dll::?dispatchScrollMSG@CCMouseDispatcher@cocos2d@@QAE_NMM@Z") GDMAKE_ATTR(NoLog)
+bool __fastcall dispatchScrollMSGHook(CCMouseDelegate* self, edx_t edx, float y, float x) {
+    if (SuperMouseManager::get()->dispatchScrollEvent(y, x, getMousePos()))
+        return true;
+
+    return GDMAKE_ORIG(self, edx, y, x);
+}
 
 GDMAKE_HOOK("libcocos2d.dll::?dispatchKeyboardMSG@CCKeyboardDispatcher@cocos2d@@QAE_NW4enumKeyCodes@2@_N@Z") GDMAKE_ATTR(NoLog)
 void __fastcall dispatchKeyboardMSGHook(

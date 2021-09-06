@@ -8,6 +8,8 @@ static constexpr const float g_fItemHeight = 27.5f;
 static constexpr const BoomListType kBoomListType_Keybind
     = static_cast<BoomListType>(0x421);
 
+ButtonSprite* createKeybindBtnSprite(const char* text, bool gold = true, const char* sprite = nullptr);
+
 struct KeybindItem : public CCObject {
     KeybindCallback* bind;
     KeybindType type;
@@ -44,6 +46,7 @@ struct KeybindItem : public CCObject {
     }
 };
 
+class MoreKeybindsPopup;
 class KeybindEditPopup;
 
 class KeybindCell : public TableViewCell, public FLAlertLayerProtocol {
@@ -58,6 +61,7 @@ class KeybindCell : public TableViewCell, public FLAlertLayerProtocol {
 
         friend class KeybindEditPopup;
         friend class KeybindRepeatPopup;
+        friend class MoreKeybindsPopup;
 
     public:
         void loadFromItem(KeybindItem* bind);
@@ -68,6 +72,7 @@ class KeybindCell : public TableViewCell, public FLAlertLayerProtocol {
         void onFold(CCObject*);
         void onReset(CCObject*);
         void onSelect(CCObject*);
+        void onMore(CCObject*);
 
 		static KeybindCell* create(const char* key, CCSize size);
 };

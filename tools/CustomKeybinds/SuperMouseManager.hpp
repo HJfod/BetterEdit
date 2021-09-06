@@ -12,7 +12,7 @@ enum MouseButton {
 
 class SuperMouseManager;
 
-class SuperMouseDelegate : public CCNode {
+class SuperMouseDelegate {
     protected:
         CCSize m_obSuperMouseHitSize = CCSizeZero;
         bool m_bSuperMouseHovered = false;
@@ -25,9 +25,12 @@ class SuperMouseDelegate : public CCNode {
     public:
         virtual void mouseEnterSuper(CCPoint const&);
         virtual void mouseLeaveSuper(CCPoint const&);
-        virtual void mouseDownSuper(MouseButton, CCPoint const&);
-        virtual void mouseUpSuper(MouseButton, CCPoint const&);
+        virtual bool mouseDownSuper(MouseButton, CCPoint const&);
+        virtual bool mouseUpSuper(MouseButton, CCPoint const&);
         virtual void mouseMoveSuper(CCPoint const&);
+        virtual void mouseDownOutsideSuper(MouseButton, CCPoint const&);
+        virtual bool mouseScrollSuper(float y, float x);
+        virtual void mouseScrollOutsideSuper(float y, float x);
         virtual void setSuperMouseHitSize(CCSize const&);
 };
 
@@ -47,7 +50,8 @@ class SuperMouseManager {
         void pushDelegate(SuperMouseDelegate*);
         void popDelegate(SuperMouseDelegate*);
 
-        void dispatchClickEvent(MouseButton, bool, CCPoint const&);
+        bool dispatchClickEvent(MouseButton, bool, CCPoint const&);
         void dispatchMoveEvent(CCPoint const&);
+        bool dispatchScrollEvent(float, float, CCPoint const&);
 };
 

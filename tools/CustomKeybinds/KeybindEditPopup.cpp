@@ -14,7 +14,7 @@ void KeybindEditPopup::setup() {
         winSize.width / 2,
         winSize.height / 2 + this->m_pLrSize.height / 2 - 50.0f
     );
-    subTitle->setScale(.5f);
+    subTitle->limitLabelWidth(this->m_pLrSize.width - 40.0f, .5f, .1f);
     this->m_pLayer->addChild(subTitle);
 
     m_pPreLabel = CCLabelBMFont::create("Press Keys...", "bigFont.fnt");

@@ -2,11 +2,12 @@
 #include "KeybindEditPopup.hpp"
 #include "KeybindingsLayer.hpp"
 #include "KeybindRepeatPopup.hpp"
+#include "MoreKeybindsPopup.hpp"
 
 KeybindCell::KeybindCell(const char* name, CCSize size) :
     TableViewCell(name, size.width, size.height) {}
 
-ButtonSprite* createKeybindBtnSprite(const char* text, bool gold = true, const char* sprite = nullptr) {
+ButtonSprite* createKeybindBtnSprite(const char* text, bool gold, const char* sprite) {
     auto sprName = "square02_small.png";
 
     // dumb way to check if sprite exists
@@ -99,6 +100,10 @@ void KeybindCell::onEdit(CCObject* pSender) {
     KeybindEditPopup::create(this, item)->show();
 }
 
+void KeybindCell::onMore(CCObject* pSender) {
+    MoreKeybindsPopup::create(this, as<CCMenuItemSpriteExtra*>(pSender))->show();
+}
+
 void KeybindCell::onRepeat(CCObject*) {
     this->m_pItem->delegate->m_pLayer->detachInput();
 
@@ -172,26 +177,27 @@ void KeybindCell::updateMenu() {
     bool resettable = false;
     bool dotDotDot = false;
     for (auto & bind : binds) {
-        if (x < 70.0f) {
+        auto spr = createKeybindBtnSprite(bind.toString().c_str());
+        auto width = spr->getScaledContentSize().width;
+        if (x - width - 5.0f < 25.0f) {
+            spr->release();
             if (!dotDotDot) {
                 dotDotDot = true;
-                auto spr = createKeybindBtnSprite("...");
+                auto sprDot = createKeybindBtnSprite("...");
                 auto btn = CCMenuItemSpriteExtra::create(
-                    spr, this, nullptr
+                    sprDot, this, menu_selector(KeybindCell::onMore)
                 );
-                auto width = spr->getScaledContentSize().width;
-                btn->setPosition(x - width / 2, 0.0f);
+                auto widthDot = sprDot->getScaledContentSize().width;
+                btn->setPosition(x - widthDot / 2, 0.0f);
                 btn->setUserObject(new KeybindStoreItem(bind));
                 m_pMenu->addChild(btn);
 
-                x -= width + 5.0f;
+                x -= widthDot + 5.0f;
             }
         } else {
-            auto spr = createKeybindBtnSprite(bind.toString().c_str());
             auto btn = CCMenuItemSpriteExtra::create(
                 spr, this, menu_selector(KeybindCell::onEdit)
             );
-            auto width = spr->getScaledContentSize().width;
             btn->setPosition(x - width / 2, 0.0f);
             btn->setUserObject(new KeybindStoreItem(bind));
             m_pMenu->addChild(btn);
@@ -224,14 +230,16 @@ void KeybindCell::updateMenu() {
         );
 
     if (editable) {
-        auto spr = createKeybindBtnSprite("+");
-        auto btn = CCMenuItemSpriteExtra::create(
-            spr, this, menu_selector(KeybindCell::onEdit)
-        );
-        btn->setPosition(x - spr->getScaledContentSize().width / 2, 0.0f);
-        btn->setUserObject(nullptr);
-        m_pMenu->addChild(btn);
-        x -= spr->getScaledContentSize().width + 5.0f;
+        if (!dotDotDot) {
+            auto spr = createKeybindBtnSprite("+");
+            auto btn = CCMenuItemSpriteExtra::create(
+                spr, this, menu_selector(KeybindCell::onEdit)
+            );
+            btn->setPosition(x - spr->getScaledContentSize().width / 2, 0.0f);
+            btn->setUserObject(nullptr);
+            m_pMenu->addChild(btn);
+            x -= spr->getScaledContentSize().width + 5.0f;
+        }
     
         if (m_pBind->repeatable) {
             auto spr = createKeybindBtnSprite(nullptr, true, "GJ_timeIcon_001.png");

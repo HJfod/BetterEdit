@@ -66,9 +66,10 @@ void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwi
 
     g_bPressedButtons[btn] = pressed;
 
-    SuperMouseManager::get()->dispatchClickEvent(
+    if (SuperMouseManager::get()->dispatchClickEvent(
         static_cast<MouseButton>(btn), pressed, getMousePos()
-    );
+    ))
+        return;
 
     return GDMAKE_ORIG_V(self, edx, wnd, btn, pressed, z);
 }

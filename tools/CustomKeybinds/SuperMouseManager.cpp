@@ -16,9 +16,12 @@ bool operator!=(CCPoint const& size, CCPoint const& size2) {
 
 void SuperMouseDelegate::mouseEnterSuper(CCPoint const&) {}
 void SuperMouseDelegate::mouseLeaveSuper(CCPoint const&) {}
-void SuperMouseDelegate::mouseDownSuper(MouseButton, CCPoint const&) {}
-void SuperMouseDelegate::mouseUpSuper(MouseButton, CCPoint const&) {}
+bool SuperMouseDelegate::mouseDownSuper(MouseButton, CCPoint const&) { return false; }
+bool SuperMouseDelegate::mouseUpSuper(MouseButton, CCPoint const&) { return false; }
 void SuperMouseDelegate::mouseMoveSuper(CCPoint const&) {}
+void SuperMouseDelegate::mouseDownOutsideSuper(MouseButton, CCPoint const&) {}
+bool SuperMouseDelegate::mouseScrollSuper(float, float) { return false; }
+void SuperMouseDelegate::mouseScrollOutsideSuper(float, float) {}
 void SuperMouseDelegate::setSuperMouseHitSize(CCSize const& size) {
     this->m_obSuperMouseHitSize = size;
 }
@@ -64,10 +67,12 @@ void SuperMouseManager::popDelegate(SuperMouseDelegate* delegate) {
 bool SuperMouseManager::delegateIsHovered(SuperMouseDelegate* delegate, CCPoint const& mpos) {
     auto size = delegate->m_obSuperMouseHitSize;
 
-    if (size == CCSizeZero)
-        size = delegate->getScaledContentSize();
+    auto p = dynamic_cast<CCNode*>(delegate);
 
-    auto pos = delegate->getPosition();
+    if (p && size == CCSizeZero)
+        size = p->getScaledContentSize();
+
+    auto pos = p ? p->getPosition() : CCPointZero;
 
     auto rect = CCRect {
         pos.x - size.width / 2,
@@ -79,15 +84,34 @@ bool SuperMouseManager::delegateIsHovered(SuperMouseDelegate* delegate, CCPoint 
     return rect.containsPoint(mpos);
 }
 
-void SuperMouseManager::dispatchClickEvent(MouseButton btn, bool down, CCPoint const& pos) {
+bool SuperMouseManager::dispatchClickEvent(MouseButton btn, bool down, CCPoint const& pos) {
+    auto ret = false;
     for (auto const& d : m_vDelegates) {
-        if (delegateIsHovered(d, pos))
+        if (delegateIsHovered(d, pos)) {
             if (down) {
-                d->mouseDownSuper(btn, pos);
+                if (d->mouseDownSuper(btn, pos))
+                    ret = true;
             } else {
-                d->mouseUpSuper(btn, pos);
+                if (d->mouseUpSuper(btn, pos))
+                    ret = true;
             }
+        } else {
+            d->mouseDownOutsideSuper(btn, pos);
+        }
     }
+    return ret;
+}
+
+bool SuperMouseManager::dispatchScrollEvent(float y, float x, CCPoint const& pos) {
+    auto ret = false;
+    for (auto const& d : m_vDelegates) {
+        if (delegateIsHovered(d, pos)) {
+            if (d->mouseScrollSuper(y, x))
+                ret = true;
+        } else
+            d->mouseScrollOutsideSuper(y, x);
+    }
+    return ret;
 }
 
 void SuperMouseManager::dispatchMoveEvent(CCPoint const& pos) {

@@ -46,7 +46,7 @@ const rd = (dpath) => {
                     char_count += data.split('').length;
                     space_count += data.match(/\s/g).length;
 
-                    if (largest_count < data.split('').length) {
+                    if (larget_line_count < data.split('\n').length) {
                         largest_count = data.split('').length;
                         larget_line_count = data.split('\n').length;
                         largest_file = file;
