@@ -2,6 +2,7 @@
 #include "EyeDropperColorOverlay.hpp"
 #include "../CustomKeybinds/KeybindManager.hpp"
 #include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
+#include "../CustomKeybinds/SuperMouseManager.hpp"
 
 static constexpr const int DROPPER_TAG = 0xb00b;
 bool g_bPickingColor = false;
@@ -65,6 +66,10 @@ void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwi
 
     g_bPressedButtons[btn] = pressed;
 
+    SuperMouseManager::get()->dispatchClickEvent(
+        static_cast<MouseButton>(btn), pressed, getMousePos()
+    );
+
     return GDMAKE_ORIG_V(self, edx, wnd, btn, pressed, z);
 }
 
@@ -100,6 +105,7 @@ void __fastcall CCScheduler_update(CCScheduler* self, edx_t edx, float dt) {
     }
 
     KeybindManager::get()->handleRepeats(dt);
+    SuperMouseManager::get()->dispatchMoveEvent(getMousePos());
 
     showEditorKeybindIndicatorIfItsTargetIsBeingHovered();
 

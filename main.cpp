@@ -20,6 +20,7 @@
 #include "tools/CustomKeybinds/KeybindManager.hpp"
 #include "tools/CustomKeybinds/BEKeybinds.hpp"
 #include "tools/CustomKeybinds/SuperKeyboardManager.hpp"
+#include "tools/CustomKeybinds/SuperMouseManager.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -59,6 +60,8 @@ GDMAKE_MAIN_HM(hMod) {
         return "Unable to initialize KeybindManager!";
     if (!SuperKeyboardManager::initGlobal())
         return "Unable to initialize SuperKeyboardManager!";
+    if (!SuperMouseManager::initGlobal())
+        return "Unable to initialize SuperMouseManager!";
 
     if (!loadUpdateVisibilityHook())
         return "Unable to midhook updateVisibility!";

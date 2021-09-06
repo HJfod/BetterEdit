@@ -51,7 +51,7 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
         name = m_pBind->name.c_str();
 
     auto nameLabel = CCLabelBMFont::create(name, "bigFont.fnt");
-    nameLabel->limitLabelWidth(260.0f, .5f, .0f);
+    nameLabel->limitLabelWidth(140.0f, .5f, .0f);
     nameLabel->setPosition(15.0f, this->m_fHeight / 2);
     nameLabel->setAnchorPoint({ 0.0f, 0.5f });
     if (!m_pBind) {
@@ -170,17 +170,34 @@ void KeybindCell::updateMenu() {
 
     bool editable = !binds.size();
     bool resettable = false;
+    bool dotDotDot = false;
     for (auto & bind : binds) {
-        auto spr = createKeybindBtnSprite(bind.toString().c_str());
-        auto btn = CCMenuItemSpriteExtra::create(
-            spr, this, menu_selector(KeybindCell::onEdit)
-        );
-        auto width = spr->getScaledContentSize().width;
-        btn->setPosition(x - width / 2, 0.0f);
-        btn->setUserObject(new KeybindStoreItem(bind));
-        m_pMenu->addChild(btn);
+        if (x < 70.0f) {
+            if (!dotDotDot) {
+                dotDotDot = true;
+                auto spr = createKeybindBtnSprite("...");
+                auto btn = CCMenuItemSpriteExtra::create(
+                    spr, this, nullptr
+                );
+                auto width = spr->getScaledContentSize().width;
+                btn->setPosition(x - width / 2, 0.0f);
+                btn->setUserObject(new KeybindStoreItem(bind));
+                m_pMenu->addChild(btn);
 
-        x -= width + 5.0f;
+                x -= width + 5.0f;
+            }
+        } else {
+            auto spr = createKeybindBtnSprite(bind.toString().c_str());
+            auto btn = CCMenuItemSpriteExtra::create(
+                spr, this, menu_selector(KeybindCell::onEdit)
+            );
+            auto width = spr->getScaledContentSize().width;
+            btn->setPosition(x - width / 2, 0.0f);
+            btn->setUserObject(new KeybindStoreItem(bind));
+            m_pMenu->addChild(btn);
+
+            x -= width + 5.0f;
+        }
 
         editable = true;
     
