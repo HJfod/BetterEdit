@@ -36,8 +36,6 @@ void DrawGridLayer_draw() {
         ccDrawColor4B(0, 0, 0, 0);
 }
 
-void DrawGridLayer_draw_durationLines() {}
-
 void (*DrawGridLayer_draw_retAddr)();
 __declspec(naked) void DrawGridLayer_draw_midHook() {
     __asm {
@@ -50,21 +48,8 @@ __declspec(naked) void DrawGridLayer_draw_midHook() {
     }
 }
 
-void (*DrawGridLayer_draw_durationLines_retAddr)();
-__declspec(naked) void DrawGridLayer_draw_durationLines_midHook() {
-    __asm {
-        pushad
-        pushfd
-        call DrawGridLayer_draw_durationLines
-        popfd
-        popad
-        jmp DrawGridLayer_draw_durationLines_retAddr
-    }
-}
-
 bool loadDrawGridLayerMidHook() {
     MAKE_MIDHOOK(0x16db5d, DrawGridLayer_draw);
-    MAKE_MIDHOOK(0x16e71c, DrawGridLayer_draw_durationLines);
 
     return true;
 }

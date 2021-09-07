@@ -70,8 +70,12 @@ void KeybindingsLayer_CB::reloadList() {
     if (oldList) {
         y = oldList->m_pTableView->getMinY() -
             oldList->m_pTableView->m_pContentLayer->getPositionY();
+        
+        std::cout << "old list: " << oldList << "\n";
 
+        oldList->retain();
         oldList->removeFromParent();
+        oldList->release();
     }
 
     auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -119,6 +123,8 @@ void KeybindingsLayer_CB::reloadList() {
         y = list->m_pTableView->getMaxY();
     list->m_pTableView->m_pContentLayer->setPositionY(y);
     this->m_pLayer->addChild(list);
+        
+    std::cout << "new list: " << list << "\n";
 
     CATCH_NULL(as<Scrollbar*>(this->m_pLayer->getChildByTag(KBLSCROLLBAR_TAG)))
         ->setList(list);
