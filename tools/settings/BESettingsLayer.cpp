@@ -108,13 +108,13 @@ void BESettingsLayer::setup() {
         "(<cl>BetterEdit</c> makes the Slider relative to the level's size)",
         BE_SETTING_FUNC_B(UseOldProgressBar)
     );
-    this->addToggle(
-        "Repeat Copy+Paste",
-        "<cy>Paste Repeating</c> means that when using <co>Copy + Paste</c>, "
-        "actions such as moving & incrementing trigger targets are automatically "
-        "repeated on the next object",
-        BE_SETTING_FUNC_B(RepeatCopyPaste), true
-    );
+    // this->addToggle(
+    //     "Repeat Copy+Paste",
+    //     "<cy>Paste Repeating</c> means that when using <co>Copy + Paste</c>, "
+    //     "actions such as moving & incrementing trigger targets are automatically "
+    //     "repeated on the next object",
+    //     BE_SETTING_FUNC_B(RepeatCopyPaste), true
+    // );
     this->addToggle(
         "Enable Relative Swipe",
         "Makes it so that when you scroll the screen while using <co>swipe</c>, "

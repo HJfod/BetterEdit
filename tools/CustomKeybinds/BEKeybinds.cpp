@@ -8,6 +8,7 @@
 #include "../VisibilityTab/loadVisibilityTab.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../HalfMove/moveForCommand.hpp"
+#include "../RepeatPaste/repeatPaste.hpp"
 
 static constexpr const float w_edge = 120.0f;
 
@@ -464,15 +465,12 @@ void loadBEKeybinds() {
         }, "editor.modify", false
     }, {});
 
-    // kbm->addEditorKeybind({ "Increment Hue", [](EditorUI* ui) -> bool {
-    //     // todo
-    //     return false;
-    // }}, {});
-
-    // kbm->addEditorKeybind({ "Repeat Copy + Paste", [](EditorUI* ui) -> bool {
-    //     // todo
-    //     return false;
-    // }}, {});
+    // kbm->addEditorKeybind({ "Repeat Copy + Paste", "betteredit.repeat_paste",
+    //     [](EditorUI* ui) -> bool {
+    //         repeatPaste(ui);
+    //         return false;
+    //     }, "editor.modify", false
+    // }, {});
 
     kbm->addEditorKeybind({ "Open Level Settings", "betteredit.open_level_settings",
         [](EditorUI* ui) -> bool {

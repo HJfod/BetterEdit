@@ -41,7 +41,7 @@ CCMenuItemSpriteExtra* KeymapLayer::getKeyButton(
     bspr->setCascadeColorEnabled(true);
     bspr->setCascadeOpacityEnabled(true);
     bspr->m_pBGSprite->setColor(m_colNormal);
-    m_pKeyBtns->addObject(bspr);
+    m_vKeyBtns.push_back(bspr);
 
     auto btn = CCMenuItemSpriteExtra::create(
         bspr, this, menu_selector(KeymapLayer::onSelect)
@@ -95,9 +95,6 @@ void KeymapLayer::setup() {
     this->m_bNoElasticity = true;
 
     auto winSize = CCDirector::sharedDirector()->getWinSize();
-
-    this->m_pKeyBtns = CCArray::create();
-    this->m_pKeyBtns->retain();
 
     struct keybtn {
         enumKeyCodes key;
@@ -189,7 +186,7 @@ void KeymapLayer::setup() {
 
     auto m_ix = 0;
     for (auto const& m : map) {
-        auto ypos = (s_fItemSeparation + s_fItemWidth) * 3 - m_ix % 6 * (s_fItemSeparation + s_fItemWidth);
+        auto ypos = (s_fItemSeparation + s_fItemWidth) * 4 - m_ix % 6 * (s_fItemSeparation + s_fItemWidth);
 
         auto xpos = - (s_fItemSeparation + s_fItemWidth) * 10;
         for (auto const& k : m) {
@@ -246,6 +243,15 @@ void KeymapLayer::setup() {
     this->m_pCallbackLabel->setZOrder(4);
     this->m_pLayer->addChild(this->m_pCallbackLabel);
 
+    this->m_pSelectedKeybindLabel = BGLabel::create("", "goldFont.fnt");
+    this->m_pSelectedKeybindLabel->setScale(.65f);
+    this->m_pSelectedKeybindLabel->setBGOpacity(50);
+    this->m_pSelectedKeybindLabel->setPosition(
+        winSize.width / 2, winSize.height / 2 - 47.5f
+    );
+    this->m_pSelectedKeybindLabel->setVisible(false);
+    this->m_pLayer->addChild(this->m_pSelectedKeybindLabel);
+
     auto rebindBtn = CCMenuItemSpriteExtra::create(
         CCNodeConstructor<ButtonSprite*>()
             .fromButtonSprite("Set Bind", "GJ_button_01.png", "goldFont.fnt")
@@ -289,10 +295,6 @@ void KeymapLayer::setup() {
         this->m_pLrSize.height / 2 - 30.0f,
         this->m_pButtonMenu
     );
-}
-
-KeymapLayer::~KeymapLayer() {
-    this->m_pKeyBtns->release();
 }
 
 void KeymapLayer::onToggle(CCObject*) {
@@ -357,6 +359,9 @@ void KeymapLayer::onSelect(CCObject* pSender) {
     
     for (auto btn : this->m_pBindBtns)
         btn->setVisible(this->m_pSelected);
+    
+    this->m_pSelectedKeybindLabel->setString(this->getKeybind().toString().c_str());
+    this->m_pSelectedKeybindLabel->setVisible(this->m_pSelected);
 }
 
 void KeymapLayer::visit() {
@@ -408,7 +413,7 @@ Keybind KeymapLayer::getKeybind(enumKeyCodes key) {
 }
 
 void KeymapLayer::keyDown(enumKeyCodes key) {
-    CCARRAY_FOREACH_B_TYPE(this->m_pKeyBtns, btn, ButtonSprite) {
+    for (auto btn : m_vKeyBtns) {
         if (key == as<int>(btn->getUserData())) {
             btn->stopAllActions();
             btn->runAction(
@@ -421,7 +426,7 @@ void KeymapLayer::keyDown(enumKeyCodes key) {
 }
 
 void KeymapLayer::keyUp(enumKeyCodes key) {
-    CCARRAY_FOREACH_B_TYPE(this->m_pKeyBtns, btn, ButtonSprite) {
+    for (auto btn : m_vKeyBtns) {
         if (key == as<int>(btn->getUserData())) {
             btn->stopAllActions();
             btn->runAction(
@@ -475,9 +480,12 @@ void KeymapLayer::updateKey(ButtonSprite* btn) {
 }
 
 void KeymapLayer::updateKeys() {
-    CCARRAY_FOREACH_B_TYPE(this->m_pKeyBtns, btn, ButtonSprite)
+    for (auto btn : m_vKeyBtns)
         if (btn != this->m_pSelected)
             this->updateKey(btn);
+
+    this->m_pSelectedKeybindLabel->setString(this->getKeybind().toString().c_str());
+    this->m_pSelectedKeybindLabel->setVisible(this->m_pSelected);
 }
 
 void KeymapLayer::showHoveredKey() {
@@ -486,7 +494,7 @@ void KeymapLayer::showHoveredKey() {
     this->m_pCallbackLabel->setString("");
 
     bool isHovering = false;
-    CCARRAY_FOREACH_B_TYPE(this->m_pKeyBtns, btn, ButtonSprite) {
+    for (auto btn : m_vKeyBtns) {
 
         auto pos = btn->getParent()->convertToWorldSpace(btn->getPosition());
         auto size = btn->getScaledContentSize();
@@ -547,14 +555,14 @@ void KeymapLayer::showHoveredKey() {
     if (!m_sLabelString.size()) {
         this->m_obHovered.key = KEY_None;
 
-        CCARRAY_FOREACH_B_TYPE(this->m_pKeyBtns, btn, ButtonSprite) {
+        for (auto btn : m_vKeyBtns) {
             btn->setOpacity(255);
         }
     }
 }
 
 void KeymapLayer::loadKeybind(Keybind const& kb) {
-    CCARRAY_FOREACH_B_TYPE(this->m_pKeyBtns, spr, ButtonSprite) {
+    for (auto spr : m_vKeyBtns) {
         if (enum_cast<enumKeyCodes>(spr->getUserData()) == kb.key)
             this->onSelect(spr->getParent());
     }

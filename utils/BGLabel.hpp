@@ -12,6 +12,7 @@ class BGLabel : public CCNode {
     public:
         void setString(const char* text);
         void updateSize();
+        void setBGOpacity(GLubyte);
 
         static BGLabel* create(const char* text, const char* font);
 };

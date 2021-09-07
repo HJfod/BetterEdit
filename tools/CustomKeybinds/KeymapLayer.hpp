@@ -3,12 +3,13 @@
 #include "KeybindManager.hpp"
 #include "KeybindingsLayer.hpp"
 #include <BrownAlertDelegate.hpp>
+#include "../../utils/BGLabel.hpp"
 
 class KeymapLayer : public BrownAlertDelegate, public FLAlertLayerProtocol {
     protected:
         static constexpr int s_fItemWidth = 12;
         static constexpr int s_fItemSeparation = 10;
-        CCArray* m_pKeyBtns;
+        std::vector<ButtonSprite*> m_vKeyBtns;
         bool m_bControlDown = false;
         bool m_bShiftDown = false;
         bool m_bAltDown = false;
@@ -32,6 +33,7 @@ class KeymapLayer : public BrownAlertDelegate, public FLAlertLayerProtocol {
         ButtonSprite* m_pSelected;
         std::vector<CCMenuItemSpriteExtra*> m_pBindBtns;
         KeybindingsLayer_CB* m_pKeybindingsLayer;
+        BGLabel* m_pSelectedKeybindLabel;
 
         void FLAlert_Clicked(FLAlertLayer*, bool);
 
@@ -50,8 +52,6 @@ class KeymapLayer : public BrownAlertDelegate, public FLAlertLayerProtocol {
         void onSelect(CCObject*);
         void onSetBind(CCObject*);
         void onUnbind(CCObject*);
-
-        ~KeymapLayer();
 
     public:
         void updateKeys();

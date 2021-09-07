@@ -4,3 +4,4 @@
 
 void loadPasteRepeatButton(EditorUI*);
 void updatePasteRepeatButton(EditorUI*);
+void repeatPaste(EditorUI*);

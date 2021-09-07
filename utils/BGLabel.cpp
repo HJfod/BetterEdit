@@ -33,6 +33,10 @@ void BGLabel::updateSize() {
     });
 }
 
+void BGLabel::setBGOpacity(GLubyte alpha) {
+    this->m_pBGSprite->setOpacity(alpha);
+}
+
 BGLabel* BGLabel::create(const char* text, const char* font) {
     auto pRet = new BGLabel;
 
