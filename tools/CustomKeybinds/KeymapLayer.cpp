@@ -1,5 +1,7 @@
 #include "KeymapLayer.hpp"
 
+KeymapLayer::Layout g_eLayout = KeymapLayer::kLayoutQWERTY;
+
 uint8_t count_ones(uint8_t byte) {
   static const uint8_t NIBBLE_LOOKUP [16] = {
         0, 1, 1, 2, 1, 2, 2, 3, 
@@ -7,6 +9,29 @@ uint8_t count_ones(uint8_t byte) {
   };
 
   return NIBBLE_LOOKUP[byte & 0x0F] + NIBBLE_LOOKUP[byte >> 4];
+}
+
+std::string KeymapLayer::layoutToString(Layout l) {
+    switch (l) {
+        case kLayoutQWERTY: return "QWERTY";
+        case kLayoutQWERTZ: return "QWERTZ";
+        default: return "Unknown";
+    }
+}
+
+std::string KeymapLayer::getShortenedKeyName(enumKeyCodes key) {
+    switch (key) {
+        case KEY_CapsLock:  return "Caps";
+        case KEY_Control:   return "Ctrl";
+        case KEY_Escape:    return "Esc";
+        case KEY_Backspace: return "<-";
+        case KEY_Insert:    return "Ins";
+        case KEY_Delete:    return "Del";
+        case KEY_PageUp:    return "PgUp";
+        case KEY_PageDown:  return "PgDown";
+        case KEY_Numlock:   return "Num";
+        default:            return keyToStringFixed(key);
+    }
 }
 
 CCMenuItemSpriteExtra* KeymapLayer::getKeyButton(
@@ -19,7 +44,7 @@ CCMenuItemSpriteExtra* KeymapLayer::getKeyButton(
     if (!width) width = 12;
 
     ButtonSprite* bspr;
-    if (sprite) {
+    if (sprite && strlen(key) > 2) {
         bspr = ButtonSprite::create(
             CCSprite::createWithSpriteFrameName(key),
             width, true, .7f, 1,
@@ -91,101 +116,63 @@ CCMenuItemToggler* KeymapLayer::getKeyToggle(
     return btn;
 }
 
-void KeymapLayer::setup() {
-    this->m_bNoElasticity = true;
+void KeymapLayer::loadLayout(Layout l) {
+    this->m_eLayout = l;
+    g_eLayout = l;
+    this->m_pSelectedLayoutLabel->setString(this->layoutToString(l).c_str());
+    this->m_pSelectedLayoutLabel->limitLabelWidth(40.f, .4f, .1f);
+    this->m_pSelected = nullptr;
 
-    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    for (auto btn : this->m_vKeyBtns)
+        btn->getParent()->removeFromParent();
+    this->m_vKeyBtns.clear();
 
-    struct keybtn {
-        enumKeyCodes key;
-        std::string text = "";
-        bool sprite = false;
-        CCMenuItemToggler** target = nullptr;
-        int width;
-        std::vector<keybtn> sub;
+    CATCH_NULL(this->m_pControlToggle)->removeFromParent();
+    CATCH_NULL(this->m_pShiftToggle)->removeFromParent();
+    CATCH_NULL(this->m_pAltToggle)->removeFromParent();
 
-        keybtn(float w) {
-            key = KEY_None;
-            width = static_cast<int>(s_fItemWidth * w);
-            text = "";
-        }
+    switch (l) {
+        case kLayoutQWERTY: default:
+            this->m_mKeymap = std::vector<std::vector<keybtn>> {
+                { { KEY_Escape, 2.5f }, { 12, "F", KEY_F1 }, KEY_Print, KEY_ScrollLock, KEY_Pause, },
+                { 1.0f, "1234567890"_s, { KEY_Backspace, 2.5f }, 1.0f, KEY_Insert, KEY_Home, KEY_PageUp,
+                    1.0f, KEY_Numlock, KEY_Divide, KEY_Multiply, },
+                { { KEY_Tab, 1.25f }, "QWERTYUIOP"_s, { KEY_Enter, 2.5f }, .75f, KEY_Delete, KEY_End, KEY_PageDown,
+                    1.0f, KEY_OEMMinus, KEY_OEMPlus, },
+                { { KEY_CapsLock, 1.75f }, "ASDFGHJKL"_s, },
+                { { KEY_Shift, 2.25f, &m_pShiftToggle }, "ZXCVBNM"_s, KEY_OEMComma, KEY_OEMPeriod, 
+                    6.75f, { "edit_upBtn_001.png", KEY_Up }, },
+                { { KEY_Control, 2.f, &m_pControlToggle }, { KEY_Alt, 2.f, &m_pAltToggle }, { KEY_Space, 8.f }, 
+                    10.0f,
+                        { "edit_leftBtn_001.png", KEY_Left },
+                        { "edit_downBtn_001.png", KEY_Down },
+                        { "edit_rightBtn_001.png", KEY_Right }, 
+                    },
+            };
+            break;
 
-        keybtn(enumKeyCodes k) {
-            key = k;
-            width = s_fItemWidth;
-            text = keyToStringFixed(k);
-        }
-
-        keybtn(enumKeyCodes k, CCMenuItemToggler** b) {
-            key = k;
-            width = s_fItemWidth;
-            text = keyToStringFixed(k);
-            target = b;
-        }
-
-        keybtn(enumKeyCodes k, float w, CCMenuItemToggler** b) {
-            key = k;
-            width = static_cast<int>(s_fItemWidth * w);
-            text = keyToStringFixed(k);
-            target = b;
-        }
-
-        keybtn(std::string const& t, enumKeyCodes k) {
-            key = k;
-            sprite = true;
-            text = t;
-            width = s_fItemWidth;
-        }
-
-        keybtn(enumKeyCodes k, std::string const& t) {
-            key = k;
-            text = t;
-            width = s_fItemWidth;
-        }
-
-        keybtn(enumKeyCodes k, float w) {
-            key = k;
-            width = static_cast<int>(s_fItemWidth * w);
-            text = keyToStringFixed(k);
-        }
-
-        keybtn(std::string const& keys) {
-            key = KEY_None;
-
-            for (auto const& key : keys)
-                sub.push_back({ static_cast<enumKeyCodes>(key) });
-        }
-
-        keybtn(int keys, std::string const& prefix, enumKeyCodes start) {
-            key = KEY_None;
-
-            for (auto ix = 0; ix < keys; ix++)
-                sub.push_back({
-                    static_cast<enumKeyCodes>(start + ix),
-                    prefix + std::to_string(ix + 1)
-                });
-        }
-    };
-
-    auto map = std::initializer_list<std::initializer_list<keybtn>> {
-        { { KEY_Escape, 2.5f }, { 12, "F", KEY_F1 }, KEY_Print, KEY_ScrollLock, KEY_Pause, },
-        { 1.0f, "1234567890"_s, { KEY_Backspace, 2.5f }, 1.0f, KEY_Insert, KEY_Home, KEY_PageUp,
-            1.0f, KEY_Numlock, KEY_Divide, KEY_Multiply, },
-        { { KEY_Tab, 1.25f }, "QWERTYUIOP"_s, { KEY_Enter, 2.5f }, .75f, KEY_Delete, KEY_End, KEY_PageDown,
-            1.0f, KEY_OEMMinus, KEY_OEMPlus, },
-        { { KEY_CapsLock, 1.75f }, "ASDFGHJKL"_s, },
-        { { KEY_Shift, 2.25f, &m_pShiftToggle }, "ZXCVBNM"_s, KEY_OEMComma, KEY_OEMPeriod, 
-            6.75f, { "edit_upBtn_001.png", KEY_Up }, },
-        { { KEY_Control, 2.f, &m_pControlToggle }, { KEY_Alt, 2.f, &m_pAltToggle }, { KEY_Space, 8.f }, 
-            10.0f,
-                { "edit_leftBtn_001.png", KEY_Left },
-                { "edit_downBtn_001.png", KEY_Down },
-                { "edit_rightBtn_001.png", KEY_Right }, 
-            },
-    };
-
+        case kLayoutQWERTZ:
+            this->m_mKeymap = std::vector<std::vector<keybtn>> {
+                { { KEY_Escape, 2.5f }, { 12, "F", KEY_F1 }, KEY_Print, KEY_ScrollLock, KEY_Pause, },
+                { 1.0f, "1234567890"_s, { KEY_Backspace, 2.5f }, 1.0f, KEY_Insert, KEY_Home, KEY_PageUp,
+                    1.0f, KEY_Numlock, KEY_Divide, KEY_Multiply, },
+                { { KEY_Tab, 1.25f }, "QWERTZUIOP"_s, { KEY_Enter, 2.5f }, .75f, KEY_Delete, KEY_End, KEY_PageDown,
+                    1.0f, KEY_OEMMinus, KEY_OEMPlus, },
+                { { KEY_CapsLock, 1.75f }, "ASDFGHJKL"_s, },
+                { { KEY_Shift, 2.25f, &m_pShiftToggle }, "YXCVBNM"_s, KEY_OEMComma, KEY_OEMPeriod, 
+                    6.75f, { "edit_upBtn_001.png", KEY_Up }, },
+                { { KEY_Control, 2.f, &m_pControlToggle }, { KEY_Alt, 2.f, &m_pAltToggle }, { KEY_Space, 8.f }, 
+                    10.0f,
+                        { "edit_leftBtn_001.png", KEY_Left },
+                        { "edit_downBtn_001.png", KEY_Down },
+                        { "edit_rightBtn_001.png", KEY_Right }, 
+                    },
+            };
+            break;
+    }
+    
     auto m_ix = 0;
-    for (auto const& m : map) {
+    for (auto const& m : this->m_mKeymap) {
         auto ypos = (s_fItemSeparation + s_fItemWidth) * 4 - m_ix % 6 * (s_fItemSeparation + s_fItemWidth);
 
         auto xpos = - (s_fItemSeparation + s_fItemWidth) * 10;
@@ -226,11 +213,71 @@ void KeymapLayer::setup() {
         m_ix++;
     }
 
+    this->updateKeys();
+}
+
+void KeymapLayer::onSwitchLayout(CCObject* pSender) {
+    auto add = as<int>(as<CCNode*>(pSender)->getUserData());
+
+    if (!this->m_vLayouts.size()) return;
+
+    auto ix = m_nSelectedLayout + add;
+
+    if (ix < 0) ix = this->m_vLayouts.size() - 1;
+    if (ix >= static_cast<int>(this->m_vLayouts.size())) ix = 0;
+
+    this->m_nSelectedLayout = ix;
+    this->loadLayout(this->m_vLayouts[this->m_nSelectedLayout]);
+}
+
+void KeymapLayer::setup() {
+    this->m_bNoElasticity = true;
+
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+    this->m_vLayouts = { kLayoutQWERTY, kLayoutQWERTZ, };
+
+    this->m_pSelectedLayoutLabel = CCLabelBMFont::create("", "bigFont.fnt");
+    this->m_pSelectedLayoutLabel->setPosition({
+        winSize.width / 2 + m_pLrSize.width / 2 - 50.0f,
+        winSize.height / 2 - m_pLrSize.height / 2 + 30.0f
+    });
+    this->m_pLayer->addChild(this->m_pSelectedLayoutLabel);
+    
+    this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
+        .fromNode(CCMenuItemSpriteExtra::create(
+            CCNodeConstructor()
+                .fromFrameName("GJ_arrow_01_001.png")
+                .scale(.45f)
+                .flipX()
+                .done(),
+            this,
+            (SEL_MenuHandler)&KeymapLayer::onSwitchLayout
+        ))
+        .udata(1)
+        .move(m_pLrSize.width / 2 - 20.0f, -m_pLrSize.height / 2 + 30.0f)
+        .done()
+    );
+    
+    this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
+        .fromNode(CCMenuItemSpriteExtra::create(
+            CCNodeConstructor()
+                .fromFrameName("GJ_arrow_01_001.png")
+                .scale(.45f)
+                .done(),
+            this,
+            (SEL_MenuHandler)&KeymapLayer::onSwitchLayout
+        ))
+        .udata(-1)
+        .move(m_pLrSize.width / 2 - 80.0f, -m_pLrSize.height / 2 + 30.0f)
+        .done()
+    );
+
     auto bg = CCScale9Sprite::create(
         "square02b_001.png", { 0.0f, 0.0f, 80.0f, 80.0f }
     );
     bg->setPosition({ winSize.width / 2, winSize.height / 2 - 100.0f });
-    bg->setContentSize({ 600.0f, 60.0f });
+    bg->setContentSize({ 560.0f, 60.0f });
     bg->setScale(.5f);
     bg->setOpacity(75);
     bg->setColor({ 0, 0, 0 });
@@ -280,7 +327,7 @@ void KeymapLayer::setup() {
     
     this->m_pSelected = nullptr;
 
-    this->updateKeys();
+    this->loadLayout(g_eLayout);
 
     MAKE_INFOBUTTON(
         "Keymap",
