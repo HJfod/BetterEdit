@@ -67,13 +67,14 @@ void KeybindingsLayer_CB::reloadList() {
     auto oldList = as<KeybindListView*>(this->m_pLayer->getChildByTag(KBLLIST_TAG));
     auto y = 0.0f;
 
+    std::cout << std::hex << "this: " << as<uintptr_t>(this) << std::dec << "\n";
+
     if (oldList) {
         y = oldList->m_pTableView->getMinY() -
             oldList->m_pTableView->m_pContentLayer->getPositionY();
         
         std::cout << "old list: " << oldList << "\n";
 
-        oldList->removeAllChildren();
         oldList->removeFromParent();
     }
 
