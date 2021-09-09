@@ -73,9 +73,8 @@ void KeybindingsLayer_CB::reloadList() {
         
         std::cout << "old list: " << oldList << "\n";
 
-        oldList->retain();
+        oldList->removeAllChildren();
         oldList->removeFromParent();
-        oldList->release();
     }
 
     auto winSize = CCDirector::sharedDirector()->getWinSize();

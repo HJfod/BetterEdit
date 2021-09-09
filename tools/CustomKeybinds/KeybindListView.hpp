@@ -84,7 +84,7 @@ class KeybindListView : public CustomListView {
         void loadCell(TableViewCell* cell, unsigned int index) override;
 
         inline ~KeybindListView() {
-            std::cout << "~KeybindListView called\n";
+            std::cout << "~KeybindListView called for " << as<uintptr_t>(this) << "\n";
         }
 
     public:

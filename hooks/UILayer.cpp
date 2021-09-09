@@ -14,3 +14,33 @@ void __fastcall UILayer_keyUp(UILayer* self, edx_t edx, enumKeyCodes key) {
         Keybind(key), PlayLayer::get(), false
     );
 }
+
+GDMAKE_HOOK(0x25f3b0)
+bool __fastcall UILayer_init(UILayer* self) {
+    if (!GDMAKE_ORIG(self))
+        return false;
+
+    auto zBind = KeybindManager::get()->getTargetByID("gd.play.place_checkpoint");
+    std::string z = "";
+    for (auto b : KeybindManager::get()->getKeybindsForCallback(zBind.type, zBind.bind))
+        z += b.toString() + ", ";
+    z = z.substr(0, z.size() - 2);
+    
+    auto btnZ = getChild<CCMenuItemSpriteExtra*>(self->m_pCheckPointMenu, 0);
+    auto zLabel = getChild<CCLabelBMFont*>(btnZ->getNormalImage(), 0);
+    zLabel->setString(z.c_str());
+    zLabel->limitLabelWidth(60.0f, zLabel->getScale(), .1f);
+
+    auto yBind = KeybindManager::get()->getTargetByID("gd.play.delete_checkpoint");
+    std::string y = "";
+    for (auto b : KeybindManager::get()->getKeybindsForCallback(yBind.type, yBind.bind))
+        y += b.toString() + ", ";
+    y = y.substr(0, y.size() - 2);
+
+    auto btnY = getChild<CCMenuItemSpriteExtra*>(self->m_pCheckPointMenu, 1);
+    auto yLabel = getChild<CCLabelBMFont*>(btnY->getNormalImage(), 0);
+    yLabel->setString(y.c_str());
+    yLabel->limitLabelWidth(60.0f, yLabel->getScale(), .1f);
+
+    return true;
+}

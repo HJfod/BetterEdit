@@ -112,13 +112,27 @@ void RGBColorInputWidget::textChanged(CCTextInputNode* input) {
 
     if (input == hex_input) {
 
+        if (!input->getString() || !strlen(input->getString()))
+            return;
+
         std::string value(input->getString());
         ccColor3B color;
 
         if (value.empty())
             return;
+        if (value.size() > 6)
+            return;
 
-        auto num_value = std::stoi(value, 0, 16);
+        int num_value;
+        try { num_value = std::stoi(value, 0, 16); }
+        catch(...) {
+            return FLAlertLayer::create(
+                nullptr,
+                "bruh",
+                "OK", nullptr,
+                "Stop trying to break my mods by using character bypass"
+            )->show();
+        }
 
         switch (value.size()) {
             case 6: {
@@ -154,23 +168,25 @@ void RGBColorInputWidget::textChanged(CCTextInputNode* input) {
 
     } else if (input == red_input || input == green_input || input == blue_input) {
         std::string value(input->getString());
-        auto _num = value.empty() ? 0 : std::stoi(value);
-        if (_num > 255) {
-            _num = 255;
-            input->setString("255");
-        }
-        GLubyte num = static_cast<GLubyte>(_num);
-        auto color = parent->getPickerColor();
-        if (input == red_input)
-            color.r = num;
-        else if (input == green_input)
-            color.g = num;
-        else if (input == blue_input)
-            color.b = num;
-        ignore = true;
-        parent->setPickerColor(color);
-        ignore = false;
-        update_labels(true, false);
+        try {
+            auto _num = value.empty() ? 0 : std::stoi(value);
+            if (_num > 255) {
+                _num = 255;
+                input->setString("255");
+            }
+            GLubyte num = static_cast<GLubyte>(_num);
+            auto color = parent->getPickerColor();
+            if (input == red_input)
+                color.r = num;
+            else if (input == green_input)
+                color.g = num;
+            else if (input == blue_input)
+                color.b = num;
+            ignore = true;
+            parent->setPickerColor(color);
+            ignore = false;
+            update_labels(true, false);
+        } catch (...) {}
     }
 }
 
