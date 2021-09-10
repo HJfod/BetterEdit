@@ -265,14 +265,17 @@ public:
     void updateObjectsPulse(float dt) {
         // too lazy to add these to gd.h
         // theyre isMusicPlaying and isPlaybackMode
+
+        auto volume = FMODAudioEngine::sharedEngine()->m_fBackgroundMusicVolume;
         if (
             (*reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + 0x130)
             || m_pEditorLayer->m_bIsPlaybackMode) &&
+            volume &&
             BetterEdit::getPulseObjectsInEditor()
         ) {
             g_hasResetObjectsScale = false;
 
-            auto fmod = gd::FMODAudioEngine::sharedEngine();
+            auto fmod = FMODAudioEngine::sharedEngine();
             auto pulse = fmod->m_fPulse1 + fmod->m_fPulse2 + fmod->m_fPulse3;
             pulse /= 3.f;
 

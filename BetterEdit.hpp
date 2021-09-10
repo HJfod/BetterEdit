@@ -27,6 +27,7 @@ using namespace cocos2d::extension;
     __macro__(DisableMouseZoomMove, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
     __macro__(FadeOutPercentage, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(PulseObjectsInEditor, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
+    __macro__(HasShownPulseVolumeWarning, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)    \
     __macro__(RotateSawsInEditor, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
     __macro__(DisableEditorPos, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)              \
     __macro__(DisableZoomText, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
