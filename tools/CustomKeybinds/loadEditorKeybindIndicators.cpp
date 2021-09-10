@@ -112,6 +112,7 @@ void showEditorKeybindIndicatorIfItsTargetIsBeingHovered() {
             csize.height
         };
 
-        node->setVisible(rect.containsPoint(getMousePos()));
+        if (isNodeVisible(node))
+            node->setVisible(rect.containsPoint(getMousePos()));
     }
 }

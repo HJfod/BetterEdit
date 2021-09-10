@@ -2,6 +2,8 @@
 
 #include "KeybindManager.hpp"
 
+bool isNodeVisible(CCNode* t);
+
 class KeybindNode : public CCSprite {
     protected:
         CCNode* m_pTarget;
