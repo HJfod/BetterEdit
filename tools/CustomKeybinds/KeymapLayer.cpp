@@ -350,10 +350,10 @@ void KeymapLayer::onToggle(CCObject*) {
 
 void KeymapLayer::onSetBind(CCObject*) {
     if (this->m_pKeybindingsLayer && this->m_pSelected) {
-        // this->m_pKeybindingsLayer->setSelectMode(
-        //     true,
-        //     this->getKeybind()
-        // );
+        this->m_pKeybindingsLayer->setSelectMode(
+            true,
+            this->getKeybind()
+        );
         this->onClose(nullptr);
     }
 }
@@ -375,8 +375,6 @@ void KeymapLayer::FLAlert_Clicked(FLAlertLayer*, bool btn2) {
         this->onSelect(this->m_pSelected->getParent());
         this->loadKeybind(KEY_None);
         this->updateKeys();
-
-        std::cout << this->m_pKeybindingsLayer << "\n";
 
         if (this->m_pKeybindingsLayer)
             this->m_pKeybindingsLayer->reloadList();

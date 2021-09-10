@@ -67,13 +67,9 @@ void KeybindingsLayer_CB::reloadList() {
     auto oldList = as<KeybindListView*>(this->m_pLayer->getChildByTag(KBLLIST_TAG));
     auto y = 0.0f;
 
-    std::cout << std::hex << "this: " << as<uintptr_t>(this) << std::dec << "\n";
-
     if (oldList) {
         y = oldList->m_pTableView->getMinY() -
             oldList->m_pTableView->m_pContentLayer->getPositionY();
-        
-        std::cout << "old list: " << oldList << "\n";
 
         oldList->removeFromParent();
     }
@@ -124,8 +120,6 @@ void KeybindingsLayer_CB::reloadList() {
     list->m_pTableView->m_pContentLayer->setPositionY(y);
     this->m_pLayer->addChild(list);
         
-    std::cout << "new list: " << list << "\n";
-
     CATCH_NULL(as<Scrollbar*>(this->m_pLayer->getChildByTag(KBLSCROLLBAR_TAG)))
         ->setList(list);
 }

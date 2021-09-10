@@ -90,7 +90,7 @@ BackupCell* BackupCell::create(BackupViewLayer* layer, const char* key, CCSize s
 
     if (pRet) {
         pRet->m_pBackupLayer = layer;
-        pRet->autorelease();
+        // pRet->autorelease();
         return pRet;
     }
 

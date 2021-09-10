@@ -83,10 +83,6 @@ class KeybindListView : public CustomListView {
         TableViewCell* getListCell(const char* key) override;
         void loadCell(TableViewCell* cell, unsigned int index) override;
 
-        inline ~KeybindListView() {
-            std::cout << std::hex << "~KeybindListView called for " << as<uintptr_t>(this) << std::dec << "\n";
-        }
-
     public:
         static KeybindListView* create(CCArray* binds, float width, float height);
 };

@@ -274,7 +274,14 @@ KeybindCell* KeybindCell::create(const char* key, CCSize size) {
     auto pRet = new KeybindCell(key, size);
 
     if (pRet) {
-        pRet->autorelease();
+        // mfg
+
+        // this call to autorelease gave me
+        // 3 days of endless pain
+        // note to self:
+        // never call autorelease on list cells
+
+        // pRet->autorelease();
         return pRet;
     }
 
