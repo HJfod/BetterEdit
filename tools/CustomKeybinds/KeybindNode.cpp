@@ -2,12 +2,12 @@
 
 CCArray* g_nodes = nullptr;
 
-bool isNodeVisible(CCNode* t) {
-    if (!t->isVisible())
+bool isNodeVisible(CCNode* t, bool includeSelf) {
+    if (includeSelf && !t->isVisible())
         return false;
     
     if (t->getParent())
-        return isNodeVisible(t->getParent());
+        return isNodeVisible(t->getParent(), true);
     
     return true;
 }

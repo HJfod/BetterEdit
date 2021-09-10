@@ -2,7 +2,7 @@
 
 #include "KeybindManager.hpp"
 
-bool isNodeVisible(CCNode* t);
+bool isNodeVisible(CCNode* t, bool includeSelf = true);
 
 class KeybindNode : public CCSprite {
     protected:
