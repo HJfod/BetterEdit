@@ -14,7 +14,9 @@ float getLevelLength() {
     // from camden314/gdp/finished_works/PlayLayer/createObjectsFromSetup.cpp
 
     float screenEnd = CCDirector::sharedDirector()->getScreenRight() + 300.0f;
-    auto res = g_lastObject->getPositionX() + 340.0f;
+    auto res = screenEnd;
+    
+    if (g_lastObject) res = g_lastObject->getPositionX() + 340.0f;
 
     if (res < screenEnd)
         res = screenEnd;
@@ -24,8 +26,6 @@ float getLevelLength() {
 
 void EditorUI_CB::onGoToPercentage(CCObject* pSender) {
     auto p = InputPrompt::create("Go To %", "%", [this](const char* txt) -> void {
-        if (!g_lastObject) return;
-
         if (txt && strlen(txt)) {
             float val = 0.0f;
             try { val = std::stof(txt); } catch(...) {}
@@ -88,7 +88,7 @@ void updatePercentLabelPosition(EditorUI* self) {
         float val = 0.0f;
         if (!BetterEdit::getUseOldProgressBar()) {
             val = self->m_pPositionSlider->getValue() * 100.0f;
-        } else if (g_lastObject && getLevelLength())
+        } else if (getLevelLength())
             val =
                 self->m_pEditorLayer->getObjectLayer()->convertToNodeSpace(
                     CCDirector::sharedDirector()->getWinSize() / 2
@@ -153,14 +153,12 @@ void __fastcall EditorUI_sliderChanged(EditorUI* self, edx_t edx, Slider* pSlide
     auto width = CCDirector::sharedDirector()->getWinSize().width;
     
     float posX = 0.0f;
-    if (g_lastObject) {
-        posX = (- getLevelLength() * min(val, 100.0f) / 100.0f + width / 2) *
-            self->m_pEditorLayer->getObjectLayer()->getScale();
+    posX = (- getLevelLength() * min(val, 100.0f) / 100.0f + width / 2) *
+        self->m_pEditorLayer->getObjectLayer()->getScale();
 
-        self->m_pEditorLayer->getObjectLayer()->setPosition({
-            posX, self->m_pEditorLayer->getObjectLayer()->getPositionY()
-        });
-    }
+    self->m_pEditorLayer->getObjectLayer()->setPosition({
+        posX, self->m_pEditorLayer->getObjectLayer()->getPositionY()
+    });
 
     self->constrainGameLayerPosition();
 
@@ -173,7 +171,7 @@ void __fastcall EditorUI_valueFromXPos(EditorUI* self) {
         return GDMAKE_ORIG_V(self);
 
     float val = 0.0f;
-    if (g_lastObject && getLevelLength())
+    if (getLevelLength())
         val =
             self->m_pEditorLayer->getObjectLayer()->convertToNodeSpace(
                 CCDirector::sharedDirector()->getWinSize() / 2
