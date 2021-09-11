@@ -10,6 +10,8 @@ static constexpr const int EPOSITION_TAG = 421;
 GameObject* g_lastObject = nullptr;
 int g_bDontUpdateSlider = 0;
 
+void updateLastObjectX(LevelEditorLayer* lel, GameObject* obj = nullptr);
+
 float getLevelLength() {
     // from camden314/gdp/finished_works/PlayLayer/createObjectsFromSetup.cpp
 
@@ -23,7 +25,15 @@ float getLevelLength() {
     // or just call retain on it and check the 
     // retain count to see if it should be
     // released lol
-    if (g_lastObject) res = g_lastObject->getPositionX() + 340.0f;
+    if (g_lastObject) {
+        if (g_lastObject->retainCount() == 1u) {
+            g_lastObject->release();
+            g_lastObject = nullptr;
+            updateLastObjectX(LevelEditorLayer::get());
+        } else {
+            res = g_lastObject->getPositionX() + 340.0f;
+        }
+    }
 
     if (res < screenEnd)
         res = screenEnd;
@@ -54,7 +64,7 @@ void EditorUI_CB::onGoToPercentage(CCObject* pSender) {
     p->show();
 }
 
-void updateLastObjectX(LevelEditorLayer* lel, GameObject* obj = nullptr) {
+void updateLastObjectX(LevelEditorLayer* lel, GameObject* obj) {
     if (obj == nullptr) {
         CCARRAY_FOREACH_B_TYPE(lel->m_pObjects, pObj, GameObject) {
             if (!g_lastObject) {
@@ -72,6 +82,9 @@ void updateLastObjectX(LevelEditorLayer* lel, GameObject* obj = nullptr) {
         if (obj->getPositionX() > g_lastObject->getPositionX())
             g_lastObject = obj;
     }
+
+    if (g_lastObject)
+        g_lastObject->retain();
 }
 
 void resetSliderPercent(EditorUI* self) {
