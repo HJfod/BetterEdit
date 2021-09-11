@@ -1,5 +1,11 @@
 #include "EnterBPMLayer.hpp"
 
+std::string* std_string_operator_assign(std::string* str1, char* str2) {
+    return as<std::string*(__thiscall*)(std::string*, char*)>(
+        base + 0xf680
+    )(str1, str2);
+}
+
 EnterBPMLayer* EnterBPMLayer::setTarget(CreateGuidelinesLayer* t) {
     m_pTarget = t;
     return this;
@@ -99,7 +105,10 @@ void EnterBPMLayer::onCreate(CCObject*) {
         beat++;
     }
 
-    m_pTarget->m_sGuidelineString = guidelineString;
+    std_string_operator_assign(
+        &m_pTarget->m_sGuidelineString,
+        guidelineString.data()
+    );
     m_pTarget->onStop(nullptr);
 
     this->onClose(nullptr);
