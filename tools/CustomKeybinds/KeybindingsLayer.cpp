@@ -212,17 +212,19 @@ GDMAKE_HOOK(0x153ce0)
 void __fastcall KeybindingsLayer_goToPage(
     KeybindingsLayer* self, edx_t edx, int page
 ) {
-    if (page < 0)
-        page = 0;
-    if (page > self->m_nPageCount)
-        page = self->m_nPageCount;
-    
-    self->m_nCurrentPage = page;
+    GDMAKE_ORIG_V(self, edx, page);
 
-    CCARRAY_FOREACH_B_TYPE(self->m_pPages->allKeys(), key, CCDictElement) {
-        CCARRAY_FOREACH_B_TYPE(as<CCArray*>(key->getObject()), node, CCNode)
-            node->setVisible(key->getIntKey() == page);
-    }
+    // if (page < 0)
+    //     page = 0;
+    // if (page > self->m_nPageCount)
+    //     page = self->m_nPageCount;
+    
+    // self->m_nCurrentPage = page;
+
+    // CCARRAY_FOREACH_B_TYPE(self->m_pPages->allKeys(), key, CCDictElement) {
+    //     CCARRAY_FOREACH_B_TYPE(as<CCArray*>(key->getObject()), node, CCNode)
+    //         node->setVisible(key->getIntKey() == page);
+    // }
 }
 
 GDMAKE_HOOK(0x152f40)
@@ -410,13 +412,13 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
         "You can <cy>customize</c> all keybinds to whatever "
         "shortcut you want.\n\n "
         
-        "A <cr>Modifier</c> is a keybind that modifies the "
+        "A <cg>modifier</c> is a keybind that modifies the "
         "behaviour of other inputs like scrolling. A modifier "
         "can be a modifier key alone, while normal keybinds "
-        "can only be a <cl>key</c> or a <cl>key</c> + <cr>modifier</c>.\n\n "
+        "can only be a <cl>key</c> or a <cl>key</c> + <cg>modifier</c>.\n\n "
 
         "<cp>Repeating</c> means that when you hold down a shortcut, "
-        "it'll start repeating at the set <cg>interval</c> after "
+        "it'll start repeating at the set <cr>interval</c> after "
         "the set <cb>start</c> time.",
         .65f,
         210.0f - 90.0f,

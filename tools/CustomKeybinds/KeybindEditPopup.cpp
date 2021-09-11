@@ -149,7 +149,10 @@ void KeybindEditPopup::onClose(CCObject*) {
 }
 
 void KeybindEditPopup::onSet(CCObject*) {
-    if (!this->m_pCell->m_pBind->modifier && this->m_obTypedBind.key == KEY_None)
+    if (this->m_pCell->m_pBind->modifier) {
+        if (!this->m_obTypedBind.modifiers && this->m_obTypedBind.key == KEY_None)
+            return;
+    } else if (this->m_obTypedBind.key == KEY_None)
         return;
 
     if (this->m_pStoreItem)
