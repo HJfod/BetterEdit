@@ -187,11 +187,7 @@ void BESettingsLayer::setup() {
     // );
     this->addInput("Save Every (min):", BE_SETTING_FUNC(AutoSaveTime), "0123456789");
     this->addInput("Soft Save Freq.:", BE_SETTING_FUNC(SoftSaveFrequency), "0123456789");
-    this->incrementPageCount(true);
 
-    this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
-    this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap), "0123456789.");
-    this->addInput("Percentage Accuracy:", BE_SETTING_FUNC(PercentageAccuracy), "0123456789");
     this->addSlider(
         "Music",
         (SEL_MenuHandler)&PauseLayer::musicSliderChanged,
@@ -202,6 +198,12 @@ void BESettingsLayer::setup() {
         (SEL_MenuHandler)&PauseLayer::sfxSliderChanged,
         FMODAudioEngine::sharedEngine()->getSFXVolume()
     );
+
+    this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
+    this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap), "0123456789.");
+    this->addInput("Objects Before Start Line:", BE_SETTING_FUNC(ObjectsPreStartLine), "0123456789");
+    this->addInput("Percentage Accuracy:", BE_SETTING_FUNC(PercentageAccuracy), "0123456789");
+    this->incrementPageCount(true);
 
     // this->addButton(
     //     ButtonSprite::create(

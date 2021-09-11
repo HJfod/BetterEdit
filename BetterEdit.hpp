@@ -18,6 +18,7 @@ using namespace cocos2d::extension;
 #define BE_SETTINGS(__macro__)                                                                  \
     __macro__(ScaleSnap, float, .25f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.01f, 1.0f)       \
     __macro__(GridSize, float, 30.0f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.9375f, 120.0f)   \
+    __macro__(ObjectsPreStartLine, int, 15, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 60)     \
     __macro__(PercentageAccuracy, int, 0, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 0, 10)       \
     __macro__(AutoSaveTime, int, 1, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 60)             \
     __macro__(SoftSaveFrequency, int, 1, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 999)       \

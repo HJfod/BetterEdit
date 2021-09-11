@@ -27,9 +27,10 @@ std::string KeymapLayer::getShortenedKeyName(enumKeyCodes key) {
         case KEY_Backspace: return "<-";
         case KEY_Insert:    return "Ins";
         case KEY_Delete:    return "Del";
-        case KEY_PageUp:    return "PgUp";
-        case KEY_PageDown:  return "PgDown";
+        case KEY_PageUp:    return "Pg\nUp";
+        case KEY_PageDown:  return "Pg\nDown";
         case KEY_Numlock:   return "Num";
+        case KEY_ScrollLock:return "Scrl";
         default:            return keyToStringFixed(key);
     }
 }
@@ -66,6 +67,8 @@ CCMenuItemSpriteExtra* KeymapLayer::getKeyButton(
     bspr->setCascadeColorEnabled(true);
     bspr->setCascadeOpacityEnabled(true);
     bspr->m_pBGSprite->setColor(m_colNormal);
+    if (bspr->m_pLabel && bspr->m_pLabel->getScale() < .2f)
+        bspr->m_pLabel->setScale(.2f);
     m_vKeyBtns.push_back(bspr);
 
     auto btn = CCMenuItemSpriteExtra::create(

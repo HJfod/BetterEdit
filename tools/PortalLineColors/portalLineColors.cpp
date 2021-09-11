@@ -13,7 +13,7 @@
     ) != MH_OK)                         \
         return false;
     
-void DrawGridLayer_draw() {
+void DrawGridLayer_draw_midHook() {
     GameObject* obj;
 
     __asm {
@@ -36,20 +36,20 @@ void DrawGridLayer_draw() {
         ccDrawColor4B(0, 0, 0, 0);
 }
 
-void (*DrawGridLayer_draw_retAddr)();
-__declspec(naked) void DrawGridLayer_draw_midHook() {
+void (*DrawGridLayer_draw_midHook_retAddr)();
+__declspec(naked) void DrawGridLayer_draw_midHook_midHook() {
     __asm {
         pushad
         pushfd
-        call DrawGridLayer_draw
+        call DrawGridLayer_draw_midHook
         popfd
         popad
-        jmp DrawGridLayer_draw_retAddr
+        jmp DrawGridLayer_draw_midHook_retAddr
     }
 }
 
 bool loadDrawGridLayerMidHook() {
-    MAKE_MIDHOOK(0x16db5d, DrawGridLayer_draw);
+    MAKE_MIDHOOK(0x16db5d, DrawGridLayer_draw_midHook);
 
     return true;
 }

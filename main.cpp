@@ -21,6 +21,7 @@
 #include "tools/CustomKeybinds/BEKeybinds.hpp"
 #include "tools/CustomKeybinds/SuperKeyboardManager.hpp"
 #include "tools/CustomKeybinds/SuperMouseManager.hpp"
+#include "tools/other/placeObjectsBefore.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     patch(0x1e62a6,
@@ -74,6 +75,7 @@ GDMAKE_MAIN_HM(hMod) {
     loadEnterSearch();
     loadTeleportScaleFix();
     loadFLAlertLayerFix();
+    loadPlaceObjectsBefore();
 
     ContextMenu::loadRightClick(hMod);
 

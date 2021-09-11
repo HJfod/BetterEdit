@@ -16,6 +16,13 @@ float getLevelLength() {
     float screenEnd = CCDirector::sharedDirector()->getScreenRight() + 300.0f;
     auto res = screenEnd;
     
+    // g_lastObject will sometimes be a released
+    // objects;
+    // i think we *might* want to hook undos /
+    // redos to account for that
+    // or just call retain on it and check the 
+    // retain count to see if it should be
+    // released lol
     if (g_lastObject) res = g_lastObject->getPositionX() + 340.0f;
 
     if (res < screenEnd)
