@@ -9,7 +9,7 @@ void KeybindSettingsLayer::setup() {
         CCNodeConstructor<CCLabelBMFont*>()
             .fromText("Interval (ms)", "bigFont.fnt")
             .scale(.4f)
-            .moveR(winSize, 0.0f, 55.0f)
+            .moveR(winSize, -60.0f, 60.0f)
             .done()
     );
 
@@ -23,7 +23,7 @@ void KeybindSettingsLayer::setup() {
                 i->getInputNode()->setTag(0);
                 i->getInputNode()->setDelegate(this);
             })
-            .moveR(winSize, 0.0f, 30.0f)
+            .moveR(winSize, -60.0f, 35.0f)
             .done()
     );
 
@@ -31,7 +31,7 @@ void KeybindSettingsLayer::setup() {
         CCNodeConstructor<CCLabelBMFont*>()
             .fromText("Start (ms)", "bigFont.fnt")
             .scale(.4f)
-            .moveR(winSize, 0.0f, 0.0f)
+            .moveR(winSize, 60.0f, 60.0f)
             .done()
     );
 
@@ -45,7 +45,7 @@ void KeybindSettingsLayer::setup() {
                 i->getInputNode()->setTag(1);
                 i->getInputNode()->setDelegate(this);
             })
-            .moveR(winSize, 0.0f, -25.0f)
+            .moveR(winSize, 60.0f, 35.0f)
             .done()
     );
 
@@ -56,8 +56,30 @@ void KeybindSettingsLayer::setup() {
         this->m_pLayer, .7f, .4f,
         120.0f, "", false, 0,
         nullptr, "Enable Repeating",
-        { winSize.width / 2 - 65.0f, winSize.height / 2 - 60.0f },
+        { winSize.width / 2 - 65.0f, winSize.height / 2 + 0.0f },
         { 5.0f, .0f }
+    );
+
+    this->m_pLayer->addChild(
+        CCNodeConstructor<CCLabelBMFont*>()
+            .fromText("Double-Click Speed (ms)", "bigFont.fnt")
+            .scale(.4f)
+            .moveR(winSize, 0.0f, -25.0f)
+            .done()
+    );
+
+    this->m_pLayer->addChild(
+        CCNodeConstructor<InputNode*>()
+            .fromNode(InputNode::create(100.0f, "ms"))
+            .exec([this](auto i) -> void {
+                i->setString(std::to_string(
+                    KeybindManager::get()->getDoubleClickInterval()
+                ).c_str());
+                i->getInputNode()->setTag(2);
+                i->getInputNode()->setDelegate(this);
+            })
+            .moveR(winSize, 0.0f, -50.0f)
+            .done()
     );
 
     this->m_pButtonMenu->addChild(
@@ -124,6 +146,14 @@ void KeybindSettingsLayer::textChanged(CCTextInputNode* input) {
                 } catch (...) {}
             }
         } break;
+
+        case 2: {
+            if (input->getString() && strlen(input->getString())) {
+                try {
+                KeybindManager::get()->setDoubleClickInterval(std::stoi(input->getString()));
+                } catch (...) {}
+            }
+        } break;
     }
 }
 
@@ -132,7 +162,7 @@ KeybindSettingsLayer* KeybindSettingsLayer::create() {
 
     if (
         ret &&
-        ret->init(220.0f, 240.0f, "GJ_square01.png", "Keybind Settings")
+        ret->init(260.0f, 220.0f, "GJ_square01.png", "Keybind Settings")
     ) {
         ret->autorelease();
         return ret;

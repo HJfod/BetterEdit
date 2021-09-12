@@ -201,7 +201,7 @@ void __fastcall EditorUI_ccTouchEnded(
         !self_->m_pEditorLayer->m_bIsPlaybackMode &&
         std::chrono::duration_cast<std::chrono::milliseconds>(
             now - g_lastTouchTime
-        ).count() < 250
+        ).count() < KeybindManager::get()->getDoubleClickInterval()
     ) {
 
         if (

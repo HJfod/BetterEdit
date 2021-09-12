@@ -134,7 +134,9 @@ void BESettingsLayer::setup() {
     this->addToggle(
         "Disable View Tab",
         "Disables the <co>View</c> tab (<cl>requires re-entering the Editor</c>)",
-        BE_SETTING_FUNC_B(DisableVisibilityTab)
+        BE_SETTING_FUNC_B(DisableVisibilityTab),
+        false,
+        true
     );
     this->addToggle(
         "Don't Color Borders",
@@ -407,7 +409,8 @@ void BESettingsLayer::addToggle(
     const char* desc,
     bool value,
     BE_Callback_B cb,
-    bool experimental
+    bool experimental,
+    bool showDescOnToggle
 ) {
     auto toggle = CCMenuItemToggler::createWithStandardSprites(
         this,
@@ -438,6 +441,9 @@ void BESettingsLayer::addToggle(
 
         infoButton->setPosition(toggle->getPosition() + cocos2d::CCPoint { -15.0f, 15.0f });
         infoButton->setUserObject(CCString::create(desc));
+
+        if (showDescOnToggle)
+            toggle->setUserObject(infoButton);
 
         this->m_pButtonMenu->addChild(infoButton);
         this->addItem(infoButton);
@@ -522,8 +528,12 @@ void BESettingsLayer::onPage(CCObject* pSender) {
 void BESettingsLayer::onToggle(CCObject* pSender) {
     auto toggle = as<CCMenuItemToggler*>(pSender);
 
-    if (toggle && toggle->getUserData())
+    if (toggle && toggle->getUserData()) {
         (reinterpret_cast<BE_Callback_B>(toggle->getUserData()))(!toggle->isToggled());
+    
+        if (toggle->getUserObject())
+            as<CCMenuItemSpriteExtra*>(toggle->getUserObject())->activate();
+    }
 }
 
 void BESettingsLayer::textChanged(CCTextInputNode* input) {

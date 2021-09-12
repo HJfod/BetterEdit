@@ -1,14 +1,7 @@
 #pragma once
 
 #include "../../BetterEdit.hpp"
-
-enum MouseButton {
-    kMouseButtonLeft    = 0,
-    kMouseButtonRight   = 1,
-    kMouseButtonMiddle  = 2,
-    kMouseButtonNext    = 3,
-    kMouseButtonPrev    = 4,
-};
+#include "KeybindManager.hpp"
 
 class SuperMouseManager;
 

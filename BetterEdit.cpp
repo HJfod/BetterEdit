@@ -8,7 +8,7 @@ using namespace gdmake::extra;
 using namespace gd;
 using namespace cocos2d;
 
-bool hasKey(DS_Dictionary* dict, std::string const& key) {
+bool DSdictHasKey(DS_Dictionary* dict, std::string const& key) {
     return dict->getKey(dict->getIndexOfKey(key.c_str())) == key;
 }
 
@@ -29,7 +29,7 @@ bool hasKey(DS_Dictionary* dict, std::string const& key) {
 #define BE_SAVE_SETTING(__name__, _, _d_, __ctype__, _0, _1, _2, _3) \
     BE_SAVE_##__ctype__##(#__name__, get##__name__(), _d_);
 #define BE_LOAD_SETTING(__name__, _, _d_, __ctype__, _0, _1, _2, _3) \
-    if (hasKey(data, #__name__)) \
+    if (DSdictHasKey(data, #__name__)) \
         BE_LOAD_##__ctype__##(__name__, data->get##__ctype__##ForKey, _d_);
 #define BE_DEFAULT_SETTING(__name__, _, __value__, __, ___, _0, _1, _2) \
     set##__name__(__value__);

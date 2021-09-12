@@ -2,7 +2,20 @@
 
 #include "../../BetterEdit.hpp"
 
+enum MouseButton {
+    kMouseButtonNone        = -1,
+    kMouseButtonLeft        = 0,
+    kMouseButtonRight       = 1,
+    kMouseButtonMiddle      = 2,
+    kMouseButtonNext        = 3,
+    kMouseButtonPrev        = 4,
+    kMouseButtonDoubleClick = 19,
+    kMouseButtonScrollUp    = 20,
+    kMouseButtonScrollDown  = 21,
+};
+
 std::string keyToStringFixed(enumKeyCodes code);
+std::string mouseToString(MouseButton btn);
 
 struct Keybind {
     enumKeyCodes key;
@@ -10,12 +23,7 @@ struct Keybind {
         kmNone = 0, kmControl = 1, kmShift = 2, kmAlt = 4,
     };
     int modifiers;
-    enum : int {
-        kcNone = 0,
-        kcLeft, kcRight, kcMiddle,
-        kcDoubleClick,
-        kcScrollUp, kcScrollDown,
-    } click = kcNone;
+    MouseButton mouse = kMouseButtonNone;
 
     bool operator==(Keybind const&) const;
     bool operator<(Keybind const&) const;
@@ -27,6 +35,8 @@ struct Keybind {
     Keybind(enumKeyCodes);
     Keybind(enumKeyCodes, Modifiers);
     Keybind(enumKeyCodes, int);
+    Keybind(MouseButton, int);
+    Keybind(MouseButton, Modifiers);
     Keybind(DS_Dictionary*);
 };
 
@@ -148,11 +158,13 @@ struct KeybindPlayLayer : public KeybindCallback {
     inline KeybindPlayLayer(
         std::string const& keybind,
         std::string const& id,
-        decltype(call) bind
+        decltype(call) bind,
+        bool repeat = true
     ) {
         this->name = keybind;
         this->id = id;
         this->call = bind;
+        this->repeatable = repeat;
         this->editor = false;
     }
 
@@ -192,6 +204,8 @@ class KeybindManager : public GManager {
             std::unordered_map<keybind_id, KeybindList>
         > m_mLoadedBinds;
         std::unordered_map<enumKeyCodes, float> m_mHeldKeys;
+        int m_nDoubleClickInterval = 250;
+        bool m_bPropagateKeyPresses = false;
 
         bool init();
 
@@ -233,6 +247,9 @@ class KeybindManager : public GManager {
         void handleRepeats(float);
         void registerKeyPress(enumKeyCodes, bool);
         bool isModifierPressed(keybind_id const&);
+
+        void setDoubleClickInterval(int);
+        int getDoubleClickInterval();
 
         static KeybindManager* get();
         static bool initGlobal();

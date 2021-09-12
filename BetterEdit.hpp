@@ -14,6 +14,8 @@ using namespace gdmake::extra;
 using namespace cocos2d;
 using namespace cocos2d::extension;
 
+bool DSdictHasKey(DS_Dictionary* dict, std::string const& key);
+
 #pragma region macros (ew)
 #define BE_SETTINGS(__macro__)                                                                  \
     __macro__(ScaleSnap, float, .25f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.01f, 1.0f)       \

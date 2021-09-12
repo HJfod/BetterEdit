@@ -31,6 +31,10 @@ std::string KeymapLayer::getShortenedKeyName(enumKeyCodes key) {
         case KEY_PageDown:  return "Pg\nDown";
         case KEY_Numlock:   return "Num";
         case KEY_ScrollLock:return "Scrl";
+        case KEY_Multiply:  return "*";
+        case KEY_Divide:    return "/";
+        case KEY_OEMPlus:   return "+";
+        case KEY_OEMMinus:  return "-";
         default:            return keyToStringFixed(key);
     }
 }
