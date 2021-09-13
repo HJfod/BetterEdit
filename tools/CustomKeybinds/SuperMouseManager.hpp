@@ -7,6 +7,7 @@ class SuperMouseManager;
 
 class SuperMouseDelegate {
     protected:
+        CCPoint m_obSuperMouseHitOffset = CCPointZero;
         CCSize m_obSuperMouseHitSize = CCSizeZero;
         bool m_bSuperMouseHovered = false;
 
@@ -25,6 +26,7 @@ class SuperMouseDelegate {
         virtual bool mouseScrollSuper(float y, float x);
         virtual void mouseScrollOutsideSuper(float y, float x);
         virtual void setSuperMouseHitSize(CCSize const&);
+        virtual void setSuperMouseHitOffset(CCPoint const&);
 };
 
 class SuperMouseManager {

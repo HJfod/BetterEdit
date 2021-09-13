@@ -137,6 +137,20 @@ Keybind::Keybind(enumKeyCodes key, int mods) {
     this->modifiers = static_cast<Modifiers>(mods);
 }
 
+Keybind::Keybind(MouseButton btn) {
+    this->mouse = btn;
+
+    auto kb = CCDirector::sharedDirector()->getKeyboardDispatcher();
+
+    this->modifiers = 0;
+    if (kb->getControlKeyPressed())
+        this->modifiers |= this->kmControl;
+    if (kb->getShiftKeyPressed())
+        this->modifiers |= this->kmShift;
+    if (kb->getAltKeyPressed())
+        this->modifiers |= this->kmAlt;
+}
+
 Keybind::Keybind(MouseButton btn, Modifiers mods) {
     this->mouse = btn;
     this->modifiers = mods;
@@ -147,10 +161,13 @@ Keybind::Keybind(MouseButton btn, int mods) {
     this->modifiers = static_cast<Modifiers>(mods);
 }
 
-Keybind::Keybind(DS_Dictionary* dict) {
+Keybind::Keybind(DS_Dictionary* dict, int version) {
     this->key = static_cast<enumKeyCodes>(dict->getIntegerForKey("key"));
     this->modifiers = dict->getIntegerForKey("modifiers");
-    this->mouse = static_cast<decltype(this->mouse)>(dict->getIntegerForKey("click"));
+    if (version > 1)
+        this->mouse = static_cast<decltype(this->mouse)>(
+            dict->getIntegerForKey("click")
+        );
 }
 
 std::size_t std::hash<Keybind>::operator()(Keybind const& key) const {
@@ -167,6 +184,7 @@ bool KeybindCallback::operator==(KeybindCallback const& other) const {
 
 void KeybindManager::encodeDataTo(DS_Dictionary* dict) {
     dict->setIntegerForKey("double-click-interval", this->m_nDoubleClickInterval);
+    dict->setIntegerForKey("version", this->getVersion());
     
     STEP_SUBDICT(dict, "binds",
         for (auto const& [type, val] : m_mCallbacks) {
@@ -191,6 +209,10 @@ void KeybindManager::dataLoaded(DS_Dictionary* dict) {
     if (DSdictHasKey(dict, "double-click-interval"))
         this->m_nDoubleClickInterval = dict->getIntegerForKey("double-click-interval");
     
+    int ver = 1;
+    if (DSdictHasKey(dict, "version"))
+        ver = dict->getIntegerForKey("version");
+    
     STEP_SUBDICT_NC(dict, "binds",
         for (auto const& typeKey : dict->getAllKeys()) {
             auto type = static_cast<KeybindType>(std::stoi(typeKey.substr(1)));
@@ -204,7 +226,7 @@ void KeybindManager::dataLoaded(DS_Dictionary* dict) {
                     STEP_SUBDICT_NC(dict, nameKey.c_str(),
                         for (auto const& key : dict->getAllKeys()) {
                             STEP_SUBDICT_NC(dict, key.c_str(),
-                                m_mLoadedBinds[type][nameKey].insert(Keybind(dict));
+                                m_mLoadedBinds[type][nameKey].insert(Keybind(dict, ver));
                             );
                         }
                     );
@@ -543,7 +565,7 @@ void KeybindManager::loadDefaultKeybinds() {
                 ui->moveGameLayer({ 0.0f, 10.0f });
             return false;
         }, "editor.ui"
-    }, {{ KEY_OEMPlus, 0 }, { kMouseButtonScrollUp, 0 }});
+    }, {{ KEY_OEMPlus, 0 }});
 
     this->addEditorKeybind({ "Scroll Down", "gd.edit.scroll_down",
         [](EditorUI* ui) -> bool {
@@ -551,7 +573,7 @@ void KeybindManager::loadDefaultKeybinds() {
                 ui->moveGameLayer({ 0.0f, -10.0f });
             return false;
         }, "editor.ui"
-    }, {{ KEY_OEMMinus, 0 }, { kMouseButtonScrollDown, 0 }});
+    }, {{ KEY_OEMMinus, 0 }});
 
     this->addEditorKeybind({ "Zoom In", "gd.edit.zoom_in",
         [](EditorUI* ui) -> bool {
@@ -966,14 +988,20 @@ void KeybindManager::handleRepeats(float dt) {
         !GameManager::sharedState()->getPlayLayer()
     ) {
         m_mHeldKeys.clear();
+        m_mHeldMouse.clear();
         return;
     }
 
+    std::unordered_map<Keybind, float> held;
     for (auto & [key, time] : m_mHeldKeys) {
+        held.insert({ Keybind(key), time });
+    }
+    for (auto & [mouse, time] : m_mHeldMouse) {
+        held.insert({ Keybind(mouse), time });
+    }
+
+    for (auto & [k, time] : held) {
         time += dt * 1000.0f;
-
-        auto k = Keybind(key);
-
         for (auto const& [type, bind] : m_mKeybinds[k]) {
             if (bind->repeatable && bind->repeat) {
                 if (
@@ -1007,6 +1035,15 @@ void KeybindManager::registerKeyPress(enumKeyCodes key, bool down) {
             m_mHeldKeys[key] = 0;
     } else {
         m_mHeldKeys.erase(key);
+    }
+}
+
+void KeybindManager::registerMousePress(MouseButton btn, bool down) {
+    if (down) {
+        if (!m_mHeldMouse.count(btn))
+            m_mHeldMouse[btn] = 0;
+    } else {
+        m_mHeldMouse.erase(btn);
     }
 }
 
@@ -1051,7 +1088,13 @@ bool KeybindManager::isModifierPressed(keybind_id const& id) {
     for (auto const& kb : kbs) {
         bool res = true;
 
-        if (kb.key != KEY_None && !this->m_mHeldKeys.count(kb.key))    
+        if ((
+            kb.key != KEY_None &&
+            !this->m_mHeldKeys.count(kb.key)
+        ) || (
+            kb.mouse != kMouseButtonNone &&
+            !this->m_mHeldMouse.count(kb.mouse)
+        ))
             res = false;
         
         if (
@@ -1082,8 +1125,21 @@ void KeybindManager::setDoubleClickInterval(int i) {
     this->m_nDoubleClickInterval = i;
 }
 
-int KeybindManager::getDoubleClickInterval() {
+int KeybindManager::getDoubleClickInterval() const {
     return this->m_nDoubleClickInterval;
+}
+
+constexpr int KeybindManager::getVersion() const {
+    return s_nVersion;
+}
+
+bool KeybindManager::isAllowedMouseButton(MouseButton btn) const {
+    switch (btn) {
+        case kMouseButtonPrev: case kMouseButtonNext:
+        case kMouseButtonRight: case kMouseButtonMiddle:
+            return true;
+    }
+    return false;
 }
 
 KeybindManager* KeybindManager::get() {

@@ -66,6 +66,24 @@ void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwi
 
     g_bPressedButtons[btn] = pressed;
 
+    KeybindManager::get()->registerMousePress(static_cast<MouseButton>(btn), pressed);
+
+    if (LevelEditorLayer::get()) {
+        KeybindManager::get()->executeEditorCallbacks(
+            Keybind(static_cast<MouseButton>(btn)),
+            LevelEditorLayer::get()->getEditorUI(),
+            pressed
+        );
+    }
+    
+    if (PlayLayer::get()) {
+        KeybindManager::get()->executePlayCallbacks(
+            Keybind(static_cast<MouseButton>(btn)),
+            PlayLayer::get(),
+            pressed
+        );
+    }
+
     if (SuperMouseManager::get()->dispatchClickEvent(
         static_cast<MouseButton>(btn), pressed, getMousePos()
     ))

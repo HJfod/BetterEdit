@@ -115,7 +115,7 @@ void KeybindCell::onReset(CCObject*) {
         this,
         "Reset Keybind",
         "Cancel", "Reset",
-        "Are you sure you want to <cr>reset</c> <cc>"_s + this->m_pBind->name + "</c>?"
+        "Are you sure you want to <cr>reset</c> <cl>"_s + this->m_pBind->name + "</c>?"
     )->show();
 }
 

@@ -25,6 +25,9 @@ void SuperMouseDelegate::mouseScrollOutsideSuper(float, float) {}
 void SuperMouseDelegate::setSuperMouseHitSize(CCSize const& size) {
     this->m_obSuperMouseHitSize = size;
 }
+void SuperMouseDelegate::setSuperMouseHitOffset(CCPoint const& pos) {
+    this->m_obSuperMouseHitOffset = pos;
+}
 
 SuperMouseDelegate::SuperMouseDelegate() {
     SuperMouseManager::get()->pushDelegate(this);
@@ -73,6 +76,11 @@ bool SuperMouseManager::delegateIsHovered(SuperMouseDelegate* delegate, CCPoint 
         size = p->getScaledContentSize();
 
     auto pos = p ? p->getPosition() : CCPointZero;
+
+    if (p && p->getParent())
+        pos = p->getParent()->convertToWorldSpace(p->getPosition());
+    
+    pos = pos + delegate->m_obSuperMouseHitOffset;
 
     auto rect = CCRect {
         pos.x - size.width / 2,

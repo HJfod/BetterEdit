@@ -18,7 +18,7 @@ std::string keyToStringFixed(enumKeyCodes code);
 std::string mouseToString(MouseButton btn);
 
 struct Keybind {
-    enumKeyCodes key;
+    enumKeyCodes key = KEY_None;
     enum Modifiers : int {
         kmNone = 0, kmControl = 1, kmShift = 2, kmAlt = 4,
     };
@@ -35,9 +35,10 @@ struct Keybind {
     Keybind(enumKeyCodes);
     Keybind(enumKeyCodes, Modifiers);
     Keybind(enumKeyCodes, int);
+    Keybind(MouseButton);
     Keybind(MouseButton, int);
     Keybind(MouseButton, Modifiers);
-    Keybind(DS_Dictionary*);
+    Keybind(DS_Dictionary*, int version);
 };
 
 struct keybind_id {
@@ -204,8 +205,10 @@ class KeybindManager : public GManager {
             std::unordered_map<keybind_id, KeybindList>
         > m_mLoadedBinds;
         std::unordered_map<enumKeyCodes, float> m_mHeldKeys;
+        std::unordered_map<MouseButton, float> m_mHeldMouse;
         int m_nDoubleClickInterval = 250;
         bool m_bPropagateKeyPresses = false;
+        static constexpr int s_nVersion = 2;
 
         bool init();
 
@@ -246,10 +249,13 @@ class KeybindManager : public GManager {
         void resetUnmodifiedRepeatTimes();
         void handleRepeats(float);
         void registerKeyPress(enumKeyCodes, bool);
+        void registerMousePress(MouseButton, bool);
         bool isModifierPressed(keybind_id const&);
 
         void setDoubleClickInterval(int);
-        int getDoubleClickInterval();
+        int getDoubleClickInterval() const;
+        bool isAllowedMouseButton(MouseButton btn) const;
+        constexpr int getVersion() const;
 
         static KeybindManager* get();
         static bool initGlobal();

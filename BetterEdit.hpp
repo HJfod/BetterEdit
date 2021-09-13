@@ -60,6 +60,7 @@ bool DSdictHasKey(DS_Dictionary* dict, std::string const& key);
     __macro__(KeybindRepeatStart, int, 700, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 10000)  \
     __macro__(ShowKeybindOnHover, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(MoveCameraWhenMovingObjects, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)    \
+    __macro__(ShownTutorial, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                 \
 
 #define STEP_SUBDICT_NC(dict, key, ...)         \
     if (dict->stepIntoSubDictWithKey(key)) {    \

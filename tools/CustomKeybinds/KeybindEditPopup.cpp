@@ -7,6 +7,8 @@ void KeybindEditPopup::setup() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     
     this->m_bNoElasticity = true;
+    this->setSuperMouseHitSize(this->m_pLrSize);
+    this->setSuperMouseHitOffset(winSize / 2);
 
     auto subTitle = CCLabelBMFont::create(m_pCell->m_pBind->name.c_str(), "bigFont.fnt");
     subTitle->setColor(m_pCell->m_pBind->modifier ? cc3x(0x8fa) : cc3x(0x3af));
@@ -97,11 +99,9 @@ void KeybindEditPopup::onRepeat(CCObject* pSender) {
     this->m_pCell->m_pBind->repeat = !t->isToggled();
 }
 
-void KeybindEditPopup::keyDown(enumKeyCodes key) {
+void KeybindEditPopup::updateLabel() {
     m_pPreLabel->setVisible(false);
     m_pTypeLabel->setVisible(true);
-
-    m_obTypedBind = Keybind(key);
 
     m_pTypeLabel->setString(m_obTypedBind.toString().c_str());
     m_pTypeLabel->limitLabelWidth(this->m_pLrSize.width - 40.0f, .8f, .2f);
@@ -127,6 +127,11 @@ void KeybindEditPopup::keyDown(enumKeyCodes key) {
     }
 }
 
+void KeybindEditPopup::keyDown(enumKeyCodes key) {
+    this->m_obTypedBind = Keybind(key);
+    this->updateLabel();
+}
+
 void KeybindEditPopup::keyDownSuper(enumKeyCodes key) {
     if (this->m_pCell->m_pBind->modifier)
         this->keyDown(key);
@@ -150,10 +155,15 @@ void KeybindEditPopup::onClose(CCObject*) {
 
 void KeybindEditPopup::onSet(CCObject*) {
     if (this->m_pCell->m_pBind->modifier) {
-        if (!this->m_obTypedBind.modifiers && this->m_obTypedBind.key == KEY_None)
-            return;
-    } else if (this->m_obTypedBind.key == KEY_None)
-        return;
+        if (
+            !this->m_obTypedBind.modifiers &&
+            this->m_obTypedBind.key == KEY_None &&
+            this->m_obTypedBind.mouse == kMouseButtonNone
+        ) return;
+    } else if (
+        this->m_obTypedBind.key == KEY_None &&
+        this->m_obTypedBind.mouse == kMouseButtonNone
+    ) return;
 
     if (this->m_pStoreItem)
         KeybindManager::get()->editKeybind(
@@ -170,6 +180,16 @@ void KeybindEditPopup::onSet(CCObject*) {
         );
 
     this->onClose(nullptr);
+}
+
+bool KeybindEditPopup::mouseDownSuper(MouseButton btn, CCPoint const& pos) {
+    if (!KeybindManager::get()->isAllowedMouseButton(btn))
+        return false;
+    
+    this->m_obTypedBind = Keybind(btn);
+    this->updateLabel();
+
+    return true;
 }
 
 KeybindEditPopup* KeybindEditPopup::create(KeybindCell* cell, KeybindStoreItem* item) {

@@ -4,6 +4,7 @@
 #include "KeybindListView.hpp"
 #include <BrownAlertDelegate.hpp>
 #include "SuperKeyboardManager.hpp"
+#include "SuperMouseManager.hpp"
 
 struct KeybindStoreItem : public CCObject {
     Keybind m_obBind;
@@ -14,7 +15,11 @@ struct KeybindStoreItem : public CCObject {
     }
 };
 
-class KeybindEditPopup : public BrownAlertDelegate, public SuperKeyboardDelegate {
+class KeybindEditPopup :
+    public BrownAlertDelegate,
+    public SuperKeyboardDelegate,
+    public SuperMouseDelegate
+{
     protected:
         KeybindCell* m_pCell;
         KeybindStoreItem* m_pStoreItem;
@@ -30,6 +35,8 @@ class KeybindEditPopup : public BrownAlertDelegate, public SuperKeyboardDelegate
         void onClose(CCObject*) override;
         void keyDown(enumKeyCodes) override;
         void keyDownSuper(enumKeyCodes) override;
+        bool mouseDownSuper(MouseButton, CCPoint const&) override;
+        void updateLabel();
 
     public:
         static KeybindEditPopup* create(KeybindCell*, KeybindStoreItem*);
