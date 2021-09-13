@@ -24,6 +24,9 @@
 #include "tools/other/placeObjectsBefore.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
+    BetterEdit::log() << "Loading BetterEdit" << log_end();
+    BetterEdit::log() << "Applying patches" << log_end();
+
     patch(0x1e62a6,
         {
             0x8b, 0xcf,                                 // MOV ECX, EDI
@@ -49,26 +52,41 @@ GDMAKE_MAIN_HM(hMod) {
     // this enables pulses in FMODAudioEngine in every layer, instead of just in PlayLayer
     patchBytes(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 
+    BetterEdit::log() << "Initializing BetterEdit" << log_end();
     if (!BetterEdit::initGlobal())
         return "Unable to initialize BetterEdit!";
+
+    BetterEdit::log() << "Initializing LiveManager" << log_end();
     if (!LiveManager::initGlobal())
         return "Unable to initialize LiveManager!";
+
+    BetterEdit::log() << "Initializing SoftSaveManager" << log_end();
     if (!SoftSaveManager::initGlobal())
         return "Unable to initialize SoftSaveManager!";
+
+    BetterEdit::log() << "Initializing LevelBackupManager" << log_end();
     if (!LevelBackupManager::initGlobal())
         return "Unable to initialize LevelBackupManager!";
+
+    BetterEdit::log() << "Initializing KeybindManager" << log_end();
     if (!KeybindManager::initGlobal())
         return "Unable to initialize KeybindManager!";
+
+    BetterEdit::log() << "Initializing SuperKeyboardManager" << log_end();
     if (!SuperKeyboardManager::initGlobal())
         return "Unable to initialize SuperKeyboardManager!";
+
+    BetterEdit::log() << "Initializing SuperMouseManager" << log_end();
     if (!SuperMouseManager::initGlobal())
         return "Unable to initialize SuperMouseManager!";
 
+    BetterEdit::log() << "Creating midhooks" << log_end();
     if (!loadUpdateVisibilityHook())
         return "Unable to midhook updateVisibility!";
     if (!loadDrawGridLayerMidHook())
         return "Unable to midhook DrawGridLayer::draw!";
 
+    BetterEdit::log() << "Loading tools" << log_end();
     loadBEKeybinds();
     loadTemplates();
     loadFavouriteTab();
@@ -81,13 +99,21 @@ GDMAKE_MAIN_HM(hMod) {
 
     // checkForUpdates();
 
+    BetterEdit::log() << "Initializing GDMake hooks" << log_end();
+
     return "";
 }
 
 GDMAKE_UNLOAD {
+    BetterEdit::log() << "Unloading BetterEdit" << log_end();
+
     ContextMenu::unloadRightClick();
+
+    BetterEdit::log() << "Unpatching Addresses" << log_end();
 
     // unpatch all addresses
     unpatch(0);
     unloadEnterSearch();
+
+    BetterEdit::log() << "Uninitializing GDMake" << log_end();
 }

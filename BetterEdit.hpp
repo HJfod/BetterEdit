@@ -16,6 +16,12 @@ using namespace cocos2d::extension;
 
 bool DSdictHasKey(DS_Dictionary* dict, std::string const& key);
 
+enum DebugLogType {
+    kLogTypeNone    = 0x0,
+    kLogTypeConsole = 0x1,
+    kLogTypeFile    = 0x2,
+};
+
 #pragma region macros (ew)
 #define BE_SETTINGS(__macro__)                                                                  \
     __macro__(ScaleSnap, float, .25f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.01f, 1.0f)       \
@@ -119,6 +125,40 @@ bool DSdictHasKey(DS_Dictionary* dict, std::string const& key);
     static std::string get##__name__##AsString() { return formatToString(get##__name__()); }
 #pragma endregion macros (ew)
 
+static constexpr const char* g_sLogfileDat = "BE_log_t.dat";
+static constexpr const char* g_sLogfile = "BE_log.log";
+
+struct log_end {};
+
+class log_stream {
+    protected:
+        std::stringstream output;
+        int type = 0;
+
+    public:
+        log_stream();
+
+        void setType(int t);
+        inline int getType() { return type; }
+
+        inline log_stream& operator<<(std::string const& s) {
+            output << s; return *this;
+        }
+        inline log_stream& operator<<(const char* s) {
+            output << s; return *this;
+        }
+        inline log_stream& operator<<(int n) {
+            output << n; return *this;
+        }
+        inline log_stream& operator<<(long n) {
+            output << n; return *this;
+        }
+        inline log_stream& operator<<(CCPoint p) {
+            output << p.x << ", " << p.y; return *this;
+        }
+        log_stream& operator<<(log_end n);
+};
+
 class BetterEdit : public gd::GManager {
     public:
         struct Preset {
@@ -214,6 +254,8 @@ class BetterEdit : public gd::GManager {
         static bool initGlobal();
 
         static void showHookConflictMessage();
+
+        static log_stream& log();
 
         inline void scheduleError(ScheduleTime time, std::string const& err) {
             if (!this->m_mScheduledErrors.count(time))

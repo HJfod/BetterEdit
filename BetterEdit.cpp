@@ -8,8 +8,51 @@ using namespace gdmake::extra;
 using namespace gd;
 using namespace cocos2d;
 
+log_stream g_obLogStream = log_stream();
+
 bool DSdictHasKey(DS_Dictionary* dict, std::string const& key) {
     return dict->getKey(dict->getIndexOfKey(key.c_str())) == key;
+}
+
+log_stream::log_stream() {
+    if (std::filesystem::exists(g_sLogfileDat)) {
+        try {
+            this->type = std::stoi(readFileString(g_sLogfileDat));
+        } catch (...) {}
+    }
+    this->setType(this->type);
+    writeFileString(g_sLogfile, "");
+}
+
+void log_stream::setType(int t) {
+    this->type = t;
+    writeFileString(g_sLogfileDat, std::to_string(t));
+}
+
+log_stream& log_stream::operator<<(log_end end) {
+    if (!this->type)
+        return *this;
+
+    auto s = "[ " + timePointAsString(std::chrono::system_clock::now()) + "] " +
+        this->output.str() + "\n";
+
+    if (this->type & kLogTypeFile) {
+        std::ofstream outfile;
+        outfile.open(g_sLogfile, std::ios_base::app);
+        outfile << s;
+        outfile.close();
+    }
+    if (this->type & kLogTypeConsole) {
+        std::cout << s;
+    }
+
+    this->output.str(std::string());
+
+    return *this;
+}
+
+log_stream& BetterEdit::log() {
+    return g_obLogStream;
 }
 
 #define BE_SAVE_Bool(_name_, _get_, _def_) \
@@ -53,24 +96,29 @@ bool BetterEdit::init() {
 }
 
 void BetterEdit::encodeDataTo(DS_Dictionary* data) {
+    BetterEdit::log() << "Saving Settings" << log_end();
     STEP_SUBDICT(data, "settings",
         BE_SETTINGS(BE_SAVE_SETTING)
     );
 
+    BetterEdit::log() << "Saving Bools" << log_end();
     STEP_SUBDICT(data, "bools",
         for (auto & [key, val] : m_mSaveBools)
             if (val.global)
                 data->setBoolForKey(key.c_str(), *val.global);
     );
 
+    BetterEdit::log() << "Saving Templates" << log_end();
     STEP_SUBDICT(data, "templates",
         m_pTemplateManager->encodeDataTo(data);
     );
 
+    BetterEdit::log() << "Saving Editor Layers" << log_end();
     STEP_SUBDICT(data, "editor-layers",
         LayerManager::get()->encodeDataTo(data);
     );
 
+    BetterEdit::log() << "Saving Presets" << log_end();
     STEP_SUBDICT(data, "presets",
         auto ix = 0u;
         for (auto preset : m_vPresets)
@@ -81,33 +129,42 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
             );
     );
 
+    BetterEdit::log() << "Saving Favorites" << log_end();
     std::string favStr = "";
     for (auto fav : m_vFavorites)
         favStr += std::to_string(fav) + ",";
     data->setStringForKey("favorites", favStr);
 
+    BetterEdit::log() << "Saving Backups" << log_end();
     LevelBackupManager::get()->save();
+
+    BetterEdit::log() << "Saving Keybinds" << log_end();
     KeybindManager::get()->save();
 }
 
 void BetterEdit::dataLoaded(DS_Dictionary* data) {
+    BetterEdit::log() << "Loading Settings" << log_end();
     STEP_SUBDICT_NC(data, "settings",
         BE_SETTINGS(BE_LOAD_SETTING)
     );
 
+    BetterEdit::log() << "Loading Bools" << log_end();
     STEP_SUBDICT_NC(data, "bools",
         for (auto key : data->getAllKeys())
             m_mSaveBools[key] = { nullptr, data->getBoolForKey(key.c_str()) };
     );
 
+    BetterEdit::log() << "Loading Templates" << log_end();
     STEP_SUBDICT_NC(data, "templates",
         m_pTemplateManager->dataLoaded(data);
     );
 
+    BetterEdit::log() << "Loading Editor Layers" << log_end();
     STEP_SUBDICT_NC(data, "editor-layers",
         LayerManager::get()->dataLoaded(data);
     );
 
+    BetterEdit::log() << "Loading Presets" << log_end();
     STEP_SUBDICT_NC(data, "presets",
         for (auto key : data->getAllKeys())
             STEP_SUBDICT_NC(data, key.c_str(),
@@ -118,6 +175,7 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
             );
     );
 
+    BetterEdit::log() << "Loading Favorites" << log_end();
     for (auto fav : stringSplit(data->getStringForKey("favorites"), ","))
         try { this->addFavorite(std::stoi(fav)); } catch (...) {}
 }

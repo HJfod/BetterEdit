@@ -120,6 +120,14 @@ static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
     return nullptr;
 }
 
+static std::string timePointAsString(const std::chrono::system_clock::time_point& tp) {
+    std::time_t t = std::chrono::system_clock::to_time_t(tp);
+    char buf[128];
+    ctime_s(buf, sizeof buf, &t);
+    buf[strlen(buf) - 1] = ' ';
+    return buf;
+}
+
 template<typename T, typename R = T>
 static constexpr R vtable_cast(T obj, uintptr_t vtable) {
     if (obj && (*as<uintptr_t*>(obj) - gd::base == vtable))
