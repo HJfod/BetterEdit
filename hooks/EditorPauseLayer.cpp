@@ -11,6 +11,7 @@
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
+#include "../tools/CustomUI/customUI.hpp"
 
 using namespace gdmake;
 
@@ -100,7 +101,11 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
 }
 
 GDMAKE_HOOK(0x75660)
-void __fastcall EditorPauseLayer_onExitEditor(EditorPauseLayer* self, edx_t edx, CCObject* pSender) {
+void __fastcall EditorPauseLayer_onExitEditor(
+    EditorPauseLayer* self,
+    edx_t edx,
+    CCObject* pSender
+) {
     stopRotations(self->m_pEditorLayer);
     resetAutoSaveTimer(self->m_pEditorLayer->m_pEditorUI);
 
@@ -110,9 +115,15 @@ void __fastcall EditorPauseLayer_onExitEditor(EditorPauseLayer* self, edx_t edx,
 }
 
 GDMAKE_HOOK(0x730e0)
-bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, LevelEditorLayer* el) {
+bool __fastcall EditorPauseLayer_init(
+    EditorPauseLayer* self,
+    edx_t edx,
+    LevelEditorLayer* el
+) {
     if (!GDMAKE_ORIG(self, edx, el))
         return false;
+
+    stopCustomizingEditor();
 
     auto menu = as<CCMenu*>(self->m_pButton0->getParent());
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
@@ -150,6 +161,7 @@ bool __fastcall EditorPauseLayer_init(EditorPauseLayer* self, edx_t edx, LevelEd
     loadColorTriggerButton(self);
     loadRemapHook(self);
     loadPasteButton(self);
+    loadUICustomizeBtn(self);
 
     GameToolbox::createToggleButton(
         (SEL_MenuHandler)&EditorPauseLayer_CB::onRotateSaws,

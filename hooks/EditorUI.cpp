@@ -12,6 +12,7 @@
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include "../tools/CustomKeybinds/KeybindManager.hpp"
 #include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
+#include "../tools/CustomUI/customUI.hpp"
 #include "EditorPauseLayer.hpp"
 #include "EditorUI.hpp"
 #include <thread>
@@ -118,6 +119,9 @@ bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,
 
     g_bHoldingDownTouch = true;
     
+    if (isCustomizingEditor())
+        return true;
+
     if (touchIntersectsInput(self_->getChildByTag(LAYERINPUT_TAG), touch))
         return true;
     if (touchIntersectsInput(getGridButtonParent(self_)->getChildByTag(ZOOMINPUT_TAG), touch))
@@ -160,6 +164,8 @@ GDMAKE_HOOK(0x90cd0)
 void __fastcall EditorUI_ccTouchMoved(EditorUI* self_, edx_t edx, CCTouch* touch, CCEvent* event) {
     auto self = reinterpret_cast<EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xEC);
 
+    if (isCustomizingEditor()) return;
+
     float prevScale = self->m_pEditorLayer->m_pObjectLayer->getScale();
     auto swipeStart =
         self->m_pEditorLayer->m_pObjectLayer->convertToNodeSpace(self->m_obSwipeStart) * prevScale;
@@ -192,6 +198,8 @@ void __fastcall EditorUI_ccTouchEnded(
     CCEvent* event
 ) {
     g_bHoldingDownTouch = false;
+
+    if (isCustomizingEditor()) return;
 
     auto now = std::chrono::system_clock::now();
 

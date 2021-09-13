@@ -28,8 +28,8 @@ bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameL
     }
     
     updatePercentLabelPosition(self->m_pEditorUI);
-
     doTheSickAnimation(self);
+    getAutoSaveTimer(self->m_pEditorUI)->resetTimer();
 
     return true;
 }
