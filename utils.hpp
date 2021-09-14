@@ -88,17 +88,23 @@ static constexpr cocos2d::ccColor3B cc3x(int hexValue) {
             static_cast<GLubyte>(hexValue * 17),
             static_cast<GLubyte>(hexValue * 17)
         };
-    if (hexValue > 0xfff)
+    if (hexValue <= 0xff)
         return cocos2d::ccColor3B {
-            static_cast<GLubyte>(hexValue >> 16 & 0xff),
-            static_cast<GLubyte>(hexValue >> 8  & 0xff),
-            static_cast<GLubyte>(hexValue >> 0  & 0xff)
+            static_cast<GLubyte>(hexValue),
+            static_cast<GLubyte>(hexValue),
+            static_cast<GLubyte>(hexValue)
         };
-    else
+    if (hexValue <= 0xfff)
         return cocos2d::ccColor3B {
             static_cast<GLubyte>((hexValue >> 8 & 0xf) * 17),
             static_cast<GLubyte>((hexValue >> 4 & 0xf) * 17),
             static_cast<GLubyte>((hexValue >> 0 & 0xf) * 17)
+        };
+    else
+        return cocos2d::ccColor3B {
+            static_cast<GLubyte>(hexValue >> 16 & 0xff),
+            static_cast<GLubyte>(hexValue >> 8  & 0xff),
+            static_cast<GLubyte>(hexValue >> 0  & 0xff)
         };
 }
 

@@ -135,6 +135,11 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
         favStr += std::to_string(fav) + ",";
     data->setStringForKey("favorites", favStr);
 
+    BetterEdit::log() << "Saving UI Customization" << log_end();
+    STEP_SUBDICT(data, "ui",
+        UIManager::get()->encodeDataTo(data);
+    );
+
     BetterEdit::log() << "Saving Backups" << log_end();
     LevelBackupManager::get()->save();
 
@@ -178,6 +183,11 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
     BetterEdit::log() << "Loading Favorites" << log_end();
     for (auto fav : stringSplit(data->getStringForKey("favorites"), ","))
         try { this->addFavorite(std::stoi(fav)); } catch (...) {}
+    
+    BetterEdit::log() << "Loading UI Customization" << log_end();
+    STEP_SUBDICT_NC(data, "ui",
+        UIManager::get()->dataLoaded(data);
+    );
 }
 
 void BetterEdit::firstLoad() {}

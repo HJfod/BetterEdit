@@ -183,6 +183,8 @@ bool KeybindCallback::operator==(KeybindCallback const& other) const {
 }
 
 void KeybindManager::encodeDataTo(DS_Dictionary* dict) {
+    BetterEdit::log() << "Saving keybinds" << log_end;
+
     dict->setIntegerForKey("double-click-interval", this->m_nDoubleClickInterval);
     dict->setIntegerForKey("version", this->getVersion());
     
@@ -206,6 +208,8 @@ void KeybindManager::encodeDataTo(DS_Dictionary* dict) {
 }
 
 void KeybindManager::dataLoaded(DS_Dictionary* dict) {
+    BetterEdit::log() << "Loading keybinds" << log_end;
+    
     if (DSdictHasKey(dict, "double-click-interval"))
         this->m_nDoubleClickInterval = dict->getIntegerForKey("double-click-interval");
     
@@ -910,29 +914,48 @@ KeybindManager::CallbackList KeybindManager::getCallbacksForKeybind(KeybindType 
     return res;
 }
 
+void KeybindManager::invokeEditor(Target const& target, EditorUI* ui, bool keydown, bool onlyPlay) {
+    if (target.bind->modifier)
+        continue;
+
+    switch (target.type) {
+        case kKBEditor: {
+            if (onlyPlay) break;
+            auto c = as<KeybindEditor*>(target.bind);
+            if (c->call_b)
+                c->call_b(ui, keydown);
+            else if (keydown)
+                c->call(ui);
+        } break;
+        
+        case kKBPlayLayer: {
+            if (as<KeybindPlayLayer*>(target.bind)->editor)
+                as<KeybindPlayLayer*>(target.bind)->call_e(nullptr, ui, keydown);
+        } break;
+    }
+}
+
+void KeybindManager::invokePlay(Target const& target, PlayLayer* pl, bool keydown) {
+    if (target.bind->modifier)
+        continue;
+
+    switch (target.type) {
+        case kKBPlayLayer: {
+            auto c = as<KeybindPlayLayer*>(target.bind);
+            if (c->call_e)
+                c->call_e(pl, nullptr, keydown);
+            else
+                c->call(pl, keydown);
+        } break;
+    }
+}
+
 void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, bool keydown, bool onlyPlay) {
     if (!m_mKeybinds.count(bind))
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
-        if (target.bind->modifier)
-            continue;
-
-        switch (target.type) {
-            case kKBEditor: {
-                if (onlyPlay) break;
-                auto c = as<KeybindEditor*>(target.bind);
-                if (c->call_b)
-                    c->call_b(ui, keydown);
-                else if (keydown)
-                    c->call(ui);
-            } break;
-            
-            case kKBPlayLayer: {
-                if (as<KeybindPlayLayer*>(target.bind)->editor)
-                    as<KeybindPlayLayer*>(target.bind)->call_e(nullptr, ui, keydown);
-            } break;
-        }
+        this->invokeEditor(target, ui, keydown, onlyPlay);
     }
 }
 
@@ -941,18 +964,7 @@ void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bo
         return;
 
     for (auto & target : m_mKeybinds[bind]) {
-        if (target.bind->modifier)
-            continue;
-
-        switch (target.type) {
-            case kKBPlayLayer: {
-                auto c = as<KeybindPlayLayer*>(target.bind);
-                if (c->call_e)
-                    c->call_e(pl, nullptr, keydown);
-                else
-                    c->call(pl, keydown);
-            } break;
-        }
+        this->invokePlay(target, pl, keydown);
     }
 }
 
@@ -1075,7 +1087,6 @@ KeybindManager::Target KeybindManager::getTargetByID(keybind_id const& cbID) {
                 };
         }
     }
-
     return KeybindManager::Target();
 }
 
@@ -1140,6 +1151,24 @@ bool KeybindManager::isAllowedMouseButton(MouseButton btn) const {
             return true;
     }
     return false;
+}
+
+void KeybindManager::invokeCallback(
+    keybind_id const& cbID,
+    EditorUI* ui,
+    PlayLayer* pl
+) {
+    auto target = this->getTargetByID(cbID);
+
+    switch (target.type) {
+        case kKBEditor:
+            this->invokeEditor(target, ui, true, false);
+            break;
+
+        case kKBPlayLayer:
+            this->invokePlay(target, pl, true);
+            break;
+    }
 }
 
 KeybindManager* KeybindManager::get() {

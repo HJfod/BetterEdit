@@ -215,6 +215,9 @@ class KeybindManager : public GManager {
         void addCallback(KeybindCallback*, KeybindType, KeybindList const&);
         KeybindList getLoadedBinds(KeybindType, KeybindCallback*, bool*);
 
+        void invokeEditor(Target const&, EditorUI*, bool, bool);
+        void invokePlay(Target const&, PlayLayer*, bool);
+
     public:
         void encodeDataTo(DS_Dictionary*) override;
         void dataLoaded(DS_Dictionary*) override;
@@ -251,6 +254,7 @@ class KeybindManager : public GManager {
         void registerKeyPress(enumKeyCodes, bool);
         void registerMousePress(MouseButton, bool);
         bool isModifierPressed(keybind_id const&);
+        void invokeCallback(keybind_id const&, EditorUI*, PlayLayer*);
 
         void setDoubleClickInterval(int);
         int getDoubleClickInterval() const;

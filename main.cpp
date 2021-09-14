@@ -22,6 +22,7 @@
 #include "tools/CustomKeybinds/SuperKeyboardManager.hpp"
 #include "tools/CustomKeybinds/SuperMouseManager.hpp"
 #include "tools/other/placeObjectsBefore.hpp"
+#include "tools/CustomUI/UIManager.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     BetterEdit::log() << "Loading BetterEdit" << log_end();
@@ -51,6 +52,10 @@ GDMAKE_MAIN_HM(hMod) {
     // thanks to adaf
     // this enables pulses in FMODAudioEngine in every layer, instead of just in PlayLayer
     patchBytes(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+
+    BetterEdit::log() << "Initializing UIManager" << log_end();
+    if (!UIManager::initGlobal())
+        return "Unable to initialize UIManager!";
 
     BetterEdit::log() << "Initializing BetterEdit" << log_end();
     if (!BetterEdit::initGlobal())
