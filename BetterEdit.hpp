@@ -5,7 +5,6 @@
 #include "tools/Templates/TemplateManager.hpp"
 #include "utils.hpp"
 #include "utils/InfoButton.hpp"
-#include "tools/CustomUI/UIManager.hpp"
 #include <set>
 #include <algorithm>
 

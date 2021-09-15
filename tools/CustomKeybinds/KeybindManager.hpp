@@ -44,6 +44,7 @@ struct Keybind {
 struct keybind_id {
     std::string value;
 
+    keybind_id();
     keybind_id(std::string const&);
     keybind_id(const char*);
     const char* c_str() const;

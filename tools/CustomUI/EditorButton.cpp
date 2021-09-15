@@ -24,7 +24,7 @@ bool EditorButton::initWithID(EditorUI* ui, keybind_id const& id) {
         return false;
     this->m_obItem = g_map[id];
 
-    auto spr = CCSprite::createWithSpriteFrameName(item.spriteName);
+    auto spr = CCSprite::createWithSpriteFrameName(this->m_obItem.spriteName);
 
     if (!CCMenuItemSprite::initWithNormalSprite(spr, nullptr, nullptr, this, nullptr))
         return false;
@@ -40,7 +40,7 @@ bool EditorButton::initWithID(EditorUI* ui, keybind_id const& id) {
 void EditorButton::activate() {
     if (this->m_pUI) {
         KeybindManager::get()->invokeCallback(
-            this->m_obItem.keybind
+            this->m_sID,
             this->m_pUI,
             nullptr
         );
@@ -54,13 +54,13 @@ void EditorButton::setEnabled(bool enable) {
 }
 
 EditorButton* EditorButton::createFromID(EditorUI* ui, keybind_id const& id) {
-    auto ret = EditorButton;
+    auto ret = new EditorButton;
 
     if (ret && ret->initWithID(ui, id)) {
         ret->autorelease();
         return ret;
     }
 
-    CC_SAFE_RELEASE(ret);
+    CC_SAFE_DELETE(ret);
     return nullptr;
 }

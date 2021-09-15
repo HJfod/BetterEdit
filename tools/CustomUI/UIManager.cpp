@@ -17,7 +17,7 @@ void UIManager::startCustomizing() {
     auto lel = LevelEditorLayer::get();
     if (lel && !m_pOverlay) {
         m_pOverlay = CustomizeOverlay::create(lel->m_pEditorUI);
-        lel->addChild(o, 1000);
+        lel->addChild(m_pOverlay, 1000);
     }
 }
 

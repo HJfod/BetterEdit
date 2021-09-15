@@ -4,6 +4,7 @@
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/other/teleportScaleFix.hpp"
 #include "../tools/SickAnimation/sickAnimation.hpp"
+#include "../tools/History/UndoHistoryManager.hpp"
 
 GDMAKE_HOOK(0x15ee00)
 bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameLevel* level) {
@@ -48,6 +49,8 @@ void __fastcall LevelEditorLayer_addSpecial(
     edx_t edx,
     GameObject* obj
 ) {
+    UndoHistoryManager::get()->addAction(new AddObjectAction(obj));
+
     GDMAKE_ORIG_V(self, edx, obj);
 
     handleObjectAddForSlider(self, obj);
@@ -66,6 +69,8 @@ void __fastcall LevelEditorLayer_removeObject(
     GameObject* obj,
     bool idk
 ) {
+    UndoHistoryManager::get()->addAction(new RemoveObjectAction(obj));
+
     GDMAKE_ORIG_V(self, edx, obj, idk);
 
     handleObjectAddForSlider(self, obj);

@@ -4,6 +4,7 @@
 #include "../AutoSave/autoSave.hpp"
 #include "../CustomKeybinds/BEKeybinds.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
+#include "../History/UndoHistoryManager.hpp"
 
 static constexpr const int SLIDERLABEL_TAG = 420;
 static constexpr const int EPOSITION_TAG = 421;
@@ -227,8 +228,12 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
 
     if (obj == nullptr)
         return;
+    
+    CCPoint oldPos = obj->getPosition();
 
     GDMAKE_ORIG_V(self, edx, obj, pos);
+
+    UndoHistoryManager::get()->addAction(new MoveObjectAction(obj, oldPos, pos));
 
     SoftSaveManager::save();
 

@@ -9,6 +9,7 @@
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../HalfMove/moveForCommand.hpp"
 #include "../RepeatPaste/repeatPaste.hpp"
+#include "../History/UndoHistoryPopup.hpp"
 
 static constexpr const float w_edge = 120.0f;
 
@@ -654,6 +655,13 @@ void loadBEKeybinds() {
     kbm->addEditorKeybind({ "Align Y", "betteredit.align_y",
         [](EditorUI* ui) -> bool {
             ui->alignObjects(ui->getSelectedObjects(), true);
+            return false;
+        }, "editor.modify", false
+    }, {});
+
+    kbm->addEditorKeybind({ "View Undo History", "betteredit.view_undo_history",
+        [](EditorUI* ui) -> bool {
+            UndoHistoryPopup::create()->show();
             return false;
         }, "editor.modify", false
     }, {});

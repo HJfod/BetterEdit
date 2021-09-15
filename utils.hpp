@@ -355,6 +355,11 @@ template<typename t> inline void vectorMove(std::vector<t>& v, size_t oldIndex, 
         std::rotate(v.begin() + oldIndex, v.begin() + oldIndex + 1, v.begin() + newIndex + 1);
 }
 
+template<typename T>
+static void vectorRemoveByValue(std::vector<T> & vec, T const& value) {
+    vec.erase(std::remove(vec.begin(), vec.end(), value), vec.end());
+}
+
 inline int strToInt(const char* str, bool* is = nullptr) {
     bool isStr = true;
     for (auto i = 0u; i < strlen(str); i++)
