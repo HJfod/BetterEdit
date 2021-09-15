@@ -6,8 +6,19 @@ void EditorPauseLayer_CB::onCustomizeUI(CCObject*) {
     this->onResume(nullptr);
 }
 
-void loadEditorCustomizations(EditorUI*) {
-
+void loadEditorCustomizations(EditorUI* self) {
+    self->m_pCopyBtn->removeFromParent();
+    self->m_pPasteBtn->removeFromParent();
+    self->m_pCopyPasteBtn->removeFromParent();
+    self->m_pEditSpecialBtn->removeFromParent();
+    self->m_pEditGroupBtn->removeFromParent();
+    self->m_pEditObjectBtn->removeFromParent();
+    self->m_pCopyValuesBtn->removeFromParent();
+    self->m_pPasteStateBtn->removeFromParent();
+    self->m_pPasteColorBtn->removeFromParent();
+    self->m_pEditHSVBtn->removeFromParent();
+    self->m_pGoToLayerBtn->removeFromParent();
+    self->m_pDeselectBtn->removeFromParent();
 }
 
 void loadUICustomizeBtn(EditorPauseLayer* self) {
