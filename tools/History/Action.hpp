@@ -4,13 +4,7 @@
 
 class UndoHistoryManager;
 
-static GameObject* getObjectByUUID(LevelEditorLayer* lel, int uuid) {
-    CCARRAY_FOREACH_B_TYPE(lel->getAllObjects(), obj, GameObject) {
-        if (obj->m_nUniqueID == uuid)
-            return obj;
-    }
-    return nullptr;
-}
+GameObject* getObjectByUUID(LevelEditorLayer* lel, int uuid);
 
 class ActionObject : public CCObject {
     protected:
@@ -19,23 +13,17 @@ class ActionObject : public CCObject {
         std::chrono::system_clock::time_point m_obTime;
         bool m_bUndone;
 
-        inline ActionObject() {
-            this->m_nID = g_nID;
-            this->m_obTime = std::chrono::system_clock::now();
-            this->autorelease();
-
-            g_nID++;
-        }
+        ActionObject();
 
         friend class UndoHistoryManager;
 
     public:
         virtual std::string describe() = 0;
         virtual CCNode* createActionCellItem(float width, float height);
-        virtual void undoAction() {
+        inline virtual void undoAction() {
             this->m_bUndone = true;
         }
-        virtual void redoAction() {
+        inline virtual void redoAction() {
             this->m_bUndone = false;
         }
 };
@@ -163,4 +151,18 @@ class SelectObjectAction : public ObjectAction {
 
         inline SelectObjectAction(CCArray* objs) :
             ObjectAction(objs) {}
+};
+
+class EditLevelAction : public ActionObject {
+    protected:
+        Gamemode m_eStartGamemode;
+        Speed m_eSpeed;
+        bool m_bMiniMode;
+        bool m_bTwoPlayerMode;
+        bool m_bFlipped;
+
+    public:
+        inline EditLevelAction(LevelSettingsObject* obj) {
+
+        }
 };

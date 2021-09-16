@@ -1,5 +1,21 @@
 #include "Action.hpp"
 
+GameObject* getObjectByUUID(LevelEditorLayer* lel, int uuid) {
+    CCARRAY_FOREACH_B_TYPE(lel->getAllObjects(), obj, GameObject) {
+        if (obj->m_nUniqueID == uuid)
+            return obj;
+    }
+    return nullptr;
+}
+
+ActionObject::ActionObject() {
+    this->m_nID = g_nID;
+    this->m_obTime = std::chrono::system_clock::now();
+    this->autorelease();
+
+    g_nID++;
+}
+
 CCNode* ActionObject::createActionCellItem(float width, float height) {
     auto label = CCLabelBMFont::create(this->describe().c_str(), "goldFont.fnt");
     label->setScale(.3f);
