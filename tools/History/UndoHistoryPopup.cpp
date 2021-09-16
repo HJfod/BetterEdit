@@ -5,12 +5,12 @@ void UndoHistoryPopup::setup() {
     
     this->m_bNoElasticity = true;
 
-    // this->m_pList = ActionListView::create(
-    //     UndoHistoryManager::get()->getActionHistory(),
-    //     280.0f, 200.0f
-    // );
-    // this->m_pList->setPosition(winSize / 2);
-    // this->addChild(this->m_pList);
+    this->m_pList = ActionListView::create(
+        UndoHistoryManager::get()->getActionHistory(),
+        280.0f, 180.0f
+    );
+    this->m_pList->setPosition(winSize / 2 - this->m_pList->getScaledContentSize() / 2);
+    this->m_pLayer->addChild(this->m_pList);
 }
 
 UndoHistoryPopup* UndoHistoryPopup::create() {

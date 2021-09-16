@@ -49,12 +49,15 @@ void __fastcall LevelEditorLayer_addSpecial(
     edx_t edx,
     GameObject* obj
 ) {
-    UndoHistoryManager::get()->addAction(new AddObjectAction(obj));
+    if (BetterEdit::isEditorInitialized())
+        UndoHistoryManager::get()->addAction(new AddObjectAction(obj));
 
     GDMAKE_ORIG_V(self, edx, obj);
 
     handleObjectAddForSlider(self, obj);
-    SoftSaveManager::saveObject(obj);
+    
+    if (BetterEdit::isEditorInitialized())
+        SoftSaveManager::saveObject(obj);
 
     if (shouldRotateSaw() && objectIsSaw(obj))
         beginRotateSaw(obj);

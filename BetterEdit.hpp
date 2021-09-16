@@ -221,6 +221,11 @@ class BetterEdit : public gd::GManager {
             return res;
         }
 
+        inline static std::string formatToString(CCPoint const& p, unsigned int precision = 60u) {
+            return formatToString(p.x) + ", " +
+                formatToString(p.y);
+        }
+
         static inline bool isEditorInitialized() {
             return BetterEdit::sharedState()->m_bEditorInitialized;
         }

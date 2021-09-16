@@ -3,7 +3,7 @@
 #include "UndoHistoryManager.hpp"
 
 static constexpr const BoomListType kBoomListType_Action
-    = static_cast<BoomListType>(0x423);
+    = static_cast<BoomListType>(0x425);
 
 class ActionCell : public TableViewCell {
     protected:

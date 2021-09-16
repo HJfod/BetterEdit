@@ -16,8 +16,7 @@ void ActionCell::loadFromAction(ActionObject* action) {
     this->m_pLayer->setVisible(true);
     this->m_pBGLayer->setOpacity(255);
     
-    auto cell = action->createActionCellItem();
-    cell->setPosition(this->m_fWidth / 2, this->m_fHeight / 2);
+    auto cell = action->createActionCellItem(this->m_fWidth, this->m_fHeight);
     this->m_pLayer->addChild(cell);
 }
 
@@ -35,7 +34,7 @@ ActionCell* ActionCell::create(const char* key, CCSize size) {
 
 
 void ActionListView::setupList() {
-    this->m_fItemSeparation = 25.0f;
+    this->m_fItemSeparation = 20.0f;
 
     if (!this->m_pEntries->count()) return;
 
@@ -48,7 +47,7 @@ void ActionListView::setupList() {
 }
 
 TableViewCell* ActionListView::getListCell(const char* key) {
-    return ActionCell::create(key, { this->m_fWidth, 55.0f });
+    return ActionCell::create(key, { this->m_fWidth, this->m_fItemSeparation });
 }
 
 void ActionListView::loadCell(TableViewCell* cell, unsigned int index) {

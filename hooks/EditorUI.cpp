@@ -13,6 +13,7 @@
 #include "../tools/CustomKeybinds/KeybindManager.hpp"
 #include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
 #include "../tools/CustomUI/customUI.hpp"
+#include "../tools/History/UndoHistoryPopup.hpp"
 #include "EditorPauseLayer.hpp"
 #include "EditorUI.hpp"
 #include <thread>
@@ -90,6 +91,10 @@ void EditorUI_CB::onExitViewMode(CCObject*) {
     CCDirector::sharedDirector()->popSceneWithTransition(
         0.5f, cocos2d::kPopTransitionFade
     );
+}
+
+void EditorUI_CB::onViewUndoHistory(CCObject*) {
+    UndoHistoryPopup::create()->show();
 }
 
 bool touchIntersectsInput(CCNode* input, CCTouch* touch) {
@@ -374,6 +379,27 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
             .tag(TOGGLEUI_TAG)
             .move(getShowButtonPosition(self))
             .save(&toggleBtn)
+            .done()
+    );
+    self->m_pSwipeBtn->getParent()->addChild(
+        CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(
+                CCMenuItemSpriteExtra::create(
+                    CCNodeConstructor<ButtonSprite*>()
+                        .fromButtonSprite("Undo History", "GJ_button_01.png", "goldFont.fnt")
+                        .scale(.45f)
+                        .done(),
+                    self,
+                    (SEL_MenuHandler)&EditorUI_CB::onViewUndoHistory
+                )
+            )
+            .exec([self](auto p) -> void {
+                addKeybindIndicator(self, p, "betteredit.view_undo_history");
+            })
+            .move(
+                self->m_pPlaybackBtn->getPositionX() + 70.0f,
+                self->m_pPlaybackBtn->getPositionY()
+            )
             .done()
     );
     updateToggleButtonSprite(toggleBtn);

@@ -30,7 +30,8 @@ class ActionObject : public CCObject {
         friend class UndoHistoryManager;
 
     public:
-        virtual CCNode* createActionCellItem() = 0;
+        virtual std::string describe() = 0;
+        virtual CCNode* createActionCellItem(float width, float height);
         virtual void undoAction() {
             this->m_bUndone = true;
         }
@@ -43,6 +44,8 @@ class ObjectAction : public ActionObject {
     protected:
         int m_nObjectUUID = 0;
         std::vector<int> m_vObjectUUIDs;
+
+        virtual CCNode* createActionCellItem(float width, float height);
 
         inline ObjectAction(int uuid) : m_nObjectUUID(uuid) {}
         inline ObjectAction(CCArray* objs) {
@@ -58,8 +61,9 @@ class AddObjectAction : public ObjectAction {
         int m_nObjectID;
 
     public:
-        inline virtual CCNode* createActionCellItem() override {
-            return CCLabelBMFont::create("Add Object", "bigFont.fnt");
+        inline virtual std::string describe() {
+            return "Create Object " + BetterEdit::formatToString(this->m_nObjectID) +
+                " at " + BetterEdit::formatToString(this->m_obPosition);
         }
 
         inline AddObjectAction(GameObject* obj) : ObjectAction(obj->m_nUniqueID) {
@@ -79,8 +83,8 @@ class AddObjectAction : public ObjectAction {
 
 class RemoveObjectAction : public ObjectAction {
     public:
-        inline virtual CCNode* createActionCellItem() override {
-            return CCLabelBMFont::create("Add Object", "bigFont.fnt");
+        inline virtual std::string describe() {
+            return "Remove Object";
         }
 
         inline RemoveObjectAction(GameObject* obj) :
@@ -95,24 +99,19 @@ class RemoveObjectAction : public ObjectAction {
 
 class MoveObjectAction : public ObjectAction {
     protected:
-        CCPoint m_obFrom;
-        CCPoint m_obTo;
+        CCPoint m_obBy;
     
     public:
-        inline virtual CCNode* createActionCellItem() override {
-            auto str = "Move Object to "_s;
-            str += std::to_string(m_obTo.x) + ", " + std::to_string(m_obTo.y);
-            str += " from ";
-            str += std::to_string(m_obFrom.x) + ", " + std::to_string(m_obFrom.y);
-
-            return CCLabelBMFont::create(str.c_str(), "bigFont.fnt");
+        inline virtual std::string describe() {
+            return "Move Object by "_s +
+                BetterEdit::formatToString(m_obBy);
         }
 
-        inline MoveObjectAction(GameObject* obj, CCPoint const& from, CCPoint const& to) :
-            ObjectAction(obj->m_nUniqueID), m_obTo(to), m_obFrom(from) {}
+        inline MoveObjectAction(GameObject* obj, CCPoint const& by) :
+            ObjectAction(obj->m_nUniqueID), m_obBy(by) {}
 
-        inline MoveObjectAction(CCArray* objs, CCPoint const& from, CCPoint const& to) :
-            ObjectAction(objs), m_obTo(to), m_obFrom(from) {}
+        inline MoveObjectAction(CCArray* objs, CCPoint const& by) :
+            ObjectAction(objs), m_obBy(by) {}
 };
 
 class ScaleObjectAction : public ObjectAction {
@@ -120,8 +119,9 @@ class ScaleObjectAction : public ObjectAction {
         float m_fScaleTo;
     
     public:
-        inline virtual CCNode* createActionCellItem() override {
-            return CCLabelBMFont::create("Scale Object", "bigFont.fnt");
+        inline virtual std::string describe() {
+            return "Scale Object to " +
+                BetterEdit::formatToString(this->m_fScaleTo);
         }
 
         inline ScaleObjectAction(GameObject* obj) :
@@ -138,8 +138,9 @@ class RotateObjectAction : public ObjectAction {
         float m_fRotateTo;
     
     public:
-        inline virtual CCNode* createActionCellItem() override {
-            return CCLabelBMFont::create("Rotate Object", "bigFont.fnt");
+        inline virtual std::string describe() {
+            return "Rotate Object to " +
+                BetterEdit::formatToString(this->m_fRotateTo);
         }
 
         inline RotateObjectAction(GameObject* obj) :
@@ -153,8 +154,8 @@ class RotateObjectAction : public ObjectAction {
 
 class SelectObjectAction : public ObjectAction {
     public:
-        inline virtual CCNode* createActionCellItem() override {
-            return CCLabelBMFont::create("Select Object", "bigFont.fnt");
+        inline virtual std::string describe() {
+            return "Select Object";
         }
 
         inline SelectObjectAction(GameObject* obj) :

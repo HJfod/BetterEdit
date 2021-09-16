@@ -6,7 +6,7 @@ ButtonGrid::~ButtonGrid() {
 }
 
 void ButtonGrid::addButton(EditorButton* b) {
-    this->m_vButtons.push_back({ b });
+    this->m_vButtons.insert({ b });
     b->retain();
 }
 
@@ -14,12 +14,12 @@ void ButtonGrid::removeButton(EditorButton* b) {
     for (auto const& v : this->m_vButtons) {
         if (v.btn == b) {
             this->m_vButtons.erase(v);
-            v->release();
+            b->release();
         }
     }
 }
 
-void ButtonGrid::moveButton(EditorButton* b, ButtonGrid::GridPosition const& p) {
+void ButtonGrid::moveButton(EditorButton* b, GridPosition const& p) {
     
 }
 
