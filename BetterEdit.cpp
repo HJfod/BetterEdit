@@ -2,6 +2,7 @@
 #include "tools/EditorLayerInput/LayerManager.hpp"
 #include "tools/AutoSave/Backup/LevelBackupManager.hpp"
 #include "tools/CustomKeybinds/KeybindManager.hpp"
+#include "tools/CustomUI/UIManager.hpp"
 
 using namespace gdmake;
 using namespace gdmake::extra;

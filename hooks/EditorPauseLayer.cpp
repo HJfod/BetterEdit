@@ -123,7 +123,7 @@ bool __fastcall EditorPauseLayer_init(
     if (!GDMAKE_ORIG(self, edx, el))
         return false;
 
-    stopCustomizingEditor();
+    UIManager::get()->stopCustomizing();
 
     auto menu = as<CCMenu*>(self->m_pButton0->getParent());
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();

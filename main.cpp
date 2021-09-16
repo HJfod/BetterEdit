@@ -23,6 +23,7 @@
 #include "tools/CustomKeybinds/SuperMouseManager.hpp"
 #include "tools/other/placeObjectsBefore.hpp"
 #include "tools/CustomUI/UIManager.hpp"
+#include "tools/History/UndoHistoryManager.hpp"
 
 GDMAKE_MAIN_HM(hMod) {
     BetterEdit::log() << "Loading BetterEdit" << log_end();
@@ -84,6 +85,10 @@ GDMAKE_MAIN_HM(hMod) {
     BetterEdit::log() << "Initializing SuperMouseManager" << log_end();
     if (!SuperMouseManager::initGlobal())
         return "Unable to initialize SuperMouseManager!";
+
+    BetterEdit::log() << "Initializing UndoHistoryManager" << log_end();
+    if (!UndoHistoryManager::initGlobal())
+        return "Unable to initialize UndoHistoryManager!";
 
     BetterEdit::log() << "Creating midhooks" << log_end();
     if (!loadUpdateVisibilityHook())

@@ -119,7 +119,7 @@ bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,
 
     g_bHoldingDownTouch = true;
     
-    if (isCustomizingEditor())
+    if (UIManager::get()->isCustomizing())
         return true;
 
     if (touchIntersectsInput(self_->getChildByTag(LAYERINPUT_TAG), touch))
@@ -164,7 +164,7 @@ GDMAKE_HOOK(0x90cd0)
 void __fastcall EditorUI_ccTouchMoved(EditorUI* self_, edx_t edx, CCTouch* touch, CCEvent* event) {
     auto self = reinterpret_cast<EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xEC);
 
-    if (isCustomizingEditor()) return;
+    if (UIManager::get()->isCustomizing()) return;
 
     float prevScale = self->m_pEditorLayer->m_pObjectLayer->getScale();
     auto swipeStart =
@@ -199,7 +199,7 @@ void __fastcall EditorUI_ccTouchEnded(
 ) {
     g_bHoldingDownTouch = false;
 
-    if (isCustomizingEditor()) return;
+    if (UIManager::get()->isCustomizing()) return;
 
     auto now = std::chrono::system_clock::now();
 

@@ -5,6 +5,7 @@
 
 KeybindManager* g_manager;
 
+keybind_id::keybind_id() { value = ""; }
 keybind_id::keybind_id(const char* val) { value = val; }
 keybind_id::keybind_id(std::string const& val) { value = val; }
 const char* keybind_id::c_str() const { return value.c_str(); }
@@ -183,7 +184,7 @@ bool KeybindCallback::operator==(KeybindCallback const& other) const {
 }
 
 void KeybindManager::encodeDataTo(DS_Dictionary* dict) {
-    BetterEdit::log() << "Saving keybinds" << log_end;
+    BetterEdit::log() << "Saving keybinds" << log_end();
 
     dict->setIntegerForKey("double-click-interval", this->m_nDoubleClickInterval);
     dict->setIntegerForKey("version", this->getVersion());
@@ -208,7 +209,7 @@ void KeybindManager::encodeDataTo(DS_Dictionary* dict) {
 }
 
 void KeybindManager::dataLoaded(DS_Dictionary* dict) {
-    BetterEdit::log() << "Loading keybinds" << log_end;
+    BetterEdit::log() << "Loading keybinds" << log_end();
     
     if (DSdictHasKey(dict, "double-click-interval"))
         this->m_nDoubleClickInterval = dict->getIntegerForKey("double-click-interval");
@@ -916,7 +917,7 @@ KeybindManager::CallbackList KeybindManager::getCallbacksForKeybind(KeybindType 
 
 void KeybindManager::invokeEditor(Target const& target, EditorUI* ui, bool keydown, bool onlyPlay) {
     if (target.bind->modifier)
-        continue;
+        return;
 
     switch (target.type) {
         case kKBEditor: {
@@ -937,7 +938,7 @@ void KeybindManager::invokeEditor(Target const& target, EditorUI* ui, bool keydo
 
 void KeybindManager::invokePlay(Target const& target, PlayLayer* pl, bool keydown) {
     if (target.bind->modifier)
-        continue;
+        return;
 
     switch (target.type) {
         case kKBPlayLayer: {
