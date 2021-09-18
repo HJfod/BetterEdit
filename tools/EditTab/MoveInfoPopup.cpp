@@ -1,10 +1,15 @@
 #include "MoveInfoPopup.hpp"
 
 CCMenuItemSpriteExtra* createBtn(
+    CCLayer* target,
     const char* spr,
     const char* sizeTxt,
-    float scale
+    float scale,
+    CCPoint const& position,
+    const char* text
 ) {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+
     auto btn = LevelEditorLayer::get()->m_pEditorUI->getSpriteButton(
         spr, nullptr, nullptr, .9f
     );
@@ -21,6 +26,15 @@ CCMenuItemSpriteExtra* createBtn(
         ->m_pSubSprite->setScale(scale);
 
     btn->getNormalImage()->setScale(.583f);
+    btn->setPosition(winSize / 2 + position);
+
+    target->addChild(btn);
+
+    auto label = CCLabelBMFont::create(text, "bigFont.fnt", 70.f, kCCTextAlignmentCenter);
+    label->setScale(.25f);
+    label->setColor({ 50, 200, 255 });
+    label->setPosition(winSize / 2 + position - CCPoint { .0f, 24.0f });
+    target->addChild(label);
 
     return btn;
 }
@@ -28,37 +42,38 @@ CCMenuItemSpriteExtra* createBtn(
 void MoveInfoPopup::setup() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
-    auto btn0 = createBtn("edit_rightBtn_001.png", nullptr, 1.f);
-    btn0->setPosition(winSize.width / 2 - 60.f, winSize.height / 2 - 30.f);
-    this->m_pLayer->addChild(btn0);
-    
-    auto btn1 = createBtn("edit_rightBtn2_001.png", nullptr, 1.f);
-    btn1->setPosition(winSize.width / 2 - 20.f, winSize.height / 2 - 30.f);
-    this->m_pLayer->addChild(btn1);
-    
-    auto btn2 = createBtn("edit_rightBtn3_001.png", nullptr, 1.f);
-    btn2->setPosition(winSize.width / 2 + 20.f, winSize.height / 2 - 30.f);
-    this->m_pLayer->addChild(btn2);
-    
-    auto btn3 = createBtn("edit_rightBtn_001.png", nullptr, .8f);
-    btn3->setPosition(winSize.width / 2 + 60.f, winSize.height / 2 - 30.f);
-    this->m_pLayer->addChild(btn3);
-    
-    auto btn4 = createBtn("edit_rightBtn2_001.png", "1/2", 1.f);
-    btn4->setPosition(winSize.width / 2 - 60.f, winSize.height / 2 + 30.f);
-    this->m_pLayer->addChild(btn4);
-    
-    auto btn5 = createBtn("edit_rightBtn2_001.png", "1/4", 1.f);
-    btn5->setPosition(winSize.width / 2 - 20.f, winSize.height / 2 + 30.f);
-    this->m_pLayer->addChild(btn5);
-    
-    auto btn6 = createBtn("edit_rightBtn2_001.png", "1/8", 1.f);
-    btn6->setPosition(winSize.width / 2 + 20.f, winSize.height / 2 + 30.f);
-    this->m_pLayer->addChild(btn6);
-    
-    auto btn7 = createBtn("edit_rightBtn_001.png", "1/2", .8f);
-    btn7->setPosition(winSize.width / 2 + 60.f, winSize.height / 2 + 30.f);
-    this->m_pLayer->addChild(btn7);
+    createBtn(
+        this->m_pLayer, "edit_rightBtn_001.png", nullptr, 1.f,
+        { -90.f, 45.f }, "1/15 block\n2 units"
+    );
+    createBtn(
+        this->m_pLayer, "edit_rightBtn2_001.png", nullptr, 1.f,
+        { - 30.f, 45.f }, "1 block\n30 units"
+    );
+    createBtn(
+        this->m_pLayer, "edit_rightBtn3_001.png", nullptr, 1.f,
+        { + 30.f, 45.f }, "5 blocks\n120 units"
+    );
+    createBtn(
+        this->m_pLayer, "edit_rightBtn_001.png", nullptr, .8f,
+        { + 90.f, 45.f }, "1/60 block\n0.5 units"
+    );
+    createBtn(
+        this->m_pLayer, "edit_rightBtn2_001.png", "1/2", 1.f,
+        { - 90.f, - 35.f }, "1/2 block\n15 units"
+    );
+    createBtn(
+        this->m_pLayer, "edit_rightBtn2_001.png", "1/4", 1.f,
+        { - 30.f, - 35.f }, "1/4 block\n7.5 units"
+    );
+    createBtn(
+        this->m_pLayer, "edit_rightBtn2_001.png", "1/8", 1.f,
+        { + 30.f, - 35.f }, "1/8 block\n3.75 units"
+    );
+    createBtn(
+        this->m_pLayer, "edit_rightBtn_001.png", "1/2", .8f,
+        { + 90.f, - 35.f }, "1/120 block\n0.25 units"
+    );
 }
 
 MoveInfoPopup* MoveInfoPopup::create() {

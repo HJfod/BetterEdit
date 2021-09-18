@@ -10,6 +10,7 @@ using namespace cocos2d;
 
 std::string g_nextFreeInput = "";
 static constexpr const int NEXTFREE_TAG = 5000;
+int g_nMixedZOrder = 0;
 
 class AddTextDelegate : public cocos2d::CCNode, public gd::TextInputDelegate {
     public:
@@ -101,12 +102,38 @@ void __fastcall SetGroupIDLayer_onEditorLayer2(SetGroupIDLayer* self, edx_t edx,
 
 GDMAKE_HOOK(0x22de80)
 void __fastcall SetGroupIDLayer_onZOrder(SetGroupIDLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
-    GDMAKE_ORIG_V(self, edx, pSender);
+    // GDMAKE_ORIG_V(self, edx, pSender);
+
+    auto add = pSender->getTag();
+    if (self->m_nZOrderValue != -1000) {
+        self->m_nZOrderValue += add;
+        if (self->m_nZOrderValue == 0)
+            self->m_nZOrderValue = add;
+        
+        if (self->m_nZOrderValue > 100)
+            self->m_nZOrderValue = 100;
+            
+        if (self->m_nZOrderValue < -100)
+            self->m_nZOrderValue = -100;
+        
+        self->m_pZOrderText->setString(
+            CCString::createWithFormat("%i", self->m_nZOrderValue)
+        );
+    } else {
+        g_nMixedZOrder += add;
+
+        if (g_nMixedZOrder)
+            self->m_pZOrderText->setString(
+                CCString::createWithFormat("Mix+%i", g_nMixedOrder)
+            );
+        else
+            self->m_pZOrderText->setString("Mixed");
+    }
 
     auto i = self->getChildByTag(71);
 
     if (i)
-        reinterpret_cast<gd::CCTextInputNode*>(i)->setString(
+        reinterpret_cast<CCTextInputNode*>(i)->setString(
             std::to_string(self->m_nZOrderValue).c_str()
         );
 }
@@ -192,8 +219,9 @@ bool __fastcall SetGroupIDLayer_initHook(
     if (!GDMAKE_ORIG(self, edx, obj, arr))
         return false;
 
-    auto nextFreeBtn = getChild<CCMenuItemSpriteExtra*>(self->m_pButtonMenu, 2);
+    g_nMixedZOrder = 0;
 
+    auto nextFreeBtn = getChild<CCMenuItemSpriteExtra*>(self->m_pButtonMenu, 2);
     nextFreeBtn->setPositionX(nextFreeBtn->getPositionX() - 20.0f);
 
     auto customNextFreeBtn = CCMenuItemSpriteExtra::create(

@@ -1,7 +1,7 @@
 {
   "ProjectName": "BetterEdit",
   "EntryPoint": null,
-  "Version": "v4.0.4-alpha",
+  "Version": "v4.1.0-alpha1",
   "ConsoleEnabled": true,
   "Compiler": 0,
   "Platform": 0,

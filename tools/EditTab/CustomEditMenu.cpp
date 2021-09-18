@@ -145,7 +145,7 @@ void CustomEditMenu::addTransformButton(
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     auto btn = this->createButton(
-        spr, nullptr, command, 1.0f, cb
+        spr, nullptr, command, 1.0f, cb, keybind
     );
     if (addToDict) {
         this->m_pUI->m_pEditButtonDict->setObject(
@@ -270,7 +270,7 @@ bool CustomEditMenu::init(EditorUI* ui) {
             (SEL_MenuHandler)&CustomEditMenu::onInfo
         ))
         .udata(1)
-        .move(this->m_obPosition.x + this->m_fWidth / 2 - 10.f, -25.f)
+        .move(this->m_obPosition.x + this->m_fWidth / 2 - 10.f, -35.f)
         .done()
     );
 
