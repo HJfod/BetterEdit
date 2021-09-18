@@ -30,6 +30,14 @@ void __fastcall dispatchKeyboardMSGHook(
     GDMAKE_ORIG_V(self, edx, key, down);
 }
 
+GDMAKE_HOOK(0x3d130)
+void __fastcall AppDelegate_applicationWillEnterForeground(CCApplication* self) {
+    GDMAKE_ORIG_V(self);
+    
+    CCDirector::sharedDirector()->getKeyboardDispatcher()
+        ->updateModifierKeys(false, false, false, false);
+}
+
 GDMAKE_HOOK(0x6ebc0)
 void __fastcall EditButtonBar_goToPage(EditButtonBar* self, edx_t edx, int page) {
     GDMAKE_ORIG_V(self, edx, page);

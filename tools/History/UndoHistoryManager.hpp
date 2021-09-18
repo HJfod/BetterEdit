@@ -15,6 +15,7 @@ class UndoHistoryManager {
         void removeAction(ActionObject* id);
 
         CCArray* getActionHistory();
+        void clearHistory();
 
         static bool initGlobal();
         static UndoHistoryManager* get();

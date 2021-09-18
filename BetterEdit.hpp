@@ -67,6 +67,8 @@ enum DebugLogType {
     __macro__(ShowKeybindOnHover, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(MoveCameraWhenMovingObjects, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)    \
     __macro__(ShownTutorial, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                 \
+    __macro__(CopyObjectsToClipboard, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
+    __macro__(EnableCustomEditMenu, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
 
 #define STEP_SUBDICT_NC(dict, key, ...)         \
     if (dict->stepIntoSubDictWithKey(key)) {    \

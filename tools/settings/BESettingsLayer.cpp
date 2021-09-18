@@ -126,11 +126,11 @@ void BESettingsLayer::setup() {
         "Use GD's original color select popup when using <co>Edit Object</c>",
         BE_SETTING_FUNC_B(DisableNewColorSelection)
     );
-    this->addToggle(
-        "Enable Up Arrow",
-        "Enables the <cr>Up</c> arrow to be used when playtesting",
-        BE_SETTING_FUNC_B(UseUpArrowForGameplay)
-    );
+    // this->addToggle(
+    //     "Enable Up Arrow",
+    //     "Enables the <cr>Up</c> arrow to be used when playtesting",
+    //     BE_SETTING_FUNC_B(UseUpArrowForGameplay)
+    // );
     this->addToggle(
         "Disable View Tab",
         "Disables the <co>View</c> tab (<cl>requires re-entering the Editor</c>)",
@@ -159,6 +159,21 @@ void BESettingsLayer::setup() {
         "When moving object(s), if they go outside the camera, the camera will "
         "reposition to show them again",
         BE_SETTING_FUNC_B(MoveCameraWhenMovingObjects)
+    );
+    this->addToggle(
+        "Copy Objects to Clipboard",
+        "When you copy objects, the object string will be copied on "
+        "your <cr>clipboard</c>, meaning you can paste it in a <cb>Discord "
+        "DM</c> for example",
+        BE_SETTING_FUNC_B(CopyObjectsToClipboard)
+    );
+    this->addToggle(
+        "Enable New Edit Menu",
+        "Enables the new Edit Menu (<cr>Disabling requires</c> "
+        "<cy>re-entering</c><cr> the editor</c>)",
+        BE_SETTING_FUNC_B(EnableCustomEditMenu),
+        false,
+        true
     );
 
     this->incrementPageCount(true);

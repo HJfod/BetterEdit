@@ -229,11 +229,10 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
     if (obj == nullptr)
         return;
     
-    CCPoint oldPos = obj->getPosition();
-
     GDMAKE_ORIG_V(self, edx, obj, pos);
 
-    UndoHistoryManager::get()->addAction(new MoveObjectAction(obj, oldPos, pos));
+    if (BetterEdit::isEditorInitialized())
+        UndoHistoryManager::get()->addAction(new MoveObjectAction(obj, pos));
 
     SoftSaveManager::save();
 

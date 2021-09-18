@@ -57,39 +57,41 @@ void loadEditorKeybindIndicators(EditorUI* ui) {
     addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pLayerPrevBtn->getParent(), 0), "gd.play.pause");
     addKeybindIndicator(ui, getChild<CCNode*>(ui->m_pLayerPrevBtn->getParent(), 1), "betteredit.open_level_settings");
     
-    auto ix = 0;
-    for (auto editKeybind : {
-        "gd.edit.move_obj_small_up",
-        "gd.edit.move_obj_small_down",
-        "gd.edit.move_obj_small_left",
-        "gd.edit.move_obj_small_right",
-        "gd.edit.move_obj_up",
-        "gd.edit.move_obj_down",
-        "gd.edit.move_obj_left",
-        "gd.edit.move_obj_right",
-        "gd.edit.flip_x",
-        "gd.edit.flip_y",
-        "gd.edit.rotate_cw",
-        "gd.edit.rotate_ccw",
-        "betteredit.rotate_45_cw",
-        "betteredit.rotate_45_ccw",
-        "gd.edit.move_obj_big_up",
-        "gd.edit.move_obj_big_down",
-        "gd.edit.move_obj_big_left",
-        "gd.edit.move_obj_big_right",
-        "gd.edit.move_obj_tiny_up",
-        "gd.edit.move_obj_tiny_down",
-        "gd.edit.move_obj_tiny_left",
-        "gd.edit.move_obj_tiny_right",
-        "gd.edit.toggle_rotate",
-        "betteredit.rotate_snap",
-        "betteredit.show_scale_control",
-    }) {
-        addKeybindIndicator(
-            ui,
-            as<CCNode*>(ui->m_pEditButtonBar->m_pButtonArray->objectAtIndex(ix++)),
-            editKeybind
-        );
+    if (!BetterEdit::getEnableCustomEditMenu()) {
+        auto ix = 0;
+        for (auto editKeybind : {
+            "gd.edit.move_obj_small_up",
+            "gd.edit.move_obj_small_down",
+            "gd.edit.move_obj_small_left",
+            "gd.edit.move_obj_small_right",
+            "gd.edit.move_obj_up",
+            "gd.edit.move_obj_down",
+            "gd.edit.move_obj_left",
+            "gd.edit.move_obj_right",
+            "gd.edit.flip_x",
+            "gd.edit.flip_y",
+            "gd.edit.rotate_cw",
+            "gd.edit.rotate_ccw",
+            "betteredit.rotate_45_cw",
+            "betteredit.rotate_45_ccw",
+            "gd.edit.move_obj_big_up",
+            "gd.edit.move_obj_big_down",
+            "gd.edit.move_obj_big_left",
+            "gd.edit.move_obj_big_right",
+            "gd.edit.move_obj_tiny_up",
+            "gd.edit.move_obj_tiny_down",
+            "gd.edit.move_obj_tiny_left",
+            "gd.edit.move_obj_tiny_right",
+            "gd.edit.toggle_rotate",
+            "betteredit.rotate_snap",
+            "betteredit.show_scale_control",
+        }) {
+            addKeybindIndicator(
+                ui,
+                as<CCNode*>(ui->m_pEditButtonBar->m_pButtonArray->objectAtIndex(ix++)),
+                editKeybind
+            );
+        }
     }
 
     updateEditorKeybindIndicators();

@@ -381,27 +381,27 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
             .save(&toggleBtn)
             .done()
     );
-    self->m_pSwipeBtn->getParent()->addChild(
-        CCNodeConstructor<CCMenuItemSpriteExtra*>()
-            .fromNode(
-                CCMenuItemSpriteExtra::create(
-                    CCNodeConstructor<ButtonSprite*>()
-                        .fromButtonSprite("Undo History", "GJ_button_01.png", "goldFont.fnt")
-                        .scale(.45f)
-                        .done(),
-                    self,
-                    (SEL_MenuHandler)&EditorUI_CB::onViewUndoHistory
-                )
-            )
-            .exec([self](auto p) -> void {
-                addKeybindIndicator(self, p, "betteredit.view_undo_history");
-            })
-            .move(
-                self->m_pPlaybackBtn->getPositionX() + 70.0f,
-                self->m_pPlaybackBtn->getPositionY()
-            )
-            .done()
-    );
+    // self->m_pSwipeBtn->getParent()->addChild(
+    //     CCNodeConstructor<CCMenuItemSpriteExtra*>()
+    //         .fromNode(
+    //             CCMenuItemSpriteExtra::create(
+    //                 CCNodeConstructor<ButtonSprite*>()
+    //                     .fromButtonSprite("Undo History", "GJ_button_01.png", "goldFont.fnt")
+    //                     .scale(.45f)
+    //                     .done(),
+    //                 self,
+    //                 (SEL_MenuHandler)&EditorUI_CB::onViewUndoHistory
+    //             )
+    //         )
+    //         .exec([self](auto p) -> void {
+    //             addKeybindIndicator(self, p, "betteredit.view_undo_history");
+    //         })
+    //         .move(
+    //             self->m_pPlaybackBtn->getPositionX() + 70.0f,
+    //             self->m_pPlaybackBtn->getPositionY()
+    //         )
+    //         .done()
+    // );
     updateToggleButtonSprite(toggleBtn);
 
     loadEditorLayerInput(self);

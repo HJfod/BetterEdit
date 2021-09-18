@@ -379,3 +379,63 @@ inline std::vector<uint8_t> intToBytes(int paramInt, bool r = true) {
     if (r) std::reverse(arrayOfByte.begin(), arrayOfByte.end());
     return arrayOfByte;
 }
+
+// from https://github.com/adafcaefc/GDClipboardFix/blob/master/GDClipboardFix/Source.cpp
+static bool copyToWin32Clipboard(std::string const& s) {
+    if (!OpenClipboard(nullptr))
+        return false;
+    if (!EmptyClipboard()) {
+        CloseClipboard();
+        return false;
+    }
+
+    HGLOBAL hg = GlobalAlloc(GMEM_MOVEABLE, s.size() + 1);
+    
+	if (!hg) {
+		CloseClipboard();
+		return false;
+	}
+
+	auto dest = GlobalLock(hg);
+
+	if (!dest) {
+		CloseClipboard();
+		return false;
+	}
+
+	memcpy(dest, s.c_str(), s.size() + 1);
+
+	GlobalUnlock(hg);
+
+	SetClipboardData(CF_TEXT, hg);
+	CloseClipboard();
+
+	GlobalFree(hg);
+
+    return true;
+}
+
+// from https://stackoverflow.com/questions/14762456/getclipboarddatacf-text
+static std::string readWin32Clipboard() {
+    if (!OpenClipboard(nullptr))
+        return "";
+    
+    HANDLE hData = GetClipboardData(CF_TEXT);
+    if (hData == nullptr) {
+        CloseClipboard();
+        return "";
+    }
+
+    char * pszText = static_cast<char*>(GlobalLock(hData));
+    if (pszText == nullptr) {
+        CloseClipboard();
+        return "";
+    }
+
+    std::string text(pszText);
+
+    GlobalUnlock(hData);
+    CloseClipboard();
+
+    return text; 
+}

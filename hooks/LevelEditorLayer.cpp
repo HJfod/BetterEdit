@@ -39,6 +39,7 @@ GDMAKE_HOOK(0x15e8d0)
 void __fastcall LevelEditorLayer_destructorHook(LevelEditorLayer* self) {
     BetterEdit::setEditorInitialized(false);
     BetterEdit::setEditorViewOnlyMode(false);
+    UndoHistoryManager::get()->clearHistory();
 
     return GDMAKE_ORIG_V(self);
 }
@@ -72,7 +73,8 @@ void __fastcall LevelEditorLayer_removeObject(
     GameObject* obj,
     bool idk
 ) {
-    UndoHistoryManager::get()->addAction(new RemoveObjectAction(obj));
+    if (BetterEdit::isEditorInitialized())
+        UndoHistoryManager::get()->addAction(new RemoveObjectAction(obj));
 
     GDMAKE_ORIG_V(self, edx, obj, idk);
 

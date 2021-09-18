@@ -955,7 +955,16 @@ void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, b
     if (!m_mKeybinds.count(bind))
         return;
 
-    for (auto & target : m_mKeybinds[bind]) {
+    auto targets = m_mKeybinds[bind];
+    if (!targets.size()) {
+        if (bind.modifiers) {
+            if (bind.key != KEY_None)
+                targets = m_mKeybinds[Keybind(bind.key, 0)];
+            else if (bind.mouse != kMouseButtonNone)
+                targets = m_mKeybinds[Keybind(bind.mouse, 0)];
+        }
+    }
+    for (auto & target : targets) {
         this->invokeEditor(target, ui, keydown, onlyPlay);
     }
 }
@@ -964,7 +973,16 @@ void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bo
     if (!m_mKeybinds.count(bind))
         return;
 
-    for (auto & target : m_mKeybinds[bind]) {
+    auto targets = m_mKeybinds[bind];
+    if (!targets.size()) {
+        if (bind.modifiers) {
+            if (bind.key != KEY_None)
+                targets = m_mKeybinds[Keybind(bind.key, 0)];
+            else if (bind.mouse != kMouseButtonNone)
+                targets = m_mKeybinds[Keybind(bind.mouse, 0)];
+        }
+    }
+    for (auto & target : targets) {
         this->invokePlay(target, pl, keydown);
     }
 }

@@ -14,6 +14,10 @@ CCArray* UndoHistoryManager::getActionHistory() {
     return this->m_pActions;
 }
 
+void UndoHistoryManager::clearHistory() {
+    this->m_pActions->removeAllObjects();
+}
+
 
 UndoHistoryManager::~UndoHistoryManager() {
     this->m_pActions->release();

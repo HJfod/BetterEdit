@@ -5,12 +5,25 @@ void UndoHistoryPopup::setup() {
     
     this->m_bNoElasticity = true;
 
-    this->m_pList = ActionListView::create(
-        UndoHistoryManager::get()->getActionHistory(),
-        280.0f, 180.0f
-    );
-    this->m_pList->setPosition(winSize / 2 - this->m_pList->getScaledContentSize() / 2);
-    this->m_pLayer->addChild(this->m_pList);
+    auto history = UndoHistoryManager::get()->getActionHistory();
+
+    if (!history->count()) {
+
+        auto label = CCLabelBMFont::create("No History Found!", "bigFont.fnt");
+        label->setScale(.6f);
+        label->setPosition(winSize / 2);
+        this->m_pLayer->addChild(label);
+
+    } else {
+
+        this->m_pList = ActionListView::create(
+            history,
+            280.0f, 180.0f
+        );
+        this->m_pList->setPosition(winSize / 2 - this->m_pList->getScaledContentSize() / 2);
+        this->m_pLayer->addChild(this->m_pList);
+
+    }
 }
 
 UndoHistoryPopup* UndoHistoryPopup::create() {

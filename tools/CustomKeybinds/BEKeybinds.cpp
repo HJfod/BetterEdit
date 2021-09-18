@@ -7,7 +7,7 @@
 #include "../RotateSaws/rotateSaws.hpp"
 #include "../VisibilityTab/loadVisibilityTab.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
-#include "../HalfMove/moveForCommand.hpp"
+#include "../EditTab/moveForCommand.hpp"
 #include "../RepeatPaste/repeatPaste.hpp"
 #include "../History/UndoHistoryPopup.hpp"
 
@@ -262,6 +262,7 @@ void loadBEKeybinds() {
         }, "editor.move"
     }, {});
 
+
     kbm->addEditorKeybind({ "Object Left Quarter", "betteredit.move_obj_quarter_left",
         [](EditorUI* ui) -> bool {
             if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
@@ -293,6 +294,73 @@ void loadBEKeybinds() {
             return false;
         }, "editor.move"
     }, {});
+
+
+    kbm->addEditorKeybind({ "Object Left Eigth", "betteredit.move_obj_eigth_left",
+        [](EditorUI* ui) -> bool {
+            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+                ui->moveObjectCall(kEditCommandEigthLeft);
+            return false;
+        }, "editor.move"
+    }, {});
+
+    kbm->addEditorKeybind({ "Object Right Eigth", "betteredit.move_obj_eigth_right",
+        [](EditorUI* ui) -> bool {
+            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+                ui->moveObjectCall(kEditCommandEigthRight);
+            return false;
+        }, "editor.move"
+    }, {});
+
+    kbm->addEditorKeybind({ "Object Up Eigth", "betteredit.move_obj_eigth_up",
+        [](EditorUI* ui) -> bool {
+            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+                ui->moveObjectCall(kEditCommandEigthUp);
+            return false;
+        }, "editor.move"
+    }, {});
+
+    kbm->addEditorKeybind({ "Object Down Eigth", "betteredit.move_obj_eigth_down",
+        [](EditorUI* ui) -> bool {
+            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+                ui->moveObjectCall(kEditCommandEigthDown);
+            return false;
+        }, "editor.move"
+    }, {});
+
+
+    kbm->addEditorKeybind({ "Object Left Half Tiny", "betteredit.move_obj_unit_left",
+        [](EditorUI* ui) -> bool {
+            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+                ui->moveObjectCall(kEditCommandQUnitLeft);
+            return false;
+        }, "editor.move"
+    }, {});
+
+    kbm->addEditorKeybind({ "Object Right Half Tiny", "betteredit.move_obj_unit_right",
+        [](EditorUI* ui) -> bool {
+            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+                ui->moveObjectCall(kEditCommandQUnitRight);
+            return false;
+        }, "editor.move"
+    }, {});
+
+    kbm->addEditorKeybind({ "Object Up Half Tiny", "betteredit.move_obj_unit_up",
+        [](EditorUI* ui) -> bool {
+            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+                ui->moveObjectCall(kEditCommandQUnitUp);
+            return false;
+        }, "editor.move"
+    }, {});
+
+    kbm->addEditorKeybind({ "Object Down Half Tiny", "betteredit.move_obj_unit_down",
+        [](EditorUI* ui) -> bool {
+            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+                ui->moveObjectCall(kEditCommandQUnitDown);
+            return false;
+        }, "editor.move"
+    }, {});
+
 
     kbm->addEditorKeybind({ "Rotate 45 CCW", "betteredit.rotate_45_ccw",
         [](EditorUI* ui) -> bool {
