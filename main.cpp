@@ -5,7 +5,6 @@
 #include "BetterEdit.hpp"
 #include "tools/Templates/templates.hpp"
 #include "tools/Favourites/favourite.hpp"
-#include "tools/ContextMenu/ContextMenu.hpp"
 #include "tools/LiveCollab/LiveManager.hpp"
 #include "tools/EditorLayerInput/LayerManager.hpp"
 #include "tools/EditorLayerInput/editorLayerInput.hpp"
@@ -105,8 +104,6 @@ GDMAKE_MAIN_HM(hMod) {
     loadFLAlertLayerFix();
     loadPlaceObjectsBefore();
 
-    ContextMenu::loadRightClick(hMod);
-
     // checkForUpdates();
 
     BetterEdit::log() << "Initializing GDMake hooks" << log_end();
@@ -116,8 +113,6 @@ GDMAKE_MAIN_HM(hMod) {
 
 GDMAKE_UNLOAD {
     BetterEdit::log() << "Unloading BetterEdit" << log_end();
-
-    ContextMenu::unloadRightClick();
 
     BetterEdit::log() << "Unpatching Addresses" << log_end();
 

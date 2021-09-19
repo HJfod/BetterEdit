@@ -34,6 +34,8 @@ void ContextPopup::show() {
 void ContextPopup::hide() {
     if (!m_bAnimationComplete) return;
 
+    this->m_bAnimationComplete = false;
+
     this->m_pBG->runAction(CCEaseSineIn::create(
         CCFadeTo::create(g_fDuration, 0)
     ));
@@ -54,11 +56,15 @@ void ContextPopup::hide() {
         ),
         nullptr
     ));
+
+    this->onHide();
 }
 
 void ContextPopup::onAnimationComplete() {
     this->m_bAnimationComplete = true;
 }
+
+void ContextPopup::onHide() {}
 
 void ContextPopup::mouseLeaveSuper(CCPoint const&) {
     // this->hide();

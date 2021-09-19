@@ -47,6 +47,7 @@ class ContextPopup :
     
     public:
         virtual void onAnimationComplete();
+        virtual void onHide();
 
         void show();
         void hide();

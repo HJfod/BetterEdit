@@ -8,8 +8,6 @@
 static constexpr const float f_96 = 96.0f;
 static constexpr const float f_0  = 0.0f;
 
-static constexpr const int VIEWBUTTONBAR_TAG = 0x234592;
-
 bool g_bHideLDM = false;
 bool g_bShowPosLine = true;
 bool g_bShowPortalLines = true;

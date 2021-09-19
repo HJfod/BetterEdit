@@ -1,22 +1,22 @@
 #pragma once
 
 #include "../../BetterEdit.hpp"
+#include "../CustomKeybinds/SuperMouseManager.hpp"
 
-class ContextMenu : public cocos2d::CCLayerColor {
+class ContextMenu : public CCLayerColor, public SuperMouseDelegate {
     protected:
-        cocos2d::ccColor4B m_colBG = { 255, 255, 255, 200 };
-        cocos2d::ccColor3B m_colText = { 0, 0, 0 };
-        cocos2d::ccColor3B m_colGray = { 150, 150, 150 };
+        ccColor4B m_colBG = { 255, 255, 255, 200 };
+        ccColor3B m_colText = { 0, 0, 0 };
+        ccColor3B m_colGray = { 150, 150, 150 };
 
         bool init() override;
+
+        void mouseDownOutsideSuper(MouseButton, CCPoint const&) override;
 
     public:
         static ContextMenu* create();
         static ContextMenu* get();
 
-        void show(cocos2d::CCPoint const& pos);
+        void show(CCPoint const& pos);
         void hide();
-
-        static void loadRightClick(HMODULE);
-        static void unloadRightClick();
 };

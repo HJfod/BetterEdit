@@ -5,6 +5,7 @@
 #include "../tools/other/teleportScaleFix.hpp"
 #include "../tools/SickAnimation/sickAnimation.hpp"
 #include "../tools/History/UndoHistoryManager.hpp"
+#include "../tools/Tutorial/tutorial.hpp"
 
 GDMAKE_HOOK(0x15ee00)
 bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameLevel* level) {
@@ -31,6 +32,9 @@ bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameL
     updatePercentLabelPosition(self->m_pEditorUI);
     doTheSickAnimation(self);
     getAutoSaveTimer(self->m_pEditorUI)->resetTimer();
+
+    if (!BetterEdit::getShownTutorial())
+        askToShowTutorial();
 
     return true;
 }

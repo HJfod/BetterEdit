@@ -3,6 +3,7 @@
 #include "../CustomKeybinds/KeybindManager.hpp"
 #include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 #include "../CustomKeybinds/SuperMouseManager.hpp"
+#include "../Tutorial/tutorial.hpp"
 
 static constexpr const int DROPPER_TAG = 0xb00b;
 bool g_bPickingColor = false;
@@ -63,6 +64,9 @@ void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwi
         BringWindowToTop(g_hwnd);
         return;
     }
+
+    if (showingTutorial())
+        return showNextTutorialPage();
 
     g_bPressedButtons[btn] = pressed;
 

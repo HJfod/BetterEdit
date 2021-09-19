@@ -25,6 +25,10 @@ void ContextMenu::hide() {
     this->setVisible(false);
 }
 
+void ContextMenu::mouseDownOutsideSuper(MouseButton, CCPoint const&) {
+    this->hide();
+}
+
 ContextMenu* ContextMenu::get() {
     if (!GameManager::sharedState()->getEditorLayer())
         return nullptr;
