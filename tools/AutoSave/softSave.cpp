@@ -247,7 +247,7 @@ void SoftSaveManager::loadObjectBinary(std::ifstream & stream) {
     }
 
     obj->m_nGameZOrder = bin_read<int>(stream);
-    obj->m_nZLayer = bin_read<int>(stream);
+    obj->m_nZLayer = bin_read<ZLayer>(stream);
     obj->m_nEditorLayer = bin_read<int>(stream);
     obj->m_nEditorLayer2 = bin_read<int>(stream);
 

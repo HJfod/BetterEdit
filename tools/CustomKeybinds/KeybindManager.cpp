@@ -331,7 +331,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Build Mode", "gd.edit.build_mode",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->toggleMode(ui->m_pBuildModeBtn);
             return false;
         }, "editor.ui", false
@@ -339,7 +339,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Edit Mode", "gd.edit.edit_mode",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->toggleMode(ui->m_pEditModeBtn);
             return false;
         }, "editor.ui", false
@@ -347,7 +347,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Delete Mode", "gd.edit.delete_mode",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->toggleMode(ui->m_pDeleteModeBtn);
             return false;
         }, "editor.ui", false
@@ -356,7 +356,7 @@ void KeybindManager::loadDefaultKeybinds() {
     this->addEditorKeybind({ "View Mode", "betteredit.view_mode",
         [](EditorUI* ui) -> bool {
             if (
-                !ui->m_pEditorLayer->m_bIsPlaybackMode &&
+                ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying &&
                 !BetterEdit::getDisableVisibilityTab()
             )
                 ui->toggleMode(ui->m_pBuildModeBtn->getParent()->getChildByTag(4));
@@ -375,7 +375,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Rotate CCW", "gd.edit.rotate_ccw",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->transformObjectCall(kEditCommandRotateCCW);
             return false;
         }, "editor.modify"
@@ -383,7 +383,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Rotate CW", "gd.edit.rotate_cw",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->transformObjectCall(kEditCommandRotateCW);
             return false;
         }, "editor.modify"
@@ -391,7 +391,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Flip X", "gd.edit.flip_x",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->transformObjectCall(kEditCommandFlipX);
             return false;
         }, "editor.modify"
@@ -399,7 +399,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Flip Y", "gd.edit.flip_y",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->transformObjectCall(kEditCommandFlipY);
             return false;
         }, "editor.modify"
@@ -407,7 +407,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Delete Selected", "gd.edit.delete_selected",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->onDeleteSelected(nullptr);
             return false;
         }, "editor.modify", false
@@ -415,7 +415,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Undo", "gd.edit.undo",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->undoLastAction(nullptr);
             return false;
         }, "editor.global"
@@ -423,7 +423,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Redo", "gd.edit.redo",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->redoLastAction(nullptr);
             return false;
         }, "editor.global"
@@ -431,7 +431,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Deselect", "gd.edit.deselect",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->deselectAll();
             return false;
         }, "editor.select", false
@@ -439,7 +439,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Copy", "gd.edit.copy",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->onCopy(nullptr);
             return false;
         }, "editor.modify", false
@@ -447,7 +447,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Cut", "gd.edit.cut",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode) {
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying) {
                 ui->onCopy(nullptr);
                 ui->onDeleteSelected(nullptr);
             }
@@ -457,7 +457,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Paste", "gd.edit.paste",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->onPaste(nullptr);
             return false;
         }, "editor.modify"
@@ -465,7 +465,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Duplicate", "gd.edit.copy_and_paste",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->onDuplicate(nullptr);
             return false;
         }, "editor.modify"
@@ -473,7 +473,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Rotate", "gd.edit.toggle_rotate",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->toggleEnableRotate(nullptr);
             return false;
         }, "editor.modify"
@@ -481,7 +481,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Free Move", "gd.edit.toggle_free_move",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->toggleFreeMove(nullptr);
             return false;
         }, "editor.modify"
@@ -489,7 +489,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Swipe", "gd.edit.toggle_swipe",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->toggleSwipe(nullptr);
             return false;
         }, "editor.modify"
@@ -497,7 +497,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Snap", "gd.edit.toggle_snap",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->toggleSnap(nullptr);
             return false;
         }, "editor.modify"
@@ -505,7 +505,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Playtest", "gd.edit.playtest",
         [](EditorUI* ui) -> bool {
-            if (ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode == kPlaybackModePlaying)
                 ui->onStopPlaytest(nullptr);
             else
                 ui->onPlaytest(nullptr);
@@ -516,7 +516,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Playback Music", "gd.edit.playback_music",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->onPlayback(nullptr);
             return false;
         }, "editor.global", false
@@ -524,7 +524,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Previous Build Tab", "gd.edit.prev_build_tab",
         [](EditorUI* ui) -> bool {
-            if (ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode == kPlaybackModePlaying)
                 return false;
             
             auto t = ui->m_nSelectedTab - 1;
@@ -537,7 +537,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Next Build Tab",  "gd.edit.next_build_tab",
         [](EditorUI* ui) -> bool {
-            if (ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode == kPlaybackModePlaying)
                 return false;
 
             auto t = ui->m_nSelectedTab + 1;
@@ -550,7 +550,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Next Group", "gd.edit.next_layer",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->onGroupUp(nullptr);
             return false;
         }, "editor.ui"
@@ -558,7 +558,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Previous Group", "gd.edit.prev_layer",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->onGroupDown(nullptr);
             return false;
         }, "editor.ui"
@@ -566,7 +566,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Scroll Up",  "gd.edit.scroll_up",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveGameLayer({ 0.0f, 10.0f });
             return false;
         }, "editor.ui"
@@ -574,7 +574,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Scroll Down", "gd.edit.scroll_down",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveGameLayer({ 0.0f, -10.0f });
             return false;
         }, "editor.ui"
@@ -596,7 +596,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Left", "gd.edit.move_obj_left",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandLeft);
             return false;
         }, "editor.move"
@@ -604,7 +604,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Right", "gd.edit.move_obj_right",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandRight);
             return false;
         }, "editor.move"
@@ -612,7 +612,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Up", "gd.edit.move_obj_up",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandUp);
             return false;
         }, "editor.move"
@@ -620,7 +620,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Down", "gd.edit.move_obj_down",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandDown);
             return false;
         }, "editor.move"
@@ -628,7 +628,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Left Small", "gd.edit.move_obj_small_left",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandSmallLeft);
             return false;
         }, "editor.move"
@@ -636,7 +636,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Right Small", "gd.edit.move_obj_small_right",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandSmallRight);
             return false;
         }, "editor.move"
@@ -644,7 +644,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Up Small", "gd.edit.move_obj_small_up",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandSmallUp);
             return false;
         }, "editor.move"
@@ -652,7 +652,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Down Small", "gd.edit.move_obj_small_down",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandSmallDown);
             return false;
         }, "editor.move"
@@ -660,7 +660,7 @@ void KeybindManager::loadDefaultKeybinds() {
     
     this->addEditorKeybind({ "Object Left Tiny", "gd.edit.move_obj_tiny_left",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandTinyLeft);
             return false;
         }, "editor.move"
@@ -668,7 +668,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Right Tiny", "gd.edit.move_obj_tiny_right",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandTinyRight);
             return false;
         }, "editor.move"
@@ -676,7 +676,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Up Tiny", "gd.edit.move_obj_tiny_up",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandTinyUp);
             return false;
         }, "editor.move"
@@ -684,7 +684,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Down Tiny", "gd.edit.move_obj_tiny_down",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandTinyDown);
             return false;
         }, "editor.move"
@@ -692,7 +692,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Left Big", "gd.edit.move_obj_big_left",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandBigLeft);
             return false;
         }, "editor.move"
@@ -700,7 +700,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Right Big", "gd.edit.move_obj_big_right",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandBigRight);
             return false;
         }, "editor.move"
@@ -708,7 +708,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Up Big", "gd.edit.move_obj_big_up",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandBigUp);
             return false;
         }, "editor.move"
@@ -716,7 +716,7 @@ void KeybindManager::loadDefaultKeybinds() {
 
     this->addEditorKeybind({ "Object Down Big", "gd.edit.move_obj_big_down",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandBigDown);
             return false;
         }, "editor.move"

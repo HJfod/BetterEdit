@@ -50,9 +50,13 @@ std::string* __fastcall LevelEditorLayer_getLevelString(
 
 GDMAKE_HOOK(0x75010)
 void __fastcall EditorPauseLayer_saveLevel(EditorPauseLayer* self) {
-    stopRotations(self->m_pEditorLayer);
+    if (shouldRotateSaw())
+        stopRotations(self->m_pEditorLayer);
 
     GDMAKE_ORIG_V(self);
+    
+    if (shouldRotateSaw())
+        beginRotations(self->m_pEditorLayer);
 
     SoftSaveManager::clear();
     LevelBackupManager::get()->handleAutoBackupForLevel(

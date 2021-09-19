@@ -52,7 +52,7 @@ GDMAKE_MAIN_HM(hMod) {
 
     // thanks to adaf
     // this enables pulses in FMODAudioEngine in every layer, instead of just in PlayLayer
-    patchBytes(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+    patch(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 
     BetterEdit::log() << "Initializing UIManager" << log_end();
     if (!UIManager::initGlobal())

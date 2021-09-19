@@ -15,7 +15,10 @@ class EditorUI_Timer : public EditorUI {
                     return;
                 }
 
-                if (timer->paused())
+                if (
+                    timer->paused() ||
+                    this->m_pEditorLayer->m_ePlaybackMode != kPlaybackModeNot
+                )
                     return;
                 
                 timer->incrementTimer();

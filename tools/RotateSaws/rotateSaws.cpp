@@ -108,17 +108,21 @@ void pauseRotations(LevelEditorLayer* self) {
 
 GDMAKE_HOOK(0x2441a0)
 void __fastcall SetupRotatePopup_keyBackClicked(CCLayer* self) {
-    stopRotations(LevelEditorLayer::get());
-    beginRotations(LevelEditorLayer::get());
+    if (shouldRotateSaw()) {
+        stopRotations(LevelEditorLayer::get());
+        beginRotations(LevelEditorLayer::get());
+    }
     
     GDMAKE_ORIG_V(self);
 }
 
 GDMAKE_HOOK(0x244150)
 void __fastcall SetupRotatePopup_onClose(CCLayer* self, edx_t edx, CCObject* pSender) {
-    stopRotations(LevelEditorLayer::get());
-    beginRotations(LevelEditorLayer::get());
-    
+    if (shouldRotateSaw()) {
+        stopRotations(LevelEditorLayer::get());
+        beginRotations(LevelEditorLayer::get());
+    }
+
     GDMAKE_ORIG_V(self, edx, pSender);
 }
 
@@ -126,7 +130,7 @@ GDMAKE_HOOK(0x1695a0)
 void __fastcall LevelEditorLayer_onPlaytest(LevelEditorLayer* self) {
     GDMAKE_ORIG_V(self);
 
-    if (BetterEdit::getRotateSawsInEditor())
+    if (BetterEdit::getRotateSawsInEditor() && !shouldRotateSaw())
         beginRotations(self);
         
     updateEditorKeybindIndicators();
@@ -136,7 +140,7 @@ GDMAKE_HOOK(0x169d90)
 void __fastcall LevelEditorLayer_onResumePlaytest(LevelEditorLayer* self) {
     GDMAKE_ORIG_V(self);
 
-    if (BetterEdit::getRotateSawsInEditor())
+    if (BetterEdit::getRotateSawsInEditor() && !shouldRotateSaw())
         resumeRotations(self);
         
     updateEditorKeybindIndicators();
@@ -146,7 +150,7 @@ GDMAKE_HOOK(0x169cc0)
 void __fastcall LevelEditorLayer_onPausePlaytest(LevelEditorLayer* self) {
     GDMAKE_ORIG_V(self);
 
-    if (BetterEdit::getRotateSawsInEditor())
+    if (BetterEdit::getRotateSawsInEditor() && !shouldRotateSaw())
         pauseRotations(self);
         
     updateEditorKeybindIndicators();
@@ -156,7 +160,7 @@ GDMAKE_HOOK(0x169f10)
 void __fastcall LevelEditorLayer_onStopPlaytest(LevelEditorLayer* self) {
     GDMAKE_ORIG_V(self);
 
-    if (BetterEdit::getRotateSawsInEditor())
+    if (BetterEdit::getRotateSawsInEditor() && !shouldRotateSaw())
         stopRotations(self);
         
     updateEditorKeybindIndicators();

@@ -232,7 +232,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Left Half", "betteredit.move_obj_half_left",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandHalfLeft);
             return false;
         }, "editor.move"
@@ -240,7 +240,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Right Half", "betteredit.move_obj_half_right",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandHalfRight);
             return false;
         }, "editor.move"
@@ -248,7 +248,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Up Half", "betteredit.move_obj_half_up",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandHalfUp);
             return false;
         }, "editor.move"
@@ -256,7 +256,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Down Half", "betteredit.move_obj_half_down",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandHalfDown);
             return false;
         }, "editor.move"
@@ -265,7 +265,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Left Quarter", "betteredit.move_obj_quarter_left",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandQuarterLeft);
             return false;
         }, "editor.move"
@@ -273,7 +273,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Right Quarter", "betteredit.move_obj_quarter_right",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandQuarterRight);
             return false;
         }, "editor.move"
@@ -281,7 +281,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Up Quarter", "betteredit.move_obj_quarter_up",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandQuarterUp);
             return false;
         }, "editor.move"
@@ -289,7 +289,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Down Quarter", "betteredit.move_obj_quarter_down",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandQuarterDown);
             return false;
         }, "editor.move"
@@ -298,7 +298,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Left Eigth", "betteredit.move_obj_eigth_left",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandEigthLeft);
             return false;
         }, "editor.move"
@@ -306,7 +306,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Right Eigth", "betteredit.move_obj_eigth_right",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandEigthRight);
             return false;
         }, "editor.move"
@@ -314,7 +314,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Up Eigth", "betteredit.move_obj_eigth_up",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandEigthUp);
             return false;
         }, "editor.move"
@@ -322,7 +322,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Down Eigth", "betteredit.move_obj_eigth_down",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandEigthDown);
             return false;
         }, "editor.move"
@@ -331,7 +331,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Left Half Tiny", "betteredit.move_obj_unit_left",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandQUnitLeft);
             return false;
         }, "editor.move"
@@ -339,7 +339,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Right Half Tiny", "betteredit.move_obj_unit_right",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandQUnitRight);
             return false;
         }, "editor.move"
@@ -347,7 +347,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Up Half Tiny", "betteredit.move_obj_unit_up",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandQUnitUp);
             return false;
         }, "editor.move"
@@ -355,7 +355,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Object Down Half Tiny", "betteredit.move_obj_unit_down",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->moveObjectCall(kEditCommandQUnitDown);
             return false;
         }, "editor.move"
@@ -432,7 +432,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Select All", "betteredit.select_all",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->selectAll();
             return false;
         }, "editor.select", false
@@ -440,7 +440,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Select All Left", "betteredit.select_all_left",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->selectAllWithDirection(false);
             return false;
         }, "editor.select", false
@@ -448,7 +448,7 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "Select All Right", "betteredit.select_all_right",
         [](EditorUI* ui) -> bool {
-            if (!ui->m_pEditorLayer->m_bIsPlaybackMode)
+            if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->selectAllWithDirection(true);
             return false;
         }, "editor.select", false

@@ -159,7 +159,7 @@ bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,
     bool move = KeybindManager::get()->isModifierPressed("gd.edit.move_modifier");
     
     self_->m_bSpaceKeyPressed = move;
-    if (!self_->m_pEditorLayer->m_bIsPlaybackMode)
+    if (self_->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
         self_->m_bMoveModifier = move;
 
     return GDMAKE_ORIG(self, edx, touch, event);
@@ -211,7 +211,7 @@ void __fastcall EditorUI_ccTouchEnded(
     auto self_ = as<EditorUI*>(as<uintptr_t>(self) - 0xEC);
     if (
         !BetterEdit::getDisableDoubleClick() &&
-        !self_->m_pEditorLayer->m_bIsPlaybackMode &&
+        self_->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying &&
         std::chrono::duration_cast<std::chrono::milliseconds>(
             now - g_lastTouchTime
         ).count() < KeybindManager::get()->getDoubleClickInterval()
@@ -282,7 +282,7 @@ public:
         auto volume = FMODAudioEngine::sharedEngine()->m_fBackgroundMusicVolume;
         if (
             (*reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(this) + 0x130)
-            || m_pEditorLayer->m_bIsPlaybackMode) &&
+            || m_pEditorLayer->m_ePlaybackMode == kPlaybackModePlaying) &&
             volume &&
             BetterEdit::getPulseObjectsInEditor()
         ) {

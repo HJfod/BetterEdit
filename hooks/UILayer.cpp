@@ -32,7 +32,7 @@ bool __fastcall UILayer_init(UILayer* self) {
     auto btnZ = getChild<CCMenuItemSpriteExtra*>(self->m_pCheckPointMenu, 0);
     if (!btnZ)
         return true;
-
+    
     auto zLabel = getChild<CCLabelBMFont*>(btnZ->getNormalImage(), 0);
     if (!zLabel)
         return true;
