@@ -10,6 +10,7 @@
 #include "../EditTab/moveForCommand.hpp"
 #include "../RepeatPaste/repeatPaste.hpp"
 #include "../History/UndoHistoryPopup.hpp"
+#include "../ContextMenu/ContextMenu.hpp"
 
 static constexpr const float w_edge = 120.0f;
 
@@ -733,4 +734,11 @@ void loadBEKeybinds() {
             return false;
         }, "editor.modify", false
     }, {});
+
+    kbm->addEditorKeybind({ "Context Menu", "betteredit.show_context_menu",
+        [](EditorUI* ui) -> bool {
+            ContextMenu::get()->show();
+            return true;
+        }, "editor.global", false
+    }, {{ kMouseButtonRight, 0 }});
 }

@@ -5,6 +5,89 @@
 static int g_nPage = 0;
 bool g_bShowing = false;
 
+bool operator==(CCPoint const& s1, CCPoint const& s2) {
+    return s1.x == s2.x && s1.y == s2.y;
+}
+
+bool operator==(CCRect const& r1, CCRect const& r2) {
+    return r1.origin == r2.origin && r1.size == r2.size;
+}
+
+class DarkOverlay : public CCNode {
+    protected:
+        CCRect m_obArea;
+
+        void draw() override {
+            auto winSize = CCDirector::sharedDirector()->getWinSize();
+            ccDrawSolidRect(
+                { 0, winSize.height },
+                {
+                    winSize.width,
+                    this->m_obArea.origin.y +
+                    this->m_obArea.size.height
+                },
+                { 0, 0, 0, .8f }
+            );
+            ccDrawSolidRect(
+                { 0, this->m_obArea.origin.y },
+                {
+                    this->m_obArea.origin.x,
+                    this->m_obArea.origin.y +
+                    this->m_obArea.size.height
+                },
+                { 0, 0, 0, .8f }
+            );
+            ccDrawSolidRect(
+                {
+                    this->m_obArea.origin.x +
+                    this->m_obArea.size.width,
+                    this->m_obArea.origin.y
+                },
+                {
+                    winSize.width,
+                    this->m_obArea.origin.y +
+                    this->m_obArea.size.height
+                },
+                { 0, 0, 0, .8f }
+            );
+            ccDrawSolidRect(
+                { 0, 0 },
+                {
+                    winSize.width,
+                    this->m_obArea.origin.y
+                },
+                { 0, 0, 0, .8f }
+            );
+        }
+
+        bool init(CCRect const& area) {
+            if (!CCNode::init())
+                return false;
+            
+            this->m_obArea = area;
+            this->setZOrder(105);
+
+            return true;
+        }
+    
+    public:
+        void setArea(CCRect const& rect) {
+            this->m_obArea = rect;
+        }
+
+        static DarkOverlay* create(CCRect const& area) {
+            auto ret = new DarkOverlay;
+
+            if (ret && ret->init(area)) {
+                ret->autorelease();
+                return ret;
+            }
+
+            CC_SAFE_DELETE(ret);
+            return nullptr;
+        }
+};
+
 enum PageType {
     kPageTypeArrow,
     kPageTypeAlert
@@ -19,6 +102,7 @@ struct TutorialPage {
     CCSize size;
     ContextPopupDirection dir;
     const char* alertTitle;
+    CCRect highlightArea = CCRectZero;
 };
 
 class TutorialPopup : public ContextPopup {
@@ -50,7 +134,9 @@ class TutorialPopup : public ContextPopup {
                 (ret->m_pPage = page) &&
                 ret->init(
                     page->targetNode ?
-                    page->targetNode->getParent()->convertToWorldSpace(page->targetNode->getPosition()) :
+                    page->targetNode->getParent()->convertToWorldSpace(
+                        page->targetNode->getPosition()
+                    ) + page->targetPos :
                     page->targetPos,
                     page->size,
                     page->dir,
@@ -68,30 +154,35 @@ class TutorialPopup : public ContextPopup {
 
 TutorialPopup* g_pLastPopup = nullptr;
 FLAlertLayer* g_pLastAlert = nullptr;
+DarkOverlay* g_pOverlay = nullptr;
 
 std::vector<std::function<TutorialPage()>> g_vPages {
     []() -> TutorialPage {
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
+        auto ui = LevelEditorLayer::get()->getEditorUI();
         return {
             kPageTypeArrow,
-            nullptr,
-            { CCDirector::sharedDirector()->getWinSize().width / 2, 80.0f },
-            as<CCMenuItem*>(LevelEditorLayer::get()->getEditorUI()->m_pBuildModeBtn->getParent()->getChildByTag(4)),
+            ui->getChildByTag(VIEWBUTTONBAR_TAG),
+            { winSize.width / 2, 80.0f },
+            as<CCMenuItem*>(ui->m_pBuildModeBtn->getParent()->getChildByTag(4)),
             "This is the <cr>view tab</c>. Here you can quickly toggle on/off visual "
             "elements, such as <cy>Preview Mode</c>, <cb>Grid</c> & <cg>Sawblade Rotation</c>.",
             { 150.0f, 100.0f },
-            kContextPopupDirectionDown
+            kContextPopupDirectionDown,
+            nullptr,
+            { 5.f, 5.f, winSize.width - 110.f, 80.0f }
         };
     },
 };
 
 class TutorialAlertDelegate : public FLAlertLayerProtocol {
     void FLAlert_Clicked(FLAlertLayer*, bool btn2) override {
-        if (btn2)
+        if (btn2) {
             showNextTutorialPage();
+            g_bShowing = true;
+        }
 
         // BetterEdit::setShownTutorial(true);
-        
-        g_bShowing = true;
         
         delete this;
     }
@@ -126,6 +217,10 @@ void showNextTutorialPage() {
     
     if (static_cast<int>(g_vPages.size()) <= g_nPage) {
         g_bShowing = false;
+        if (g_pOverlay) {
+            g_pOverlay->removeFromParent();
+            g_pOverlay = nullptr;
+        }
         return;
     }
 
@@ -133,6 +228,32 @@ void showNextTutorialPage() {
 
     if (page.clickNode)
         page.clickNode->activate();
+    
+    CCRect hlSize;
+    
+    if (page.targetNode && page.highlightArea == CCRectZero) {
+        auto size = page.targetNode->getScaledContentSize();
+        hlSize = {
+            page.targetNode->getPositionX() - size.width / 2,
+            page.targetNode->getPositionY() - size.height / 2,
+            size.width,
+            size.height
+        };
+    } else {
+        hlSize = {
+            page.highlightArea.origin.x,
+            page.highlightArea.origin.y,
+            page.highlightArea.size.width,
+            page.highlightArea.size.height
+        };
+    }
+
+    if (!g_pOverlay) {
+        g_pOverlay = DarkOverlay::create(hlSize);
+        LevelEditorLayer::get()->addChild(g_pOverlay);
+    } else {
+        g_pOverlay->setArea(hlSize);
+    }
     
     if (page.type == kPageTypeAlert) {
         auto popup = FLAlertLayer::create(

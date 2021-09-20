@@ -10,6 +10,7 @@ class SuperMouseDelegate {
         CCPoint m_obSuperMouseHitOffset = CCPointZero;
         CCSize m_obSuperMouseHitSize = CCSizeZero;
         bool m_bSuperMouseHovered = false;
+        bool m_bSuperMouseDown = false;
 
         SuperMouseDelegate();
         ~SuperMouseDelegate();
@@ -33,6 +34,7 @@ class SuperMouseManager {
     protected:
         std::vector<SuperMouseDelegate*> m_vDelegates;
         CCPoint m_obLastPosition;
+        SuperMouseDelegate* m_pCapturing = nullptr;
 
         bool init();
 
@@ -44,6 +46,9 @@ class SuperMouseManager {
 
         void pushDelegate(SuperMouseDelegate*);
         void popDelegate(SuperMouseDelegate*);
+
+        void captureMouse(SuperMouseDelegate*);
+        void releaseCapture(SuperMouseDelegate*);
 
         bool dispatchClickEvent(MouseButton, bool, CCPoint const&);
         void dispatchMoveEvent(CCPoint const&);

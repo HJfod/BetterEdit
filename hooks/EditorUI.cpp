@@ -14,6 +14,7 @@
 #include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
 #include "../tools/CustomUI/customUI.hpp"
 #include "../tools/History/UndoHistoryPopup.hpp"
+#include "../tools/ContextMenu/loadContextMenu.hpp"
 #include "EditorPauseLayer.hpp"
 #include "EditorUI.hpp"
 #include <thread>
@@ -447,6 +448,8 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
 
     g_hasResetObjectsScale = true;
     self->schedule(schedule_selector(EditorUIPulse::updateObjectsPulse));
+
+    loadContextMenu();
 
     return true;
 }

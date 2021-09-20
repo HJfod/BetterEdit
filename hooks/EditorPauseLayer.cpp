@@ -42,6 +42,15 @@ void EditorPauseLayer_CB::onRotateSaws(CCObject* pSender) {
         stopRotations(LevelEditorLayer::get());
 }
 
+int countLDMObjects(LevelEditorLayer* lel) {
+    int count = 0;
+    CCARRAY_FOREACH_B_TYPE(lel->getAllObjects(), obj, GameObject) {
+        if (obj->m_bHighDetail)
+            count++;
+    }
+    return count;
+}
+
 GDMAKE_HOOK(0x758d0)
 void __fastcall EditorPauseLayer_keyDown(EditorPauseLayer* self, edx_t edx, enumKeyCodes key) {
     if (key == KEY_Escape)
@@ -186,6 +195,20 @@ bool __fastcall EditorPauseLayer_init(
         },
         { 8.0f, 0.0f }
     );
+
+    auto objCountLabel = getChild<CCLabelBMFont*>(self, 9);
+
+    if (objCountLabel) {
+        std::string str = objCountLabel->getString();
+        int c = countLDMObjects(self->m_pEditorLayer);
+        float p = static_cast<float>(c) /
+            self->m_pEditorLayer->getAllObjects()->count() *
+            100.f;
+        p = roundf(p);
+        str += " | " + std::to_string(c) + " LDM (" +
+            BetterEdit::formatToString(p) + "%)";
+        objCountLabel->setString(str.c_str());
+    }
 
     if (isPickingEyeDropperColor()) {
         FLAlertLayer::create(

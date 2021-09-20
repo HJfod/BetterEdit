@@ -93,36 +93,46 @@ bool SuperMouseManager::delegateIsHovered(SuperMouseDelegate* delegate, CCPoint 
 }
 
 bool SuperMouseManager::dispatchClickEvent(MouseButton btn, bool down, CCPoint const& pos) {
-    auto ret = false;
+    if (m_pCapturing) {
+        m_pCapturing->m_bSuperMouseDown = down;
+        return m_pCapturing->mouseDownSuper(btn, pos);
+    }
     for (auto const& d : m_vDelegates) {
+        if (!down) d->m_bSuperMouseDown = false;
         if (delegateIsHovered(d, pos)) {
             if (down) {
+                d->m_bSuperMouseDown = true;
                 if (d->mouseDownSuper(btn, pos))
-                    ret = true;
+                    return true;
             } else {
                 if (d->mouseUpSuper(btn, pos))
-                    ret = true;
+                    return true;
             }
         } else {
             d->mouseDownOutsideSuper(btn, pos);
         }
     }
-    return ret;
+    return false;
 }
 
 bool SuperMouseManager::dispatchScrollEvent(float y, float x, CCPoint const& pos) {
-    auto ret = false;
+    if (m_pCapturing) {
+        return m_pCapturing->mouseScrollSuper(y, x);
+    }
     for (auto const& d : m_vDelegates) {
         if (delegateIsHovered(d, pos)) {
             if (d->mouseScrollSuper(y, x))
-                ret = true;
+                return true;
         } else
             d->mouseScrollOutsideSuper(y, x);
     }
-    return ret;
+    return false;
 }
 
 void SuperMouseManager::dispatchMoveEvent(CCPoint const& pos) {
+    if (m_pCapturing) {
+        return m_pCapturing->mouseMoveSuper(pos);
+    }
     if (this->m_obLastPosition != pos) {
         for (auto const& d : m_vDelegates) {
             auto hover = this->delegateIsHovered(d, pos);
@@ -144,4 +154,14 @@ void SuperMouseManager::dispatchMoveEvent(CCPoint const& pos) {
     }
 
     this->m_obLastPosition = pos;
+}
+
+void SuperMouseManager::captureMouse(SuperMouseDelegate* delegate) {
+    if (!m_pCapturing)
+        m_pCapturing = delegate;
+}
+
+void SuperMouseManager::releaseCapture(SuperMouseDelegate* delegate) {
+    if (m_pCapturing == delegate)
+        m_pCapturing = nullptr;
 }
