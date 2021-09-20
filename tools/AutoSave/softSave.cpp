@@ -155,8 +155,7 @@ void SoftSaveManager::saveObjectBinary(std::ofstream & stream, GameObject* obj) 
         bin_write(stream, eobj->m_bPlayerColor1);
         bin_write(stream, eobj->m_bPlayerColor2);
         bin_write(stream, eobj->m_bBlending);
-        bin_write(stream, eobj->m_fMoveX);
-        bin_write(stream, eobj->m_fMoveY);
+        bin_write(stream, eobj->m_obMove);
         bin_write(stream, eobj->m_nEasingType);
         bin_write(stream, eobj->m_fEasingRate);
         bin_write(stream, eobj->m_bLockToPlayerX);
@@ -166,8 +165,7 @@ void SoftSaveManager::saveObjectBinary(std::ofstream & stream, GameObject* obj) 
         bin_write(stream, eobj->m_nRotateDegrees);
         bin_write(stream, eobj->m_nTimes360);
         bin_write(stream, eobj->m_bLockObjectRotation);
-        bin_write(stream, eobj->m_fFollowXMod);
-        bin_write(stream, eobj->m_fFollowYMod);
+        bin_write(stream, eobj->m_obFollowMod);
         bin_write(stream, eobj->m_fFollowYSpeed);
         bin_write(stream, eobj->m_fFollowYDelay);
         bin_write(stream, eobj->m_nFollowYOffset);
@@ -263,8 +261,7 @@ void SoftSaveManager::loadObjectBinary(std::ifstream & stream) {
         M_BIN_READ(stream, eobj->m_bPlayerColor1);
         M_BIN_READ(stream, eobj->m_bPlayerColor2);
         M_BIN_READ(stream, eobj->m_bBlending);
-        M_BIN_READ(stream, eobj->m_fMoveX);
-        M_BIN_READ(stream, eobj->m_fMoveY);
+        M_BIN_READ(stream, eobj->m_obMove);
         M_BIN_READ(stream, eobj->m_nEasingType);
         M_BIN_READ(stream, eobj->m_fEasingRate);
         M_BIN_READ(stream, eobj->m_bLockToPlayerX);
@@ -274,8 +271,7 @@ void SoftSaveManager::loadObjectBinary(std::ifstream & stream) {
         M_BIN_READ(stream, eobj->m_nRotateDegrees);
         M_BIN_READ(stream, eobj->m_nTimes360);
         M_BIN_READ(stream, eobj->m_bLockObjectRotation);
-        M_BIN_READ(stream, eobj->m_fFollowXMod);
-        M_BIN_READ(stream, eobj->m_fFollowYMod);
+        M_BIN_READ(stream, eobj->m_obFollowMod);
         M_BIN_READ(stream, eobj->m_fFollowYSpeed);
         M_BIN_READ(stream, eobj->m_fFollowYDelay);
         M_BIN_READ(stream, eobj->m_nFollowYOffset);
