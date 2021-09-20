@@ -4,12 +4,17 @@
 #include "../CustomKeybinds/SuperMouseManager.hpp"
 #include "../CustomKeybinds/KeybindManager.hpp"
 
+class ContextMenu;
+
 class ContextMenuItem :
     public CCNode,
     public SuperMouseDelegate
 {
     protected:
         CCPoint m_obLastMousePos;
+        ContextMenu* m_pMenu;
+        
+        friend class ContextMenu;
 
         bool init();
         void draw() override;
@@ -20,14 +25,33 @@ class ContextMenuItem :
         virtual void drag(float);
 };
 
+class SpecialContextMenuItem : public ContextMenuItem {
+    public:
+        using Callback = std::function<void(SpecialContextMenuItem*)>;
+
+    protected:
+        CCSprite* m_pSprite;
+        Callback m_pCallback;
+        CCLabelTTF* m_pLabel;
+
+        bool init(const char*, const char*, Callback);
+        void activate() override;
+        void visit() override;
+
+    public:
+        static SpecialContextMenuItem* create(
+            const char* spr, const char* txt, Callback
+        );
+};
+
 class KeybindContextMenuItem : public ContextMenuItem {
     protected:
         keybind_id m_sID;
-        CCLabelBMFont* m_pLabel;
+        KeybindCallback* m_pCallback;
+        CCLabelTTF* m_pLabel;
 
         bool init(keybind_id const&);
         void activate() override;
-
         void visit() override;
     
     public:

@@ -19,10 +19,10 @@ ccColor3B to3B(ccColor4B const& c) {
 
 constexpr const int CMENU_TAG = 600;
 
-ccColor4B g_colBG = { 255, 255, 255, 255 };
-ccColor4B g_colText = { 0, 0, 0, 255 };
+ccColor4B g_colBG = { 0, 0, 0, 200 };
+ccColor4B g_colText = { 255, 255, 255, 255 };
 ccColor4B g_colGray = { 150, 150, 150, 255 };
-ccColor4B g_colHover = { 0, 0, 0, 50 };
+ccColor4B g_colHover = { 255, 255, 255, 50 };
 ccColor4B g_colTransparent = { 0, 0, 0, 0 };
 
 bool ContextMenuItem::init() {
@@ -40,6 +40,9 @@ void ContextMenuItem::draw() {
         this->getScaledContentSize(),
         to4f(this->m_bSuperMouseHovered ? g_colHover : g_colTransparent)
     );
+
+    this->setSuperMouseHitSize(this->getScaledContentSize());
+    this->setSuperMouseHitOffset(this->getScaledContentSize() / 2);
 }
 
 bool ContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& mpos) {
@@ -75,11 +78,13 @@ bool KeybindContextMenuItem::init(keybind_id const& id) {
     
     this->m_sID = id;
 
-    this->m_pLabel = CCLabelBMFont::create("", "chatFont.fnt");
+    this->m_pLabel = CCLabelTTF::create("", "Segoe UI", 16);
     this->m_pLabel->setColor(to3B(g_colText));
     this->addChild(this->m_pLabel);
 
     auto target = KeybindManager::get()->getTargetByID(id);
+
+    this->m_pCallback = target.bind;
 
     if (target.bind)
         this->m_pLabel->setString(target.bind->name.c_str());
@@ -90,25 +95,92 @@ bool KeybindContextMenuItem::init(keybind_id const& id) {
 }
 
 void KeybindContextMenuItem::visit() {
-    ContextMenuItem::visit();
-
     this->m_pLabel->setPosition(
         this->getContentSize() / 2
     );
-    this->m_pLabel->limitLabelWidth(
-        this->getScaledContentSize().width -10.0f, .5f, .0f
-    );
-    this->setSuperMouseHitOffset(this->getScaledContentSize() / 2);
+    this->m_pLabel->setScale(.3f);
+    this->m_pLabel->setScale(min(
+        1.0f,
+        (this->getScaledContentSize().width - 10.0f) /
+        this->m_pLabel->getScaledContentSize().width
+    ) * .3f);
+    // this->m_pLabel->limitLabelWidth(
+    //     this->getScaledContentSize().width -10.0f, .4f, .0f
+    // );
+
+    ContextMenuItem::visit();
 }
 
 void KeybindContextMenuItem::activate() {
-
+    KeybindManager::get()->invokeCallback(
+        this->m_sID, LevelEditorLayer::get()->getEditorUI(), nullptr
+    );
+    SuperMouseManager::get()->releaseCapture(this);
+    if (this->m_pMenu)
+        this->m_pMenu->hide();
 }
 
 KeybindContextMenuItem* KeybindContextMenuItem::create(keybind_id const& id) {
     auto ret = new KeybindContextMenuItem;
 
     if (ret && ret->init(id)) {
+        ret->autorelease();
+        return ret;
+    }
+
+    CC_SAFE_DELETE(ret);
+    return nullptr;
+}
+
+
+bool SpecialContextMenuItem::init(
+    const char* spr, const char* txt, SpecialContextMenuItem::Callback cb
+) {
+    if (!ContextMenuItem::init())
+        return false;
+    
+    this->m_pSprite = CCSprite::createWithSpriteFrameName(spr);
+    this->addChild(this->m_pSprite);
+
+    this->m_pLabel = CCLabelTTF::create(txt, "Segoe UI", 16);
+    this->m_pLabel->setColor(to3B(g_colText));
+    this->addChild(this->m_pLabel);
+
+    this->m_pCallback = cb;
+
+    return true;
+}
+
+void SpecialContextMenuItem::visit() {
+    this->m_pLabel->setScale(.3f);
+    this->m_pLabel->setPosition({
+        this->getContentSize().width / 2 + 20.0f,
+        this->getContentSize().height / 2
+    });
+
+    this->m_pSprite->setPosition({
+        this->getContentSize().width / 2 - 
+            this->m_pLabel->getScaledContentSize().width / 2,
+        this->getContentSize().height / 2
+    });
+    this->m_pSprite->setScale(.2f);
+
+    ContextMenuItem::visit();
+}
+
+void SpecialContextMenuItem::activate() {
+    this->m_pCallback(this);
+    SuperMouseManager::get()->releaseCapture(this);
+    if (this->m_pMenu)
+        this->m_pMenu->hide();
+}
+
+SpecialContextMenuItem* SpecialContextMenuItem::create(
+    const char* spr, const char* txt, SpecialContextMenuItem::Callback cb
+) {
+    auto ret = new SpecialContextMenuItem;
+
+    if (ret && ret->init(spr, txt, cb)) {
         ret->autorelease();
         return ret;
     }
@@ -177,18 +249,28 @@ bool ContextMenu::init() {
     
     this->setTag(CMENU_TAG);
     this->setZOrder(5000);
-    this->setSuperMouseHitOffset(this->getScaledContentSize() / 2);
     this->m_pEditor = LevelEditorLayer::get();
 
     this->m_mConfig = {
         { kStateNoneSelected, {
-            { "gd.edit.paste", "betteredit.select_all" },
-            { "betteredit.toggle_ui" }
+            { 
+              "betteredit.select_all_left",
+              "betteredit.select_all",
+              "betteredit.select_all_right",
+            },
+            { "gd.edit.paste", "betteredit.toggle_ui" },
         } },
 
         { kStateOneSelected, {
-            { "betteredit.preview_mode" }
-        } }
+            { "betteredit.preview_mode" },
+            { "gd.edit.deselect" },
+        } },
+
+        { kStateManySelected, {
+            { "betteredit.edit_object", "betteredit.edit_group", "betteredit.edit_special" },
+            { "betteredit.align_x", "betteredit.align_y" },
+            { "gd.edit.deselect" },
+        } },
     };
 
     return true;
@@ -216,11 +298,14 @@ void ContextMenu::show(CCPoint const& pos) {
         pos.x,
         pos.y - this->getScaledContentSize().height
     );
+    this->setSuperMouseHitOffset(this->getScaledContentSize() / 2);
+    this->setSuperMouseHitSize(this->getScaledContentSize());
     this->setVisible(true);
 }
 
 void ContextMenu::hide() {
     this->setVisible(false);
+    this->setPosition(-700.0f, -900.0f);
 }
 
 void ContextMenu::mouseDownOutsideSuper(MouseButton, CCPoint const&) {
@@ -228,7 +313,7 @@ void ContextMenu::mouseDownOutsideSuper(MouseButton, CCPoint const&) {
 }
 
 bool ContextMenu::mouseDownSuper(MouseButton, CCPoint const&) {
-    return this->isVisible();
+    return false;
 }
 
 void ContextMenu::generate() {
@@ -246,10 +331,12 @@ void ContextMenu::generate() {
         c = this->m_mConfig[kStateManySelected];
     }
 
-    auto h = c.size() * 18.0f;
-    auto w = 140.0f;
+    static constexpr const float defaultItemHeight = 12.f;
 
-    float y = 0.0f;
+    auto h = c.size() * defaultItemHeight + defaultItemHeight;
+    auto w = 120.0f;
+
+    float y = (c.size() - 1) * defaultItemHeight + defaultItemHeight;
     for (auto const& line : c) {
         float x = 0.0f;
         for (auto const& item : line) {
@@ -264,13 +351,22 @@ void ContextMenu::generate() {
             }
             if (pItem) {
                 pItem->setPosition(x, y);
-                pItem->setContentSize({w / line.size(), 25.f});
+                pItem->setContentSize({w / line.size(), defaultItemHeight});
+                pItem->m_pMenu = this;
                 this->addChild(pItem);
             }
             x += w / line.size();
         }
-        y += 25.f;
+        y -= defaultItemHeight;
     }
+
+    auto settings = SpecialContextMenuItem::create(
+        "GJ_optionsBtn02_001.png", "Customize", [](auto btn) -> void {}
+    );
+    settings->setPosition(0, y);
+    settings->setContentSize({ w, defaultItemHeight });
+    settings->m_pMenu = this;
+    this->addChild(settings);
 
     this->setContentSize({ w, h });
 }

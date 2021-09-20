@@ -10,9 +10,13 @@ bool operator==(CCSize const& size, CCSize const& size2) {
 
 bool operator!=(CCPoint const& size, CCPoint const& size2) {
     return
-        size.x == size2.x &&
-        size.y == size2.y;
+        size.x != size2.x ||
+        size.y != size2.y;
 }
+
+std::ostream& operator<<(std::ostream& stream, CCPoint const& pos);
+
+bool isNodeVisible(CCNode* t, bool includeSelf = true);
 
 void SuperMouseDelegate::mouseEnterSuper(CCPoint const&) {}
 void SuperMouseDelegate::mouseLeaveSuper(CCPoint const&) {}
@@ -75,6 +79,9 @@ bool SuperMouseManager::delegateIsHovered(SuperMouseDelegate* delegate, CCPoint 
     if (p && size == CCSizeZero)
         size = p->getScaledContentSize();
 
+    if (p && !isNodeVisible(p))
+        return false;
+
     auto pos = p ? p->getPosition() : CCPointZero;
 
     if (p && p->getParent())
@@ -95,7 +102,10 @@ bool SuperMouseManager::delegateIsHovered(SuperMouseDelegate* delegate, CCPoint 
 bool SuperMouseManager::dispatchClickEvent(MouseButton btn, bool down, CCPoint const& pos) {
     if (m_pCapturing) {
         m_pCapturing->m_bSuperMouseDown = down;
-        return m_pCapturing->mouseDownSuper(btn, pos);
+        if (down)
+            return m_pCapturing->mouseDownSuper(btn, pos);
+        else
+            return m_pCapturing->mouseUpSuper(btn, pos);
     }
     for (auto const& d : m_vDelegates) {
         if (!down) d->m_bSuperMouseDown = false;
@@ -109,7 +119,8 @@ bool SuperMouseManager::dispatchClickEvent(MouseButton btn, bool down, CCPoint c
                     return true;
             }
         } else {
-            d->mouseDownOutsideSuper(btn, pos);
+            if (down)
+                d->mouseDownOutsideSuper(btn, pos);
         }
     }
     return false;
@@ -131,6 +142,7 @@ bool SuperMouseManager::dispatchScrollEvent(float y, float x, CCPoint const& pos
 
 void SuperMouseManager::dispatchMoveEvent(CCPoint const& pos) {
     if (m_pCapturing) {
+        this->m_obLastPosition = pos;
         return m_pCapturing->mouseMoveSuper(pos);
     }
     if (this->m_obLastPosition != pos) {
@@ -152,7 +164,6 @@ void SuperMouseManager::dispatchMoveEvent(CCPoint const& pos) {
             }
         }
     }
-
     this->m_obLastPosition = pos;
 }
 
@@ -164,4 +175,8 @@ void SuperMouseManager::captureMouse(SuperMouseDelegate* delegate) {
 void SuperMouseManager::releaseCapture(SuperMouseDelegate* delegate) {
     if (m_pCapturing == delegate)
         m_pCapturing = nullptr;
+}
+
+void SuperMouseManager::releaseCapture() {
+    this->m_pCapturing = nullptr;
 }

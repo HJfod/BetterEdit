@@ -49,6 +49,7 @@ class SuperMouseManager {
 
         void captureMouse(SuperMouseDelegate*);
         void releaseCapture(SuperMouseDelegate*);
+        void releaseCapture();
 
         bool dispatchClickEvent(MouseButton, bool, CCPoint const&);
         void dispatchMoveEvent(CCPoint const&);

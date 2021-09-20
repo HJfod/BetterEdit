@@ -442,7 +442,7 @@ void loadBEKeybinds() {
     kbm->addEditorKeybind({ "Select All Left", "betteredit.select_all_left",
         [](EditorUI* ui) -> bool {
             if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
-                ui->selectAllWithDirection(false);
+                ui->selectAllWithDirection(true);
             return false;
         }, "editor.select", false
     }, {});
@@ -450,7 +450,7 @@ void loadBEKeybinds() {
     kbm->addEditorKeybind({ "Select All Right", "betteredit.select_all_right",
         [](EditorUI* ui) -> bool {
             if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
-                ui->selectAllWithDirection(true);
+                ui->selectAllWithDirection(false);
             return false;
         }, "editor.select", false
     }, {});
