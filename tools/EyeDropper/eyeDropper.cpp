@@ -122,9 +122,9 @@ void __fastcall CCScheduler_update(CCScheduler* self, edx_t edx, float dt) {
         g_bLoadedResources = true;
 
         CCTextureCache::sharedTextureCache()
-            ->addImage("BE_GameSheet01.png", false);
+            ->addImage("BE_ContextSheet01.png", false);
         CCSpriteFrameCache::sharedSpriteFrameCache()
-            ->addSpriteFramesWithFile("BE_GameSheet01.plist");
+            ->addSpriteFramesWithFile("BE_ContextSheet01.plist");
     }
 
     KeybindManager::get()->handleRepeats(dt);

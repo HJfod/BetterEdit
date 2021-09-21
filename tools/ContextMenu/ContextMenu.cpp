@@ -17,17 +17,49 @@ ccColor3B to3B(ccColor4B const& c) {
     return { c.r, c.g, c.b };
 }
 
+void limitSpriteSize(CCSprite* spr, CCSize const& size, float def, float min) {
+    spr->setScale(1.f);
+    auto [cwidth, cheight] = spr->getContentSize();
+    
+    auto len = size.height;
+    auto clen = cheight;
+    if (size.width < size.height) {
+        len = size.width;
+        clen = cwidth;
+    }
+
+    float scale = def;
+    if (len && len < clen) {
+        scale = len / clen;
+    }
+    if (def && def < scale) {
+        scale = def;
+    }
+    if (min && scale < min) {
+        scale = min;
+    }
+    spr->setScale(scale);
+}
+
+CCSize operator-(CCSize const& size, float f) {
+    return { size.width - f, size.height - f };
+}
+
 constexpr const int CMENU_TAG = 600;
+
+#define MORD(x, d) (this->m_pMenu ? this->m_pMenu->x : d)
 
 ccColor4B g_colBG = { 0, 0, 0, 200 };
 ccColor4B g_colText = { 255, 255, 255, 255 };
 ccColor4B g_colGray = { 150, 150, 150, 255 };
-ccColor4B g_colHover = { 255, 255, 255, 50 };
+ccColor4B g_colHover = { 255, 255, 255, 52 };
 ccColor4B g_colTransparent = { 0, 0, 0, 0 };
 
-bool ContextMenuItem::init() {
+bool ContextMenuItem::init(ContextMenu* menu) {
     if (!CCNode::init())
         return false;
+    
+    this->m_pMenu = menu;
     
     return true;
 }
@@ -35,10 +67,26 @@ bool ContextMenuItem::init() {
 void ContextMenuItem::draw() {
     CCNode::draw();
 
+    ccColor4B col = g_colHover;
+
+    if (this->m_bSuperMouseHovered) {
+        if (this->m_nFade < g_colHover.a)
+            this->m_nFade += MORD(m_nAnimationSpeed, 5);
+        else
+            this->m_nFade = g_colHover.a;
+    } else {
+        if (this->m_nFade >= MORD(m_nAnimationSpeed, 5))
+            this->m_nFade -= MORD(m_nAnimationSpeed, 5);
+        else
+            this->m_nFade = 0;
+    }
+
+    col.a = this->m_nFade;
+
     ccDrawSolidRect(
         { 0, 0 },
         this->getScaledContentSize(),
-        to4f(this->m_bSuperMouseHovered ? g_colHover : g_colTransparent)
+        to4f(col)
     );
 
     auto mul = this->m_pMenu ? this->m_pMenu->getScale() : 1.f;
@@ -70,17 +118,34 @@ void ContextMenuItem::mouseMoveSuper(CCPoint const& mpos) {
     }
 }
 
+AnyLabel* ContextMenuItem::createLabel(const char* txt) {
+    if (this->m_pMenu) {
+        switch (this->m_pMenu->m_eType) {
+            case kAnyLabelTypeBM:
+                return AnyLabel::create(CCLabelBMFont::create(txt, this->m_pMenu->m_sFont));
+                break;
+            
+            case kAnyLabelTypeTTF:
+                return AnyLabel::create(CCLabelTTF::create(
+                    txt, this->m_pMenu->m_sFont, this->m_pMenu->m_fTTFFontSize
+                ));
+                break;
+        }
+    }
+    return AnyLabel::create(CCLabelTTF::create(txt, "Segoe UI", 16));
+}
+
 void ContextMenuItem::activate() {}
 void ContextMenuItem::drag(float) {}
 
 
-bool KeybindContextMenuItem::init(keybind_id const& id) {
-    if (!ContextMenuItem::init())
+bool KeybindContextMenuItem::init(ContextMenu* menu, keybind_id const& id) {
+    if (!ContextMenuItem::init(menu))
         return false;
     
     this->m_sID = id;
 
-    this->m_pLabel = CCLabelTTF::create("", "Segoe UI", 16);
+    this->m_pLabel = this->createLabel();
     this->m_pLabel->setColor(to3B(g_colText));
     this->addChild(this->m_pLabel);
 
@@ -100,15 +165,11 @@ void KeybindContextMenuItem::visit() {
     this->m_pLabel->setPosition(
         this->getContentSize() / 2
     );
-    this->m_pLabel->setScale(.3f);
-    this->m_pLabel->setScale(min(
-        1.0f,
-        (this->getScaledContentSize().width - 10.0f) /
-        this->m_pLabel->getScaledContentSize().width
-    ) * .3f);
-    // this->m_pLabel->limitLabelWidth(
-    //     this->getScaledContentSize().width -10.0f, .4f, .0f
-    // );
+    this->m_pLabel->limitLabelWidth(
+        this->getScaledContentSize().width - 10.0f,
+        this->m_pMenu ? this->m_pMenu->m_fFontScale : .4f,
+        .02f
+    );
 
     ContextMenuItem::visit();
 }
@@ -122,10 +183,12 @@ void KeybindContextMenuItem::activate() {
         this->m_pMenu->hide();
 }
 
-KeybindContextMenuItem* KeybindContextMenuItem::create(keybind_id const& id) {
+KeybindContextMenuItem* KeybindContextMenuItem::create(
+    ContextMenu* menu, keybind_id const& id
+) {
     auto ret = new KeybindContextMenuItem;
 
-    if (ret && ret->init(id)) {
+    if (ret && ret->init(menu, id)) {
         ret->autorelease();
         return ret;
     }
@@ -136,15 +199,20 @@ KeybindContextMenuItem* KeybindContextMenuItem::create(keybind_id const& id) {
 
 
 bool SpecialContextMenuItem::init(
-    const char* spr, const char* txt, SpecialContextMenuItem::Callback cb
+    ContextMenu* menu,
+    const char* spr,
+    const char* txt,
+    SpecialContextMenuItem::Callback cb
 ) {
-    if (!ContextMenuItem::init())
+    if (!ContextMenuItem::init(menu))
         return false;
     
-    this->m_pSprite = CCSprite::createWithSpriteFrameName(spr);
-    this->addChild(this->m_pSprite);
+    if (spr) {
+        this->m_pSprite = CCSprite::createWithSpriteFrameName(spr);
+        this->addChild(this->m_pSprite);
+    }
 
-    this->m_pLabel = CCLabelTTF::create(txt, "Segoe UI", 16);
+    this->m_pLabel = this->createLabel(txt);
     this->m_pLabel->setColor(to3B(g_colText));
     this->addChild(this->m_pLabel);
 
@@ -154,35 +222,126 @@ bool SpecialContextMenuItem::init(
 }
 
 void SpecialContextMenuItem::visit() {
-    this->m_pLabel->setScale(.3f);
-    this->m_pLabel->setPosition({
-        this->getContentSize().width / 2 + 20.0f,
-        this->getContentSize().height / 2
-    });
+    auto hasLabel = this->m_pLabel->getString() && strlen(this->m_pLabel->getString());
+    if (hasLabel) {
+        this->m_pLabel->limitLabelWidth(
+            this->getContentSize().width - 30.f,
+            this->m_pMenu ? this->m_pMenu->m_fFontScale : .4f,
+            .02f
+        );
+        this->m_pLabel->limitLabelHeight(
+            this->getContentSize().height - 3.f,
+            this->m_pMenu ? this->m_pMenu->m_fFontScale : .4f,
+            .02f
+        );
+    }
 
-    this->m_pSprite->setPosition({
-        this->getContentSize().width / 2 - 
-            this->m_pLabel->getScaledContentSize().width / 2,
-        this->getContentSize().height / 2
-    });
-    this->m_pSprite->setScale(.2f);
+    if (this->m_pSprite) {
+        limitSpriteSize(this->m_pSprite,
+            this->getContentSize() - 4.f, this->m_fSpriteScale, .02f
+        );
+    }
+
+    if (hasLabel) {
+        this->m_pLabel->setPosition({
+            this->getContentSize().width / 2 + (this->m_pSprite ? (
+                1.0f + this->m_pSprite->getScaledContentSize().width / 2
+            ) : 0.f),
+            this->getContentSize().height / 2
+        });
+    }
+
+    if (this->m_pSprite) {
+        this->m_pSprite->setPosition({
+            this->getContentSize().width / 2 + (hasLabel ? (
+                - 1.0f - this->m_pLabel->getScaledContentSize().width / 2 
+            ) : 0.f),
+            this->getContentSize().height / 2
+        });
+    }
 
     ContextMenuItem::visit();
 }
 
 void SpecialContextMenuItem::activate() {
-    this->m_pCallback(this);
-    SuperMouseManager::get()->releaseCapture(this);
-    if (this->m_pMenu)
-        this->m_pMenu->hide();
+    if (this->m_pCallback) {
+        if (!this->m_pCallback(this)) {
+            SuperMouseManager::get()->releaseCapture(this);
+            if (this->m_pMenu)
+                this->m_pMenu->hide();
+        }
+    }
+}
+
+void SpecialContextMenuItem::setSpriteOpacity(GLubyte b) {
+    this->m_nSpriteOpacity = b;
+    if (this->m_pSprite)
+        this->m_pSprite->setOpacity(b);
 }
 
 SpecialContextMenuItem* SpecialContextMenuItem::create(
-    const char* spr, const char* txt, SpecialContextMenuItem::Callback cb
+    ContextMenu* menu,
+    const char* spr,
+    const char* txt,
+    SpecialContextMenuItem::Callback cb
 ) {
     auto ret = new SpecialContextMenuItem;
 
-    if (ret && ret->init(spr, txt, cb)) {
+    if (ret && ret->init(menu, spr, txt, cb)) {
+        ret->autorelease();
+        return ret;
+    }
+
+    CC_SAFE_DELETE(ret);
+    return nullptr;
+}
+
+bool DragContextMenuItem::init(
+    ContextMenu* menu,
+    const char* spr,
+    const char* txt,
+    DragContextMenuItem::DragCallback cb,
+    DragContextMenuItem::DragValue cv
+) {
+    if (!SpecialContextMenuItem::init(menu, spr, txt, nullptr))
+        return false;
+
+    this->m_pDragCallback = cb;
+    this->m_pDragValue = cv;
+    this->m_sText = txt;
+
+    return true;
+}
+
+void DragContextMenuItem::visit() {
+    if (this->m_pDragValue) {
+        this->m_pLabel->setString(
+            (
+                this->m_sText +
+                ": "_s +
+                BetterEdit::formatToString(this->m_pDragValue(), 2u)
+            ).c_str() 
+        );
+    }
+
+    SpecialContextMenuItem::visit();
+}
+
+void DragContextMenuItem::drag(float val) {
+    if (this->m_pDragCallback)
+        this->m_pDragCallback(this, val);
+}
+
+DragContextMenuItem* DragContextMenuItem::create(
+    ContextMenu* menu,
+    const char* spr,
+    const char* txt,
+    DragContextMenuItem::DragCallback cb,
+    DragContextMenuItem::DragValue cv
+) {
+    auto ret = new DragContextMenuItem;
+
+    if (ret && ret->init(menu, spr, txt, cb, cv)) {
         ret->autorelease();
         return ret;
     }
@@ -192,8 +351,10 @@ SpecialContextMenuItem* SpecialContextMenuItem::create(
 }
 
 
-bool PropContextMenuItem::init(PropContextMenuItem::Type type) {
-    if (!ContextMenuItem::init())
+bool PropContextMenuItem::init(
+    ContextMenu* menu, PropContextMenuItem::Type type
+) {
+    if (!ContextMenuItem::init(menu))
         return false;
     
     this->m_eType = type;
@@ -232,10 +393,12 @@ void PropContextMenuItem::drag(float val) {
     }
 }
 
-PropContextMenuItem* PropContextMenuItem::create(PropContextMenuItem::Type type) {
+PropContextMenuItem* PropContextMenuItem::create(
+    ContextMenu* menu, PropContextMenuItem::Type type
+) {
     auto ret = new PropContextMenuItem;
 
-    if (ret && ret->init(type)) {
+    if (ret && ret->init(menu, type)) {
         ret->autorelease();
         return ret;
     }
@@ -251,28 +414,32 @@ bool ContextMenu::init() {
     
     this->setTag(CMENU_TAG);
     this->setZOrder(5000);
-    this->setScale(1.64f);
+    this->setScale(1.5f);
     this->m_pEditor = LevelEditorLayer::get();
 
     this->m_mConfig = {
         { kStateNoneSelected, {
-            { 
-              "betteredit.select_all_left",
-              "betteredit.select_all",
-              "betteredit.select_all_right",
-            },
-            { "gd.edit.paste", "betteredit.toggle_ui" },
+            {{ 
+                "betteredit.select_all_left",
+                "betteredit.select_all",
+                "betteredit.select_all_right",
+            }},
+            {{ "gd.edit.paste", "betteredit.toggle_ui" }},
         } },
 
         { kStateOneSelected, {
-            { "betteredit.preview_mode" },
-            { "gd.edit.deselect" },
+            {{ "betteredit.preview_mode" }},
+            {{ "gd.edit.deselect" }},
         } },
 
         { kStateManySelected, {
-            { "betteredit.edit_object", "betteredit.edit_group", "betteredit.edit_special" },
-            { "betteredit.align_x", "betteredit.align_y" },
-            { "gd.edit.deselect" },
+            {{
+                "betteredit.edit_object",
+                "betteredit.edit_group",
+                "betteredit.edit_special"
+            }},
+            {{ "betteredit.align_x", "betteredit.align_y" }},
+            {{ "gd.edit.deselect" }},
         } },
     };
 
@@ -297,19 +464,27 @@ void ContextMenu::show() {
 
 void ContextMenu::show(CCPoint const& pos) {
     this->generate();
+    this->m_obLocation = pos;
+    this->updatePosition();
+    this->setVisible(true);
+}
+
+void ContextMenu::updatePosition() {
+    auto pos = this->m_obLocation;
+
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     auto csize = this->getContentSize();
     auto cssize = this->getScaledContentSize();
     auto x = pos.x + cssize.width / 2 - csize.width / 2;
     auto y = pos.y - cssize.height + cssize.height / 2 - csize.height / 2;
-    if (x + cssize.width > winSize.width)
-        x -= cssize.width;
-    if (y - cssize.height < 0)
-        y += cssize.height;
+    while (x + cssize.width > winSize.width)
+        x -= 20.f;
+    while (y - cssize.height < 0)
+        y += 20.f;
+
     this->setPosition(x, y);
-    this->setSuperMouseHitOffset(this->getScaledContentSize() / 2);
-    this->setSuperMouseHitSize(this->getScaledContentSize());
-    this->setVisible(true);
+    this->setSuperMouseHitOffset(csize / 2);
+    this->setSuperMouseHitSize(cssize);
 }
 
 void ContextMenu::hide() {
@@ -344,42 +519,80 @@ void ContextMenu::generate() {
         c = this->m_mConfig[kStateManySelected];
     }
 
-    static constexpr const float defaultItemHeight = 12.f;
-
-    auto h = c.size() * defaultItemHeight + defaultItemHeight;
+    auto h = 0.f;
     auto w = 120.0f;
 
-    float y = (c.size() - 1) * defaultItemHeight + defaultItemHeight;
+    float y = 0.0f;
     for (auto const& line : c) {
         float x = 0.0f;
-        for (auto const& item : line) {
+        for (auto const& item : line.items) {
             ContextMenuItem* pItem = nullptr;
             switch (item.m_eType) {
                 case ContextMenuStorageItem::kItemTypeKeybind:
-                    pItem = KeybindContextMenuItem::create(item.m_sKeybindID);
+                    pItem = KeybindContextMenuItem::create(this, item.m_sKeybindID);
                     break;
                 case ContextMenuStorageItem::kItemTypeProperty:
-                    pItem = PropContextMenuItem::create(item.m_ePropType);
+                    pItem = PropContextMenuItem::create(this, item.m_ePropType);
                     break;
             }
             if (pItem) {
                 pItem->setPosition(x, y);
-                pItem->setContentSize({w / line.size(), defaultItemHeight});
-                pItem->m_pMenu = this;
+                pItem->setContentSize({ w / line.items.size(), line.height });
                 this->addChild(pItem);
             }
-            x += w / line.size();
+            x += w / line.items.size();
         }
-        y -= defaultItemHeight;
+        y += line.height;
+        h += line.height;
     }
 
-    auto settings = SpecialContextMenuItem::create(
-        "GJ_optionsBtn02_001.png", "Customize", [](auto btn) -> void {}
+    CCARRAY_FOREACH_B_TYPE(this->m_pChildren, node, CCNode) {
+        node->setPositionY(
+            h - 4.f - node->getPositionY()
+        );
+    }
+
+    static const float arrowSize = 20.f;
+    static const float optionSize = w / 2 - 20.f;
+
+    auto arrowLeft = SpecialContextMenuItem::create(
+        this, "BE_ri_arrow_001.png", "", [](auto btn) -> bool { return false; }
     );
-    settings->setPosition(0, y);
-    settings->setContentSize({ w, defaultItemHeight });
-    settings->m_pMenu = this;
+    arrowLeft->setPosition(0, 0);
+    arrowLeft->setContentSize({ arrowSize, 8.f });
+    arrowLeft->m_pSprite->setFlipX(true);
+    arrowLeft->m_fSpriteScale = .3f;
+    this->addChild(arrowLeft);
+
+    auto arrowRight = SpecialContextMenuItem::create(
+        this, "BE_ri_arrow_001.png", "", [](auto btn) -> bool { return true; }
+    );
+    arrowRight->setPosition(w - arrowSize, 0);
+    arrowRight->setContentSize({ arrowSize, 8.f });
+    arrowRight->m_fSpriteScale = .3f;
+    this->addChild(arrowRight);
+
+    auto settings = SpecialContextMenuItem::create(
+        this, "BE_ri_gear_001.png", "Customize"
+    );
+    settings->setPosition(arrowSize, 0);
+    settings->setContentSize({ optionSize, 8.f });
+    settings->setSpriteOpacity(95);
     this->addChild(settings);
+
+    auto scaleLabel = DragContextMenuItem::create(
+        this, nullptr, "Scale", [this](auto, float v) -> void {
+            this->setScale(clamp(this->getScale() + v / 5, .5f, 4.f));
+            this->updatePosition();
+        }, [this]() -> float {
+            return this->getScale();
+        }
+    );
+    scaleLabel->setPosition(optionSize + arrowSize, 0);
+    scaleLabel->setContentSize({ optionSize, 8.f });
+    this->addChild(scaleLabel);
+
+    h += 8.f;
 
     this->setContentSize({ w, h });
 }
