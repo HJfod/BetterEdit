@@ -8,7 +8,7 @@ class UndoHistoryManager {
 
         bool init();
 
-        ~UndoHistoryManager();
+        virtual ~UndoHistoryManager();
 
     public:
         void addAction(ActionObject* action);

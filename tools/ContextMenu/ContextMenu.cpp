@@ -41,8 +41,10 @@ void ContextMenuItem::draw() {
         to4f(this->m_bSuperMouseHovered ? g_colHover : g_colTransparent)
     );
 
-    this->setSuperMouseHitSize(this->getScaledContentSize());
-    this->setSuperMouseHitOffset(this->getScaledContentSize() / 2);
+    auto mul = this->m_pMenu ? this->m_pMenu->getScale() : 1.f;
+
+    this->setSuperMouseHitSize(this->getScaledContentSize() * mul);
+    this->setSuperMouseHitOffset(this->getScaledContentSize() / 2 * mul);
 }
 
 bool ContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& mpos) {
@@ -249,6 +251,7 @@ bool ContextMenu::init() {
     
     this->setTag(CMENU_TAG);
     this->setZOrder(5000);
+    this->setScale(1.64f);
     this->m_pEditor = LevelEditorLayer::get();
 
     this->m_mConfig = {
@@ -294,10 +297,16 @@ void ContextMenu::show() {
 
 void ContextMenu::show(CCPoint const& pos) {
     this->generate();
-    this->setPosition(
-        pos.x,
-        pos.y - this->getScaledContentSize().height
-    );
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    auto csize = this->getContentSize();
+    auto cssize = this->getScaledContentSize();
+    auto x = pos.x + cssize.width / 2 - csize.width / 2;
+    auto y = pos.y - cssize.height + cssize.height / 2 - csize.height / 2;
+    if (x + cssize.width > winSize.width)
+        x -= cssize.width;
+    if (y - cssize.height < 0)
+        y += cssize.height;
+    this->setPosition(x, y);
     this->setSuperMouseHitOffset(this->getScaledContentSize() / 2);
     this->setSuperMouseHitSize(this->getScaledContentSize());
     this->setVisible(true);
@@ -314,6 +323,10 @@ void ContextMenu::mouseDownOutsideSuper(MouseButton, CCPoint const&) {
 
 bool ContextMenu::mouseDownSuper(MouseButton, CCPoint const&) {
     return false;
+}
+
+void ContextMenu::keyDownSuper(enumKeyCodes code) {
+    if (code == KEY_Escape) this->hide();
 }
 
 void ContextMenu::generate() {

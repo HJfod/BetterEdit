@@ -13,7 +13,7 @@ class SuperMouseDelegate {
         bool m_bSuperMouseDown = false;
 
         SuperMouseDelegate();
-        ~SuperMouseDelegate();
+        virtual ~SuperMouseDelegate();
 
         friend class SuperMouseManager;
 

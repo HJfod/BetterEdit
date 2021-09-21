@@ -11,7 +11,7 @@ class CustomizeArea : public CCLayer, public SuperMouseDelegate {
 
         bool init(CCArray*);
 
-        ~CustomizeArea();
+        virtual ~CustomizeArea();
 
     public:
         void updateSize();

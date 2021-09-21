@@ -72,6 +72,11 @@ void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwi
 
     KeybindManager::get()->registerMousePress(static_cast<MouseButton>(btn), pressed);
 
+    if (SuperMouseManager::get()->dispatchClickEvent(
+        static_cast<MouseButton>(btn), pressed, getMousePos()
+    ))
+        return;
+
     if (LevelEditorLayer::get()) {
         KeybindManager::get()->executeEditorCallbacks(
             Keybind(static_cast<MouseButton>(btn)),
@@ -87,11 +92,6 @@ void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwi
             pressed
         );
     }
-
-    if (SuperMouseManager::get()->dispatchClickEvent(
-        static_cast<MouseButton>(btn), pressed, getMousePos()
-    ))
-        return;
 
     return GDMAKE_ORIG_V(self, edx, wnd, btn, pressed, z);
 }

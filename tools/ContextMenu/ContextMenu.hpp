@@ -2,9 +2,50 @@
 
 #include "../../BetterEdit.hpp"
 #include "../CustomKeybinds/SuperMouseManager.hpp"
+#include "../CustomKeybinds/SuperKeyboardManager.hpp"
 #include "../CustomKeybinds/KeybindManager.hpp"
 
 class ContextMenu;
+
+#define ANYLABEL_TYPE(_type_)               \
+    protected:                              \
+    _type_* m_p##_type_ = nullptr;          \
+    inline bool init(_type_* p) {           \
+        if (!CCNodeRGBA::init())            \
+            return false;                   \
+        this->m_p##_type_ = p;              \
+        this->addChild(p);                  \
+        this->setCascadeColorEnabled(true); \
+        this->setCascadeOpacityEnabled(true);\
+        return true;                        \
+    }                                       \
+    public:                                 \
+    static AnyLabel* create(_type_* p) {    \
+        auto ret = new AnyLabel;            \
+        if (ret && ret->init(p)) {          \
+            ret->autorelease(); return ret; \
+        }                                   \
+        CC_SAFE_DELETE(ret); return nullptr;\
+    }                                       \
+
+class AnyLabel : public CCNodeRGBA, public CCLabelProtocol {
+        ANYLABEL_TYPE(CCLabelBMFont);
+        ANYLABEL_TYPE(CCLabelTTF);
+
+    public:
+        inline void setString(const char* s) override {
+            if (m_pCCLabelBMFont)
+                m_pCCLabelBMFont->setString(s);
+            if (m_pCCLabelTTF)
+                m_pCCLabelTTF->setString(s);
+        }
+        inline const char* getString(void) override {
+            if (m_pCCLabelBMFont)
+                return m_pCCLabelBMFont->getString();
+            if (m_pCCLabelTTF)
+                return m_pCCLabelTTF->getString();
+        }
+};
 
 class ContextMenuItem :
     public CCNode,
@@ -98,7 +139,11 @@ struct ContextMenuStorageItem {
     }
 };
 
-class ContextMenu : public CCLayerColor, public SuperMouseDelegate {
+class ContextMenu :
+    public CCLayerColor,
+    public SuperMouseDelegate,
+    public SuperKeyboardDelegate
+{
     public:
         enum State {
             kStateNoneSelected,
@@ -120,6 +165,7 @@ class ContextMenu : public CCLayerColor, public SuperMouseDelegate {
 
         void mouseDownOutsideSuper(MouseButton, CCPoint const&) override;
         bool mouseDownSuper(MouseButton, CCPoint const&) override;
+        void keyDownSuper(enumKeyCodes) override;
 
         void draw() override;
 

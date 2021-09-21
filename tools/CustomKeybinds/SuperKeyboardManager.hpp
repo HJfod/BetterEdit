@@ -7,7 +7,7 @@ struct SuperKeyboardDelegate {
     virtual void keyUpSuper(enumKeyCodes);
 
     SuperKeyboardDelegate();
-    ~SuperKeyboardDelegate();
+    virtual ~SuperKeyboardDelegate();
 };
 
 class SuperKeyboardManager {

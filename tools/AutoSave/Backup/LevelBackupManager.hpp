@@ -59,7 +59,7 @@ struct LevelBackupSettings : public CCObject {
     CCArray* m_pBackups;
     static constexpr const int s_defaultBackupEvery = 500;
 
-    ~LevelBackupSettings() {
+    virtual ~LevelBackupSettings() {
         m_pBackups->release();
     }
 

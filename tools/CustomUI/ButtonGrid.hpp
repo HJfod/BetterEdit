@@ -48,7 +48,7 @@ class ButtonGrid {
         ButtonGridItem getItem(EditorButton*);
 
     public:
-        ~ButtonGrid();
+        virtual ~ButtonGrid();
 
         void addButton(EditorButton*);
         void removeButton(EditorButton*);

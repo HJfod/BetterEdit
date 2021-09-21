@@ -166,14 +166,18 @@ void CustomEditMenu::addTransformButton(
 }
 
 bool CustomEditMenu::init(EditorUI* ui) {
+    auto arr = CCArray::create();
+    arr->retain();
     if (!EditButtonBar::init(
-        CCArray::create(), 
+        arr,
         0, false,
         GameManager::sharedState()->getIntGameVariable("0049"),
         GameManager::sharedState()->getIntGameVariable("0050"),
         { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f }
     ))
         return false;
+    
+    arr->release();
     
     this->m_pUI = ui;
     this->m_pMenu = CCMenu::create();
