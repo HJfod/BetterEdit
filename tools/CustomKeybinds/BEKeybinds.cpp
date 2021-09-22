@@ -11,6 +11,7 @@
 #include "../RepeatPaste/repeatPaste.hpp"
 #include "../History/UndoHistoryPopup.hpp"
 #include "../ContextMenu/ContextMenu.hpp"
+#include "../Screenshot/screenshot.hpp"
 
 static constexpr const float w_edge = 120.0f;
 
@@ -741,4 +742,11 @@ void loadBEKeybinds() {
             return true;
         }, "editor.global", false
     }, {{ kMouseButtonRight, 0 }});
+
+    kbm->addEditorKeybind({ "Take Screenshot", "betteredit.screenshot",
+        [](EditorUI* ui) -> bool {
+            takeScreenshot(ui);
+            return true;
+        }, "editor.global", false
+    }, {{ KEY_L, 0 }});
 }

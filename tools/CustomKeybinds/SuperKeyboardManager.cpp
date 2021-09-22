@@ -34,7 +34,7 @@ SuperKeyboardManager* SuperKeyboardManager::get() {
 }
 
 void SuperKeyboardManager::pushDelegate(SuperKeyboardDelegate* delegate) {
-    this->m_vDelegates.push_back(delegate);
+    this->m_vDelegates.insert(this->m_vDelegates.begin(), delegate);
 }
 
 void SuperKeyboardManager::popDelegate(SuperKeyboardDelegate* delegate) {

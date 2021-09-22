@@ -20,17 +20,14 @@ ccColor3B to3B(ccColor4B const& c) {
 void limitSpriteSize(CCSprite* spr, CCSize const& size, float def, float min) {
     spr->setScale(1.f);
     auto [cwidth, cheight] = spr->getContentSize();
-    
-    auto len = size.height;
-    auto clen = cheight;
-    if (size.width < size.height) {
-        len = size.width;
-        clen = cwidth;
-    }
 
     float scale = def;
-    if (len && len < clen) {
-        scale = len / clen;
+    if (size.height && size.height < cheight) {
+        scale = size.height / cheight;
+    }
+    if (size.width && size.width < cwidth) {
+        if (size.width / cwidth < scale)
+            scale = size.width / cwidth;
     }
     if (def && def < scale) {
         scale = def;
@@ -209,7 +206,8 @@ bool SpecialContextMenuItem::init(
     
     if (spr) {
         this->m_pSprite = CCSprite::createWithSpriteFrameName(spr);
-        this->addChild(this->m_pSprite);
+        if (this->m_pSprite)
+            this->addChild(this->m_pSprite);
     }
 
     this->m_pLabel = this->createLabel(txt);
@@ -425,6 +423,7 @@ bool ContextMenu::init() {
                 "betteredit.select_all_right",
             }},
             {{ "gd.edit.paste", "betteredit.toggle_ui" }},
+            {{ "betteredit.screenshot" }},
         } },
 
         { kStateOneSelected, {
@@ -560,7 +559,7 @@ void ContextMenu::generate() {
     );
     arrowLeft->setPosition(0, 0);
     arrowLeft->setContentSize({ arrowSize, 8.f });
-    arrowLeft->m_pSprite->setFlipX(true);
+    CATCH_NULL(arrowLeft->m_pSprite)->setFlipX(true);
     arrowLeft->m_fSpriteScale = .3f;
     this->addChild(arrowLeft);
 

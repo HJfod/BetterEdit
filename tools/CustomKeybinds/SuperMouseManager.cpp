@@ -62,7 +62,7 @@ SuperMouseManager* SuperMouseManager::get() {
 }
 
 void SuperMouseManager::pushDelegate(SuperMouseDelegate* delegate) {
-    this->m_vDelegates.push_back(delegate);
+    this->m_vDelegates.insert(this->m_vDelegates.begin(), delegate);
 }
 
 void SuperMouseManager::popDelegate(SuperMouseDelegate* delegate) {

@@ -22,10 +22,10 @@ void __fastcall dispatchKeyboardMSGHook(
 ) {
     if (key == KEY_Tab && self->getAltKeyPressed())
         self->updateModifierKeys(false, false, false, false);
-    
-    KeybindManager::get()->registerKeyPress(key, down);
 
     SuperKeyboardManager::get()->dispatchEvent(key, down);
+    
+    KeybindManager::get()->registerKeyPress(key, down);
 
     GDMAKE_ORIG_V(self, edx, key, down);
 }
