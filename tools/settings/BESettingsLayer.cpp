@@ -175,6 +175,11 @@ void BESettingsLayer::setup() {
         false,
         true
     );
+    this->addToggle(
+        "Become Unfunny",
+        "Disables <cg>Easter Eggs</c>",
+        BE_SETTING_FUNC_B(NoEasterEggs)
+    );
 
     this->incrementPageCount(true);
 

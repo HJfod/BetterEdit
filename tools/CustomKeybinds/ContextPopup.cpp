@@ -82,8 +82,9 @@ bool ContextPopup::mouseScrollSuper(float, float) {
     return true;
 }
 
-void ContextPopup::keyDownSuper(enumKeyCodes) {
+bool ContextPopup::keyDownSuper(enumKeyCodes) {
     this->hide();
+    return false;
 }
 
 bool ContextPopup::init(

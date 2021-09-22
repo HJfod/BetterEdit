@@ -23,7 +23,8 @@ void __fastcall dispatchKeyboardMSGHook(
     if (key == KEY_Tab && self->getAltKeyPressed())
         self->updateModifierKeys(false, false, false, false);
 
-    SuperKeyboardManager::get()->dispatchEvent(key, down);
+    if (SuperKeyboardManager::get()->dispatchEvent(key, down))
+        return;
     
     KeybindManager::get()->registerKeyPress(key, down);
 

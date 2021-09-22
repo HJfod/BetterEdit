@@ -35,6 +35,7 @@ class SuperMouseManager {
         std::vector<SuperMouseDelegate*> m_vDelegates;
         CCPoint m_obLastPosition;
         SuperMouseDelegate* m_pCapturing = nullptr;
+        SuperMouseDelegate* m_pWeakCapture = nullptr;
 
         bool init();
 
@@ -47,7 +48,7 @@ class SuperMouseManager {
         void pushDelegate(SuperMouseDelegate*);
         void popDelegate(SuperMouseDelegate*);
 
-        void captureMouse(SuperMouseDelegate*);
+        void captureMouse(SuperMouseDelegate*, bool weak = false);
         void releaseCapture(SuperMouseDelegate*);
         void releaseCapture();
 

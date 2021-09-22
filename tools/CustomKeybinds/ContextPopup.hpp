@@ -34,7 +34,7 @@ class ContextPopup :
         virtual void setup() = 0;
         void mouseLeaveSuper(CCPoint const&) override;
         void mouseDownOutsideSuper(MouseButton, CCPoint const&) override;
-        void keyDownSuper(enumKeyCodes);
+        bool keyDownSuper(enumKeyCodes);
         void mouseScrollOutsideSuper(float, float) override;
         bool mouseScrollSuper(float, float) override;
 

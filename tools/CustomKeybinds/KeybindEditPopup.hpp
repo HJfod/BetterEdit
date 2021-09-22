@@ -34,7 +34,7 @@ class KeybindEditPopup :
         void onSet(CCObject*);
         void onClose(CCObject*) override;
         void keyDown(enumKeyCodes) override;
-        void keyDownSuper(enumKeyCodes) override;
+        bool keyDownSuper(enumKeyCodes) override;
         bool mouseDownSuper(MouseButton, CCPoint const&) override;
         void updateLabel();
 

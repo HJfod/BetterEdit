@@ -3,8 +3,8 @@
 #include "../../BetterEdit.hpp"
 
 struct SuperKeyboardDelegate {
-    virtual void keyDownSuper(enumKeyCodes);
-    virtual void keyUpSuper(enumKeyCodes);
+    virtual bool keyDownSuper(enumKeyCodes);
+    virtual bool keyUpSuper(enumKeyCodes);
 
     SuperKeyboardDelegate();
     virtual ~SuperKeyboardDelegate();
@@ -23,5 +23,5 @@ class SuperKeyboardManager {
         void pushDelegate(SuperKeyboardDelegate*);
         void popDelegate(SuperKeyboardDelegate*);
 
-        void dispatchEvent(enumKeyCodes, bool keydown);
+        bool dispatchEvent(enumKeyCodes, bool keydown);
 };

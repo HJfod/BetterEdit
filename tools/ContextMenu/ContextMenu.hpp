@@ -6,6 +6,7 @@
 #include "../CustomKeybinds/KeybindManager.hpp"
 
 class ContextMenu;
+class CustomizeCMLayer;
 
 #define ANYLABEL_TYPE(_type_)               \
     protected:                              \
@@ -121,8 +122,10 @@ class ContextMenuItem :
         CCPoint m_obLastMousePos;
         ContextMenu* m_pMenu = nullptr;
         GLubyte m_nFade = 0;
+        bool m_bDisabled = false;
         
         friend class ContextMenu;
+        friend class CustomizeCMLayer;
 
         bool init(ContextMenu*);
         void draw() override;
@@ -249,10 +252,20 @@ class ContextMenu :
 {
     public:
         enum State {
+            kStateAuto = -1,
             kStateNoneSelected,
             kStateOneSelected,
             kStateManySelected,
         };
+
+        inline static std::string stateToString(State state) {
+            switch (state) {
+                case kStateNoneSelected: return "Empty Selection";
+                case kStateOneSelected: return "One Object Selected";
+                case kStateManySelected: return "Multiple Selected";
+                default: return "Unknown State";
+            }
+        }
 
         struct Line {
             float height = 12.f;
@@ -272,6 +285,7 @@ class ContextMenu :
         CCPoint m_obLocation;
         LevelEditorLayer* m_pEditor;
         bool m_bDrawBorder = false;
+        bool m_bDisabled = false;
         std::unordered_map<State, Config> m_mConfig;
         const char* m_sFont = "Segoe UI";
         float m_fTTFFontSize = 28.f;
@@ -283,15 +297,16 @@ class ContextMenu :
         friend class SpecialContextMenuItem;
         friend class KeybindContextMenuItem;
         friend class PropContextMenuItem;
+        friend class CustomizeCMLayer;
 
         bool init() override;
 
-        void generate();
+        void generate(State = kStateAuto);
         void updatePosition();
 
         void mouseDownOutsideSuper(MouseButton, CCPoint const&) override;
         bool mouseDownSuper(MouseButton, CCPoint const&) override;
-        void keyDownSuper(enumKeyCodes) override;
+        bool keyDownSuper(enumKeyCodes) override;
 
         void draw() override;
 
@@ -299,6 +314,10 @@ class ContextMenu :
         static ContextMenu* create();
         static ContextMenu* load();
         static ContextMenu* get();
+
+        inline void setDisabled(bool b) {
+            this->m_bDisabled = b;
+        }
         
         void show();
         void show(CCPoint const& pos);

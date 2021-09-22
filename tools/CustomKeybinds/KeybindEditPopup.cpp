@@ -132,9 +132,10 @@ void KeybindEditPopup::keyDown(enumKeyCodes key) {
     this->updateLabel();
 }
 
-void KeybindEditPopup::keyDownSuper(enumKeyCodes key) {
+bool KeybindEditPopup::keyDownSuper(enumKeyCodes key) {
     if (this->m_pCell->m_pBind->modifier)
         this->keyDown(key);
+    return false;
 }
 
 void KeybindEditPopup::onRemove(CCObject*) {

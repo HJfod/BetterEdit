@@ -122,6 +122,7 @@ bool SuperMouseManager::dispatchClickEvent(MouseButton btn, bool down, CCPoint c
             if (down)
                 d->mouseDownOutsideSuper(btn, pos);
         }
+        if (d == this->m_pWeakCapture) break;
     }
     return false;
 }
@@ -136,6 +137,8 @@ bool SuperMouseManager::dispatchScrollEvent(float y, float x, CCPoint const& pos
                 return true;
         } else
             d->mouseScrollOutsideSuper(y, x);
+
+        if (d == this->m_pWeakCapture) break;
     }
     return false;
 }
@@ -162,21 +165,30 @@ void SuperMouseManager::dispatchMoveEvent(CCPoint const& pos) {
             if (hover) {
                 d->mouseMoveSuper(pos);
             }
+
+            if (d == this->m_pWeakCapture) break;
         }
     }
     this->m_obLastPosition = pos;
 }
 
-void SuperMouseManager::captureMouse(SuperMouseDelegate* delegate) {
-    if (!m_pCapturing)
+void SuperMouseManager::captureMouse(SuperMouseDelegate* delegate, bool weak) {
+    if (!weak && !m_pCapturing) {
         m_pCapturing = delegate;
+    }
+    if (weak && !m_pWeakCapture) {
+        this->m_pWeakCapture = delegate;
+    }
 }
 
 void SuperMouseManager::releaseCapture(SuperMouseDelegate* delegate) {
     if (m_pCapturing == delegate)
         m_pCapturing = nullptr;
+    if (m_pWeakCapture == delegate)
+        m_pWeakCapture = nullptr;
 }
 
 void SuperMouseManager::releaseCapture() {
     this->m_pCapturing = nullptr;
+    this->m_pWeakCapture = nullptr;
 }

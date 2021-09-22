@@ -69,6 +69,7 @@ enum DebugLogType {
     __macro__(ShownTutorial, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                 \
     __macro__(CopyObjectsToClipboard, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
     __macro__(EnableCustomEditMenu, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
+    __macro__(NoEasterEggs, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                  \
 
 #define STEP_SUBDICT_NC(dict, key, ...)         \
     if (dict->stepIntoSubDictWithKey(key)) {    \
@@ -223,9 +224,13 @@ class BetterEdit : public gd::GManager {
             return res;
         }
 
+        inline static std::string formatToString(bool b, unsigned int precision = 60u) {
+            return b ? "true" : "false";
+        }
+
         inline static std::string formatToString(CCPoint const& p, unsigned int precision = 60u) {
-            return formatToString(p.x) + ", " +
-                formatToString(p.y);
+            return formatToString(p.x, precision) + ", " +
+                formatToString(p.y, precision);
         }
 
         static inline bool isEditorInitialized() {

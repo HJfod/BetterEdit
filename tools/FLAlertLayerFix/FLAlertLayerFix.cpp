@@ -1,5 +1,13 @@
 #include "../../BetterEdit.hpp"
 
+void fixLayering(CCNode* node) {
+    auto target = CCDirector::sharedDirector()->getRunningScene();
+
+    int layer_count = target->getChildrenCount();
+
+    node->setZOrder(100 + layer_count * 200);
+}
+
 void fixLayering(FLAlertLayer* layer) {
     auto target = layer->m_pTargetLayer ?
         layer->m_pTargetLayer : 

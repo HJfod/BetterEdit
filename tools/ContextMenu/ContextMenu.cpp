@@ -1,4 +1,5 @@
 #include "ContextMenu.hpp"
+#include "CustomizeCMLayer.hpp"
 
 using namespace gd;
 using namespace gdmake;
@@ -93,25 +94,33 @@ void ContextMenuItem::draw() {
 }
 
 bool ContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& mpos) {
-    if (btn == kMouseButtonLeft) {
+    if (!this->m_bDisabled && btn == kMouseButtonLeft) {
         this->activate();
         this->m_obLastMousePos = mpos;
         SuperMouseManager::get()->captureMouse(this);
+    }
+    if (this->m_bDisabled) {
+        this->m_obLastMousePos = mpos;
     }
     return true;
 }
 
 bool ContextMenuItem::mouseUpSuper(MouseButton btn, CCPoint const&) {
-    if (btn == kMouseButtonLeft) {
+    if (!this->m_bDisabled && btn == kMouseButtonLeft) {
         SuperMouseManager::get()->releaseCapture(this);
     }
     return true;
 }
 
 void ContextMenuItem::mouseMoveSuper(CCPoint const& mpos) {
-    if (this->m_bSuperMouseDown) {
+    if (!this->m_bDisabled && this->m_bSuperMouseDown) {
         this->drag(mpos.y - this->m_obLastMousePos.y);
         this->m_obLastMousePos = mpos;
+    }
+    if (this->m_bDisabled && this->m_bSuperMouseDown) {
+        this->setPosition(
+            this->getPosition() + (this->m_obLastMousePos - mpos) * MORD(getScale(), 1.f)
+        );
     }
 }
 
@@ -492,30 +501,36 @@ void ContextMenu::hide() {
 }
 
 void ContextMenu::mouseDownOutsideSuper(MouseButton, CCPoint const&) {
-    this->hide();
+    if (!this->m_bDisabled)
+        this->hide();
 }
 
 bool ContextMenu::mouseDownSuper(MouseButton, CCPoint const&) {
     return false;
 }
 
-void ContextMenu::keyDownSuper(enumKeyCodes code) {
-    if (code == KEY_Escape) this->hide();
+bool ContextMenu::keyDownSuper(enumKeyCodes code) {
+    if (!this->m_bDisabled && code == KEY_Escape) this->hide();
+    return false;
 }
 
-void ContextMenu::generate() {
+void ContextMenu::generate(State s) {
     this->removeAllChildren();
 
     auto sel = this->m_pEditor->getEditorUI()->getSelectedObjects();
 
     Config c;
 
-    if (!sel->count()) {
-        c = this->m_mConfig[kStateNoneSelected];
-    } else if (sel->count() == 1) {
-        c = this->m_mConfig[kStateOneSelected];
+    if (s != kStateAuto) {
+        c = this->m_mConfig[s];
     } else {
-        c = this->m_mConfig[kStateManySelected];
+        if (!sel->count()) {
+            c = this->m_mConfig[kStateNoneSelected];
+        } else if (sel->count() == 1) {
+            c = this->m_mConfig[kStateOneSelected];
+        } else {
+            c = this->m_mConfig[kStateManySelected];
+        }
     }
 
     auto h = 0.f;
@@ -538,6 +553,8 @@ void ContextMenu::generate() {
                 pItem->setPosition(x, y);
                 pItem->setContentSize({ w / line.items.size(), line.height });
                 this->addChild(pItem);
+                if (this->m_bDisabled)
+                    pItem->m_bDisabled = true;
             }
             x += w / line.items.size();
         }
@@ -561,6 +578,7 @@ void ContextMenu::generate() {
     arrowLeft->setContentSize({ arrowSize, 8.f });
     CATCH_NULL(arrowLeft->m_pSprite)->setFlipX(true);
     arrowLeft->m_fSpriteScale = .3f;
+    arrowLeft->m_bDisabled = this->m_bDisabled;
     this->addChild(arrowLeft);
 
     auto arrowRight = SpecialContextMenuItem::create(
@@ -569,14 +587,19 @@ void ContextMenu::generate() {
     arrowRight->setPosition(w - arrowSize, 0);
     arrowRight->setContentSize({ arrowSize, 8.f });
     arrowRight->m_fSpriteScale = .3f;
+    arrowRight->m_bDisabled = this->m_bDisabled;
     this->addChild(arrowRight);
 
     auto settings = SpecialContextMenuItem::create(
-        this, "BE_ri_gear_001.png", "Customize"
+        this, "BE_ri_gear_001.png", "Customize", [](auto) -> bool {
+            CustomizeCMLayer::create()->show();
+            return false;
+        }
     );
     settings->setPosition(arrowSize, 0);
     settings->setContentSize({ optionSize, 8.f });
     settings->setSpriteOpacity(95);
+    settings->m_bDisabled = this->m_bDisabled;
     this->addChild(settings);
 
     auto scaleLabel = DragContextMenuItem::create(
@@ -589,6 +612,7 @@ void ContextMenu::generate() {
     );
     scaleLabel->setPosition(optionSize + arrowSize, 0);
     scaleLabel->setContentSize({ optionSize, 8.f });
+    scaleLabel->m_bDisabled = this->m_bDisabled;
     this->addChild(scaleLabel);
 
     h += 8.f;

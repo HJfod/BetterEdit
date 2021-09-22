@@ -38,6 +38,7 @@ class ScreenShotOverlay :
         bool m_bSelecting = false;
         bool m_bMoving = false;
         bool m_bExtendedMode = false;
+        bool m_bIncludeGrid = false;
         CCPoint m_obStartPos;
         CCPoint m_obEndPos;
         CCPoint m_obMoveLastPos;
@@ -45,14 +46,16 @@ class ScreenShotOverlay :
         CCLabelBMFont* m_pQualityLabel;
         CCLabelBMFont* m_pExtendedInfoLabel;
         CCLabelBMFont* m_pInfoLabel;
+        CCLabelBMFont* m_pOptionsLabel;
         CCLayer* m_pLayer;
         float m_fQuality = 1.f;
 
         bool mouseDownSuper(MouseButton, CCPoint const&) override;
         bool mouseUpSuper(MouseButton, CCPoint const&) override;
+        bool mouseScrollSuper(float y, float x) override;
         void mouseMoveSuper(CCPoint const&) override;
 
-        void keyDownSuper(enumKeyCodes) override;
+        bool keyDownSuper(enumKeyCodes) override;
 
         void screenshot();
         void updateLabels();

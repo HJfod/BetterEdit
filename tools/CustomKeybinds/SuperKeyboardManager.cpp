@@ -3,8 +3,8 @@
 
 SuperKeyboardManager* g_manager;
 
-void SuperKeyboardDelegate::keyDownSuper(enumKeyCodes) {}
-void SuperKeyboardDelegate::keyUpSuper(enumKeyCodes) {}
+bool SuperKeyboardDelegate::keyDownSuper(enumKeyCodes) { return false; }
+bool SuperKeyboardDelegate::keyUpSuper(enumKeyCodes) { return false; }
 
 SuperKeyboardDelegate::SuperKeyboardDelegate() {
     SuperKeyboardManager::get()->pushDelegate(this);
@@ -43,11 +43,15 @@ void SuperKeyboardManager::popDelegate(SuperKeyboardDelegate* delegate) {
     ), this->m_vDelegates.end());
 }
 
-void SuperKeyboardManager::dispatchEvent(enumKeyCodes key, bool keydown) {
+bool SuperKeyboardManager::dispatchEvent(enumKeyCodes key, bool keydown) {
     if (this->m_vDelegates.size()) {
-        if (keydown)
-            this->m_vDelegates.at(0)->keyDownSuper(key);
-        else
-            this->m_vDelegates.at(0)->keyUpSuper(key);
+        if (keydown) {
+            if (this->m_vDelegates.at(0)->keyDownSuper(key))
+                return true;
+        } else {
+            if (this->m_vDelegates.at(0)->keyUpSuper(key))
+                return true;
+        }
     }
+    return false;
 }

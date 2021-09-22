@@ -4,6 +4,8 @@
 #pragma comment(lib, "GdiPlus")
 
 float g_fQuality = 1.f;
+bool g_bIncludeGrid = false;
+size_t g_nScreenshotTitle = 0;
 
 CCSize operator*=(CCSize & size, float mul) {
     size.width *= mul;
@@ -205,12 +207,34 @@ ScreenShotPopup::~ScreenShotPopup() {
 ScreenShotPopup* ScreenShotPopup::create(CCRenderTexture* tex) {
     auto ret = new ScreenShotPopup;
 
+    auto titles = std::vector<const char*> {
+        "Wow! what a terrible pic",
+        "Yeah I said it. It looks stupid.",
+        "Ok I'm sorry for calling that last one\n"
+        "terrible, that was so rude of me",
+        "I've just been going through a rough\n"
+        "time lately, y'know",
+        "Eh...",
+        "Nice shot!",
+        "Nice shot!",
+        "Nice shot!",
+        "Nice shot!",
+        "N I C E   C O C K",
+        "Nice shot!",
+    };
+    auto title = titles.at(g_nScreenshotTitle);
+    if (g_nScreenshotTitle < titles.size() - 1)
+        g_nScreenshotTitle++;
+    
+    if (BetterEdit::getNoEasterEggs())
+        title = "Screenshot Preview";
+
     if (
         ret &&
         ((ret->m_pTexture = tex) || true) &&
     ret->init(
         340.0f, 240.0f,
-        "GJ_square01.png", "Wow! what a terrible pic"
+        "GJ_square01.png", title
     )) {
         ret->autorelease();
         return ret;
@@ -226,6 +250,7 @@ bool ScreenShotOverlay::init() {
         return false;
 
     this->m_fQuality = g_fQuality;
+    this->m_bIncludeGrid = g_bIncludeGrid;
     
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     this->setContentSize(winSize);
@@ -252,6 +277,12 @@ bool ScreenShotOverlay::init() {
     this->m_pExtendedInfoLabel->setScale(.25f);
     this->m_pLayer->addChild(this->m_pExtendedInfoLabel);
 
+    this->m_pOptionsLabel = CCLabelBMFont::create("", "bigFont.fnt", 500.0f, kCCTextAlignmentRight);
+    this->m_pOptionsLabel->setAnchorPoint({ 1.f, .5f });
+    this->m_pOptionsLabel->setPosition(winSize.width - 20.0f, 40.0f);
+    this->m_pOptionsLabel->setScale(.35f);
+    this->m_pLayer->addChild(this->m_pOptionsLabel);
+
     auto qualityInfo = CCLabelBMFont::create(
         "Increase Quality: H\n"
         "Decrease Quality: G\n",
@@ -276,9 +307,15 @@ bool ScreenShotOverlay::init() {
 }
 
 void ScreenShotOverlay::updateLabels() {
-    this->m_pQualityLabel->setString(
-        ("Quality: " + BetterEdit::formatToString(this->m_fQuality) + "x").c_str()
-    );
+    auto qs = ("Quality: " + BetterEdit::formatToString(this->m_fQuality) + "x");
+    if (this->m_fQuality > 4.0f) {
+        qs += " (Warning: Very High - May Crash!)";
+    }
+    this->m_pQualityLabel->setString(qs.c_str());
+
+    this->m_pOptionsLabel->setString((
+        "[1] Include Grid: " + BetterEdit::formatToString(this->m_bIncludeGrid)
+    ).c_str());
 
     if (this->m_bExtendedMode) {
         this->m_pInfoLabel->setString(
@@ -290,7 +327,7 @@ void ScreenShotOverlay::updateLabels() {
     } else {
         this->m_pInfoLabel->setString("Select area to screenshot");
         this->m_pExtendedInfoLabel->setString(
-            "Press E to take Extended Screenshot\n"
+            // "Press E to take Extended Screenshot\n"
             "Press F to take Fullscreen Screenshot"
         );
     }
@@ -354,26 +391,41 @@ bool ScreenShotOverlay::mouseUpSuper(MouseButton btn, CCPoint const& pos) {
     return true;
 }
 
-void ScreenShotOverlay::keyDownSuper(enumKeyCodes key) {
+bool ScreenShotOverlay::mouseScrollSuper(float y, float x) {
+    this->keyDownSuper(y > 0.0f ? KEY_G : KEY_H);
+    return true;
+}
+
+bool ScreenShotOverlay::keyDownSuper(enumKeyCodes key) {
     int add = 0;
     switch (key) {
         case KEY_G: add = -1; break;
         case KEY_H: add = 1; break;
-        case KEY_E:
-            m_bExtendedMode = true;
-            return this->updateLabels();
+        case KEY_One:
+            this->m_bIncludeGrid = !this->m_bIncludeGrid;
+            this->updateLabels();
+            return true;
+        // case KEY_E:
+        //     m_bExtendedMode = true;
+        //     this->updateLabels();
+        //     return true;
         case KEY_N:
             if (m_bExtendedMode) {
                 m_bExtendedMode = false;
                 m_bSelecting = false;
             }
-            return this->updateLabels();
+            this->updateLabels();
+            return true;
         case KEY_F:
             this->m_obStartPos = CCPointZero;
             this->m_obEndPos = CCDirector::sharedDirector()->getWinSize();
-            return this->screenshot();
-        case KEY_Escape: this->removeFromParent(); return;
-        default: return;
+            this->screenshot();
+            return true;
+        case KEY_Escape:
+            this->removeFromParent();
+            return true;
+        default:
+            return true;
     }
 
     std::vector<float> q = { .5f, .75f, 1.f, 1.5f, 2.f, 3.f, 4.f, 6.f, 8.f, 12.f, };
@@ -396,26 +448,33 @@ void ScreenShotOverlay::keyDownSuper(enumKeyCodes key) {
     this->m_fQuality = q[val];
 
     this->updateLabels();
+
+    return true;
 }
 
 void ScreenShotOverlay::screenshot() {
     this->setVisible(false);
+    if (!this->m_bIncludeGrid)
+        this->m_pUI->m_pEditorLayer->m_pDrawGridLayer->setVisible(false);
     
     auto area = CCRect {
-        min(this->m_obStartPos.x, this->m_obEndPos.x),
-        min(this->m_obStartPos.y, this->m_obEndPos.y),
+        fabsf(min(this->m_obStartPos.x, this->m_obEndPos.x)),
+        fabsf(min(this->m_obStartPos.y, this->m_obEndPos.y)),
         fabsf(this->m_obEndPos.x - this->m_obStartPos.x),
         fabsf(this->m_obEndPos.y - this->m_obStartPos.y)
     };
 
     // no ridiculously small screenshots allowed
-    if (area.size.width * area.size.height < 150.0f) {
+    if (area.size.width * area.size.height < 250.0f) {
         this->m_pLayer->setVisible(true);
         this->m_bSelecting = false;
+        this->m_pUI->m_pEditorLayer->m_pDrawGridLayer->setVisible(true);
         return this->setVisible(true);
     }
 
     area *= this->m_fQuality;
+
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     auto tex = CCRenderTexture::create(
         static_cast<int>(area.size.width),
@@ -424,6 +483,26 @@ void ScreenShotOverlay::screenshot() {
     tex->begin();
     auto scene = CCDirector::sharedDirector()->getRunningScene();
     scene->setScale(this->m_fQuality);
+
+    // auto xCount = static_cast<int>(ceilf(
+    //     (area.origin.x + area.size.width) /
+    //     (winSize.width * this->m_fQuality)
+    // ));
+    // auto yCount = static_cast<int>(ceilf(
+    //     (area.origin.y + area.size.height) /
+    //     (winSize.height * this->m_fQuality)
+    // ));
+
+    // for (int i = 0; i < yCount; i++) {
+    //     for (int j = 0; j < xCount; j++) {
+    //         scene->setPosition(-area.origin + 
+    //             (scene->getScaledContentSize() - scene->getContentSize()) / 2
+    //             + CCPoint { winSize.width * j, winSize.height * i }
+    //         );
+    //         scene->visit();
+    //     }
+    // }
+    
     scene->setPosition(-area.origin + 
         (scene->getScaledContentSize() - scene->getContentSize()) / 2
     );
@@ -435,6 +514,8 @@ void ScreenShotOverlay::screenshot() {
     ScreenShotPopup::create(tex)->show();
 
     ScreenFlash::show({ 255, 255, 255, 255 }, 1.0f);
+
+    this->m_pUI->m_pEditorLayer->m_pDrawGridLayer->setVisible(true);
 
     this->removeFromParent();
 }
@@ -519,6 +600,7 @@ ScreenShotOverlay::~ScreenShotOverlay() {
     SuperMouseManager::get()->releaseCapture(this);
 
     g_fQuality = this->m_fQuality;
+    g_bIncludeGrid = this->m_bIncludeGrid;
 
     if (this->m_pUI)
         this->m_pUI->setVisible(true);
