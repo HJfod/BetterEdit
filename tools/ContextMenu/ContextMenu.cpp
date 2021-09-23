@@ -60,6 +60,7 @@ constexpr const int CMENU_TAG = 600;
 #define PROP_GET(...) this->m_getValue = [this](GameObject* obj) -> float { __VA_ARGS__; };
 #define PROP_SET(...) this->m_setValue = [this](GameObject* obj, float f, bool abs) -> void { __VA_ARGS__; };
 #define PROP_NAME(name) this->m_getName = [this]() -> std::string { return name; };
+#define PROP_DRAW(...) this->m_drawCube = [this]() -> void { __VA_ARGS__; };
 
 ccColor4B g_colBG = { 0, 0, 0, 200 };
 ccColor4B g_colText = { 255, 255, 255, 255 };
@@ -77,8 +78,6 @@ bool ContextMenuItem::init(ContextMenu* menu) {
 }
 
 void ContextMenuItem::draw() {
-    CCNode::draw();
-
     ccColor4B col = g_colHover;
 
     if (this->m_bSuperMouseHovered) {
@@ -95,6 +94,9 @@ void ContextMenuItem::draw() {
 
     col.a = this->m_nFade;
 
+    // some mf somewhere resets the blend
+    // func sometimes
+    ccGLBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     ccDrawSolidRect(
         { 0, 0 },
         this->getScaledContentSize(),
@@ -105,10 +107,13 @@ void ContextMenuItem::draw() {
 
     this->setSuperMouseHitSize(this->getScaledContentSize() * mul);
     this->setSuperMouseHitOffset(this->getScaledContentSize() / 2 * mul);
+
+    CCNode::draw();
 }
 
 bool ContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& mpos) {
     if (!this->m_bDisabled && btn == kMouseButtonLeft) {
+        if (this->m_pMenu) this->m_pMenu->deactivateOthers(this);
         this->activate();
         this->m_obLastMousePos = mpos;
         SuperMouseManager::get()->captureMouse(this);
@@ -156,7 +161,9 @@ AnyLabel* ContextMenuItem::createLabel(const char* txt) {
 }
 
 void ContextMenuItem::activate() {}
+void ContextMenuItem::deactivate() {}
 void ContextMenuItem::drag(float) {}
+void ContextMenuItem::hide() { this->deactivate(); }
 
 
 bool KeybindContextMenuItem::init(ContextMenu* menu, keybind_id const& id) {
@@ -383,13 +390,24 @@ bool PropContextMenuItem::init(
     this->m_eType = type;
 
     this->m_pInput = CCTextInputNode::create("", this, "bigFont.fnt", 100.0f, 10.0f);
-    this->addChild(this->m_pInput);
+    this->m_pInput->setDelegate(this);
+    this->m_pInput->setAllowedChars(inputf_Numeral);
     this->m_pInput->retain();
 
-    SuperKeyboardManager::get()->popDelegate(this);
+    this->m_pCube = CCSprite::createWithSpriteFrameName("d_largeSquare_02_001.png");
+    this->m_pCube->setVisible(false);
+    this->m_pCube->setScale(.18f);
+    this->addChild(this->m_pCube);
+
+    this->m_pCube2 = CCSprite::createWithSpriteFrameName("d_largeSquare_02_001.png");
+    this->m_pCube2->setVisible(false);
+    this->m_pCube2->setScale(.18f);
+    this->addChild(this->m_pCube2);
+
+    this->superKeyPopSelf();
 
     switch (this->m_eType) {
-        case kTypeScale:
+        case kTypeScale: {
             PROP_GET(return roundf(obj->getScale() * 100) / 100);
             PROP_SET(
                 if (abs)
@@ -398,8 +416,20 @@ bool PropContextMenuItem::init(
                     obj->updateCustomScale(this->m_getValue(obj) + f / 10.f)
             );
             PROP_NAME("Scale");
-            break;
-        case kTypeRotate:
+            PROP_DRAW(
+                auto scale = this->getValue() / this->m_fLastDraggedValue * .18f;
+                scale = clamp(scale, .1f, .25f);
+                this->m_pCube->setScale(scale);
+            );
+            this->m_pCube2->setOpacity(50);
+            this->m_pCube->setVisible(true);
+            this->m_pCube2->setVisible(true);
+            this->m_pInput->setAllowedChars(inputf_NumeralFloatSigned);
+            this->m_sSuffix = "x";
+            this->m_fDefaultValue = 1.f;
+        } break;
+            
+        case kTypeRotate: {
             PROP_GET(return roundf(obj->getRotation() * 100) / 100);
             PROP_SET(
                 if (abs)
@@ -408,23 +438,49 @@ bool PropContextMenuItem::init(
                     obj->setRotation(this->m_getValue(obj) + f * 2.f)
             );
             PROP_NAME("Rotate");
-            break;
+            PROP_DRAW(
+                this->m_pCube2->setRotation(this->m_fLastDraggedValue);
+                this->m_pCube->setRotation(this->getValue());
+            );
+            this->m_sSuffix = "°";
+            this->m_pCube2->setOpacity(50);
+            this->m_pCube->setVisible(true);
+            this->m_pCube2->setVisible(true);
+            this->m_pInput->setAllowedChars(inputf_NumeralFloatSigned);
+        } break;
     }
+
+    this->m_fLastDraggedValue = this->getValue();
 
     return true;
 }
 
 bool PropContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& pos) {
-    if (this->m_bEditingText) {
+    if (this->m_bEditingText && this->m_bTextSelected) {
         this->enableInput(false);
         return true;
     } else {
         if (btn == kMouseButtonLeft && pos == this->m_obLastMousePos) {
-            this->enableInput(true);
+            if (!this->m_bEditingText) {
+                this->enableInput(true);
+            } else {
+                this->m_bTextSelected = true;
+            }
             return true;
+        } else {
+            this->enableInput(false);
         }
     }
     return this->ContextMenuItem::mouseDownSuper(btn, pos);
+}
+
+bool PropContextMenuItem::mouseUpSuper(MouseButton btn, CCPoint const& pos) {
+    this->m_fLastDraggedValue = this->getValue();
+    return this->ContextMenuItem::mouseUpSuper(btn, pos);
+}
+
+void PropContextMenuItem::mouseDownOutsideSuper(MouseButton, CCPoint const&) {
+    this->enableInput(false);
 }
 
 float PropContextMenuItem::getValue() {
@@ -433,7 +489,7 @@ float PropContextMenuItem::getValue() {
         if (objs->count())
             return m_getValue(as<GameObject*>(objs->objectAtIndex(0)));
     }
-    return 0.0f;
+    return m_fDefaultValue;
 }
 
 void PropContextMenuItem::setValue(float f, bool abs) {
@@ -451,52 +507,120 @@ void PropContextMenuItem::drag(float val) {
     }
 }
 
-void PropContextMenuItem::visit() {
-    if (this->m_bEditingText) {
-        this->m_pValueLabel->setString(this->m_pInput->getString());
-    } else {
-        auto text = this->m_getName() + ": " +
-            BetterEdit::formatToString(this->getValue(), 2u);
-        this->m_pValueLabel->setString(text.c_str());
-    }
-
-    this->m_pValueLabel->limitLabelWidth(
-        this->getContentSize().width - 30.f,
-        MORD(m_fFontScale, .4f),
-        .02f
-    );
-    this->m_pValueLabel->limitLabelHeight(
-        this->getContentSize().height - 3.f,
-        MORD(m_fFontScale, .4f),
-        .02f
-    );
-    this->m_pValueLabel->setPosition(this->getContentSize() / 2);
-
-    ContextMenuItem::visit();
-}
-
 void PropContextMenuItem::enableInput(bool b) {
     this->m_bEditingText = b;
     if (b) {
         this->m_pInput->setString(
             BetterEdit::formatToString(this->getValue(), 2u).c_str()
         );
-        SuperKeyboardManager::get()->pushDelegate(this);
-        std::cout << this->m_pInput->attachWithIME() << "\n";
+        this->m_pInput->m_pTextField->attachWithIME();
+        this->superKeyPushSelf();
     } else {
-        SuperKeyboardManager::get()->popDelegate(this);
-        this->m_pInput->detachWithIME();
+        this->m_pInput->m_pTextField->detachWithIME();
+        this->m_bTextSelected = false;
+        this->superKeyPopSelf();
     }
 }
 
-void PropContextMenuItem::draw() {
+void PropContextMenuItem::textChanged(CCTextInputNode*) {
+    auto str = this->m_pInput->getString();
+    if (str && strlen(str)) {
+        if (this->m_bTextSelected) {
+            this->setValue(this->m_fDefaultValue, true);
+            this->m_pInput->setString("");
+            this->m_bTextSelected = false;
+            return;
+        }
+        this->m_bTextSelected = false;
+        try {
+            bool digit = false;
+            for (size_t i = 0; i < strlen(str); i++) {
+                if (isdigit(str[i])) digit = true;
+            }
+            if (digit) {
+                this->setValue(std::stof(str), true);
+            } else {
+                this->setValue(this->m_fDefaultValue, true);
+            }
+        } catch (...) {
+            this->setValue(this->m_fDefaultValue, true);
+        }
+    }
+}
+
+bool PropContextMenuItem::keyDownSuper(enumKeyCodes key) {
+    this->m_bTextSelected = false;
+    if (key == KEY_Escape || key == KEY_Enter)
+        this->enableInput(false);
+    return true;
+}
+
+void PropContextMenuItem::visit() {
     if (this->m_bEditingText) {
-        auto pos = this->m_pValueLabel->getPosition();
-        auto size = this->m_pValueLabel->getScaledContentSize();
-        ccDrawSolidRect(
-            pos - size / 2, pos + size / 2, to4f(g_colText)
+        this->m_pValueLabel->setString(
+            std::string(this->m_pInput->getString() + this->m_sSuffix).c_str()
         );
-        this->m_pValueLabel->setColor(to3B(invert4B(g_colText)));
+    } else {
+        auto text = this->m_getName() + ": " +
+            BetterEdit::formatToString(this->getValue(), 2u) +
+            this->m_sSuffix;
+        this->m_pValueLabel->setString(text.c_str());
+    }
+
+    bool image = this->m_drawCube && this->getScaledContentSize().height >= 15.f;
+
+    this->m_pValueLabel->limitLabelWidth(
+        this->getContentSize().width - 30.f,
+        MORD(m_fFontScale, .4f) - (image ? .05f : 0.f),
+        .02f
+    );
+    this->m_pValueLabel->limitLabelHeight(
+        this->getContentSize().height - 3.f,
+        MORD(m_fFontScale, .4f) - (image ? .05f : 0.f),
+        .02f
+    );
+
+    if (image) {
+        this->m_pValueLabel->setPosition(
+            this->getContentSize().width / 2,
+            6.f
+        );
+    } else {
+        this->m_pValueLabel->setPosition(
+            this->getContentSize() / 2
+        );
+    }
+
+    ContextMenuItem::visit();
+}
+
+void PropContextMenuItem::draw() {
+    if (this->m_drawCube && this->getScaledContentSize().height >= 15.f) {
+        auto pos = this->getScaledContentSize() / 2;
+        pos.height += 4.f;
+        this->m_pCube->setPosition(pos);
+        this->m_pCube2->setPosition(pos);
+        this->m_drawCube();
+    }
+
+    if (this->m_bEditingText) {
+        if (this->m_bTextSelected) {
+            auto pos = this->m_pValueLabel->getPosition();
+            auto size = this->m_pValueLabel->getScaledContentSize();
+            ccDrawSolidRect(
+                pos - size / 2, pos + size / 2, to4f(g_colText)
+            );
+            this->m_pValueLabel->setColor(to3B(invert4B(g_colText)));
+        } else {
+            auto pos = this->m_pValueLabel->getPosition();
+            auto size = this->m_pValueLabel->getScaledContentSize();
+            ccDrawSolidRect(
+                pos + size / 2,
+                pos + CCPoint { size.width / 2 + 0.5f, -size.height / 2 },
+                to4f(g_colText)
+            );
+            this->m_pValueLabel->setColor(to3B(g_colText));
+        }
     } else {
         this->m_pValueLabel->setColor(to3B(g_colText));
     }
@@ -504,13 +628,8 @@ void PropContextMenuItem::draw() {
     ContextMenuItem::draw();
 }
 
-bool PropContextMenuItem::keyDownSuper(enumKeyCodes key) {
-    if (this->m_pInput->getString() && strlen(this->m_pInput->getString())) {
-        try {
-            this->setValue(std::stof(this->m_pInput->getString()), true);
-        } catch (...) {}
-    }
-    return true;
+void PropContextMenuItem::deactivate() {
+    this->enableInput(false);
 }
 
 PropContextMenuItem::~PropContextMenuItem() {
@@ -541,30 +660,37 @@ bool ContextMenu::init() {
     this->setScale(1.5f);
     this->m_pEditor = LevelEditorLayer::get();
 
-    this->m_mConfig = {
-        { kStateNoneSelected, {
-            {{ 
-                "betteredit.select_all_left",
-                "betteredit.select_all",
-                "betteredit.select_all_right",
-            }},
-            {{ "gd.edit.paste", "betteredit.toggle_ui" }},
-            {{ "betteredit.screenshot" }},
-        } },
+    this->m_vDefaultConfig = {
+        {{ 
+            "betteredit.select_all_left",
+            "betteredit.select_all",
+            "betteredit.select_all_right",
+        }},
+        {{
+            { "betteredit.preview_mode" },
+            { "betteredit.rotate_saws" },
+        }},
+        {{ "gd.edit.paste", "betteredit.toggle_ui" }},
+        {{ "betteredit.screenshot" }},
+    };
 
-        { kStateOneSelected, {
+    this->m_mContexts = {
+        { kContextTypeObject, {{
             {{
                 { PropContextMenuItem::kTypeRotate },
                 { PropContextMenuItem::kTypeScale }
-            }},
+            }, 24.f},
             {{
-                { "betteredit.preview_mode" },
-                { "betteredit.rotate_saws", 2 },
+                "betteredit.edit_object",
+                "betteredit.edit_group",
+                "betteredit.edit_special"
             }},
             {{ "gd.edit.deselect" }},
-        } },
-
-        { kStateManySelected, {
+        }, {
+            {{
+                { PropContextMenuItem::kTypeRotate },
+                { PropContextMenuItem::kTypeScale }
+            }, 24.f},
             {{
                 "betteredit.edit_object",
                 "betteredit.edit_group",
@@ -572,7 +698,7 @@ bool ContextMenu::init() {
             }},
             {{ "betteredit.align_x", "betteredit.align_y" }},
             {{ "gd.edit.deselect" }},
-        } },
+        }} },
     };
 
     return true;
@@ -622,6 +748,9 @@ void ContextMenu::updatePosition() {
 void ContextMenu::hide() {
     this->setVisible(false);
     this->setPosition(-700.0f, -900.0f);
+    CCARRAY_FOREACH_B_TYPE(this->m_pChildren, node, ContextMenuItem) {
+        node->hide();
+    }
 }
 
 void ContextMenu::mouseDownOutsideSuper(MouseButton, CCPoint const&) {
@@ -638,22 +767,41 @@ bool ContextMenu::keyDownSuper(enumKeyCodes code) {
     return false;
 }
 
-void ContextMenu::generate(State s) {
+void ContextMenu::generate(ContextType s, bool multi) {
     this->removeAllChildren();
 
     auto sel = this->m_pEditor->getEditorUI()->getSelectedObjects();
 
     Config c;
 
-    if (s != kStateAuto) {
-        c = this->m_mConfig[s];
+    if (s != kContextTypeAuto) {
+        if (s == kContextTypeDefault)
+            c = this->m_vDefaultConfig;
+        else
+            c = multi ?
+                this->m_mContexts[s].m_vMultiConfig :
+                this->m_mContexts[s].m_vSingleConfig;
     } else {
         if (!sel->count()) {
-            c = this->m_mConfig[kStateNoneSelected];
-        } else if (sel->count() == 1) {
-            c = this->m_mConfig[kStateOneSelected];
+            c = this->m_vDefaultConfig;
         } else {
-            c = this->m_mConfig[kStateManySelected];
+            bool multi = sel->count() > 1;
+
+            auto type = this->getTypeUnderMouse();
+
+            if (this->m_mContexts.count(type)) {
+                c = multi ?
+                    this->m_mContexts[type].m_vMultiConfig :
+                    this->m_mContexts[type].m_vSingleConfig;
+            } else {
+                if (this->m_mContexts.count(kContextTypeObject)) {
+                    c = multi ?
+                        this->m_mContexts[kContextTypeObject].m_vMultiConfig :
+                        this->m_mContexts[kContextTypeObject].m_vSingleConfig;
+                } else {
+                    c = this->m_vDefaultConfig;
+                }
+            }
         }
     }
 
@@ -695,7 +843,7 @@ void ContextMenu::generate(State s) {
 
     CCARRAY_FOREACH_B_TYPE(this->m_pChildren, node, CCNode) {
         node->setPositionY(
-            h - 4.f - node->getPositionY()
+            h + 8.f - node->getPositionY() - node->getScaledContentSize().height
         );
     }
 
@@ -749,6 +897,21 @@ void ContextMenu::generate(State s) {
     h += 8.f;
 
     this->setContentSize({ w, h });
+}
+
+void ContextMenu::deactivateOthers(ContextMenuItem* butNotThis) {
+    CCARRAY_FOREACH_B_TYPE(this->m_pChildren, node, ContextMenuItem) {
+        if (node != butNotThis)
+            node->deactivate();
+    }
+}
+
+ContextMenu::ContextType ContextMenu::getTypeUnderMouse() {
+    CCARRAY_FOREACH_B_TYPE(this->m_pEditor->getAllObjects(), obj, GameObject) {
+        // how tf do i check if an object is rotateable
+    }
+
+    return kContextTypeObject;
 }
 
 ContextMenu* ContextMenu::get() {

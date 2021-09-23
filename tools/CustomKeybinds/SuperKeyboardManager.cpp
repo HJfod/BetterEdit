@@ -5,6 +5,12 @@ SuperKeyboardManager* g_manager;
 
 bool SuperKeyboardDelegate::keyDownSuper(enumKeyCodes) { return false; }
 bool SuperKeyboardDelegate::keyUpSuper(enumKeyCodes) { return false; }
+void SuperKeyboardDelegate::superKeyPushSelf() {
+    g_manager->pushDelegate(this);
+}
+void SuperKeyboardDelegate::superKeyPopSelf() {
+    g_manager->popDelegate(this);
+}
 
 SuperKeyboardDelegate::SuperKeyboardDelegate() {
     SuperKeyboardManager::get()->pushDelegate(this);

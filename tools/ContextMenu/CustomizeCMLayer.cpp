@@ -22,10 +22,12 @@ bool CustomizeCMLayer::init() {
     this->m_nSelectedMode = g_nSelectedMode;
 
     this->m_vModes = {
-        ContextMenu::kStateNoneSelected,
-        ContextMenu::kStateOneSelected,
-        ContextMenu::kStateManySelected,
-        ContextMenu::kStateContextAware,
+        ContextMenu::kContextTypeDefault,
+        ContextMenu::kContextTypeObject,
+        ContextMenu::kContextTypeSolid,
+        ContextMenu::kContextTypeDetail,
+        ContextMenu::kContextTypeTrigger,
+        ContextMenu::kContextTypeSpecial,
     };
 
     this->m_pContextMenu = ContextMenu::create();
@@ -187,7 +189,7 @@ bool CustomizeCMLayer::keyUpSuper(enumKeyCodes) {
 
 void CustomizeCMLayer::updateLabels() {
     this->m_pSelectedModeLabel->setString(
-        ContextMenu::stateToString(this->m_vModes.at(this->m_nSelectedMode)).c_str()
+        ContextMenu::defaultContextName(this->m_vModes.at(this->m_nSelectedMode)).c_str()
     );
     this->m_pSelectedModeLabel->limitLabelWidth(80.f, .5f, .1f);
 }

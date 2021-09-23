@@ -13,7 +13,7 @@ class CustomizeCMLayer :
         CCMenu* m_pButtonMenu;
         CCLabelBMFont* m_pSelectedModeLabel;
         int m_nSelectedMode = 0;
-        std::vector<ContextMenu::State> m_vModes;
+        std::vector<ContextMenu::ContextType> m_vModes;
         CCMenuItem* m_pClickedBtn = nullptr;
         ContextMenuItem* m_pHoverItem = nullptr;
         ContextMenu* m_pContextMenu;

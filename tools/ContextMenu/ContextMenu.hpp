@@ -133,7 +133,9 @@ class ContextMenuItem :
         bool mouseUpSuper(MouseButton btn, CCPoint const&) override;
         void mouseMoveSuper(CCPoint const&) override;
         virtual void activate();
+        virtual void deactivate();
         virtual void drag(float);
+        virtual void hide();
         AnyLabel* createLabel(const char* txt = "");
 };
 
@@ -207,7 +209,8 @@ class KeybindContextMenuItem : public ContextMenuItem {
 
 class PropContextMenuItem :
     public ContextMenuItem,
-    public SuperKeyboardDelegate
+    public SuperKeyboardDelegate,
+    public TextInputDelegate
 {
     public:
         enum Type {
@@ -222,11 +225,19 @@ class PropContextMenuItem :
         Type m_eType;
         AnyLabel* m_pValueLabel;
         float m_fDragCollect = 0;
+        float m_fDefaultValue = 0.0f;
+        float m_fLastDraggedValue = 0.0f;
+        std::string m_sSuffix = "";
         std::function<float(GameObject*)> m_getValue;
         std::function<void(GameObject*, float, bool)> m_setValue;
         std::function<std::string()> m_getName;
+        std::function<void()> m_drawCube = nullptr;
+        CCSprite* m_pCube = nullptr;
+        CCSprite* m_pCube2 = nullptr;
         bool m_bEditingText = false;
+        bool m_bTextSelected = false;
         CCTextInputNode* m_pInput;
+        int m_nCaretPos = 0;
 
         float getValue();
         void setValue(float, bool = false);
@@ -234,12 +245,16 @@ class PropContextMenuItem :
         void enableInput(bool);
 
         bool mouseDownSuper(MouseButton, CCPoint const&) override;
+        void mouseDownOutsideSuper(MouseButton, CCPoint const&) override;
+        bool mouseUpSuper(MouseButton, CCPoint const&) override;
         bool keyDownSuper(enumKeyCodes) override;
+        void textChanged(CCTextInputNode*) override;
 
         bool init(ContextMenu*, Type);
         void drag(float) override;
         void visit() override;
         void draw() override;
+        void deactivate() override;
 
         virtual ~PropContextMenuItem();
 
@@ -274,24 +289,6 @@ class ContextMenu :
     public SuperKeyboardDelegate
 {
     public:
-        enum State {
-            kStateAuto = -1,
-            kStateNoneSelected,
-            kStateOneSelected,
-            kStateManySelected,
-            kStateContextAware,
-        };
-
-        inline static std::string stateToString(State state) {
-            switch (state) {
-                case kStateNoneSelected: return "Empty Selection";
-                case kStateOneSelected: return "One Object Selected";
-                case kStateManySelected: return "Multiple Selected";
-                case kStateContextAware: return "Context-Aware";
-                default: return "Unknown State";
-            }
-        }
-
         struct Line {
             float height = 12.f;
             std::vector<ContextMenuStorageItem> items;
@@ -305,17 +302,55 @@ class ContextMenu :
             }
         };
         using Config = std::vector<Line>;
-        struct Context {
-            std::set<int> ids;
-            Config config;
 
+        enum ContextType {
+            kContextTypeAuto = -1,
+            kContextTypeDefault,
+            kContextTypeObject,
+            kContextTypeSolid,
+            kContextTypeDetail,
+            kContextTypeTrigger,
+            kContextTypeSpecial,
+        };
+
+        inline static std::string defaultContextName(ContextType type) {
+            switch (type) {
+                case kContextTypeDefault: return "Default";
+                case kContextTypeObject: return "Object";
+                case kContextTypeSolid: return "Solid";
+                case kContextTypeDetail: return "Detail";
+                case kContextTypeTrigger: return "Trigger";
+                case kContextTypeSpecial: return "ID List";
+            }
+            return "Unknown";
+        }
+
+        struct Context {
+            std::string m_sName = "";
+            std::set<int> m_vIDs;
+            Config m_vSingleConfig;
+            Config m_vMultiConfig;
+
+            inline Context() {
+                this->m_vIDs = {};
+            }
             inline Context(Config c) {
-                this->ids = {};
-                this->config = c;
+                this->m_vIDs = {};
+                this->m_vSingleConfig = c;
+            }
+            inline Context(Config c, Config cm) {
+                this->m_vIDs = {};
+                this->m_vSingleConfig = c;
+                this->m_vMultiConfig = cm;
             }
             inline Context(std::set<int> i, Config c) {
-                this->ids = i;
-                this->config = c;
+                this->m_vIDs = i;
+                this->m_vSingleConfig = c;
+            }
+            inline Context(std::set<int> i, Config c, Config cm) {
+                this->m_vIDs = i;
+                this->m_vSingleConfig = c;
+                this->m_vMultiConfig = cm;
             }
         };
 
@@ -324,8 +359,8 @@ class ContextMenu :
         LevelEditorLayer* m_pEditor;
         bool m_bDrawBorder = false;
         bool m_bDisabled = false;
-        std::unordered_map<State, Config> m_mConfig;
-        std::unordered_map<std::string, Context> m_mContexts;
+        Config m_vDefaultConfig;
+        std::unordered_map<ContextType, Context> m_mContexts;
         const char* m_sFont = "Segoe UI";
         float m_fTTFFontSize = 28.f;
         float m_fFontScale = .2f;
@@ -340,8 +375,11 @@ class ContextMenu :
 
         bool init() override;
 
-        void generate(State = kStateAuto);
+        void generate(ContextType = kContextTypeAuto, bool multi = false);
         void updatePosition();
+        ContextType getTypeUnderMouse();
+
+        void deactivateOthers(ContextMenuItem*);
 
         void mouseDownOutsideSuper(MouseButton, CCPoint const&) override;
         bool mouseDownSuper(MouseButton, CCPoint const&) override;

@@ -8,6 +8,10 @@ struct SuperKeyboardDelegate {
 
     SuperKeyboardDelegate();
     virtual ~SuperKeyboardDelegate();
+
+    protected:
+        void superKeyPushSelf();
+        void superKeyPopSelf();
 };
 
 class SuperKeyboardManager {
