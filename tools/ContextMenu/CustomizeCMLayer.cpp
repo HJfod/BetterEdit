@@ -25,6 +25,7 @@ bool CustomizeCMLayer::init() {
         ContextMenu::kStateNoneSelected,
         ContextMenu::kStateOneSelected,
         ContextMenu::kStateManySelected,
+        ContextMenu::kStateContextAware,
     };
 
     this->m_pContextMenu = ContextMenu::create();

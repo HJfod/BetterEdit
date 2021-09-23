@@ -514,6 +514,14 @@ void KeybindManager::loadDefaultKeybinds() {
         }, "editor.global", false
     }, {{ KEY_Enter, 0 }});
 
+    this->addEditorKeybind({ "Pause Playtest", "gd.edit.pause_playtest",
+        [](EditorUI* ui) -> bool {
+            if (ui->m_pEditorLayer->m_ePlaybackMode == kPlaybackModePlaying)
+                ui->onPlaytest(nullptr);
+            return false;
+        }, "editor.global", false
+    }, {});
+
     this->addEditorKeybind({ "Playback Music", "gd.edit.playback_music",
         [](EditorUI* ui) -> bool {
             if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)

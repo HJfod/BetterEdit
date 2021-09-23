@@ -18,6 +18,15 @@ ccColor3B to3B(ccColor4B const& c) {
     return { c.r, c.g, c.b };
 }
 
+ccColor4B invert4B(ccColor4B const& c) {
+    return {
+        static_cast<GLubyte>(255 - c.r),
+        static_cast<GLubyte>(255 - c.g),
+        static_cast<GLubyte>(255 - c.b),
+        c.a
+    };
+}
+
 void limitSpriteSize(CCSprite* spr, CCSize const& size, float def, float min) {
     spr->setScale(1.f);
     auto [cwidth, cheight] = spr->getContentSize();
@@ -43,9 +52,14 @@ CCSize operator-(CCSize const& size, float f) {
     return { size.width - f, size.height - f };
 }
 
+bool operator==(CCPoint const&, CCPoint const&);
+
 constexpr const int CMENU_TAG = 600;
 
 #define MORD(x, d) (this->m_pMenu ? this->m_pMenu->x : d)
+#define PROP_GET(...) this->m_getValue = [this](GameObject* obj) -> float { __VA_ARGS__; };
+#define PROP_SET(...) this->m_setValue = [this](GameObject* obj, float f, bool abs) -> void { __VA_ARGS__; };
+#define PROP_NAME(name) this->m_getName = [this]() -> std::string { return name; };
 
 ccColor4B g_colBG = { 0, 0, 0, 200 };
 ccColor4B g_colText = { 255, 255, 255, 255 };
@@ -364,40 +378,143 @@ bool PropContextMenuItem::init(
     if (!ContextMenuItem::init(menu))
         return false;
     
+    this->m_pValueLabel = this->createLabel();
+    this->addChild(this->m_pValueLabel);
     this->m_eType = type;
 
+    this->m_pInput = CCTextInputNode::create("", this, "bigFont.fnt", 100.0f, 10.0f);
+    this->addChild(this->m_pInput);
+    this->m_pInput->retain();
+
+    SuperKeyboardManager::get()->popDelegate(this);
+
+    switch (this->m_eType) {
+        case kTypeScale:
+            PROP_GET(return roundf(obj->getScale() * 100) / 100);
+            PROP_SET(
+                if (abs)
+                    obj->updateCustomScale(f);
+                else
+                    obj->updateCustomScale(this->m_getValue(obj) + f / 10.f)
+            );
+            PROP_NAME("Scale");
+            break;
+        case kTypeRotate:
+            PROP_GET(return roundf(obj->getRotation() * 100) / 100);
+            PROP_SET(
+                if (abs)
+                    obj->setRotation(f);
+                else
+                    obj->setRotation(this->m_getValue(obj) + f * 2.f)
+            );
+            PROP_NAME("Rotate");
+            break;
+    }
+
     return true;
+}
+
+bool PropContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& pos) {
+    if (this->m_bEditingText) {
+        this->enableInput(false);
+        return true;
+    } else {
+        if (btn == kMouseButtonLeft && pos == this->m_obLastMousePos) {
+            this->enableInput(true);
+            return true;
+        }
+    }
+    return this->ContextMenuItem::mouseDownSuper(btn, pos);
+}
+
+float PropContextMenuItem::getValue() {
+    if (m_getValue) {
+        auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+        if (objs->count())
+            return m_getValue(as<GameObject*>(objs->objectAtIndex(0)));
+    }
+    return 0.0f;
+}
+
+void PropContextMenuItem::setValue(float f, bool abs) {
+    if (m_setValue) {
+        auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+        CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject)
+            return m_setValue(obj, f, abs);
+    }
 }
 
 void PropContextMenuItem::drag(float val) {
     auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
     CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
-        switch (this->m_eType) {
-            case kTypeScale: 
-                obj->setScale(obj->getScale() + val / 10.f);
-                break;
-            case kTypeRotate: 
-                obj->setScale(obj->getScale() + val / 10.f);
-                break;
-            case kTypeZOrder: 
-                obj->setScale(obj->getScale() + val / 10.f);
-                break;
-            case kTypeELayer: 
-                m_fDragCollect += val / 2.f;
-                while (m_fDragCollect > 1.f || m_fDragCollect < -1.f) {
-                    m_fDragCollect += m_fDragCollect > 0 ? -1.f : 1.f;
-                    obj->m_nEditorLayer += m_fDragCollect > 0 ? 1 : -1;
-                }
-                break;
-            case kTypeELayer2: 
-                m_fDragCollect += val / 2.f;
-                while (m_fDragCollect > 1.f || m_fDragCollect < -1.f) {
-                    m_fDragCollect += m_fDragCollect > 0 ? -1.f : 1.f;
-                    obj->m_nEditorLayer2 += m_fDragCollect > 0 ? 1 : -1;
-                }
-                break;
-        }
+        this->m_setValue(obj, val, false);
     }
+}
+
+void PropContextMenuItem::visit() {
+    if (this->m_bEditingText) {
+        this->m_pValueLabel->setString(this->m_pInput->getString());
+    } else {
+        auto text = this->m_getName() + ": " +
+            BetterEdit::formatToString(this->getValue(), 2u);
+        this->m_pValueLabel->setString(text.c_str());
+    }
+
+    this->m_pValueLabel->limitLabelWidth(
+        this->getContentSize().width - 30.f,
+        MORD(m_fFontScale, .4f),
+        .02f
+    );
+    this->m_pValueLabel->limitLabelHeight(
+        this->getContentSize().height - 3.f,
+        MORD(m_fFontScale, .4f),
+        .02f
+    );
+    this->m_pValueLabel->setPosition(this->getContentSize() / 2);
+
+    ContextMenuItem::visit();
+}
+
+void PropContextMenuItem::enableInput(bool b) {
+    this->m_bEditingText = b;
+    if (b) {
+        this->m_pInput->setString(
+            BetterEdit::formatToString(this->getValue(), 2u).c_str()
+        );
+        SuperKeyboardManager::get()->pushDelegate(this);
+        std::cout << this->m_pInput->attachWithIME() << "\n";
+    } else {
+        SuperKeyboardManager::get()->popDelegate(this);
+        this->m_pInput->detachWithIME();
+    }
+}
+
+void PropContextMenuItem::draw() {
+    if (this->m_bEditingText) {
+        auto pos = this->m_pValueLabel->getPosition();
+        auto size = this->m_pValueLabel->getScaledContentSize();
+        ccDrawSolidRect(
+            pos - size / 2, pos + size / 2, to4f(g_colText)
+        );
+        this->m_pValueLabel->setColor(to3B(invert4B(g_colText)));
+    } else {
+        this->m_pValueLabel->setColor(to3B(g_colText));
+    }
+
+    ContextMenuItem::draw();
+}
+
+bool PropContextMenuItem::keyDownSuper(enumKeyCodes key) {
+    if (this->m_pInput->getString() && strlen(this->m_pInput->getString())) {
+        try {
+            this->setValue(std::stof(this->m_pInput->getString()), true);
+        } catch (...) {}
+    }
+    return true;
+}
+
+PropContextMenuItem::~PropContextMenuItem() {
+    this->m_pInput->release();
 }
 
 PropContextMenuItem* PropContextMenuItem::create(
@@ -436,7 +553,14 @@ bool ContextMenu::init() {
         } },
 
         { kStateOneSelected, {
-            {{ "betteredit.preview_mode" }},
+            {{
+                { PropContextMenuItem::kTypeRotate },
+                { PropContextMenuItem::kTypeScale }
+            }},
+            {{
+                { "betteredit.preview_mode" },
+                { "betteredit.rotate_saws", 2 },
+            }},
             {{ "gd.edit.deselect" }},
         } },
 
@@ -539,6 +663,10 @@ void ContextMenu::generate(State s) {
     float y = 0.0f;
     for (auto const& line : c) {
         float x = 0.0f;
+        int total_grow = 0;
+        for (auto const& item : line.items)
+            total_grow += item.m_nGrow;
+        
         for (auto const& item : line.items) {
             ContextMenuItem* pItem = nullptr;
             switch (item.m_eType) {
@@ -551,12 +679,15 @@ void ContextMenu::generate(State s) {
             }
             if (pItem) {
                 pItem->setPosition(x, y);
-                pItem->setContentSize({ w / line.items.size(), line.height });
+                pItem->setContentSize({
+                    w * (static_cast<float>(item.m_nGrow) / total_grow),
+                    line.height
+                });
                 this->addChild(pItem);
                 if (this->m_bDisabled)
                     pItem->m_bDisabled = true;
             }
-            x += w / line.items.size();
+            x += w * (static_cast<float>(item.m_nGrow) / total_grow);
         }
         y += line.height;
         h += line.height;

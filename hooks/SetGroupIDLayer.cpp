@@ -264,7 +264,7 @@ void __fastcall SetGroupIDLayer_textChanged(SetGroupIDLayer* self, edx_t edx, CC
             }
             while (str.size() && (!isdigit(str[0]) && str[0] != '-'))
                 str = str.substr(1);
-            if (str.size())
+            if (str.size() && str != "-")
                 val = std::stoi(str);
         } catch (...) {
             isInt = false;

@@ -205,7 +205,10 @@ class KeybindContextMenuItem : public ContextMenuItem {
         static KeybindContextMenuItem* create(ContextMenu*, keybind_id const&);
 };
 
-class PropContextMenuItem : public ContextMenuItem {
+class PropContextMenuItem :
+    public ContextMenuItem,
+    public SuperKeyboardDelegate
+{
     public:
         enum Type {
             kTypeScale,
@@ -218,10 +221,27 @@ class PropContextMenuItem : public ContextMenuItem {
     protected:
         Type m_eType;
         AnyLabel* m_pValueLabel;
-        float m_fDragCollect = .0f;
+        float m_fDragCollect = 0;
+        std::function<float(GameObject*)> m_getValue;
+        std::function<void(GameObject*, float, bool)> m_setValue;
+        std::function<std::string()> m_getName;
+        bool m_bEditingText = false;
+        CCTextInputNode* m_pInput;
+
+        float getValue();
+        void setValue(float, bool = false);
+
+        void enableInput(bool);
+
+        bool mouseDownSuper(MouseButton, CCPoint const&) override;
+        bool keyDownSuper(enumKeyCodes) override;
 
         bool init(ContextMenu*, Type);
         void drag(float) override;
+        void visit() override;
+        void draw() override;
+
+        virtual ~PropContextMenuItem();
 
     public:
         static PropContextMenuItem* create(ContextMenu*, Type);
@@ -232,16 +252,19 @@ struct ContextMenuStorageItem {
         kItemTypeKeybind,
         kItemTypeProperty,
     };
+    int m_nGrow = 1;
     ItemType m_eType;
     keybind_id m_sKeybindID;
     PropContextMenuItem::Type m_ePropType;
-    ContextMenuStorageItem(const char* id) {
+    ContextMenuStorageItem(const char* id, int grow = 1) {
         this->m_eType = kItemTypeKeybind;
         this->m_sKeybindID = id;
+        this->m_nGrow = grow;
     }
-    ContextMenuStorageItem(PropContextMenuItem::Type type) {
+    ContextMenuStorageItem(PropContextMenuItem::Type type, int grow = 1) {
         this->m_eType = kItemTypeProperty;
         this->m_ePropType = type;
+        this->m_nGrow = grow;
     }
 };
 
@@ -256,6 +279,7 @@ class ContextMenu :
             kStateNoneSelected,
             kStateOneSelected,
             kStateManySelected,
+            kStateContextAware,
         };
 
         inline static std::string stateToString(State state) {
@@ -263,6 +287,7 @@ class ContextMenu :
                 case kStateNoneSelected: return "Empty Selection";
                 case kStateOneSelected: return "One Object Selected";
                 case kStateManySelected: return "Multiple Selected";
+                case kStateContextAware: return "Context-Aware";
                 default: return "Unknown State";
             }
         }
@@ -280,6 +305,19 @@ class ContextMenu :
             }
         };
         using Config = std::vector<Line>;
+        struct Context {
+            std::set<int> ids;
+            Config config;
+
+            inline Context(Config c) {
+                this->ids = {};
+                this->config = c;
+            }
+            inline Context(std::set<int> i, Config c) {
+                this->ids = i;
+                this->config = c;
+            }
+        };
 
     protected:
         CCPoint m_obLocation;
@@ -287,6 +325,7 @@ class ContextMenu :
         bool m_bDrawBorder = false;
         bool m_bDisabled = false;
         std::unordered_map<State, Config> m_mConfig;
+        std::unordered_map<std::string, Context> m_mContexts;
         const char* m_sFont = "Segoe UI";
         float m_fTTFFontSize = 28.f;
         float m_fFontScale = .2f;
