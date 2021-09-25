@@ -3,6 +3,7 @@
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../AutoSave/autoSave.hpp"
 #include "../VisibilityTab/loadVisibilityTab.hpp"
+#include "../ContextMenu/loadContextMenu.hpp"
 
 using namespace gdmake;
 
@@ -16,8 +17,11 @@ void __fastcall EditorUI_selectObject(gd::EditorUI* self, edx_t edx, gd::GameObj
 
     SoftSaveManager::saveObject(obj);
 
-    if (AdvancedFilterLayer::testSelectObject(obj) && testSelectObjectLayer(obj))
-        return GDMAKE_ORIG_V(self, edx, obj, idk);
+    if (AdvancedFilterLayer::testSelectObject(obj) && testSelectObjectLayer(obj)) {
+        GDMAKE_ORIG_V(self, edx, obj, idk);
+
+        updateContextMenu();
+    }
 }
 
 GDMAKE_HOOK(0x864a0)
@@ -34,5 +38,7 @@ void __fastcall EditorUI_selectObjects(gd::EditorUI* self, edx_t edx, cocos2d::C
             objs->removeObjectAtIndex(ix--);
     }
     
-    return GDMAKE_ORIG_V(self, edx, objs, idk);
+    GDMAKE_ORIG_V(self, edx, objs, idk);
+
+    updateContextMenu();
 }

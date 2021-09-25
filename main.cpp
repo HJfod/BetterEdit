@@ -24,6 +24,10 @@
 #include "tools/CustomUI/UIManager.hpp"
 #include "tools/History/UndoHistoryManager.hpp"
 
+GDMAKE_DEBUG(song, args) {
+    LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->songID = std::stoi(args[1]);
+}
+
 GDMAKE_MAIN_HM(hMod) {
     BetterEdit::log() << "Loading BetterEdit" << log_end();
     BetterEdit::log() << "Applying patches" << log_end();

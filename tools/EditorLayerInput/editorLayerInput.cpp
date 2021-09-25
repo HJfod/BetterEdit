@@ -409,19 +409,25 @@ bool testSelectObjectLayer(GameObject* obj) {
     auto layer1 = LayerManager::get()->getLayer(obj->m_nEditorLayer);
     auto layer2 = LayerManager::get()->getLayer(obj->m_nEditorLayer2);
 
-    if (obj->m_nEditorLayer == LevelEditorLayer::get()->m_nCurrentLayer ||
-        obj->m_nEditorLayer2 == LevelEditorLayer::get()->m_nCurrentLayer)
+    auto current = LevelEditorLayer::get()->m_nCurrentLayer;
+
+    if (obj->m_nEditorLayer == current ||
+        obj->m_nEditorLayer2 == current)
         return true;
 
     bool check2 = false;
 
     if (obj->m_nEditorLayer == 0 &&
         obj->m_nEditorLayer2 > 0) check2 = true;
-
+    
     if (!check2 && layer1 && (!layer1->m_bVisible || layer1->m_bLocked))
         return false;
 
     if (check2 && layer2 && (!layer2->m_bVisible || layer2->m_bLocked))
+        return false;
+
+    if (current != -1 && obj->m_nEditorLayer != current &&
+        obj->m_nEditorLayer2 != current)
         return false;
 
     return true;

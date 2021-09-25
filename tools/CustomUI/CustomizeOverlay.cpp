@@ -1,13 +1,5 @@
 #include "CustomizeOverlay.hpp"
 
-std::ostream& operator<<(std::ostream& stream, CCPoint const& pos) {
-    return stream << pos.x << ", " << pos.y;
-}
-
-std::ostream& operator<<(std::ostream& stream, CCSize const& pos) {
-    return stream << pos.width << " : " << pos.height;
-}
-
 CCSize operator-(CCSize const& size) {
     return { -size.width, -size.height };
 }

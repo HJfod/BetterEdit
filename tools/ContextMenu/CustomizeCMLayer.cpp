@@ -84,8 +84,6 @@ bool CustomizeCMLayer::init() {
     return true;
 }
 
-std::ostream& operator<<(std::ostream& stream, CCRect const& size);
-
 CCMenuItem* CustomizeCMLayer::itemUnderMouse(CCPoint const& mpos) {
     CCARRAY_FOREACH_B_TYPE(this->m_pButtonMenu->getChildren(), btn, CCMenuItem) {
         auto pos = this->m_pButtonMenu->convertToWorldSpace(btn->getPosition());

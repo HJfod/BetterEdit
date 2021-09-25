@@ -18,7 +18,7 @@ void __fastcall GameObject_duplicateAttributes(gd::GameObject* dest, edx_t edx, 
 
     auto states = PasteLayer::getStates();
 
-    dest->m_unk21E = false;
+    dest->m_bGroupDisabled = false;
     dest->m_unk414 = 0;
 
     if (states->count(PasteLayer::ObjID))           dest->m_nObjectID = src->m_nObjectID;

@@ -1,5 +1,6 @@
 #include "ContextMenu.hpp"
 #include "CustomizeCMLayer.hpp"
+#include "../EditorLayerInput/editorLayerInput.hpp"
 
 using namespace gd;
 using namespace gdmake;
@@ -54,19 +55,108 @@ CCSize operator-(CCSize const& size, float f) {
 
 bool operator==(CCPoint const&, CCPoint const&);
 
+GameObject* firstObject(CCArray* objs) {
+    if (objs->count())
+        return as<GameObject*>(objs->objectAtIndex(0));
+    return nullptr;
+}
+
+float dampenf(float x, float y) {
+    return x + y / 10.f;
+}
+
+constexpr size_t operator"" _h (const char* txt, size_t) {
+    return hash(txt);
+}
+
+CCRect getObjectRect(CCNode* node) {
+    auto pos = node->getPosition();
+    auto size = node->getScaledContentSize();
+
+    return {
+        pos.x - size.width / 2,
+        pos.y - size.height / 2,
+        size.width,
+        size.height
+    };
+}
+
+bool objectsAreAdjacent(GameObject* o1, GameObject* o2) {
+    auto rect1 = getObjectRect(o1);
+    auto rect2 = getObjectRect(o2);
+
+    return (
+        rect1.origin.x <= rect2.origin.x + rect2.size.width &&
+        rect2.origin.x <= rect1.origin.x + rect1.size.width &&
+        rect1.origin.y <= rect2.origin.y + rect2.size.height &&
+        rect2.origin.y <= rect1.origin.y + rect1.size.height
+    );
+}
+
+void recursiveAddNear(EditorUI* ui, GameObject* fromObj, std::vector<GameObject*> const& vnear, CCArray* arr) {
+    for (auto const& obj : vnear) {
+        if (objectsAreAdjacent(fromObj, obj)) {
+            if (!arr->containsObject(obj)) {
+                arr->addObject(obj);
+                recursiveAddNear(ui, obj, vnear, arr);
+            }
+        }
+    }
+}
+
+void selectStructure(EditorUI* ui, GameObject* fromObj) {
+    std::vector<GameObject*> nearby;
+    auto pos = fromObj->getPosition();
+    CCARRAY_FOREACH_B_TYPE(ui->m_pEditorLayer->getAllObjects(), obj, GameObject) {
+        switch (obj->m_nObjectType) {
+            case kGameObjectTypeSlope:
+            case kGameObjectTypeSolid:
+            case kGameObjectTypeSpecial:
+            case kGameObjectTypeDecoration:
+            case kGameObjectTypeHazard:
+            case kGameObjectTypeGravityPad:
+            case kGameObjectTypePinkJumpPad:
+            case kGameObjectTypeYellowJumpPad:
+            case kGameObjectTypeRedJumpPad:
+                if (
+                    obj->m_nEditorLayer == fromObj->m_nEditorLayer
+                ) {
+                    if (ccpDistance(obj->getPosition(), pos) < 500.0f) {
+                        nearby.push_back(obj);
+                    }
+                }
+                break;
+        }
+    }
+    auto arr = CCArray::create();
+    arr->addObject(fromObj);
+    recursiveAddNear(ui, fromObj, nearby, arr);
+    ui->deselectAll();
+    ui->selectObjects(arr, false);
+}
+
 constexpr const int CMENU_TAG = 600;
 
 #define MORD(x, d) (this->m_pMenu ? this->m_pMenu->x : d)
-#define PROP_GET(...) this->m_getValue = [this](GameObject* obj) -> float { __VA_ARGS__; };
-#define PROP_SET(...) this->m_setValue = [this](GameObject* obj, float f, bool abs) -> void { __VA_ARGS__; };
-#define PROP_NAME(name) this->m_getName = [this]() -> std::string { return name; };
-#define PROP_DRAW(...) this->m_drawCube = [this]() -> void { __VA_ARGS__; };
+#define PROP_GET(...) \
+    this->m_getValue = [this](CCArray* objs) -> float { __VA_ARGS__; };
+#define PROP_SET(...) \
+    this->m_setValue = [this](CCArray* objs, float f, bool abs) -> void { __VA_ARGS__; };
+#define PROP_NAME(name) \
+    this->m_getName = [this]() -> std::string { return name; };
+#define PROP_DRAW(...) \
+    this->m_drawCube = [this]() -> void { __VA_ARGS__; };
+#define PROP_USABLE(...) \
+    this->m_usable = [this]() -> bool { __VA_ARGS__; };
+#define PROP_UNDO(...) \
+    this->m_undo = [this]() -> void { __VA_ARGS__; };
 
 ccColor4B g_colBG = { 0, 0, 0, 200 };
 ccColor4B g_colText = { 255, 255, 255, 255 };
 ccColor4B g_colGray = { 150, 150, 150, 255 };
 ccColor4B g_colHover = { 255, 255, 255, 52 };
 ccColor4B g_colTransparent = { 0, 0, 0, 0 };
+ccColor3B g_colSelect = { 255, 194, 90 };
 
 bool ContextMenuItem::init(ContextMenu* menu) {
     if (!CCNode::init())
@@ -162,6 +252,7 @@ AnyLabel* ContextMenuItem::createLabel(const char* txt) {
 
 void ContextMenuItem::activate() {}
 void ContextMenuItem::deactivate() {}
+void ContextMenuItem::updateItem() {}
 void ContextMenuItem::drag(float) {}
 void ContextMenuItem::hide() { this->deactivate(); }
 
@@ -214,6 +305,92 @@ KeybindContextMenuItem* KeybindContextMenuItem::create(
     ContextMenu* menu, keybind_id const& id
 ) {
     auto ret = new KeybindContextMenuItem;
+
+    if (ret && ret->init(menu, id)) {
+        ret->autorelease();
+        return ret;
+    }
+
+    CC_SAFE_DELETE(ret);
+    return nullptr;
+}
+
+
+ActionContextMenuItem::ACMIAction ActionContextMenuItem::actionForID(std::string const& id) {
+    switch (hash(id.c_str())) {
+        case "deselect_this"_h: return {
+            "Deselect This",
+            [](ActionContextMenuItem* item, GameObject* obj) -> void {
+                auto ui = LevelEditorLayer::get()->getEditorUI();
+                CATCH_NULL(ui->m_pSelectedObjects)->removeObject(obj);
+                if (ui->m_pSelectedObject) {
+                    ui->m_pSelectedObject = nullptr;
+                }
+                if (item->m_pMenu) {
+                    item->m_pMenu->m_pObjSelectedUnderMouse = nullptr;
+                }
+                obj->deselectObject();
+                ui->updateButtons();
+                ui->updateObjectInfoLabel();
+            }
+        };
+        case "select_structure"_h: return {
+            "Select Structure",
+            [](ActionContextMenuItem* item, GameObject* obj) -> void {
+                auto ui = LevelEditorLayer::get()->getEditorUI();
+                selectStructure(ui, obj);
+                ui->updateButtons();
+                ui->updateObjectInfoLabel();
+                if (item->m_pMenu) {
+                    item->m_pMenu->m_bDeselectObjUnderMouse = false;
+                }
+            }
+        };
+        default:
+            return { "Unknown Action" };
+    }
+}
+
+bool ActionContextMenuItem::init(ContextMenu* menu, std::string const& id) {
+    if (!ContextMenuItem::init(menu))
+        return false;
+    
+    this->m_obAction = this->actionForID(id);
+
+    this->m_pLabel = this->createLabel(this->m_obAction.m_sName.c_str());
+    this->m_pLabel->setColor(to3B(g_colText));
+    this->addChild(this->m_pLabel);
+
+    return true;
+}
+
+void ActionContextMenuItem::visit() {
+    this->m_pLabel->setPosition(
+        this->getContentSize() / 2
+    );
+    this->m_pLabel->limitLabelWidth(
+        this->getScaledContentSize().width - 10.0f,
+        this->m_pMenu ? this->m_pMenu->m_fFontScale : .4f,
+        .02f
+    );
+
+    ContextMenuItem::visit();
+}
+
+void ActionContextMenuItem::activate() {
+    if (this->m_pMenu) {
+        this->m_obAction.m_callback(this, this->m_pMenu->m_pObjSelectedUnderMouse);
+        this->m_pMenu->hide();
+    } else {
+        this->m_obAction.m_callback(this, nullptr);
+    }
+    SuperMouseManager::get()->releaseCapture(this);
+}
+
+ActionContextMenuItem* ActionContextMenuItem::create(
+    ContextMenu* menu, std::string const& id
+) {
+    auto ret = new ActionContextMenuItem;
 
     if (ret && ret->init(menu, id)) {
         ret->autorelease();
@@ -408,12 +585,64 @@ bool PropContextMenuItem::init(
 
     switch (this->m_eType) {
         case kTypeScale: {
-            PROP_GET(return roundf(obj->getScale() * 100) / 100);
+            PROP_GET(
+                auto max_val = 0.0f;
+                CCARRAY_FOREACH_B_BASE(objs, obj, GameObject*, ix) {
+                    if (ix == 0) {
+                        max_val = obj->getScale();
+                    } else if (obj->getScale() > max_val) {
+                        max_val = obj->getScale();
+                    }
+                }
+                return max_val;
+            );
             PROP_SET(
-                if (abs)
-                    obj->updateCustomScale(f);
-                else
-                    obj->updateCustomScale(this->m_getValue(obj) + f / 10.f)
+                auto ui = LevelEditorLayer::get()->getEditorUI();
+                ui->m_pScaleControl->loadValues(nullptr, objs);
+                if (this->absoluteModifier()) {
+                    if (abs) {
+                        CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                            auto sobjs = CCArray::createWithObject(obj);
+                            ui->scaleObjects(
+                                sobjs, f,
+                                obj->getPosition()
+                            );
+                        }
+                    } else {
+                        CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                            auto sobjs = CCArray::createWithObject(obj);
+                            ui->scaleObjects(
+                                sobjs, dampenf(this->m_getValue(objs), f), 
+                                obj->getPosition()
+                            );
+                        }
+                    }
+                } else {
+                    if (abs) {
+                        ui->scaleObjects(
+                            objs, f,
+                            this->m_obScaleCenter
+                        );
+                    } else {
+                        ui->scaleObjects(
+                            objs, dampenf(this->m_getValue(objs), f),
+                            this->m_obScaleCenter
+                        );
+                    }
+                }
+            );
+            PROP_USABLE(
+                auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+                if (!objs->count()) 
+                    return false;
+                return true;
+            );
+            PROP_UNDO(
+                auto ui = EditorUI::get();
+                auto undo = UndoObject::createWithTransformObjects(
+                    ui->getSelectedObjects(), kUndoCommandTransform
+                );
+                ui->m_pEditorLayer->m_pUndoObjects->addObject(undo);
             );
             PROP_NAME("Scale");
             PROP_DRAW(
@@ -430,12 +659,58 @@ bool PropContextMenuItem::init(
         } break;
             
         case kTypeRotate: {
-            PROP_GET(return roundf(obj->getRotation() * 100) / 100);
+            PROP_GET(return firstObject(objs)->getRotation());
             PROP_SET(
-                if (abs)
-                    obj->setRotation(f);
-                else
-                    obj->setRotation(this->m_getValue(obj) + f * 2.f)
+                auto ui = LevelEditorLayer::get()->getEditorUI();
+                if (this->absoluteModifier()) {
+                    if (abs) {
+                        CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                            auto sobjs = CCArray::createWithObject(obj);
+                            ui->rotateObjects(
+                                sobjs, f - obj->getRotation(),
+                                ui->getGroupCenter(sobjs, false)
+                            );
+                        }
+                    } else {
+                        CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                            auto sobjs = CCArray::createWithObject(obj);
+                            ui->rotateObjects(
+                                sobjs, f * 2.f,
+                                ui->getGroupCenter(sobjs, false)
+                            );
+                        }
+                    }
+                } else {
+                    if (abs) {
+                        ui->rotateObjects(
+                            objs, f - this->m_getValue(objs),
+                            ui->getGroupCenter(objs, false)
+                        );
+                    } else {
+                        ui->rotateObjects(
+                            objs, f * 2.f,
+                            ui->getGroupCenter(objs, false)
+                        );
+                    }
+                }
+            );
+            PROP_USABLE(
+                auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+                if (!objs->count()) 
+                    return false;
+                CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                    if (obj->m_nObjectType == kGameObjectTypeSolid ||
+                        obj->m_nObjectType == kGameObjectTypeSlope)
+                        return false;
+                }
+                return true;
+            );
+            PROP_UNDO(
+                auto ui = EditorUI::get();
+                auto undo = UndoObject::createWithTransformObjects(
+                    ui->getSelectedObjects(), kUndoCommandTransform
+                );
+                ui->m_pEditorLayer->m_pUndoObjects->addObject(undo);
             );
             PROP_NAME("Rotate");
             PROP_DRAW(
@@ -443,6 +718,78 @@ bool PropContextMenuItem::init(
                 this->m_pCube->setRotation(this->getValue());
             );
             this->m_sSuffix = "°";
+            this->m_pCube2->setOpacity(50);
+            this->m_pCube->setVisible(true);
+            this->m_pCube2->setVisible(true);
+            this->m_pInput->setAllowedChars(inputf_NumeralFloatSigned);
+        } break;
+            
+        case kTypePositionX: {
+            PROP_GET(return firstObject(objs)->getPositionX());
+            PROP_SET(
+                auto ui = LevelEditorLayer::get()->getEditorUI();
+                CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                    if (abs)
+                        obj->setPositionX(f);
+                    else
+                        obj->setPositionX(obj->getPositionX() + f);
+                }
+            );
+            PROP_USABLE(
+                auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+                return objs->count();
+            );
+            PROP_UNDO(
+                auto ui = EditorUI::get();
+                auto undo = UndoObject::createWithTransformObjects(
+                    ui->getSelectedObjects(), kUndoCommandTransform
+                );
+                ui->m_pEditorLayer->m_pUndoObjects->addObject(undo);
+            );
+            PROP_NAME("Position X");
+            PROP_DRAW(
+                auto pos = this->getValue() / this->m_fLastDraggedValue;
+                pos = clamp(pos, -10.f, 10.f);
+                this->m_pCube->setPositionX(
+                    this->m_pCube->getPositionX() + pos
+                );
+            );
+            this->m_pCube2->setOpacity(50);
+            this->m_pCube->setVisible(true);
+            this->m_pCube2->setVisible(true);
+            this->m_pInput->setAllowedChars(inputf_NumeralFloatSigned);
+        } break;
+
+        case kTypePositionY: {
+            PROP_GET(return firstObject(objs)->getPositionY());
+            PROP_SET(
+                auto ui = LevelEditorLayer::get()->getEditorUI();
+                CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                    if (abs)
+                        obj->setPositionY(f);
+                    else
+                        obj->setPositionY(obj->getPositionY() + f);
+                }
+            );
+            PROP_USABLE(
+                auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+                return objs->count();
+            );
+            PROP_UNDO(
+                auto ui = EditorUI::get();
+                auto undo = UndoObject::createWithTransformObjects(
+                    ui->getSelectedObjects(), kUndoCommandTransform
+                );
+                ui->m_pEditorLayer->m_pUndoObjects->addObject(undo);
+            );
+            PROP_NAME("Position Y");
+            PROP_DRAW(
+                auto pos = this->getValue() / this->m_fLastDraggedValue;
+                pos = clamp(pos, -10.f, 10.f);
+                this->m_pCube->setPositionY(
+                    this->m_pCube->getPositionY() + pos
+                );
+            );
             this->m_pCube2->setOpacity(50);
             this->m_pCube->setVisible(true);
             this->m_pCube2->setVisible(true);
@@ -456,6 +803,8 @@ bool PropContextMenuItem::init(
 }
 
 bool PropContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& pos) {
+    if (!this->isUsable())
+        return true;
     if (this->m_bEditingText && this->m_bTextSelected) {
         this->enableInput(false);
         return true;
@@ -471,10 +820,15 @@ bool PropContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& pos) {
             this->enableInput(false);
         }
     }
+    if (this->m_undo) {
+        this->m_undo();
+    }
     return this->ContextMenuItem::mouseDownSuper(btn, pos);
 }
 
 bool PropContextMenuItem::mouseUpSuper(MouseButton btn, CCPoint const& pos) {
+    if (!this->isUsable())
+        return true;
     this->m_fLastDraggedValue = this->getValue();
     return this->ContextMenuItem::mouseUpSuper(btn, pos);
 }
@@ -487,7 +841,7 @@ float PropContextMenuItem::getValue() {
     if (m_getValue) {
         auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
         if (objs->count())
-            return m_getValue(as<GameObject*>(objs->objectAtIndex(0)));
+            return m_getValue(objs);
     }
     return m_fDefaultValue;
 }
@@ -496,14 +850,35 @@ void PropContextMenuItem::setValue(float f, bool abs) {
     if (m_setValue) {
         auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
         CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject)
-            return m_setValue(obj, f, abs);
+            return m_setValue(objs, f, abs);
     }
 }
 
+bool PropContextMenuItem::isUsable() {
+    if (m_usable) return m_usable();
+    return true;
+}
+
+bool PropContextMenuItem::absoluteModifier() {
+    return CCDirector::sharedDirector()
+        ->getKeyboardDispatcher()
+        ->getAltKeyPressed();
+}
+
+bool PropContextMenuItem::smallModifier() {
+    return CCDirector::sharedDirector()
+        ->getKeyboardDispatcher()
+        ->getShiftKeyPressed();
+}
+
 void PropContextMenuItem::drag(float val) {
+    if (!this->isUsable())
+        return;
+    if (this->smallModifier())
+        val /= 5.f;
     auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
     CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
-        this->m_setValue(obj, val, false);
+        this->m_setValue(objs, val, false);
     }
 }
 
@@ -526,9 +901,10 @@ void PropContextMenuItem::textChanged(CCTextInputNode*) {
     auto str = this->m_pInput->getString();
     if (str && strlen(str)) {
         if (this->m_bTextSelected) {
+            auto c = str[strlen(str) - 1];
             this->setValue(this->m_fDefaultValue, true);
-            this->m_pInput->setString("");
             this->m_bTextSelected = false;
+            this->m_pInput->setString(std::string(1, c).c_str());
             return;
         }
         this->m_bTextSelected = false;
@@ -595,6 +971,14 @@ void PropContextMenuItem::visit() {
 }
 
 void PropContextMenuItem::draw() {
+    if (!this->isUsable()) {
+        this->m_pValueLabel->setOpacity(50);
+        this->m_pCube->setOpacity(50);
+    } else {
+        this->m_pValueLabel->setOpacity(255);
+        this->m_pCube->setOpacity(255);
+    }
+
     if (this->m_drawCube && this->getScaledContentSize().height >= 15.f) {
         auto pos = this->getScaledContentSize() / 2;
         pos.height += 4.f;
@@ -630,6 +1014,21 @@ void PropContextMenuItem::draw() {
 
 void PropContextMenuItem::deactivate() {
     this->enableInput(false);
+}
+
+void PropContextMenuItem::updateItem() {
+    if (this->m_pMenu) {
+        auto ui = this->m_pMenu->m_pEditor->m_pEditorUI;
+
+        if (!ui) return;
+
+        auto objs = ui->getSelectedObjects();
+
+        this->m_obScaleCenter =
+            ui->getGroupCenter(objs, false);
+
+        this->m_pMenu->m_pEditor->m_pEditorUI->m_obScalePos = this->m_obScaleCenter;
+    }
 }
 
 PropContextMenuItem::~PropContextMenuItem() {
@@ -677,6 +1076,10 @@ bool ContextMenu::init() {
     this->m_mContexts = {
         { kContextTypeObject, {{
             {{
+                { PropContextMenuItem::kTypePositionX },
+                { PropContextMenuItem::kTypePositionY }
+            }, 24.f},
+            {{
                 { PropContextMenuItem::kTypeRotate },
                 { PropContextMenuItem::kTypeScale }
             }, 24.f},
@@ -685,8 +1088,13 @@ bool ContextMenu::init() {
                 "betteredit.edit_group",
                 "betteredit.edit_special"
             }},
-            {{ "gd.edit.deselect" }},
+            {{ "gd.edit.deselect", "deselect_this"_s }},
+            {{ "select_structure"_s }},
         }, {
+            {{
+                { PropContextMenuItem::kTypePositionX },
+                { PropContextMenuItem::kTypePositionY }
+            }, 24.f},
             {{
                 { PropContextMenuItem::kTypeRotate },
                 { PropContextMenuItem::kTypeScale }
@@ -697,7 +1105,8 @@ bool ContextMenu::init() {
                 "betteredit.edit_special"
             }},
             {{ "betteredit.align_x", "betteredit.align_y" }},
-            {{ "gd.edit.deselect" }},
+            {{ "gd.edit.deselect", "deselect_this"_s }},
+            {{ "select_structure"_s }},
         }} },
     };
 
@@ -737,7 +1146,7 @@ void ContextMenu::updatePosition() {
     auto y = pos.y - cssize.height + cssize.height / 2 - csize.height / 2;
     while (x + cssize.width > winSize.width)
         x -= 20.f;
-    while (y - cssize.height < 0)
+    while (y < 0)
         y += 20.f;
 
     this->setPosition(x, y);
@@ -746,6 +1155,24 @@ void ContextMenu::updatePosition() {
 }
 
 void ContextMenu::hide() {
+    if (this->m_pObjSelectedUnderMouse) {
+        if (this->m_bDeselectObjUnderMouse) {
+            CATCH_NULL(this->m_pEditor->m_pEditorUI->m_pSelectedObjects)->removeObject(
+                this->m_pObjSelectedUnderMouse
+            );
+            if (this->m_pEditor->m_pEditorUI->m_pSelectedObject) {
+                this->m_pEditor->m_pEditorUI->m_pSelectedObject = nullptr;
+            }
+            this->m_pObjSelectedUnderMouse->deselectObject();
+            this->m_pObjSelectedUnderMouse->release();
+            this->m_pObjSelectedUnderMouse = nullptr;
+            this->m_pEditor->m_pEditorUI->updateButtons();
+        } else {
+            if (this->m_pObjSelectedUnderMouse->m_bIsSelected)
+                this->m_pObjSelectedUnderMouse->selectObject();
+        }
+    }
+    
     this->setVisible(false);
     this->setPosition(-700.0f, -900.0f);
     CCARRAY_FOREACH_B_TYPE(this->m_pChildren, node, ContextMenuItem) {
@@ -782,13 +1209,13 @@ void ContextMenu::generate(ContextType s, bool multi) {
                 this->m_mContexts[s].m_vMultiConfig :
                 this->m_mContexts[s].m_vSingleConfig;
     } else {
-        if (!sel->count()) {
+        bool multi = sel->count() > 1;
+
+        auto type = this->getTypeUnderMouse();
+
+        if (type == kContextTypeDefault) {
             c = this->m_vDefaultConfig;
         } else {
-            bool multi = sel->count() > 1;
-
-            auto type = this->getTypeUnderMouse();
-
             if (this->m_mContexts.count(type)) {
                 c = multi ?
                     this->m_mContexts[type].m_vMultiConfig :
@@ -823,6 +1250,9 @@ void ContextMenu::generate(ContextType s, bool multi) {
                     break;
                 case ContextMenuStorageItem::kItemTypeProperty:
                     pItem = PropContextMenuItem::create(this, item.m_ePropType);
+                    break;
+                case ContextMenuStorageItem::kItemTypeAction:
+                    pItem = ActionContextMenuItem::create(this, item.m_sActionID);
                     break;
             }
             if (pItem) {
@@ -906,20 +1336,48 @@ void ContextMenu::deactivateOthers(ContextMenuItem* butNotThis) {
     }
 }
 
-ContextMenu::ContextType ContextMenu::getTypeUnderMouse() {
-    CCARRAY_FOREACH_B_TYPE(this->m_pEditor->getAllObjects(), obj, GameObject) {
-        // how tf do i check if an object is rotateable
+void ContextMenu::updateItems() {
+    CCARRAY_FOREACH_B_TYPE(this->m_pChildren, node, ContextMenuItem) {
+        node->updateItem();
     }
-
-    return kContextTypeObject;
 }
 
-ContextMenu* ContextMenu::get() {
-    if (!GameManager::sharedState()->getEditorLayer())
+ContextMenu::ContextType ContextMenu::getTypeUnderMouse(bool selectUnder) {
+    auto mpos = this->m_pEditor->m_pObjectLayer->convertToNodeSpace(getMousePos());
+    auto obj = this->m_pEditor->objectAtPosition(mpos);
+    
+    if (obj) {
+        if (testSelectObjectLayer(obj)) {
+            this->m_pEditor->m_pEditorUI->selectObjects(CCArray::createWithObject(obj), false);
+            obj->selectObject(g_colSelect);
+            if (this->m_pObjSelectedUnderMouse) {
+                this->m_pObjSelectedUnderMouse->release();
+            }
+            this->m_bDeselectObjUnderMouse = true;
+            this->m_pObjSelectedUnderMouse = obj;
+            this->m_pObjSelectedUnderMouse->retain();
+            if (obj->m_nObjectType == kGameObjectTypeSolid ||
+                obj->m_nObjectType == kGameObjectTypeSlope)
+                return kContextTypeSolid;
+            if (obj->m_nObjectType == kGameObjectTypeDecoration)
+                return kContextTypeDetail;
+            return kContextTypeObject;
+        }
+    }
+
+    return kContextTypeDefault;
+}
+
+ContextMenu* ContextMenu::get(LevelEditorLayer* lel) {
+    if (lel) {
+        return as<ContextMenu*>(lel->getChildByTag(CMENU_TAG));
+    }
+
+    if (!LevelEditorLayer::get())
         return nullptr;
     
-    return as<ContextMenu*>(GameManager::sharedState()
-        ->getEditorLayer()
+    return as<ContextMenu*>(
+        LevelEditorLayer::get()
         ->getChildByTag(CMENU_TAG));
 }
 

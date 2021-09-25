@@ -5,6 +5,8 @@
 
 using namespace gdmake;
 using namespace gdmake::extra;
+using namespace cocos2d;
+using namespace gd;
 
 static constexpr const char* inputf_Default =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,/\\{}[]()&%!?\"#¤$€:;'*^¨~+<>|.-_";
@@ -56,19 +58,19 @@ static bool ispatched(uintptr_t addr) {
     return g_patchedBytes.count(addr);
 }
 
-static cocos2d::CCSprite* createBESprite(const char* name, const char* fallback = nullptr) {
-    auto spr = cocos2d::CCSprite::createWithSpriteFrameName(name);
+static CCSprite* createBESprite(const char* name, const char* fallback = nullptr) {
+    auto spr = CCSprite::createWithSpriteFrameName(name);
 
     if (spr) return spr;
     if (fallback) {
-        spr = cocos2d::CCSprite::createWithSpriteFrameName(fallback);
+        spr = CCSprite::createWithSpriteFrameName(fallback);
 
         if (spr) return spr;
     }
 
-    auto missingTextureSpr = cocos2d::CCSprite::create();
+    auto missingTextureSpr = CCSprite::create();
 
-    auto missingTextureLabel = cocos2d::CCLabelBMFont::create("Missing\nTexture", "bigFont.fnt");
+    auto missingTextureLabel = CCLabelBMFont::create("Missing\nTexture", "bigFont.fnt");
 
     missingTextureLabel->setColor({ 255, 50, 50 });
     missingTextureLabel->setScale(.3f);
@@ -81,36 +83,36 @@ static cocos2d::CCSprite* createBESprite(const char* name, const char* fallback 
     return missingTextureSpr;
 }
 
-static constexpr cocos2d::ccColor3B cc3x(int hexValue) {
+static constexpr ccColor3B cc3x(int hexValue) {
     if (hexValue <= 0xf)
-        return cocos2d::ccColor3B {
+        return ccColor3B {
             static_cast<GLubyte>(hexValue * 17),
             static_cast<GLubyte>(hexValue * 17),
             static_cast<GLubyte>(hexValue * 17)
         };
     if (hexValue <= 0xff)
-        return cocos2d::ccColor3B {
+        return ccColor3B {
             static_cast<GLubyte>(hexValue),
             static_cast<GLubyte>(hexValue),
             static_cast<GLubyte>(hexValue)
         };
     if (hexValue <= 0xfff)
-        return cocos2d::ccColor3B {
+        return ccColor3B {
             static_cast<GLubyte>((hexValue >> 8 & 0xf) * 17),
             static_cast<GLubyte>((hexValue >> 4 & 0xf) * 17),
             static_cast<GLubyte>((hexValue >> 0 & 0xf) * 17)
         };
     else
-        return cocos2d::ccColor3B {
+        return ccColor3B {
             static_cast<GLubyte>(hexValue >> 16 & 0xff),
             static_cast<GLubyte>(hexValue >> 8  & 0xff),
             static_cast<GLubyte>(hexValue >> 0  & 0xff)
         };
 }
 
-static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
+static EffectGameObject* asEffectGameObject(GameObject* obj) {
     if (obj != nullptr) {
-        const auto vtable = *as<uintptr_t*>(obj) - gd::base;
+        const auto vtable = *as<uintptr_t*>(obj) - base;
         if (
             // EffectGameObject::vftable
             vtable == 0x2e4190 ||
@@ -121,7 +123,7 @@ static gd::EffectGameObject* asEffectGameObject(gd::GameObject* obj) {
             // StartPosObject::vftable
             vtable == 0x25aa40
         )
-            return as<gd::EffectGameObject*>(obj);
+            return as<EffectGameObject*>(obj);
     }
     return nullptr;
 }
@@ -136,18 +138,18 @@ static std::string timePointAsString(const std::chrono::system_clock::time_point
 
 template<typename T, typename R = T>
 static constexpr R vtable_cast(T obj, uintptr_t vtable) {
-    if (obj && (*as<uintptr_t*>(obj) - gd::base == vtable))
+    if (obj && (*as<uintptr_t*>(obj) - base == vtable))
         return as<R>(obj);
     
     return nullptr;
 }
 
-static cocos2d::CCPoint getMousePos() {
-    auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-    auto winSizePx = cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getViewPortRect();
+static CCPoint getMousePos() {
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+    auto winSizePx = CCDirector::sharedDirector()->getOpenGLView()->getViewPortRect();
     auto ratio_w = winSize.width / winSizePx.size.width;
     auto ratio_h = winSize.height / winSizePx.size.height;
-    auto mpos = cocos2d::CCDirector::sharedDirector()->getOpenGLView()->getMousePosition();
+    auto mpos = CCDirector::sharedDirector()->getOpenGLView()->getMousePosition();
     mpos.y = winSizePx.size.height - mpos.y;
     mpos.x *= ratio_w;
     mpos.y *= ratio_h;
@@ -177,34 +179,34 @@ static constexpr T offset_cast(R const v, uintptr_t offset) {
 #define CATCH_NULL(x) if (x) x
 
 
-template<class T = cocos2d::CCSprite*>
+template<class T = CCSprite*>
 class CCNodeConstructor {
     protected:
         T node;
 
     public:
-        inline CCNodeConstructor<cocos2d::CCSprite*> & fromFrameName(const char* fname) {
-            this->node = cocos2d::CCSprite::createWithSpriteFrameName(fname);
+        inline CCNodeConstructor<CCSprite*> & fromFrameName(const char* fname) {
+            this->node = CCSprite::createWithSpriteFrameName(fname);
             return *this;
         }
-        inline CCNodeConstructor<cocos2d::CCSprite*> & fromBESprite(const char* fname, const char* fback = nullptr) {
+        inline CCNodeConstructor<CCSprite*> & fromBESprite(const char* fname, const char* fback = nullptr) {
             this->node = createBESprite(fname, fback);
             return *this;
         }
-        inline CCNodeConstructor<cocos2d::CCSprite*> & fromFile(const char* fname) {
-            this->node = cocos2d::CCSprite::create(fname);
+        inline CCNodeConstructor<CCSprite*> & fromFile(const char* fname) {
+            this->node = CCSprite::create(fname);
             return *this;
         }
-        inline CCNodeConstructor<cocos2d::CCLabelBMFont*> & fromText(const char* text, const char* font) {
-            this->node = cocos2d::CCLabelBMFont::create(text, font);
+        inline CCNodeConstructor<CCLabelBMFont*> & fromText(const char* text, const char* font) {
+            this->node = CCLabelBMFont::create(text, font);
             return *this;
         }
-        inline CCNodeConstructor<cocos2d::CCMenu*> & fromMenu() {
-            this->node = cocos2d::CCMenu::create();
+        inline CCNodeConstructor<CCMenu*> & fromMenu() {
+            this->node = CCMenu::create();
             return *this;
         }
-        inline CCNodeConstructor<gd::ButtonSprite*> & fromButtonSprite(const char* text, const char* bg, const char* font) {
-            this->node = gd::ButtonSprite::create(text, 0, 0, font, bg, 0, .8f);
+        inline CCNodeConstructor<ButtonSprite*> & fromButtonSprite(const char* text, const char* bg, const char* font) {
+            this->node = ButtonSprite::create(text, 0, 0, font, bg, 0, .8f);
             return *this;
         }
         inline CCNodeConstructor<T> & fromNode(T node) {
@@ -251,11 +253,11 @@ class CCNodeConstructor {
             node->setPosition(x, y);
             return *this;
         }
-        inline CCNodeConstructor<T> & moveR(cocos2d::CCSize winSize, float x, float y) {
-            node->setPosition(winSize / 2 + cocos2d::CCPoint { x, y });
+        inline CCNodeConstructor<T> & moveR(CCSize winSize, float x, float y) {
+            node->setPosition(winSize / 2 + CCPoint { x, y });
             return *this;
         }
-        inline CCNodeConstructor<T> & move(cocos2d::CCPoint const& pos) {
+        inline CCNodeConstructor<T> & move(CCPoint const& pos) {
             node->setPosition(pos);
             return *this;
         }
@@ -263,15 +265,15 @@ class CCNodeConstructor {
             node->setContentSize({ x, y });
             return *this;
         }
-        inline CCNodeConstructor<T> & csize(cocos2d::CCSize const& size) {
+        inline CCNodeConstructor<T> & csize(CCSize const& size) {
             node->setContentSize(size);
             return *this;
         }
-        inline CCNodeConstructor<T> & anchor(cocos2d::CCPoint const& pos) {
+        inline CCNodeConstructor<T> & anchor(CCPoint const& pos) {
             node->setAnchorPoint(pos);
             return *this;
         }
-        inline CCNodeConstructor<T> & color(cocos2d::ccColor3B color) {
+        inline CCNodeConstructor<T> & color(ccColor3B color) {
             node->setColor(color);
             return *this;
         }
@@ -279,15 +281,15 @@ class CCNodeConstructor {
             node->setString(text);
             return *this;
         }
-        inline CCNodeConstructor<T> & delegate(cocos2d::CCObject* pDelegate) {
+        inline CCNodeConstructor<T> & delegate(CCObject* pDelegate) {
             node->setDelegate(pDelegate);
             return *this;
         }
-        inline CCNodeConstructor<T> & add(cocos2d::CCNode* anode) {
+        inline CCNodeConstructor<T> & add(CCNode* anode) {
             node->addChild(anode);
             return *this;
         }
-        inline CCNodeConstructor<T> & add(std::function<cocos2d::CCNode*(T)> func) {
+        inline CCNodeConstructor<T> & add(std::function<CCNode*(T)> func) {
             node->addChild(func(node));
             return *this;
         }
@@ -295,7 +297,7 @@ class CCNodeConstructor {
             func(node);
             return *this;
         }
-        inline CCNodeConstructor<T> & uobj(cocos2d::CCObject* obj) {
+        inline CCNodeConstructor<T> & uobj(CCObject* obj) {
             node->setUserObject(obj);
             return *this;
         }
@@ -439,3 +441,16 @@ static std::string readWin32Clipboard() {
 
     return text; 
 }
+
+static std::ostream& operator<<(std::ostream& stream, CCPoint const& pos) {
+    return stream << pos.x << ", " << pos.y;
+}
+
+static std::ostream& operator<<(std::ostream& stream, CCSize const& pos) {
+    return stream << pos.width << " : " << pos.height;
+}
+
+static std::ostream& operator<<(std::ostream& stream, CCRect const& size) {
+    return stream << size.origin << " | " << size.size;
+}
+

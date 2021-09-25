@@ -4,3 +4,7 @@
 void loadContextMenu() {
     ContextMenu::load();
 }
+
+void updateContextMenu(LevelEditorLayer* lel) {
+    CATCH_NULL(ContextMenu::get(lel))->updateItems();
+}

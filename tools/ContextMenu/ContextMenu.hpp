@@ -134,6 +134,7 @@ class ContextMenuItem :
         void mouseMoveSuper(CCPoint const&) override;
         virtual void activate();
         virtual void deactivate();
+        virtual void updateItem();
         virtual void drag(float);
         virtual void hide();
         AnyLabel* createLabel(const char* txt = "");
@@ -207,6 +208,27 @@ class KeybindContextMenuItem : public ContextMenuItem {
         static KeybindContextMenuItem* create(ContextMenu*, keybind_id const&);
 };
 
+class ActionContextMenuItem : public ContextMenuItem {
+    public:
+        struct ACMIAction {
+            std::string m_sName;
+            std::function<void(ActionContextMenuItem*, GameObject*)> m_callback;
+        };
+
+        static ACMIAction actionForID(std::string const&);
+
+    protected:
+        ACMIAction m_obAction;
+        AnyLabel* m_pLabel;
+
+        bool init(ContextMenu*, std::string const&);
+        void activate() override;
+        void visit() override;
+    
+    public:
+        static ActionContextMenuItem* create(ContextMenu*, std::string const&);
+};
+
 class PropContextMenuItem :
     public ContextMenuItem,
     public SuperKeyboardDelegate,
@@ -214,6 +236,8 @@ class PropContextMenuItem :
 {
     public:
         enum Type {
+            kTypePositionX,
+            kTypePositionY,
             kTypeScale,
             kTypeRotate,
             kTypeZOrder,
@@ -228,19 +252,25 @@ class PropContextMenuItem :
         float m_fDefaultValue = 0.0f;
         float m_fLastDraggedValue = 0.0f;
         std::string m_sSuffix = "";
-        std::function<float(GameObject*)> m_getValue;
-        std::function<void(GameObject*, float, bool)> m_setValue;
+        std::function<float(CCArray*)> m_getValue;
+        std::function<void(CCArray*, float, bool)> m_setValue;
         std::function<std::string()> m_getName;
+        std::function<bool()> m_usable = nullptr;
         std::function<void()> m_drawCube = nullptr;
+        std::function<void()> m_undo = nullptr;
         CCSprite* m_pCube = nullptr;
         CCSprite* m_pCube2 = nullptr;
         bool m_bEditingText = false;
         bool m_bTextSelected = false;
         CCTextInputNode* m_pInput;
         int m_nCaretPos = 0;
+        CCPoint m_obScaleCenter = CCPointZero;
 
         float getValue();
         void setValue(float, bool = false);
+        bool isUsable();
+        bool absoluteModifier();
+        bool smallModifier();
 
         void enableInput(bool);
 
@@ -255,6 +285,7 @@ class PropContextMenuItem :
         void visit() override;
         void draw() override;
         void deactivate() override;
+        void updateItem() override;
 
         virtual ~PropContextMenuItem();
 
@@ -266,10 +297,12 @@ struct ContextMenuStorageItem {
     enum ItemType {
         kItemTypeKeybind,
         kItemTypeProperty,
+        kItemTypeAction,
     };
     int m_nGrow = 1;
     ItemType m_eType;
     keybind_id m_sKeybindID;
+    std::string m_sActionID;
     PropContextMenuItem::Type m_ePropType;
     ContextMenuStorageItem(const char* id, int grow = 1) {
         this->m_eType = kItemTypeKeybind;
@@ -279,6 +312,11 @@ struct ContextMenuStorageItem {
     ContextMenuStorageItem(PropContextMenuItem::Type type, int grow = 1) {
         this->m_eType = kItemTypeProperty;
         this->m_ePropType = type;
+        this->m_nGrow = grow;
+    }
+    ContextMenuStorageItem(std::string const& id, int grow = 1) {
+        this->m_eType = kItemTypeAction;
+        this->m_sActionID = id;
         this->m_nGrow = grow;
     }
 };
@@ -359,6 +397,7 @@ class ContextMenu :
         LevelEditorLayer* m_pEditor;
         bool m_bDrawBorder = false;
         bool m_bDisabled = false;
+        bool m_bSelectObjectUnderMouse = true;
         Config m_vDefaultConfig;
         std::unordered_map<ContextType, Context> m_mContexts;
         const char* m_sFont = "Segoe UI";
@@ -366,10 +405,13 @@ class ContextMenu :
         float m_fFontScale = .2f;
         AnyLabelType m_eType = kAnyLabelTypeTTF;
         int m_nAnimationSpeed = 7;
+        GameObject* m_pObjSelectedUnderMouse = nullptr;
+        bool m_bDeselectObjUnderMouse = false;
 
         friend class ContextMenuItem;
         friend class SpecialContextMenuItem;
         friend class KeybindContextMenuItem;
+        friend class ActionContextMenuItem;
         friend class PropContextMenuItem;
         friend class CustomizeCMLayer;
 
@@ -377,7 +419,7 @@ class ContextMenu :
 
         void generate(ContextType = kContextTypeAuto, bool multi = false);
         void updatePosition();
-        ContextType getTypeUnderMouse();
+        ContextType getTypeUnderMouse(bool = true);
 
         void deactivateOthers(ContextMenuItem*);
 
@@ -390,7 +432,9 @@ class ContextMenu :
     public:
         static ContextMenu* create();
         static ContextMenu* load();
-        static ContextMenu* get();
+        static ContextMenu* get(LevelEditorLayer* = nullptr);
+
+        void updateItems();
 
         inline void setDisabled(bool b) {
             this->m_bDisabled = b;

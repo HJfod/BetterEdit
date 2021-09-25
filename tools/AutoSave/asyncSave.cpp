@@ -52,6 +52,9 @@ GDMAKE_HOOK(0x75010)
 void __fastcall EditorPauseLayer_saveLevel(EditorPauseLayer* self) {
     if (shouldRotateSaw())
         stopRotations(self->m_pEditorLayer);
+    
+    if (self->m_pEditorLayer->m_ePlaybackMode != kPlaybackModeNot)
+        self->m_pEditorLayer->m_pEditorUI->onStopPlaytest(nullptr);
 
     GDMAKE_ORIG_V(self);
     

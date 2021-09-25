@@ -622,7 +622,7 @@ void __fastcall EditorUI_scaleObjects(gd::EditorUI* self, edx_t, CCArray* objs, 
         // although that does some rounding so its stupid
         gameObj->m_fScale = newScale;
         gameObj->setRScale(1.f);
-        gameObj->m_unk2B0 = true;
+        gameObj->m_bTextureRectDirty = true;
         gameObj->m_bIsObjectRectDirty = true;
 
         if (!lockPos)

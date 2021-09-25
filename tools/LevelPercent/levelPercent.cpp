@@ -5,6 +5,7 @@
 #include "../CustomKeybinds/BEKeybinds.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../History/UndoHistoryManager.hpp"
+#include "../ContextMenu/loadContextMenu.hpp"
 
 static constexpr const int SLIDERLABEL_TAG = 420;
 static constexpr const int EPOSITION_TAG = 421;
@@ -239,6 +240,8 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
     if (g_bDontUpdateSlider || !self) return;
 
     updateLastObjectX(self->m_pEditorLayer, obj);
+
+    updateContextMenu();
 
     updatePercentLabelPosition(self);
 

@@ -429,7 +429,7 @@ void KeybindManager::loadDefaultKeybinds() {
         }, "editor.global"
     }, {{ KEY_Z, Keybind::kmControl | Keybind::kmShift }});
 
-    this->addEditorKeybind({ "Deselect", "gd.edit.deselect",
+    this->addEditorKeybind({ "Deselect All", "gd.edit.deselect",
         [](EditorUI* ui) -> bool {
             if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
                 ui->deselectAll();

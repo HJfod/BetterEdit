@@ -39,13 +39,6 @@ CCPoint operator+=(CCPoint & pos, CCPoint const& add) {
     return pos;
 }
 
-std::ostream& operator<<(std::ostream& stream, CCPoint const& size);
-std::ostream& operator<<(std::ostream& stream, CCSize const& size);
-
-std::ostream& operator<<(std::ostream& stream, CCRect const& size) {
-    return stream << size.origin << " | " << size.size;
-}
-
 // from https://stackoverflow.com/questions/39200677/how-to-copy-a-picture-from-disk-into-the-clipboard-with-win32
 bool copyimage(const wchar_t* filename)
 {

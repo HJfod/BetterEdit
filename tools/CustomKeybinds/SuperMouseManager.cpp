@@ -14,8 +14,6 @@ bool operator!=(CCPoint const& size, CCPoint const& size2) {
         size.y != size2.y;
 }
 
-std::ostream& operator<<(std::ostream& stream, CCPoint const& pos);
-
 bool isNodeVisible(CCNode* t, bool includeSelf = true);
 
 void SuperMouseDelegate::mouseEnterSuper(CCPoint const&) {}

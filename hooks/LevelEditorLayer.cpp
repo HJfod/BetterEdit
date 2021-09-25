@@ -6,6 +6,7 @@
 #include "../tools/SickAnimation/sickAnimation.hpp"
 #include "../tools/History/UndoHistoryManager.hpp"
 #include "../tools/Tutorial/tutorial.hpp"
+#include "../tools/ContextMenu/loadContextMenu.hpp"
 
 GDMAKE_HOOK(0x15ee00)
 bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameLevel* level) {
@@ -32,6 +33,7 @@ bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameL
     updatePercentLabelPosition(self->m_pEditorUI);
     doTheSickAnimation(self);
     getAutoSaveTimer(self->m_pEditorUI)->resetTimer();
+    updateContextMenu(self);
 
     if (!BetterEdit::getShownTutorial())
         askToShowTutorial();
@@ -60,6 +62,8 @@ void __fastcall LevelEditorLayer_addSpecial(
     GDMAKE_ORIG_V(self, edx, obj);
 
     handleObjectAddForSlider(self, obj);
+
+    updateContextMenu();
     
     if (BetterEdit::isEditorInitialized())
         SoftSaveManager::saveObject(obj);
@@ -81,6 +85,8 @@ void __fastcall LevelEditorLayer_removeObject(
         UndoHistoryManager::get()->addAction(new RemoveObjectAction(obj));
 
     GDMAKE_ORIG_V(self, edx, obj, idk);
+
+    updateContextMenu();
 
     handleObjectAddForSlider(self, obj);
     SoftSaveManager::removeObject(obj);
