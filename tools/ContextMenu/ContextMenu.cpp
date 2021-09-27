@@ -37,7 +37,7 @@ bool ContextMenu::init() {
                 { PropContextMenuItem::kTypeRotate },
                 { PropContextMenuItem::kTypeScale }
             }, 24.f},
-            // {{ { ContextMenuStorageItem::kItemTypeQuickGroup } }},
+            {{ { ContextMenuStorageItem::kItemTypeQuickGroup } }},
             {{
                 { PropContextMenuItem::kTypeZOrder },
                 { PropContextMenuItem::kTypeELayer },
