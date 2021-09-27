@@ -157,14 +157,30 @@ ccColor4B g_colGray = { 150, 150, 150, 255 };
 ccColor4B g_colHover = { 255, 255, 255, 52 };
 ccColor4B g_colTransparent = { 0, 0, 0, 0 };
 ccColor3B g_colSelect = { 255, 194, 90 };
+ccColor4B g_colHighlight = { 50, 255, 180, 255 };
 
 bool ContextMenuItem::init(ContextMenu* menu) {
     if (!CCNode::init())
         return false;
     
     this->m_pMenu = menu;
-    
+    this->updateDragDir();
+
     return true;
+}
+
+void ContextMenuItem::updateDragDir() {
+    if (this->m_pMenu) {
+        // override drag direction if needs be
+        switch (this->m_pMenu->m_eDragDir) {
+            case ContextMenu::kDragItemDirHorizontal:
+                this->m_bHorizontalDrag = true;
+                break;
+            case ContextMenu::kDragItemDirVertical:
+                this->m_bHorizontalDrag = false;
+                break;
+        }
+    }
 }
 
 void ContextMenuItem::draw() {
@@ -223,7 +239,11 @@ bool ContextMenuItem::mouseUpSuper(MouseButton btn, CCPoint const&) {
 
 void ContextMenuItem::mouseMoveSuper(CCPoint const& mpos) {
     if (!this->m_bDisabled && this->m_bSuperMouseDown) {
-        this->drag(mpos.y - this->m_obLastMousePos.y);
+        if (this->m_bHorizontalDrag) {
+            this->drag(mpos.x - this->m_obLastMousePos.x);
+        } else {
+            this->drag(mpos.y - this->m_obLastMousePos.y);
+        }
         this->m_obLastMousePos = mpos;
     }
     if (this->m_bDisabled && this->m_bSuperMouseDown) {
@@ -231,6 +251,11 @@ void ContextMenuItem::mouseMoveSuper(CCPoint const& mpos) {
             this->getPosition() + (this->m_obLastMousePos - mpos) * MORD(getScale(), 1.f)
         );
     }
+}
+
+bool ContextMenuItem::mouseScrollSuper(float y, float) {
+    this->drag(y / 6.f);
+    return true;
 }
 
 AnyLabel* ContextMenuItem::createLabel(const char* txt) {
@@ -566,6 +591,12 @@ bool PropContextMenuItem::init(
     this->addChild(this->m_pValueLabel);
     this->m_eType = type;
 
+    this->m_pAbsModifierLabel = this->createLabel("Alt");
+    this->addChild(this->m_pAbsModifierLabel);
+
+    this->m_pSmallModifierLabel = this->createLabel("Shift");
+    this->addChild(this->m_pSmallModifierLabel);
+
     this->m_pInput = CCTextInputNode::create("", this, "bigFont.fnt", 100.0f, 10.0f);
     this->m_pInput->setDelegate(this);
     this->m_pInput->setAllowedChars(inputf_Numeral);
@@ -754,6 +785,7 @@ bool PropContextMenuItem::init(
                     this->m_pCube->getPositionX() + pos
                 );
             );
+            this->m_bHorizontalDrag = true;
             this->m_pCube2->setOpacity(50);
             this->m_pCube->setVisible(true);
             this->m_pCube2->setVisible(true);
@@ -796,6 +828,8 @@ bool PropContextMenuItem::init(
             this->m_pInput->setAllowedChars(inputf_NumeralFloatSigned);
         } break;
     }
+
+    this->updateDragDir();
 
     this->m_fLastDraggedValue = this->getValue();
 
@@ -943,7 +977,8 @@ void PropContextMenuItem::visit() {
         this->m_pValueLabel->setString(text.c_str());
     }
 
-    bool image = this->m_drawCube && this->getScaledContentSize().height >= 15.f;
+    auto size = this->getScaledContentSize();
+    bool image = this->m_drawCube && size.height >= 15.f;
 
     this->m_pValueLabel->limitLabelWidth(
         this->getContentSize().width - 30.f,
@@ -965,6 +1000,35 @@ void PropContextMenuItem::visit() {
         this->m_pValueLabel->setPosition(
             this->getContentSize() / 2
         );
+    }
+
+    if (size.height >= 20.f) {
+        this->m_pSmallModifierLabel->setAnchorPoint({ 0.f, .5f });
+        this->m_pSmallModifierLabel->setPosition(2.f, size.height - 3.f);
+        this->m_pSmallModifierLabel->setScale(.15f);
+        this->m_pSmallModifierLabel->setVisible(true);
+        if (this->smallModifier()) {
+            this->m_pSmallModifierLabel->setColor(to3B(g_colHighlight));
+            this->m_pSmallModifierLabel->setOpacity(255);
+        } else {
+            this->m_pSmallModifierLabel->setColor(to3B(g_colText));
+            this->m_pSmallModifierLabel->setOpacity(90);
+        }
+
+        this->m_pAbsModifierLabel->setAnchorPoint({ 0.f, .5f });
+        this->m_pAbsModifierLabel->setPosition(2.f, size.height - 8.f);
+        this->m_pAbsModifierLabel->setScale(.15f);
+        this->m_pAbsModifierLabel->setVisible(true);
+        if (this->absoluteModifier()) {
+            this->m_pAbsModifierLabel->setColor(to3B(g_colHighlight));
+            this->m_pAbsModifierLabel->setOpacity(255);
+        } else {
+            this->m_pAbsModifierLabel->setColor(to3B(g_colText));
+            this->m_pAbsModifierLabel->setOpacity(90);
+        }
+    } else {
+        this->m_pSmallModifierLabel->setVisible(false);
+        this->m_pAbsModifierLabel->setVisible(false);
     }
 
     ContextMenuItem::visit();
@@ -1348,12 +1412,16 @@ ContextMenu::ContextType ContextMenu::getTypeUnderMouse(bool selectUnder) {
     
     if (obj) {
         if (testSelectObjectLayer(obj)) {
-            this->m_pEditor->m_pEditorUI->selectObjects(CCArray::createWithObject(obj), false);
+            if (!obj->m_bIsSelected) {
+                this->m_bDeselectObjUnderMouse = true;
+                this->m_pEditor->m_pEditorUI->selectObjects(CCArray::createWithObject(obj), false);
+            } else {
+                this->m_bDeselectObjUnderMouse = false;
+            }
             obj->selectObject(g_colSelect);
             if (this->m_pObjSelectedUnderMouse) {
                 this->m_pObjSelectedUnderMouse->release();
             }
-            this->m_bDeselectObjUnderMouse = true;
             this->m_pObjSelectedUnderMouse = obj;
             this->m_pObjSelectedUnderMouse->retain();
             if (obj->m_nObjectType == kGameObjectTypeSolid ||

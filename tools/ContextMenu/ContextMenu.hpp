@@ -112,6 +112,13 @@ class AnyLabel : public CCNodeRGBA, public CCLabelProtocol {
             }
             label->setScale(scale);
         }
+        inline void setAnchorPoint(CCPoint const& pos) {
+            CCNode* label = nullptr;
+            if (m_pCCLabelBMFont) label = m_pCCLabelBMFont;
+            if (m_pCCLabelTTF) label = m_pCCLabelTTF;
+            if (!label) return;
+            label->setAnchorPoint(pos);
+        }
 };
 
 class ContextMenuItem :
@@ -123,6 +130,7 @@ class ContextMenuItem :
         ContextMenu* m_pMenu = nullptr;
         GLubyte m_nFade = 0;
         bool m_bDisabled = false;
+        bool m_bHorizontalDrag = false;
         
         friend class ContextMenu;
         friend class CustomizeCMLayer;
@@ -132,11 +140,13 @@ class ContextMenuItem :
         bool mouseDownSuper(MouseButton btn, CCPoint const&) override;
         bool mouseUpSuper(MouseButton btn, CCPoint const&) override;
         void mouseMoveSuper(CCPoint const&) override;
+        bool mouseScrollSuper(float, float) override;
         virtual void activate();
         virtual void deactivate();
         virtual void updateItem();
         virtual void drag(float);
         virtual void hide();
+        void updateDragDir();
         AnyLabel* createLabel(const char* txt = "");
 };
 
@@ -248,6 +258,8 @@ class PropContextMenuItem :
     protected:
         Type m_eType;
         AnyLabel* m_pValueLabel;
+        AnyLabel* m_pAbsModifierLabel;
+        AnyLabel* m_pSmallModifierLabel;
         float m_fDragCollect = 0;
         float m_fDefaultValue = 0.0f;
         float m_fLastDraggedValue = 0.0f;
@@ -351,6 +363,12 @@ class ContextMenu :
             kContextTypeSpecial,
         };
 
+        enum DragItemDir {
+            kDragItemDirAuto,
+            kDragItemDirHorizontal,
+            kDragItemDirVertical,
+        };
+
         inline static std::string defaultContextName(ContextType type) {
             switch (type) {
                 case kContextTypeDefault: return "Default";
@@ -407,6 +425,7 @@ class ContextMenu :
         int m_nAnimationSpeed = 7;
         GameObject* m_pObjSelectedUnderMouse = nullptr;
         bool m_bDeselectObjUnderMouse = false;
+        DragItemDir m_eDragDir = kDragItemDirAuto;
 
         friend class ContextMenuItem;
         friend class SpecialContextMenuItem;

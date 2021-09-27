@@ -277,6 +277,17 @@ void BESettingsLayer::setup() {
         true
     )->setUserObject(CCString::create("https://discord.gg/K9Kuh3hzTC"));
     this->addTitle("Running version GDMAKE_PROJECT_VERSION", "goldFont.fnt")->setScale(.6f);
+    this->addToggle(
+        "Enable Experimental Features",
+        "Enables <cg>Experimental</c> / <cy>Beta</c> features.\n\n "
+        "These features are <cr>extremely likely to crash</c> "
+        "and may not even be finished. However, if you'd like "
+        "to test them out and <cy>provide feedback</c>, that "
+        "would be greatly appreciated. \n\n "
+        "May require a <cl>restart</c> to apply.",
+        BE_SETTING_FUNC_B(EnableExperimentalFeatures)
+    );
+    this->addSubtitle();
     // this->addToggle(
     //     "Check for Updates", "Checks for available updates at startup",
     //     BE_SETTING_FUNC_B(AutoUpdateEnabled)
