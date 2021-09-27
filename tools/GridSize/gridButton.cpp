@@ -61,8 +61,10 @@ void zoomEditorGrid(EditorUI* ui, bool zoomIn) {
     else
         BetterEdit::sharedState()->setGridSizeEnabled(true);
     
-    GameManager::sharedState()->setGameVariable("0038", true);
-    ui->m_pEditorLayer->updateOptions();
+    if (BetterEdit::getShowGridOnChange()) {
+        GameManager::sharedState()->setGameVariable("0038", true);
+        ui->m_pEditorLayer->updateOptions();
+    }
 
     ui->updateGridNodeSize();
 

@@ -31,6 +31,7 @@ enum DebugLogType {
     __macro__(AutoSaveTime, int, 1, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 60)             \
     __macro__(SoftSaveFrequency, int, 1, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 999)       \
     __macro__(GridSizeEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
+    __macro__(ShowGridOnChange, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(AlwaysUseCustomGridSize, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)       \
     __macro__(PasteStateEnabled, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)              \
     __macro__(DisableMouseZoomMove, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
@@ -70,7 +71,7 @@ enum DebugLogType {
     __macro__(CopyObjectsToClipboard, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
     __macro__(EnableCustomEditMenu, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
     __macro__(NoEasterEggs, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                  \
-    __macro__(EnableExperimentalFeatures, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)    \
+    __macro__(EnableExperimentalFeatures, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)     \
 
 #define STEP_SUBDICT_NC(dict, key, ...)         \
     if (dict->stepIntoSubDictWithKey(key)) {    \

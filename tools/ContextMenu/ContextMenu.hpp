@@ -78,9 +78,9 @@ class AnyLabel : public CCNodeRGBA, public CCLabelProtocol {
             if (m_pCCLabelTTF) label = m_pCCLabelTTF;
             if (!label) return;
 
+            float scale = label->getScale();
             label->setScale(1.f);
             auto [cwidth, _] = label->getContentSize();
-            float scale = label->getScale();
             if (width && width < cwidth) {
                 scale = width / cwidth;
             }
@@ -98,9 +98,9 @@ class AnyLabel : public CCNodeRGBA, public CCLabelProtocol {
             if (m_pCCLabelTTF) label = m_pCCLabelTTF;
             if (!label) return;
 
+            float scale = label->getScale();
             label->setScale(1.f);
             auto [_, cheight] = label->getContentSize();
-            float scale = label->getScale();
             if (height && height < cheight) {
                 scale = height / cheight;
             }
@@ -264,7 +264,7 @@ class PropContextMenuItem :
         float m_fDefaultValue = 0.0f;
         float m_fLastDraggedValue = 0.0f;
         std::string m_sSuffix = "";
-        std::function<float(CCArray*)> m_getValue;
+        std::function<float(CCArray*, GameObject*)> m_getValue;
         std::function<void(CCArray*, float, bool)> m_setValue;
         std::function<std::string()> m_getName;
         std::function<bool()> m_usable = nullptr;
@@ -274,15 +274,18 @@ class PropContextMenuItem :
         CCSprite* m_pCube2 = nullptr;
         bool m_bEditingText = false;
         bool m_bTextSelected = false;
+        bool m_bHasAbsoluteModifier = true;
         CCTextInputNode* m_pInput;
         int m_nCaretPos = 0;
         CCPoint m_obScaleCenter = CCPointZero;
+        std::unordered_map<GameObject*, float> m_mStartValues;
 
-        float getValue();
+        float getValue(GameObject* = nullptr);
         void setValue(float, bool = false);
         bool isUsable();
         bool absoluteModifier();
         bool smallModifier();
+        void updateStartValues();
 
         void enableInput(bool);
 
@@ -416,6 +419,7 @@ class ContextMenu :
         bool m_bDrawBorder = false;
         bool m_bDisabled = false;
         bool m_bSelectObjectUnderMouse = true;
+        bool m_bInvertedScrollWheel = false;
         Config m_vDefaultConfig;
         std::unordered_map<ContextType, Context> m_mContexts;
         const char* m_sFont = "Segoe UI";
@@ -426,6 +430,7 @@ class ContextMenu :
         GameObject* m_pObjSelectedUnderMouse = nullptr;
         bool m_bDeselectObjUnderMouse = false;
         DragItemDir m_eDragDir = kDragItemDirAuto;
+        float m_fObjectMoveGridSnap = 30.f;
 
         friend class ContextMenuItem;
         friend class SpecialContextMenuItem;

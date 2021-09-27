@@ -139,7 +139,7 @@ constexpr const int CMENU_TAG = 600;
 
 #define MORD(x, d) (this->m_pMenu ? this->m_pMenu->x : d)
 #define PROP_GET(...) \
-    this->m_getValue = [this](CCArray* objs) -> float { __VA_ARGS__; };
+    this->m_getValue = [this](CCArray* objs, GameObject* specific) -> float { __VA_ARGS__; };
 #define PROP_SET(...) \
     this->m_setValue = [this](CCArray* objs, float f, bool abs) -> void { __VA_ARGS__; };
 #define PROP_NAME(name) \
@@ -254,7 +254,10 @@ void ContextMenuItem::mouseMoveSuper(CCPoint const& mpos) {
 }
 
 bool ContextMenuItem::mouseScrollSuper(float y, float) {
-    this->drag(y / 6.f);
+    auto val = y / -6.f;
+    if (MORD(m_bInvertedScrollWheel, false))
+        val = -val;
+    this->drag(val);
     return true;
 }
 
@@ -643,7 +646,7 @@ bool PropContextMenuItem::init(
                         CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
                             auto sobjs = CCArray::createWithObject(obj);
                             ui->scaleObjects(
-                                sobjs, dampenf(this->m_getValue(objs), f), 
+                                sobjs, dampenf(this->getValue(), f), 
                                 obj->getPosition()
                             );
                         }
@@ -656,7 +659,7 @@ bool PropContextMenuItem::init(
                         );
                     } else {
                         ui->scaleObjects(
-                            objs, dampenf(this->m_getValue(objs), f),
+                            objs, dampenf(this->getValue(), f),
                             this->m_obScaleCenter
                         );
                     }
@@ -714,7 +717,7 @@ bool PropContextMenuItem::init(
                 } else {
                     if (abs) {
                         ui->rotateObjects(
-                            objs, f - this->m_getValue(objs),
+                            objs, f - this->getValue(),
                             ui->getGroupCenter(objs, false)
                         );
                     } else {
@@ -756,14 +759,24 @@ bool PropContextMenuItem::init(
         } break;
             
         case kTypePositionX: {
-            PROP_GET(return firstObject(objs)->getPositionX());
+            PROP_GET(
+                if (specific) return specific->getPositionX();
+                return firstObject(objs)->getPositionX()
+            );
             PROP_SET(
                 auto ui = LevelEditorLayer::get()->getEditorUI();
                 CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
-                    if (abs)
-                        obj->setPositionX(f);
-                    else
-                        obj->setPositionX(obj->getPositionX() + f);
+                    float pos = m_fDragCollect * 2.f;
+                    if (!abs) {
+                        pos = this->m_mStartValues[obj] + m_fDragCollect * 2.f;
+                    }
+                    if (this->absoluteModifier()) {
+                        auto snap = MORD(m_fObjectMoveGridSnap, 15.f);
+                        if (this->smallModifier())
+                            snap /= 4.f;
+                        pos = roundf(pos / snap) * snap;
+                    }
+                    obj->setPositionX(pos);
                 }
             );
             PROP_USABLE(
@@ -779,8 +792,9 @@ bool PropContextMenuItem::init(
             );
             PROP_NAME("Position X");
             PROP_DRAW(
-                auto pos = this->getValue() / this->m_fLastDraggedValue;
-                pos = clamp(pos, -10.f, 10.f);
+                auto pos = (this->getValue() - this->m_fLastDraggedValue) / 3.f;
+                auto l = this->getScaledContentSize().width / 6.f;
+                pos = clamp(pos, -l, l);
                 this->m_pCube->setPositionX(
                     this->m_pCube->getPositionX() + pos
                 );
@@ -793,14 +807,24 @@ bool PropContextMenuItem::init(
         } break;
 
         case kTypePositionY: {
-            PROP_GET(return firstObject(objs)->getPositionY());
+            PROP_GET(
+                if (specific) return specific->getPositionY();
+                return firstObject(objs)->getPositionY()
+            );
             PROP_SET(
                 auto ui = LevelEditorLayer::get()->getEditorUI();
                 CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
-                    if (abs)
-                        obj->setPositionY(f);
-                    else
-                        obj->setPositionY(obj->getPositionY() + f);
+                    float pos = m_fDragCollect * 2.f;
+                    if (!abs) {
+                        pos = this->m_mStartValues[obj] + m_fDragCollect * 2.f;
+                    }
+                    if (this->absoluteModifier()) {
+                        auto snap = MORD(m_fObjectMoveGridSnap, 15.f);
+                        if (this->smallModifier())
+                            snap /= 4.f;
+                        pos = roundf(pos / snap) * snap;
+                    }
+                    obj->setPositionY(pos);
                 }
             );
             PROP_USABLE(
@@ -816,8 +840,9 @@ bool PropContextMenuItem::init(
             );
             PROP_NAME("Position Y");
             PROP_DRAW(
-                auto pos = this->getValue() / this->m_fLastDraggedValue;
-                pos = clamp(pos, -10.f, 10.f);
+                auto pos = (this->getValue() - this->m_fLastDraggedValue) / 3.f;
+                auto l = this->getScaledContentSize().height / 8.f;
+                pos = clamp(pos, -l, l);
                 this->m_pCube->setPositionY(
                     this->m_pCube->getPositionY() + pos
                 );
@@ -826,6 +851,93 @@ bool PropContextMenuItem::init(
             this->m_pCube->setVisible(true);
             this->m_pCube2->setVisible(true);
             this->m_pInput->setAllowedChars(inputf_NumeralFloatSigned);
+        } break;
+            
+        case kTypeELayer: {
+            PROP_GET(
+                if (specific) return static_cast<float>(specific->m_nEditorLayer);
+                return static_cast<float>(firstObject(objs)->m_nEditorLayer)
+            );
+            PROP_SET(
+                CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                    auto val = static_cast<int>(this->m_fDragCollect / 6.f);
+                    obj->m_nEditorLayer = static_cast<int>(this->m_mStartValues[obj]) + val;
+                    // todo: make these use max layer from layer manager
+                    if (obj->m_nEditorLayer > 500)
+                        obj->m_nEditorLayer = 500;
+                    if (obj->m_nEditorLayer < 0)
+                        obj->m_nEditorLayer = 0;
+                }
+            );
+            PROP_USABLE(
+                auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+                if (!objs->count()) 
+                    return false;
+                return true;
+            );
+            PROP_NAME("Editor Layer");
+            this->m_pInput->setAllowedChars(inputf_Numeral);
+            this->m_bHasAbsoluteModifier = false;
+        } break;
+            
+        case kTypeELayer2: {
+            PROP_GET(
+                if (specific) return static_cast<float>(specific->m_nEditorLayer2);
+                return static_cast<float>(firstObject(objs)->m_nEditorLayer2)
+            );
+            PROP_SET(
+                CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                    auto val = static_cast<int>(this->m_fDragCollect / 6.f);
+                    obj->m_nEditorLayer2 = static_cast<int>(this->m_mStartValues[obj]) + val;
+                    // todo: make these use max layer from layer manager
+                    if (obj->m_nEditorLayer2 > 500)
+                        obj->m_nEditorLayer2 = 500;
+                    if (obj->m_nEditorLayer2 < 0)
+                        obj->m_nEditorLayer2 = 0;
+                }
+            );
+            PROP_USABLE(
+                auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+                if (!objs->count()) 
+                    return false;
+                return true;
+            );
+            PROP_NAME("Editor Layer 2");
+            this->m_pInput->setAllowedChars(inputf_Numeral);
+            this->m_bHasAbsoluteModifier = false;
+        } break;
+            
+        case kTypeZOrder: {
+            PROP_GET(
+                if (specific) return static_cast<float>(specific->m_nGameZOrder);
+                return static_cast<float>(firstObject(objs)->m_nGameZOrder)
+            );
+            PROP_SET(
+                CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+                    auto val = static_cast<int>(this->m_fDragCollect / 6.f);
+                    obj->m_nGameZOrder = static_cast<int>(this->m_mStartValues[obj]) + val;
+                    if (obj->m_nGameZOrder > 999)
+                        obj->m_nGameZOrder = 999;
+                    if (obj->m_nGameZOrder < -999)
+                        obj->m_nGameZOrder = -999;
+                }
+            );
+            PROP_USABLE(
+                auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+                if (!objs->count()) 
+                    return false;
+                return true;
+            );
+            PROP_NAME("Z Order");
+            this->m_pInput->setAllowedChars(inputf_NumeralSigned);
+            this->m_bHasAbsoluteModifier = false;
+        } break;
+
+        default: {
+            PROP_GET(return 0.f);
+            PROP_SET();
+            PROP_USABLE(return false;)
+            PROP_NAME("Unknown");
         } break;
     }
 
@@ -836,9 +948,18 @@ bool PropContextMenuItem::init(
     return true;
 }
 
+void PropContextMenuItem::updateStartValues() {
+    auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+    CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+        this->m_mStartValues[obj] = this->m_getValue(objs, obj);
+    }
+}
+
 bool PropContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& pos) {
     if (!this->isUsable())
         return true;
+    this->m_fDragCollect = 0.f;
+    this->updateStartValues();
     if (this->m_bEditingText && this->m_bTextSelected) {
         this->enableInput(false);
         return true;
@@ -863,6 +984,7 @@ bool PropContextMenuItem::mouseDownSuper(MouseButton btn, CCPoint const& pos) {
 bool PropContextMenuItem::mouseUpSuper(MouseButton btn, CCPoint const& pos) {
     if (!this->isUsable())
         return true;
+    this->m_mStartValues.clear();
     this->m_fLastDraggedValue = this->getValue();
     return this->ContextMenuItem::mouseUpSuper(btn, pos);
 }
@@ -871,11 +993,11 @@ void PropContextMenuItem::mouseDownOutsideSuper(MouseButton, CCPoint const&) {
     this->enableInput(false);
 }
 
-float PropContextMenuItem::getValue() {
+float PropContextMenuItem::getValue(GameObject* obj) {
     if (m_getValue) {
         auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
         if (objs->count())
-            return m_getValue(objs);
+            return m_getValue(objs, obj);
     }
     return m_fDefaultValue;
 }
@@ -910,6 +1032,7 @@ void PropContextMenuItem::drag(float val) {
         return;
     if (this->smallModifier())
         val /= 5.f;
+    this->m_fDragCollect += val;
     auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
     CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
         this->m_setValue(objs, val, false);
@@ -980,15 +1103,16 @@ void PropContextMenuItem::visit() {
     auto size = this->getScaledContentSize();
     bool image = this->m_drawCube && size.height >= 15.f;
 
-    this->m_pValueLabel->limitLabelWidth(
-        this->getContentSize().width - 30.f,
-        MORD(m_fFontScale, .4f) - (image ? .05f : 0.f),
-        .02f
-    );
+    auto scale = MORD(m_fFontScale, .4f) - (image ? .05f : 0.f);
     this->m_pValueLabel->limitLabelHeight(
         this->getContentSize().height - 3.f,
-        MORD(m_fFontScale, .4f) - (image ? .05f : 0.f),
-        .02f
+        scale,
+        .01f
+    );
+    this->m_pValueLabel->limitLabelWidth(
+        this->getContentSize().width - 30.f,
+        scale,
+        .01f
     );
 
     if (image) {
@@ -1015,16 +1139,20 @@ void PropContextMenuItem::visit() {
             this->m_pSmallModifierLabel->setOpacity(90);
         }
 
-        this->m_pAbsModifierLabel->setAnchorPoint({ 0.f, .5f });
-        this->m_pAbsModifierLabel->setPosition(2.f, size.height - 8.f);
-        this->m_pAbsModifierLabel->setScale(.15f);
-        this->m_pAbsModifierLabel->setVisible(true);
-        if (this->absoluteModifier()) {
-            this->m_pAbsModifierLabel->setColor(to3B(g_colHighlight));
-            this->m_pAbsModifierLabel->setOpacity(255);
+        if (this->m_bHasAbsoluteModifier) {
+            this->m_pAbsModifierLabel->setAnchorPoint({ 0.f, .5f });
+            this->m_pAbsModifierLabel->setPosition(2.f, size.height - 8.f);
+            this->m_pAbsModifierLabel->setScale(.15f);
+            this->m_pAbsModifierLabel->setVisible(true);
+            if (this->absoluteModifier()) {
+                this->m_pAbsModifierLabel->setColor(to3B(g_colHighlight));
+                this->m_pAbsModifierLabel->setOpacity(255);
+            } else {
+                this->m_pAbsModifierLabel->setColor(to3B(g_colText));
+                this->m_pAbsModifierLabel->setOpacity(90);
+            }
         } else {
-            this->m_pAbsModifierLabel->setColor(to3B(g_colText));
-            this->m_pAbsModifierLabel->setOpacity(90);
+            this->m_pAbsModifierLabel->setVisible(false);
         }
     } else {
         this->m_pSmallModifierLabel->setVisible(false);
@@ -1141,11 +1269,14 @@ bool ContextMenu::init() {
         { kContextTypeObject, {{
             {{
                 { PropContextMenuItem::kTypePositionX },
-                { PropContextMenuItem::kTypePositionY }
-            }, 24.f},
-            {{
+                { PropContextMenuItem::kTypePositionY },
                 { PropContextMenuItem::kTypeRotate },
                 { PropContextMenuItem::kTypeScale }
+            }, 24.f},
+            {{
+                { PropContextMenuItem::kTypeZOrder },
+                { PropContextMenuItem::kTypeELayer },
+                { PropContextMenuItem::kTypeELayer2 },
             }, 24.f},
             {{
                 "betteredit.edit_object",
@@ -1194,6 +1325,9 @@ void ContextMenu::show() {
 }
 
 void ContextMenu::show(CCPoint const& pos) {
+    if (!BetterEdit::getEnableExperimentalFeatures())
+        return;
+
     this->generate();
     this->m_obLocation = pos;
     this->updatePosition();

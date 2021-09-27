@@ -287,7 +287,7 @@ void BESettingsLayer::setup() {
         "May require a <cl>restart</c> to apply.",
         BE_SETTING_FUNC_B(EnableExperimentalFeatures)
     );
-    this->addSubtitle();
+    this->addTitle("For Feedback / Support, Contact HJfod#1795\nor Join the Discord", "bigFont.fnt");
     // this->addToggle(
     //     "Check for Updates", "Checks for available updates at startup",
     //     BE_SETTING_FUNC_B(AutoUpdateEnabled)
