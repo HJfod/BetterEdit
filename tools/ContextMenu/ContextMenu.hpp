@@ -121,6 +121,48 @@ class AnyLabel : public CCNodeRGBA, public CCLabelProtocol {
         }
 };
 
+class ContextMenuItem;
+
+class ContextMenuItemWithBGAndPossiblyText : public CCNode {
+    protected:
+        ButtonSprite* m_pButtonSprite = nullptr;
+        AnyLabel* m_pLabel = nullptr;
+        ccColor4F m_obColor;
+
+        bool init(AnyLabel* label);
+
+        void draw() override;
+    
+    public:
+        static ContextMenuItemWithBGAndPossiblyText* create(
+            AnyLabel* label
+        );
+
+        void setString(const char*);
+        const char* getString() const;
+
+        void setColor(ccColor4B);
+};
+
+class ContextMenuButton :
+    public CCMenuItemSpriteExtra,
+    public SuperMouseDelegate {
+    protected:
+        ContextMenuItem* m_pItem;
+        ContextMenuItemWithBGAndPossiblyText* m_pBG;
+
+        bool init(ContextMenuItem*, const char* txt, SEL_MenuHandler);
+
+        bool mouseDownSuper(MouseButton btn, CCPoint const&) override;
+        bool mouseUpSuper(MouseButton btn, CCPoint const&) override;
+        void mouseLeaveSuper(CCPoint const&) override;
+
+        void visit() override;
+
+    public:
+        static ContextMenuButton* create(ContextMenuItem*, const char* txt, SEL_MenuHandler);
+};
+
 class ContextMenuItem :
     public CCNode,
     public SuperMouseDelegate
@@ -131,9 +173,12 @@ class ContextMenuItem :
         GLubyte m_nFade = 0;
         bool m_bDisabled = false;
         bool m_bHorizontalDrag = false;
+        bool m_bNoHover = false;
+        float m_fScrollDivisor = 6.f;
         
         friend class ContextMenu;
         friend class CustomizeCMLayer;
+        friend class ContextMenuButton;
 
         bool init(ContextMenu*);
         void draw() override;
@@ -147,6 +192,8 @@ class ContextMenuItem :
         virtual void drag(float);
         virtual void hide();
         void updateDragDir();
+    
+    public:
         AnyLabel* createLabel(const char* txt = "");
 };
 
@@ -253,11 +300,14 @@ class PropContextMenuItem :
             kTypeZOrder,
             kTypeELayer,
             kTypeELayer2,
+            kTypeColor1,
+            kTypeColor2,
         };
 
     protected:
         Type m_eType;
         AnyLabel* m_pValueLabel;
+        AnyLabel* m_pNameLabel;
         AnyLabel* m_pAbsModifierLabel;
         AnyLabel* m_pSmallModifierLabel;
         float m_fDragCollect = 0;
@@ -267,6 +317,7 @@ class PropContextMenuItem :
         std::function<float(CCArray*, GameObject*)> m_getValue;
         std::function<void(CCArray*, float, bool)> m_setValue;
         std::function<std::string()> m_getName;
+        std::function<std::string(float)> m_specialValueName = nullptr;
         std::function<bool()> m_usable = nullptr;
         std::function<void()> m_drawCube = nullptr;
         std::function<void()> m_undo = nullptr;
@@ -308,11 +359,30 @@ class PropContextMenuItem :
         static PropContextMenuItem* create(ContextMenu*, Type);
 };
 
+class QuickGroupContextMenuItem : public ContextMenuItem {
+    protected:
+        bool mouseDownSuper(MouseButton, CCPoint const&) override;
+        void mouseMoveSuper(CCPoint const&) override;
+
+        CCNode* hoversItem();
+        
+        bool init(ContextMenu*);
+        void visit() override;
+
+        void onAddGroup(CCObject*);
+        void onAddNewGroup(CCObject*);
+
+    public:
+        static QuickGroupContextMenuItem* create(ContextMenu*);
+};
+
 struct ContextMenuStorageItem {
     enum ItemType {
         kItemTypeKeybind,
         kItemTypeProperty,
         kItemTypeAction,
+        kItemTypeQuickGroup,
+        kItemTypeEmptySpacer,
     };
     int m_nGrow = 1;
     ItemType m_eType;
@@ -332,6 +402,10 @@ struct ContextMenuStorageItem {
     ContextMenuStorageItem(std::string const& id, int grow = 1) {
         this->m_eType = kItemTypeAction;
         this->m_sActionID = id;
+        this->m_nGrow = grow;
+    }
+    ContextMenuStorageItem(ItemType type, int grow = 1) {
+        this->m_eType = type;
         this->m_nGrow = grow;
     }
 };
@@ -416,7 +490,7 @@ class ContextMenu :
     protected:
         CCPoint m_obLocation;
         LevelEditorLayer* m_pEditor;
-        bool m_bDrawBorder = false;
+        bool m_bDrawBorder = true;
         bool m_bDisabled = false;
         bool m_bSelectObjectUnderMouse = true;
         bool m_bInvertedScrollWheel = false;
@@ -431,13 +505,24 @@ class ContextMenu :
         bool m_bDeselectObjUnderMouse = false;
         DragItemDir m_eDragDir = kDragItemDirAuto;
         float m_fObjectMoveGridSnap = 30.f;
+        ccColor4B m_colBG = { 0, 0, 0, 200 };
+        ccColor4B m_colText = { 255, 255, 255, 255 };
+        ccColor4B m_colGray = { 150, 150, 150, 255 };
+        ccColor4B m_colHover = { 255, 255, 255, 52 };
+        ccColor4B m_colBorder = { 150, 150, 150, 20 };
+        ccColor4B m_colTransparent = { 0, 0, 0, 0 };
+        ccColor3B m_colSelect = { 255, 194, 90 };
+        ccColor4B m_colHighlight = { 50, 255, 255, 255 };
+        std::set<int> m_vQuickGroups = { 1, 2, 10, 50 };
 
         friend class ContextMenuItem;
         friend class SpecialContextMenuItem;
         friend class KeybindContextMenuItem;
         friend class ActionContextMenuItem;
         friend class PropContextMenuItem;
+        friend class QuickGroupContextMenuItem;
         friend class CustomizeCMLayer;
+        friend class ContextMenuButton;
 
         bool init() override;
 

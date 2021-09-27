@@ -2,18 +2,6 @@
 
 SuperMouseManager* g_manager;
 
-bool operator==(CCSize const& size, CCSize const& size2) {
-    return
-        size.width == size2.width &&
-        size.height == size2.height;
-}
-
-bool operator!=(CCPoint const& size, CCPoint const& size2) {
-    return
-        size.x != size2.x ||
-        size.y != size2.y;
-}
-
 bool isNodeVisible(CCNode* t, bool includeSelf = true);
 
 void SuperMouseDelegate::mouseEnterSuper(CCPoint const&) {}

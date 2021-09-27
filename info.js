@@ -15,6 +15,9 @@ let char_count = 0;
 let largest_count = 0;
 let larget_line_count = 0;
 let largest_file = "";
+let larget_header_count = 0;
+let larget_header_line_count = 0;
+let largest_header = "";
 let class_count = 0;
 const letter_count = {};
 
@@ -23,8 +26,9 @@ const rd = (dpath) => {
 
     dir.forEach(file => {
         let is_code = false;
+        let is_header = false;
         switch (file.split('.').pop()) {
-            case 'hpp': case 'h': header_count++; is_code = true; break;
+            case 'hpp': case 'h': header_count++; is_code = true; is_header = true; break;
             case 'cpp': case 'c': source_count++; is_code = true; break;
             case 'png': case 'jpg': resource_count++; break;
         }
@@ -50,6 +54,12 @@ const rd = (dpath) => {
                         largest_count = data.split('').length;
                         larget_line_count = data.split('\n').length;
                         largest_file = file;
+                    }
+
+                    if (is_header && larget_header_line_count < data.split('\n').length) {
+                        larget_header_count = data.split('').length;
+                        larget_header_line_count = data.split('\n').length;
+                        largest_header = file;
                     }
 
                     data.split('\n').forEach(f => {
@@ -111,6 +121,8 @@ ${b}${dir_count}${n} directories)
 console.log(`${p}${line_count}${n} lines of code (${g}${Math.round(comment_count / line_count * 100)}%${n} comments)
 `.replace(/\n/g, ''));
 console.log(`Largest file is ${b}${largest_file}${n} (${r}${largest_count}${n} chars, ${g}${larget_line_count}${n} lines)
+`.replace(/\n/g, ''));
+console.log(`Largest header is ${b}${largest_header}${n} (${r}${largest_header_count}${n} chars, ${g}${larget_header_line_count}${n} lines)
 `.replace(/\n/g, ''));
 console.log(`Average line count per file is ${c}${Math.round(line_count / file_count)}${n}
 `.replace(/\n/g, ''));

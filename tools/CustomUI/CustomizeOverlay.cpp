@@ -1,9 +1,5 @@
 #include "CustomizeOverlay.hpp"
 
-CCSize operator-(CCSize const& size) {
-    return { -size.width, -size.height };
-}
-
 void CustomizeArea::updateSize() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 

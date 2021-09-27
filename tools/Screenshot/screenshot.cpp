@@ -7,38 +7,6 @@ float g_fQuality = 1.f;
 bool g_bIncludeGrid = false;
 size_t g_nScreenshotTitle = 0;
 
-CCSize operator*=(CCSize & size, float mul) {
-    size.width *= mul;
-    size.height *= mul;
-    return size;
-}
-
-CCRect operator*=(CCRect & size, float mul) {
-    size.origin.x *= mul;
-    size.origin.y *= mul;
-    size.size.width *= mul;
-    size.size.height *= mul;
-    return size;
-}
-
-CCPoint operator/=(CCPoint & pos, float mul) {
-    pos.x /= mul;
-    pos.y /= mul;
-    return pos;
-}
-
-CCPoint operator*=(CCPoint & pos, float mul) {
-    pos.x *= mul;
-    pos.y *= mul;
-    return pos;
-}
-
-CCPoint operator+=(CCPoint & pos, CCPoint const& add) {
-    pos.x += add.x;
-    pos.y += add.y;
-    return pos;
-}
-
 // from https://stackoverflow.com/questions/39200677/how-to-copy-a-picture-from-disk-into-the-clipboard-with-win32
 bool copyimage(const wchar_t* filename)
 {
@@ -72,8 +40,6 @@ bool copyimage(const wchar_t* filename)
     }
     return result;
 }
-
-void limitSpriteSize(CCSprite* spr, CCSize const& size, float def, float min);
 
 bool ScreenFlash::init(ccColor4B const& col, float time) {
     if (!CCLayerColor::initWithColor(col))
@@ -113,7 +79,7 @@ void ScreenShotPopup::setup() {
     
     this->m_pShot = this->m_pTexture->getSprite();
     this->m_pShot->setPosition(winSize / 2);
-    limitSpriteSize(
+    limitNodeSize(
         this->m_pShot,
         { this->m_pLrSize.width - 55.0f, this->m_pLrSize.height - 85.0f },
         1.0f, .01f

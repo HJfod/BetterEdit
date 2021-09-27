@@ -5,14 +5,6 @@
 static int g_nPage = 0;
 bool g_bShowing = false;
 
-bool operator==(CCPoint const& s1, CCPoint const& s2) {
-    return s1.x == s2.x && s1.y == s2.y;
-}
-
-bool operator==(CCRect const& r1, CCRect const& r2) {
-    return r1.origin == r2.origin && r1.size == r2.size;
-}
-
 class DarkOverlay : public CCNode {
     protected:
         CCRect m_obArea;

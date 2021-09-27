@@ -16,6 +16,8 @@ static constexpr const char* inputf_AlphabetNoSpaces =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static constexpr const char* inputf_Numeral =
     "0123456789";
+static constexpr const char* inputf_ColorChannel =
+    "0123456789bglineojdpwhtackrBGLINEOJDPWHTACKR ";
 static constexpr const char* inputf_NumeralSigned =
     "0123456789-+";
 static constexpr const char* inputf_NumeralFloat =
@@ -454,3 +456,211 @@ static std::ostream& operator<<(std::ostream& stream, CCRect const& size) {
     return stream << size.origin << " | " << size.size;
 }
 
+static CCPoint operator "" _y (long double val) {
+    return { .0f, static_cast<float>(val) };
+}
+
+static CCPoint operator "" _x (long double val) {
+    return { static_cast<float>(val), .0f };
+}
+
+static std::string replaceColorChannelNames(std::string const& input) {
+    auto text = stringToLower(input);
+    text = stringReplace(text, "default", "0");
+    text = stringReplace(text, "def", "0");
+    text = stringReplace(text, "lbg", "1007");
+    text = stringReplace(text, "bg", "1000");
+    text = stringReplace(text, "g1", "1001");
+    text = stringReplace(text, "line", "1002");
+    text = stringReplace(text, "3dl", "1003");
+    text = stringReplace(text, "obj", "1004");
+    text = stringReplace(text, "p1", "1005");
+    text = stringReplace(text, "p2", "1006");
+    text = stringReplace(text, "g2", "1009");
+    text = stringReplace(text, "black", "1010");
+    text = stringReplace(text, "white", "1011");
+    text = stringReplace(text, "lighter", "1012");
+    return text;
+}
+
+static void ccDrawColor4B(ccColor4B const& c) {
+    ccDrawColor4B(c.r, c.g, c.b, c.a);
+}
+
+static ccColor4F to4f(ccColor4B const& c) {
+    return { c.r / 255.f, c.g / 255.f, c.b / 255.f, c.a / 255.f };
+}
+
+static ccColor3B to3B(ccColor4B const& c) {
+    return { c.r, c.g, c.b };
+}
+
+static ccColor4B invert4B(ccColor4B const& c) {
+    return {
+        static_cast<GLubyte>(255 - c.r),
+        static_cast<GLubyte>(255 - c.g),
+        static_cast<GLubyte>(255 - c.b),
+        c.a
+    };
+}
+
+static void limitNodeSize(CCNode* spr, CCSize const& size, float def, float min) {
+    spr->setScale(1.f);
+    auto [cwidth, cheight] = spr->getContentSize();
+
+    float scale = def;
+    if (size.height && size.height < cheight) {
+        scale = size.height / cheight;
+    }
+    if (size.width && size.width < cwidth) {
+        if (size.width / cwidth < scale)
+            scale = size.width / cwidth;
+    }
+    if (def && def < scale) {
+        scale = def;
+    }
+    if (min && scale < min) {
+        scale = min;
+    }
+    spr->setScale(scale);
+}
+
+static CCSize operator*=(CCSize & size, float mul) {
+    size.width *= mul;
+    size.height *= mul;
+    return size;
+}
+
+static CCRect operator*=(CCRect & size, float mul) {
+    size.origin.x *= mul;
+    size.origin.y *= mul;
+    size.size.width *= mul;
+    size.size.height *= mul;
+    return size;
+}
+
+static CCPoint operator/=(CCPoint & pos, float mul) {
+    pos.x /= mul;
+    pos.y /= mul;
+    return pos;
+}
+
+static CCPoint operator*=(CCPoint & pos, float mul) {
+    pos.x *= mul;
+    pos.y *= mul;
+    return pos;
+}
+
+static CCPoint operator+=(CCPoint & pos, CCPoint const& add) {
+    pos.x += add.x;
+    pos.y += add.y;
+    return pos;
+}
+
+static CCSize operator-(CCSize const& size, float f) {
+    return { size.width - f, size.height - f };
+}
+
+static CCSize operator-(CCSize const& size) {
+    return { -size.width, -size.height };
+}
+
+static bool operator==(CCSize const& size, CCSize const& size2) {
+    return
+        size.width == size2.width &&
+        size.height == size2.height;
+}
+
+static bool operator!=(CCPoint const& size, CCPoint const& size2) {
+    return
+        size.x != size2.x ||
+        size.y != size2.y;
+}
+
+static bool operator==(CCPoint const& s1, CCPoint const& s2) {
+    return s1.x == s2.x && s1.y == s2.y;
+}
+
+static bool operator==(CCRect const& r1, CCRect const& r2) {
+    return r1.origin == r2.origin && r1.size == r2.size;
+}
+
+static GameObject* firstObject(CCArray* objs) {
+    if (objs->count())
+        return as<GameObject*>(objs->objectAtIndex(0));
+    return nullptr;
+}
+
+static float dampenf(float x, float y) {
+    return x + y / 10.f;
+}
+
+static constexpr size_t operator"" _h (const char* txt, size_t) {
+    return hash(txt);
+}
+
+static CCRect getObjectRect(CCNode* node) {
+    auto pos = node->getPosition();
+    auto size = node->getScaledContentSize();
+
+    return {
+        pos.x - size.width / 2,
+        pos.y - size.height / 2,
+        size.width,
+        size.height
+    };
+}
+
+static bool objectsAreAdjacent(GameObject* o1, GameObject* o2) {
+    auto rect1 = getObjectRect(o1);
+    auto rect2 = getObjectRect(o2);
+
+    return (
+        rect1.origin.x <= rect2.origin.x + rect2.size.width &&
+        rect2.origin.x <= rect1.origin.x + rect1.size.width &&
+        rect1.origin.y <= rect2.origin.y + rect2.size.height &&
+        rect2.origin.y <= rect1.origin.y + rect1.size.height
+    );
+}
+
+static void recursiveAddNear(EditorUI* ui, GameObject* fromObj, std::vector<GameObject*> const& vnear, CCArray* arr) {
+    for (auto const& obj : vnear) {
+        if (objectsAreAdjacent(fromObj, obj)) {
+            if (!arr->containsObject(obj)) {
+                arr->addObject(obj);
+                recursiveAddNear(ui, obj, vnear, arr);
+            }
+        }
+    }
+}
+
+static void selectStructure(EditorUI* ui, GameObject* fromObj) {
+    std::vector<GameObject*> nearby;
+    auto pos = fromObj->getPosition();
+    CCARRAY_FOREACH_B_TYPE(ui->m_pEditorLayer->getAllObjects(), obj, GameObject) {
+        switch (obj->m_nObjectType) {
+            case kGameObjectTypeSlope:
+            case kGameObjectTypeSolid:
+            case kGameObjectTypeSpecial:
+            case kGameObjectTypeDecoration:
+            case kGameObjectTypeHazard:
+            case kGameObjectTypeGravityPad:
+            case kGameObjectTypePinkJumpPad:
+            case kGameObjectTypeYellowJumpPad:
+            case kGameObjectTypeRedJumpPad:
+                if (
+                    obj->m_nEditorLayer == fromObj->m_nEditorLayer
+                ) {
+                    if (ccpDistance(obj->getPosition(), pos) < 500.0f) {
+                        nearby.push_back(obj);
+                    }
+                }
+                break;
+        }
+    }
+    auto arr = CCArray::create();
+    arr->addObject(fromObj);
+    recursiveAddNear(ui, fromObj, nearby, arr);
+    ui->deselectAll();
+    ui->selectObjects(arr, false);
+}

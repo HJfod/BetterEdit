@@ -187,19 +187,7 @@ class AdvancedFilterLayer : public BrownAlertDelegate {
 
                     this->parseString = rtext;
 
-                    auto text = stringToLower(rtext);
-                    text = stringReplace(text, "lbg", "1007");
-                    text = stringReplace(text, "bg", "1000");
-                    text = stringReplace(text, "g1", "1001");
-                    text = stringReplace(text, "line", "1002");
-                    text = stringReplace(text, "3dl", "1003");
-                    text = stringReplace(text, "obj", "1004");
-                    text = stringReplace(text, "p1", "1005");
-                    text = stringReplace(text, "p2", "1006");
-                    text = stringReplace(text, "g2", "1009");
-                    text = stringReplace(text, "black", "1010");
-                    text = stringReplace(text, "white", "1011");
-                    text = stringReplace(text, "lighter", "1012");
+                    auto text = replaceColorChannelNames(rtext);
 
                     try {
                         this->none = false;
