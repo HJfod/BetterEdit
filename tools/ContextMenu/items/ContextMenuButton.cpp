@@ -44,9 +44,21 @@ void ContextMenuButton::visit() {
         );
     }
 
-    this->setContentSize(this->m_pBG->getScaledContentSize());
+    // this->setContentSize(this->m_pBG->getScaledContentSize());
+    this->setSuperMouseHitSize(this->getScaledContentSize());
+    this->setSuperMouseHitOffset(- this->getScaledContentSize() / 2);
 
     CCMenuItemSpriteExtra::visit();
+}
+
+void ContextMenuButton::draw() {
+    ccDrawColor4B({ 255, 0, 0, 255 });
+    ccDrawRect(
+        { 0, 0 },
+        this->getScaledContentSize()
+    );
+
+    CCMenuItemSpriteExtra::draw();
 }
 
 ContextMenuButton* ContextMenuButton::create(

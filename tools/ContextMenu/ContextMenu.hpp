@@ -158,6 +158,7 @@ class ContextMenuButton :
         void mouseLeaveSuper(CCPoint const&) override;
 
         void visit() override;
+        void draw() override;
 
     public:
         static ContextMenuButton* create(ContextMenuItem*, const char* txt, SEL_MenuHandler);

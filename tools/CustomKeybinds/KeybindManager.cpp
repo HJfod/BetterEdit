@@ -373,6 +373,14 @@ void KeybindManager::loadDefaultKeybinds() {
         true, "editor.global"
     }, {{ KEY_Space, 0 }});
 
+    this->addEditorKeybind({ "Copy Modifier", "gd.edit.duplicate_modifier",
+        true, "editor.global"
+    }, {{ KEY_None, Keybind::kmAlt }});
+
+    this->addEditorKeybind({ "Free Move Modifier", "gd.edit.free_move_modifier",
+        true, "editor.global"
+    }, {{ KEY_None, Keybind::kmControl }});
+
     this->addEditorKeybind({ "Rotate CCW", "gd.edit.rotate_ccw",
         [](EditorUI* ui) -> bool {
             if (ui->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
@@ -959,12 +967,10 @@ void KeybindManager::invokePlay(Target const& target, PlayLayer* pl, bool keydow
     }
 }
 
-void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, bool keydown, bool onlyPlay) {
-    if (!m_mKeybinds.count(bind))
-        return;
-
+std::vector<KeybindManager::Target> KeybindManager::figureOutTargets(Keybind const& bind) {
     auto targets = m_mKeybinds[bind];
-    if (!targets.size()) {
+    bool stop_looking_for_targets = false;
+    while (!stop_looking_for_targets && !targets.size()) {
         if (bind.modifiers) {
             if (bind.key != KEY_None)
                 targets = m_mKeybinds[Keybind(bind.key, 0)];
@@ -972,7 +978,13 @@ void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, b
                 targets = m_mKeybinds[Keybind(bind.mouse, 0)];
         }
     }
-    for (auto & target : targets) {
+    return targets;
+}
+
+void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, bool keydown, bool onlyPlay) {
+    if (!m_mKeybinds.count(bind))
+        return;
+    for (auto & target : figureOutTargets(bind)) {
         this->invokeEditor(target, ui, keydown, onlyPlay);
     }
 }
@@ -980,17 +992,7 @@ void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, b
 void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bool keydown) {
     if (!m_mKeybinds.count(bind))
         return;
-
-    auto targets = m_mKeybinds[bind];
-    if (!targets.size()) {
-        if (bind.modifiers) {
-            if (bind.key != KEY_None)
-                targets = m_mKeybinds[Keybind(bind.key, 0)];
-            else if (bind.mouse != kMouseButtonNone)
-                targets = m_mKeybinds[Keybind(bind.mouse, 0)];
-        }
-    }
-    for (auto & target : targets) {
+    for (auto & target : figureOutTargets(bind)) {
         this->invokePlay(target, pl, keydown);
     }
 }

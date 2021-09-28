@@ -158,10 +158,25 @@ bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,
     );
 
     bool move = KeybindManager::get()->isModifierPressed("gd.edit.move_modifier");
-    
     self_->m_bSpaceKeyPressed = move;
     if (self_->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
         self_->m_bMoveModifier = move;
+    
+    patch(0x90984, { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+
+    bool duplicate = KeybindManager::get()->isModifierPressed("gd.edit.duplicate_modifier");
+    patch(0x909dd, duplicate ?
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90 } :
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0xeb, 0x22 },
+        false, true
+    );
+
+    bool free_move = KeybindManager::get()->isModifierPressed("gd.edit.free_move_modifier");
+    patch(0x90971, free_move ?
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0xeb, 0x17 } :
+        std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90 },
+        false, true
+    );
 
     return GDMAKE_ORIG(self, edx, touch, event);
 }

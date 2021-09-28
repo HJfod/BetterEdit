@@ -256,6 +256,7 @@ class KeybindManager : public GManager {
         void registerMousePress(MouseButton, bool);
         bool isModifierPressed(keybind_id const&);
         void invokeCallback(keybind_id const&, EditorUI*, PlayLayer*);
+        std::vector<Target> figureOutTargets(Keybind const&);
 
         void setDoubleClickInterval(int);
         int getDoubleClickInterval() const;
