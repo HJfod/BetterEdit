@@ -19,19 +19,19 @@ void fixLayering(FLAlertLayer* layer) {
     layer->setZOrder(layer->m_nZOrder2);
 }
 
-GDMAKE_HOOK(0x23560)
+GDMAKE_HOOK(0x23560, "_ZN12FLAlertLayer4showEv")
 void __fastcall FLAlertLayer_show(FLAlertLayer* layer) {
     GDMAKE_ORIG_V(layer);
     fixLayering(layer);
 }
 
-GDMAKE_HOOK(0x46ff0)
+GDMAKE_HOOK(0x46ff0, "_ZN16ColorSelectPopup4showEv")
 void __fastcall ColorSelectPopup_show(ColorSelectPopup* layer) {
     GDMAKE_ORIG_V(layer);
     fixLayering(layer);
 }
 
-GDMAKE_HOOK(0x672c0)
+GDMAKE_HOOK(0x672c0, "_ZN15CustomSongLayer4showEv")
 void __fastcall CustomSongLayer_show(FLAlertLayer* layer) {
     GDMAKE_ORIG_V(layer);
     fixLayering(layer);

@@ -338,7 +338,7 @@ bool shouldHidePortalLine() {
     return !g_bShowPortalLines;
 }
 
-GDMAKE_HOOK(0x7ad20)
+GDMAKE_HOOK(0x7ad20, "_ZN8EditorUI10toggleModeEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_toggleMode(EditorUI* self, edx_t edx, CCObject* pSender) {
     if (!pSender) return;
 

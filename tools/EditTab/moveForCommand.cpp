@@ -1,6 +1,6 @@
 #include "moveForCommand.hpp"
 
-GDMAKE_HOOK(0x8d890)
+GDMAKE_HOOK(0x8d890, "_ZN8EditorUI14moveForCommandE11EditCommand")
 CCPoint* __fastcall EditorUI_moveForCommand(EditorUI* self, edx_t edx, CCPoint* pos, EditCommand com) {
     switch (com) {
         case kEditCommandHalfLeft:

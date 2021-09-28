@@ -2,7 +2,7 @@
 #include "../LevelPercent/levelPercent.hpp"
 #include "../CustomKeybinds/KeybindManager.hpp"
 
-GDMAKE_HOOK(0x921d0)
+GDMAKE_HOOK(0x921d0, "_ZN8EditorUI11scrollWheelEff")
 void __fastcall EditorUI_scrollWheel(gd::EditorUI* self_, edx_t edx, float amt, float b) {
     // get the actual EditorUI since this function is a virtual that messes it up
     auto self = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xfc);

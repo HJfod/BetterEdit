@@ -31,7 +31,7 @@ void __fastcall dispatchKeyboardMSGHook(
     GDMAKE_ORIG_V(self, edx, key, down);
 }
 
-GDMAKE_HOOK(0x3d130)
+GDMAKE_HOOK(0x3d130, "_ZN11AppDelegate30applicationWillEnterForegroundEv")
 void __fastcall AppDelegate_applicationWillEnterForeground(CCApplication* self) {
     GDMAKE_ORIG_V(self);
     
@@ -39,21 +39,21 @@ void __fastcall AppDelegate_applicationWillEnterForeground(CCApplication* self) 
         ->updateModifierKeys(false, false, false, false);
 }
 
-GDMAKE_HOOK(0x6ebc0)
+GDMAKE_HOOK(0x6ebc0, "_ZN13EditButtonBar8goToPageEi")
 void __fastcall EditButtonBar_goToPage(EditButtonBar* self, edx_t edx, int page) {
     GDMAKE_ORIG_V(self, edx, page);
 
     updateEditorKeybindIndicators();
 }
 
-GDMAKE_HOOK(0x6ec20)
+GDMAKE_HOOK(0x6ec20, "_ZN13EditButtonBar7onRightEPN7cocos2d8CCObjectE")
 void __fastcall EditButtonBar_onRight(EditButtonBar* self, edx_t edx, CCObject* obj) {
     GDMAKE_ORIG_V(self, edx, obj);
 
     updateEditorKeybindIndicators();
 }
 
-GDMAKE_HOOK(0x6ec80)
+GDMAKE_HOOK(0x6ec80, "_ZN13EditButtonBar6onLeftEPN7cocos2d8CCObjectE")
 void __fastcall EditButtonBar_onLeft(EditButtonBar* self, edx_t edx, CCObject* obj) {
     GDMAKE_ORIG_V(self, edx, obj);
 

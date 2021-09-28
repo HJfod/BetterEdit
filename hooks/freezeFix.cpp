@@ -3,12 +3,14 @@
 #include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 using namespace gdmake;
+using namespace gd;
+using namespace cocos2d;
 
 // thank you cos8o
 // adapted from https://github.com/cos8oih/editorFreezeFix
 
-GDMAKE_HOOK(0x87600)
-void __fastcall EditorUI_onPlayTest(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
+GDMAKE_HOOK(0x87600, "_ZN8EditorUI10onPlaytestEPN7cocos2d8CCObjectE")
+void __fastcall EditorUI_onPlaytest(EditorUI* self, edx_t edx, CCObject* pSender) {
     if (
         BetterEdit::getPulseObjectsInEditor() &&
         !BetterEdit::getHasShownPulseVolumeWarning() &&

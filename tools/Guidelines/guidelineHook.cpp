@@ -9,7 +9,7 @@ class CreateGuidelinesLayer_CB : public CreateGuidelinesLayer {
 };
 
 
-GDMAKE_HOOK(0x4c190)
+GDMAKE_HOOK(0x4c190, "_ZN21CreateGuidelinesLayer4initEP19LevelSettingsObject")
 bool __fastcall CreateGuidelinesLayer_init(CreateGuidelinesLayer* self, edx_t edx, LevelSettingsObject* pObj) {
     if (!GDMAKE_ORIG(self, edx, pObj))
         return false;

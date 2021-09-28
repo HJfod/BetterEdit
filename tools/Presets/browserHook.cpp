@@ -53,7 +53,7 @@ void setupCreatePresetButton(gd::EditLevelLayer* self, gd::GJGameLevel* level) {
     menu->addChild(btn);
 }
 
-GDMAKE_HOOK(0x15cbf0)
+GDMAKE_HOOK(0x15cbf0, "_ZN17LevelBrowserLayer5onNewEPN7cocos2d8CCObjectE")
 void __fastcall LevelBrowserLayer_onNew(gd::LevelBrowserLayer* self, edx_t edx, cocos2d::CCObject* pSender) {
     if (BetterEdit::sharedState()->getPresets().size())
         PresetLayer::create()->show();

@@ -113,7 +113,7 @@ bool pointIntersectsScaleControls(EditorUI* self, CCTouch* touch, CCEvent* event
     return false;
 }
 
-GDMAKE_HOOK(0x94840)
+GDMAKE_HOOK(0x94840, "_ZN14GJScaleControl12ccTouchMovedEPN7cocos2d7CCTouchEPNS0_7CCEventE")
 void __fastcall GJScaleControl_ccTouchMoved(GJScaleControl* self_, edx_t edx, CCTouch* touch, CCEvent* event) {
     auto self = reinterpret_cast<GJScaleControl*>(reinterpret_cast<uintptr_t>(self_) - 0xEC);
 
@@ -141,7 +141,7 @@ void __fastcall GJScaleControl_ccTouchMoved(GJScaleControl* self_, edx_t edx, CC
     }
 }
 
-GDMAKE_HOOK(0x94990)
+GDMAKE_HOOK(0x94990, "_ZN14GJScaleControl11updateLabelEf")
 void __fastcall GJScaleControl_updateLabel(GJScaleControl* self) {
     // note: there's a float in xmm0
 
@@ -157,7 +157,7 @@ void __fastcall GJScaleControl_updateLabel(GJScaleControl* self) {
         reinterpret_cast<CCTextInputNode*>(t)->setString(s.c_str());
 }
 
-GDMAKE_HOOK(0x94590)
+GDMAKE_HOOK(0x94590, "_ZN14GJScaleControl10loadValuesEP10GameObjectPN7cocos2d7CCArrayE")
 void __fastcall GJScaleControl_loadValues(GJScaleControl* self, edx_t edx, GameObject* obj, CCArray* objs) {
     GDMAKE_ORIG_V(self, edx, obj, objs);
 
@@ -173,7 +173,7 @@ void __fastcall GJScaleControl_loadValues(GJScaleControl* self, edx_t edx, GameO
         reinterpret_cast<CCTextInputNode*>(t)->setString(s.c_str());
 }
 
-GDMAKE_HOOK(0x94490)
+GDMAKE_HOOK(0x94490, "_ZN14GJScaleControl4initEv")
 bool __fastcall GJScaleControl_init(GJScaleControl* self) {
     if (!GDMAKE_ORIG(self))
         return false;
@@ -266,7 +266,7 @@ bool __fastcall GJScaleControl_init(GJScaleControl* self) {
     return true;
 }
 
-GDMAKE_HOOK(0x889b0)
+GDMAKE_HOOK(0x889b0, "_ZN8EditorUI20activateScaleControlEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_activateScaleControl(EditorUI* self, edx_t edx, CCObject* pSender) {
     auto fixPos =
         BetterEdit::getFixScaleSliderPosition() &&
@@ -288,7 +288,7 @@ void __fastcall EditorUI_activateScaleControl(EditorUI* self, edx_t edx, CCObjec
     }
 }
 
-GDMAKE_HOOK(0x87030)
+GDMAKE_HOOK(0x87030, "_ZN8EditorUI23updateSpecialUIElementsEv")
 void __fastcall EditorUI_updateSpecialUIElements(EditorUI* self) {
     GDMAKE_ORIG_V(self);
 

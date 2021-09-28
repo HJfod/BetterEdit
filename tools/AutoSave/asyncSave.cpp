@@ -7,7 +7,7 @@
 std::mutex g_stringMutex;
 static std::string g_sharedString;
 
-GDMAKE_HOOK(0x162480)
+GDMAKE_HOOK(0x162480, "_ZN16LevelEditorLayer14getLevelStringEv")
 std::string* __fastcall LevelEditorLayer_getLevelString(
     LevelEditorLayer* self, edx_t edx, std::string* resStr
 ) {
@@ -48,7 +48,7 @@ std::string* __fastcall LevelEditorLayer_getLevelString(
     return resStr;
 }
 
-GDMAKE_HOOK(0x75010)
+GDMAKE_HOOK(0x75010, "_ZN16EditorPauseLayer9saveLevelEv")
 void __fastcall EditorPauseLayer_saveLevel(EditorPauseLayer* self) {
     if (shouldRotateSaw())
         stopRotations(self->m_pEditorLayer);

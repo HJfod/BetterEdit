@@ -147,7 +147,7 @@ void updateHSVPreviewColor(HSVWidgetPopup* self) {
     }
 }
 
-GDMAKE_HOOK(0x4adf0)
+GDMAKE_HOOK(0x4adf0, "_ZN18ConfigureHSVWidget12updateLabelsEv")
 void __fastcall ConfigureHSVWidget_updateLabels(ConfigureHSVWidget* self) {
     GDMAKE_ORIG_V(self);
 
@@ -162,7 +162,7 @@ void __fastcall ConfigureHSVWidget_updateLabels(ConfigureHSVWidget* self) {
         updateHSVPreviewColor(as<HSVWidgetPopup*>(self->getUserData()));
 }
 
-GDMAKE_HOOK(0x4a3f0)
+GDMAKE_HOOK(0x4a3f0, "_ZN18ConfigureHSVWidget4initEN7cocos2d11_ccHSVValueEb")
 bool __fastcall ConfigureHSVWidget_init(ConfigureHSVWidget* self, edx_t edx, int abs, ccHSVValue val) {
     if (!GDMAKE_ORIG(self, edx, abs, val))
         return false;
@@ -199,14 +199,14 @@ bool __fastcall ConfigureHSVWidget_init(ConfigureHSVWidget* self, edx_t edx, int
     return true;
 }
 
-GDMAKE_HOOK(0x567c0)
+GDMAKE_HOOK(0x567c0, "_ZN20CustomizeObjectLayer5onHSVEPN7cocos2d8CCObjectE")
 void __fastcall CustomizeObjectLayer_onHSV(CustomizeObjectLayer* self, edx_t edx, CCMenuItemSpriteExtra* pSender) {
     g_hsvColorChannel = self->getActiveMode(true);
 
     GDMAKE_ORIG(self, edx, pSender);
 }
 
-GDMAKE_HOOK(0x49f10)
+GDMAKE_HOOK(0x49f10, "_ZN14HSVWidgetPopup4initEN7cocos2d11_ccHSVValueEP22HSVWidgetPopupDelegateSs")
 bool __fastcall HSVWidgetPopup_init(HSVWidgetPopup* self, edx_t edx, HSVWidgetPopupDelegate* delegate, ccHSVValue hsv, std::string str) {
     if (!GDMAKE_ORIG(self, edx, delegate, hsv, str))
         return false;

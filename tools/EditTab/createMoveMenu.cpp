@@ -31,7 +31,7 @@ void addMoveButton(
         addKeybindIndicator(self, btn, keybind);
 }
 
-GDMAKE_HOOK(0x8c0d0)
+GDMAKE_HOOK(0x8c0d0, "_ZN8EditorUI14createMoveMenuEv")
 void __fastcall EditorUI_createMoveMenu(EditorUI* self) {
     if (BetterEdit::getEnableCustomEditMenu()) {
         self->m_pEditButtonDict = CCDictionary::create();

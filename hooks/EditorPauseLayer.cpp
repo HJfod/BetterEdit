@@ -51,7 +51,7 @@ int countLDMObjects(LevelEditorLayer* lel) {
     return count;
 }
 
-GDMAKE_HOOK(0x758d0)
+GDMAKE_HOOK(0x758d0, "_ZN16EditorPauseLayer7keyDownEN7cocos2d12enumKeyCodesE")
 void __fastcall EditorPauseLayer_keyDown(EditorPauseLayer* self, edx_t edx, enumKeyCodes key) {
     if (key == KEY_Escape)
         as<EditorPauseLayer*>(as<uintptr_t>(self) - 0xf8)->onResume(nullptr);
@@ -59,7 +59,7 @@ void __fastcall EditorPauseLayer_keyDown(EditorPauseLayer* self, edx_t edx, enum
         GDMAKE_ORIG_V(self, edx, key);
 }
 
-GDMAKE_HOOK(0x74fe0)
+GDMAKE_HOOK(0x74fe0, "_ZN16EditorPauseLayer8onResumeEPN7cocos2d8CCObjectE")
 void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
@@ -109,7 +109,7 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
     // showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
 }
 
-GDMAKE_HOOK(0x75660)
+GDMAKE_HOOK(0x75660, "_ZN16EditorPauseLayer12onExitEditorEPN7cocos2d8CCObjectE")
 void __fastcall EditorPauseLayer_onExitEditor(
     EditorPauseLayer* self,
     edx_t edx,
@@ -123,7 +123,7 @@ void __fastcall EditorPauseLayer_onExitEditor(
     self->removeFromParentAndCleanup(true);
 }
 
-GDMAKE_HOOK(0x730e0)
+GDMAKE_HOOK(0x730e0, "_ZN16EditorPauseLayer4initEP16LevelEditorLayer")
 bool __fastcall EditorPauseLayer_init(
     EditorPauseLayer* self,
     edx_t edx,

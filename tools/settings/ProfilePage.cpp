@@ -3,7 +3,7 @@
 
 using namespace gdmake;
 
-GDMAKE_HOOK(ProfilePage::init)
+GDMAKE_HOOK(ProfilePage::init, "_ZN11ProfilePage4initEib")
 bool __fastcall ProfilePage_init(gd::ProfilePage* self, edx_t edx, int accountID, bool idk) {
     if (!GDMAKE_ORIG(self, edx, accountID, idk))
         return false;
@@ -23,7 +23,7 @@ bool __fastcall ProfilePage_init(gd::ProfilePage* self, edx_t edx, int accountID
     return true;
 }
 
-GDMAKE_HOOK(0x5f3d0)
+GDMAKE_HOOK(0x5f3d0, "_ZN11CommentCell15loadFromCommentEP9GJComment")
 void __fastcall CommentCell_loadFromComment(gd::CommentCell* self, edx_t edx, gd::GJComment* comment) {
     GDMAKE_ORIG_V(self, edx, comment);
 
@@ -38,7 +38,7 @@ void __fastcall CommentCell_loadFromComment(gd::CommentCell* self, edx_t edx, gd
     }
 }
 
-GDMAKE_HOOK(0x213830)
+GDMAKE_HOOK(0x213830, "_ZN11ProfilePage20setupCommentsBrowserEPN7cocos2d7CCArrayE")
 void __fastcall ProfilePage_setupCommentsBrowser(gd::ProfilePage* self, edx_t edx, cocos2d::CCArray* comments) {
     if (comments && self->m_nAccountID == 104257) {
         CCARRAY_FOREACH_B(comments, c)

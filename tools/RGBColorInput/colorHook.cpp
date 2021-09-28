@@ -4,7 +4,7 @@
 
 static constexpr const int WIDGET_TAG = 69696;
 
-GDMAKE_HOOK(0x43ae0)
+GDMAKE_HOOK(0x43ae0, "_ZN16ColorSelectPopup4initEP16EffectGameObjectPN7cocos2d7CCArrayEP11ColorAction")
 bool __fastcall ColorSelectPopup_init(
     ColorSelectPopup* self,
     edx_t edx,
@@ -35,22 +35,22 @@ bool __fastcall ColorSelectPopup_init(
     return true;
 }
 
-GDMAKE_HOOK(0x46f30)
+GDMAKE_HOOK(0x46f30, "_ZN16ColorSelectPopup17colorValueChangedEN7cocos2d10_ccColor3BE")
 void __fastcall ColorSelectPopup_colorValueChanged(ColorSelectPopup* self) {
     GDMAKE_ORIG(self);
     CATCH_NULL(as<RGBColorInputWidget*>(self->getAlertLayer()->getChildByTag(WIDGET_TAG)))
         ->update_labels(true, true);
 }
 
-GDMAKE_HOOK(0x479c0)
-void __fastcall ColorSelectPopup_updateCopyColorIdfk(ColorSelectPopup* self) {
+GDMAKE_HOOK(0x479c0, "_ZN16ColorSelectPopup15updateCopyColorEv")
+void __fastcall ColorSelectPopup_updateCopyColor(ColorSelectPopup* self) {
     GDMAKE_ORIG(self);
     CATCH_NULL(as<RGBColorInputWidget*>(self->getAlertLayer()->getChildByTag(WIDGET_TAG)))
         ->setVisible(!self->copyColor);
     showEyeDropper(self);
 }
 
-GDMAKE_HOOK(0x23e980)
+GDMAKE_HOOK(0x23e980, "_ZN15SetupPulsePopup4initEP16EffectGameObjectPN7cocos2d7CCArrayE")
 bool __fastcall SetupPulsePopup_init(SetupPulsePopup* self, edx_t edx, EffectGameObject* eff_obj, CCArray* arr) {
     if (!GDMAKE_ORIG(self, edx, eff_obj, arr))
         return false;
@@ -80,15 +80,15 @@ bool __fastcall SetupPulsePopup_init(SetupPulsePopup* self, edx_t edx, EffectGam
     return true;
 }
 
-GDMAKE_HOOK(0x2426b0)
+GDMAKE_HOOK(0x2426b0, "_ZN15SetupPulsePopup17colorValueChangedEN7cocos2d10_ccColor3BE")
 void __fastcall SetupPulsePopup_colorValueChanged(SetupPulsePopup* self) {
     GDMAKE_ORIG_V(self);
     CATCH_NULL(as<RGBColorInputWidget*>(as<ColorSelectPopup*>(self)->getAlertLayer()->getChildByTag(WIDGET_TAG)))
         ->update_labels(true, true);
 }
 
-GDMAKE_HOOK(0x242cf0)
-void __fastcall SetupPulsePopup_switchPulseModeIDK(SetupPulsePopup* self) {
+GDMAKE_HOOK(0x242cf0, "_ZN15SetupPulsePopup15updatePulseModeEv")
+void __fastcall SetupPulsePopup_updatePulseMode(SetupPulsePopup* self) {
     GDMAKE_ORIG_V(self);
     CATCH_NULL(as<RGBColorInputWidget*>(as<ColorSelectPopup*>(self)->getAlertLayer()->getChildByTag(WIDGET_TAG)))
         ->setVisible(self->pulseMode == 0);

@@ -5,7 +5,7 @@
 
 using namespace gdmake;
 
-GDMAKE_HOOK(0x6f5d0)
+GDMAKE_HOOK(0x6f5d0, "_ZN14EditLevelLayer4initEP11GJGameLevel")
 bool __fastcall EditLevelLayer_init(EditLevelLayer* self, edx_t edx, GJGameLevel* level) {
     if (!GDMAKE_ORIG(self, edx, level))
         return false;

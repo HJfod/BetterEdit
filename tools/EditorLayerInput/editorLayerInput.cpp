@@ -90,7 +90,7 @@ void EditorUI_CB::onShowLayerPopup(CCObject*) {
     LayerViewPopup::create()->show();
 }
 
-GDMAKE_HOOK(0x886b0)
+GDMAKE_HOOK(0x886b0, "_ZN8EditorUI11onGoToLayerEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onGoToLayer(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
@@ -99,7 +99,7 @@ void __fastcall EditorUI_onGoToLayer(gd::EditorUI* self, edx_t edx, cocos2d::CCO
     updateEditorLayerInputText(self);
 }
 
-GDMAKE_HOOK(0x8d7e0)
+GDMAKE_HOOK(0x8d7e0, "_ZN8EditorUI11onGroupDownEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onGroupDown(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG(self, edx, pSender);
 
@@ -108,7 +108,7 @@ void __fastcall EditorUI_onGroupDown(gd::EditorUI* self, edx_t edx, cocos2d::CCO
     updateEditorLayerInputText(self);
 }
 
-GDMAKE_HOOK(0x8d780)
+GDMAKE_HOOK(0x8d780, "_ZN8EditorUI9onGroupUpEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onGroupUp(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG(self, edx, pSender);
 
@@ -117,7 +117,7 @@ void __fastcall EditorUI_onGroupUp(gd::EditorUI* self, edx_t edx, cocos2d::CCObj
     updateEditorLayerInputText(self);
 }
 
-GDMAKE_HOOK(0x88790)
+GDMAKE_HOOK(0x88790, "_ZN8EditorUI15onGoToBaseLayerEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onGoToBaseLayer(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
     GDMAKE_ORIG(self, edx, pSender);
 

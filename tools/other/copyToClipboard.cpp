@@ -39,7 +39,7 @@ bool verifyObjectString(std::string const& str) {
     return true;
 }
 
-GDMAKE_HOOK(0x87fb0)
+GDMAKE_HOOK(0x87fb0, "_ZN8EditorUI6onCopyEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onCopy(EditorUI* self, edx_t edx, CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
@@ -48,7 +48,7 @@ void __fastcall EditorUI_onCopy(EditorUI* self, edx_t edx, CCObject* pSender) {
     }
 }
 
-GDMAKE_HOOK(0x880c0)
+GDMAKE_HOOK(0x880c0, "_ZN8EditorUI7onPasteEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onPaste(EditorUI* self, edx_t edx, CCObject* pSender) {
     if (BetterEdit::getCopyObjectsToClipboard()) {
         auto str = readWin32Clipboard();

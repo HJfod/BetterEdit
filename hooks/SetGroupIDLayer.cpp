@@ -139,7 +139,7 @@ void updateInput(bool many, bool mixed, CCLabelBMFont* label, int val) {
     }
 }
 
-GDMAKE_HOOK(0x22d690)
+GDMAKE_HOOK(0x22d690, "_ZN15SetGroupIDLayer13onEditorLayerEPN7cocos2d8CCObjectE")
 void __fastcall SetGroupIDLayer_onEditorLayer(SetGroupIDLayer* self, edx_t edx, CCObject* pSender) {
     self->m_nEditorLayerValue += pSender->getTag() ? 1 : -1;
     
@@ -158,7 +158,7 @@ void __fastcall SetGroupIDLayer_onEditorLayer(SetGroupIDLayer* self, edx_t edx, 
     );
 }
 
-GDMAKE_HOOK(0x22e0b0)
+GDMAKE_HOOK(0x22e0b0, "_ZN15SetGroupIDLayer19updateEditorLayerIDEv")
 void __fastcall SetGroupIDLayer_updateEditorLayerID(SetGroupIDLayer* self) {
     if (self->m_pObj) {
         self->m_pObj->m_nEditorLayer = self->m_nEditorLayerValue;
@@ -175,7 +175,7 @@ void __fastcall SetGroupIDLayer_updateEditorLayerID(SetGroupIDLayer* self) {
     }
 }
 
-GDMAKE_HOOK(0x22d710)
+GDMAKE_HOOK(0x22d710, "_ZN15SetGroupIDLayer14onEditorLayer2EPN7cocos2d8CCObjectE")
 void __fastcall SetGroupIDLayer_onEditorLayer2(SetGroupIDLayer* self, edx_t edx, CCObject* pSender) {
     self->m_nEditorLayer2Value += pSender->getTag() ? 1 : -1;
     
@@ -194,7 +194,7 @@ void __fastcall SetGroupIDLayer_onEditorLayer2(SetGroupIDLayer* self, edx_t edx,
     );
 }
 
-GDMAKE_HOOK(0x22e110)
+GDMAKE_HOOK(0x22e110, "_ZN15SetGroupIDLayer20updateEditorLayerID2Ev")
 void __fastcall SetGroupIDLayer_updateEditorLayerID2(SetGroupIDLayer* self) {
     if (self->m_pObj) {
         self->m_pObj->m_nEditorLayer2 = self->m_nEditorLayer2Value;
@@ -211,7 +211,7 @@ void __fastcall SetGroupIDLayer_updateEditorLayerID2(SetGroupIDLayer* self) {
     }
 }
 
-GDMAKE_HOOK(0x22de80)
+GDMAKE_HOOK(0x22de80, "_ZN15SetGroupIDLayer8onZOrderEPN7cocos2d8CCObjectE")
 void __fastcall SetGroupIDLayer_onZOrder(SetGroupIDLayer* self, edx_t edx, CCObject* pSender) {
     auto add = pSender->getTag() ? 1 : -1;
     self->m_nZOrderValue += add;
@@ -231,7 +231,7 @@ void __fastcall SetGroupIDLayer_onZOrder(SetGroupIDLayer* self, edx_t edx, CCObj
     );
 }
 
-GDMAKE_HOOK(0x22e3d0)
+GDMAKE_HOOK(0x22e3d0, "_ZN15SetGroupIDLayer12updateZOrderEv")
 void __fastcall SetGroupIDLayer_updateZOrder(SetGroupIDLayer* self) {
     if (self->m_pObj) {
         self->m_pObj->m_nGameZOrder = self->m_nZOrderValue;
@@ -250,7 +250,7 @@ void __fastcall SetGroupIDLayer_updateZOrder(SetGroupIDLayer* self) {
     }
 }
 
-GDMAKE_HOOK(0x22d610)
+GDMAKE_HOOK(0x22d610, "_ZN15SetGroupIDLayer11textChangedEP15CCTextInputNode")
 void __fastcall SetGroupIDLayer_textChanged(SetGroupIDLayer* self, edx_t edx, CCTextInputNode* input) {
     int val = 0;
     bool isInt = true;
@@ -334,8 +334,8 @@ void turnLabelIntoInput(
     self->addChild(eLayerInput);
 }
 
-GDMAKE_HOOK(0x22b670)
-bool __fastcall SetGroupIDLayer_initHook(
+GDMAKE_HOOK(0x22b670, "_ZN15SetGroupIDLayer4initEP10GameObjectPN7cocos2d7CCArrayE")
+bool __fastcall SetGroupIDLayer_init(
     SetGroupIDLayer* self,
     edx_t edx,
     GameObject* obj,

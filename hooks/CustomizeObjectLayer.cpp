@@ -232,7 +232,7 @@ CCSprite* createBGSprite() {
     return bgTexture->getSprite();
 }
 
-GDMAKE_HOOK(0x56db0)
+GDMAKE_HOOK(0x56db0, "_ZN20CustomizeObjectLayer12onSelectModeEPN7cocos2d8CCObjectE")
 void __fastcall CustomizeObjectLayer_onSelectMode(
     CustomizeObjectLayer* self,
     edx_t edx,
@@ -243,7 +243,7 @@ void __fastcall CustomizeObjectLayer_onSelectMode(
     updateButtons(self);
 }
 
-GDMAKE_HOOK(0x53e00)
+GDMAKE_HOOK(0x53e00, "_ZN20CustomizeObjectLayer4initEP10GameObjectPN7cocos2d7CCArrayE")
 bool __fastcall CustomizeObjectLayer_init(
     CustomizeObjectLayer* self,
     edx_t edx,
@@ -402,7 +402,7 @@ bool __fastcall CustomizeObjectLayer_init(
     return true;
 }
 
-GDMAKE_HOOK(0x574d0)
+GDMAKE_HOOK(0x574d0, "_ZN20CustomizeObjectLayer11textChangedEP15CCTextInputNode")
 void __fastcall CustomizeObjectLayer_textChanged(
     CustomizeObjectLayer* self_, edx_t edx, CCTextInputNode* input
 ) {
@@ -421,7 +421,7 @@ void __fastcall CustomizeObjectLayer_textChanged(
     updateCustomChannelSprite(self);
 }
 
-GDMAKE_HOOK(0x57350)
+GDMAKE_HOOK(0x57350, "_ZN20CustomizeObjectLayer19onUpdateCustomColorEPN7cocos2d8CCObjectE")
 void __fastcall CustomizeObjectLayer_onUpdateCustomColor(
     CustomizeObjectLayer* self,
     edx_t edx,
@@ -432,16 +432,16 @@ void __fastcall CustomizeObjectLayer_onUpdateCustomColor(
     updateButtons(self);
 }
 
-GDMAKE_HOOK(0x564a0)
+GDMAKE_HOOK(0x564a0, "_ZThn468_N20CustomizeObjectLayer17colorSelectClosedEPN7cocos2d6CCNodeE")
 void __fastcall CustomizeObjectLayer_colorSelectClosed(
-    CustomizeObjectLayer* self
+    CustomizeObjectLayer* self, edx_t edx, CCNode* node
 ) {
     updateButtons(as<CustomizeObjectLayer*>(as<uintptr_t>(self) - 0x1d4));
 
-    GDMAKE_ORIG(self);
+    GDMAKE_ORIG(self, edx, node);
 }
 
-GDMAKE_HOOK(0x579d0)
+GDMAKE_HOOK(0x579d0, "_ZN20CustomizeObjectLayer17highlightSelectedEP12ButtonSprite")
 void __fastcall CustomizeObjectLayer_highlightSelected(
     CustomizeObjectLayer* self,
     edx_t edx,

@@ -162,7 +162,7 @@ void setIgnoreNewObjectsForSliderPercent(bool b) {
         g_bDontUpdateSlider--;
 }
 
-GDMAKE_HOOK(0x78cc0)
+GDMAKE_HOOK(0x78cc0, "_ZN8EditorUI13sliderChangedEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_sliderChanged(EditorUI* self, edx_t edx, Slider* pSlider) {
     if (BetterEdit::getUseOldProgressBar()) {
         GDMAKE_ORIG_V(self, edx, pSlider);
@@ -187,7 +187,7 @@ void __fastcall EditorUI_sliderChanged(EditorUI* self, edx_t edx, Slider* pSlide
     updatePercentLabelPosition(self);
 }
 
-GDMAKE_HOOK(0x78e30)
+GDMAKE_HOOK(0x78e30, "_ZN8EditorUI13valueFromXPosEf")
 void __fastcall EditorUI_valueFromXPos(EditorUI* self) {
     if (BetterEdit::getUseOldProgressBar())
         return GDMAKE_ORIG_V(self);
@@ -220,7 +220,7 @@ void handleObjectAddForSlider(LevelEditorLayer* self, GameObject* obj) {
         self->m_pEditorUI->updateSlider();
 }
 
-GDMAKE_HOOK(0x8ddb0)
+GDMAKE_HOOK(0x8ddb0, "_ZN8EditorUI10moveObjectEP10GameObjectN7cocos2d7CCPointE")
 void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, CCPoint pos) {
     // because gd sometimes passes a good ol'
     // nullptr to moveObject when you're
@@ -251,7 +251,7 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
     self->updateSlider();
 }
 
-GDMAKE_HOOK(0x78f10)
+GDMAKE_HOOK(0x78f10, "_ZN8EditorUI12updateSliderEv")
 void __fastcall EditorUI_updateSlider(EditorUI* self) {
     GDMAKE_ORIG_V(self);
 

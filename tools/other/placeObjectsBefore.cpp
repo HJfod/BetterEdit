@@ -8,7 +8,7 @@ void updateEdge() {
     g_fEdgeInverted = -g_fEdge;
 }
 
-GDMAKE_HOOK(0x16ce90)
+GDMAKE_HOOK(0x16ce90, "_ZN13DrawGridLayer4drawEv")
 void __fastcall DrawGridLayer_draw(DrawGridLayer* self) {
     // updateEdge();
 
@@ -17,7 +17,7 @@ void __fastcall DrawGridLayer_draw(DrawGridLayer* self) {
     return GDMAKE_ORIG_V(self);
 }
 
-GDMAKE_HOOK(0x8f920)
+GDMAKE_HOOK(0x8f920, "_ZN8EditorUI26constrainGameLayerPositionEv")
 void __fastcall EditorUI_constrainGameLayerPosition(EditorUI* self) {
     // updateEdge();
     

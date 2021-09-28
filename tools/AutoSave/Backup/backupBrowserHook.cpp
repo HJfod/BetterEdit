@@ -1,6 +1,6 @@
 #include "LevelBackupManager.hpp"
 
-GDMAKE_HOOK(0x5be30)
+GDMAKE_HOOK(0x5be30, "_ZN9LevelCell18loadLocalLevelCellEv")
 void __fastcall LevelCell_loadLocalLevelCell(LevelCell* self) {
     GDMAKE_ORIG_V(self);
 

@@ -1,6 +1,6 @@
 #include "../../BetterEdit.hpp"
 
-GDMAKE_HOOK(0x1dc920)
+GDMAKE_HOOK(0x1dc920, "_ZN13ObjectToolbox18gridNodeSizeForKeyEi")
 void __stdcall ObjectToolbox_gridNodeSizeForKey(int objID) {
     if (!BetterEdit::sharedState()->getGridSizeEnabled())
         return GDMAKE_ORIG_V(objID);
@@ -12,7 +12,7 @@ void __stdcall ObjectToolbox_gridNodeSizeForKey(int objID) {
     }
 }
 
-GDMAKE_HOOK(0x78f60)
+GDMAKE_HOOK(0x78f60, "_ZN8EditorUI18updateGridNodeSizeEv")
 void __fastcall EditorUI_updateGridNodeSize(gd::EditorUI* self) {
     if (!BetterEdit::sharedState()->getGridSizeEnabled())
         return GDMAKE_ORIG_V(self);

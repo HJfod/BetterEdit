@@ -1,6 +1,6 @@
 #include "../BetterEdit.hpp"
 
-GDMAKE_HOOK(0x18c8e0)
+GDMAKE_HOOK(0x18c8e0, "_ZN12LoadingLayer10loadAssetsEv")
 void __fastcall LoadingLayer_loadAssets(LoadingLayer* self) {
     GDMAKE_ORIG(self);
 

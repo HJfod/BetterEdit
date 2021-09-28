@@ -30,7 +30,7 @@ class BoomScrollLayer_CB : public BoomScrollLayer {
         }
 };
 
-GDMAKE_HOOK(0x11ea0)
+GDMAKE_HOOK(0x11ea0, "_ZN15BoomScrollLayer10updateDotsEf")
 void __fastcall BoomScrollLayer_updateDots(BoomScrollLayer* self, edx_t edx, float width) {
     GDMAKE_ORIG_V(self, edx, width);
 
@@ -45,7 +45,7 @@ void __fastcall BoomScrollLayer_updateDots(BoomScrollLayer* self, edx_t edx, flo
     }
 }
 
-GDMAKE_HOOK(0x11780)
+GDMAKE_HOOK(0x11780, "_ZN15BoomScrollLayer4initEPN7cocos2d7CCArrayEibS2_P21DynamicScrollDelegate")
 bool __fastcall BoomScrollLayer_init(
     BoomScrollLayer* self,
     edx_t edx,

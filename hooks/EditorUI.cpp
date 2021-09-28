@@ -119,7 +119,7 @@ bool touchIntersectsInput(CCNode* input, CCTouch* touch) {
         return true;
 }
 
-GDMAKE_HOOK(0x907b0)
+GDMAKE_HOOK(0x907b0, "_ZN8EditorUI12ccTouchBeganEPN7cocos2d7CCTouchEPNS0_7CCEventE")
 bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,CCEvent* event) {
     auto self_ = reinterpret_cast<gd::EditorUI*>(reinterpret_cast<uintptr_t>(self) - 0xEC);
 
@@ -181,7 +181,7 @@ bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,
     return GDMAKE_ORIG(self, edx, touch, event);
 }
 
-GDMAKE_HOOK(0x90cd0)
+GDMAKE_HOOK(0x90cd0, "_ZN8EditorUI12ccTouchMovedEPN7cocos2d7CCTouchEPNS0_7CCEventE")
 void __fastcall EditorUI_ccTouchMoved(EditorUI* self_, edx_t edx, CCTouch* touch, CCEvent* event) {
     auto self = reinterpret_cast<EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xEC);
 
@@ -211,7 +211,7 @@ void __fastcall EditorUI_ccTouchMoved(EditorUI* self_, edx_t edx, CCTouch* touch
         self->m_obSwipeStart = self->m_obSwipeStart + rel;
 }
 
-GDMAKE_HOOK(0x911a0)
+GDMAKE_HOOK(0x911a0, "_ZN8EditorUI12ccTouchEndedEPN7cocos2d7CCTouchEPNS0_7CCEventE")
 void __fastcall EditorUI_ccTouchEnded(
     EditorUI* self,
     edx_t edx,
@@ -261,13 +261,13 @@ void __fastcall EditorUI_ccTouchEnded(
     GDMAKE_ORIG_V(self, edx, touch, event);
 }
 
-GDMAKE_HOOK(0x78860)
+GDMAKE_HOOK(0x78860, "_ZN8EditorUI15clickOnPositionEN7cocos2d7CCPointE")
 void __fastcall EditorUI_clickOnPosition(EditorUI* self, edx_t edx, CCPoint point) {
     if (!BetterEdit::isEditorViewOnlyMode())
         return GDMAKE_ORIG_V(self, edx, point);
 }
 
-GDMAKE_HOOK(0x76090)
+GDMAKE_HOOK(0x76090, "_ZN8EditorUID2Ev")
 void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
     saveClipboard(self);
     resetSliderPercent(self);
@@ -355,12 +355,12 @@ public:
     }
 };
 
-GDMAKE_HOOK(EditorUI::init)
-bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lvl) {
+GDMAKE_HOOK(EditorUI::init, "_ZN8EditorUI4initEP16LevelEditorLayer")
+bool __fastcall EditorUI_init(EditorUI* self, edx_t edx, LevelEditorLayer* lel) {
     makeVisibilityPatches();
     setupRotateSaws();
 
-    if (!GDMAKE_ORIG(self, edx, lvl))
+    if (!GDMAKE_ORIG(self, edx, lel))
         return false;
 
     auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -469,7 +469,7 @@ bool __fastcall EditorUI_init(gd::EditorUI* self, edx_t edx, gd::GJGameLevel* lv
     return true;
 }
 
-GDMAKE_HOOK(0x7a370)
+GDMAKE_HOOK(0x7a370, "_ZN8EditorUI17createCustomItemsEv")
 CCArray* __fastcall EditorUI_createCustomItems(EditorUI* self) {
     setIgnoreNewObjectsForSliderPercent(true);
 
@@ -480,7 +480,7 @@ CCArray* __fastcall EditorUI_createCustomItems(EditorUI* self) {
     return ret;
 }
 
-GDMAKE_HOOK(0x7a280)
+GDMAKE_HOOK(0x7a280, "_ZN8EditorUI18onDeleteCustomItemEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onDeleteCustomItem(EditorUI* self, edx_t edx, CCObject* pSender) {
     setIgnoreNewObjectsForSliderPercent(true);
 
@@ -489,7 +489,7 @@ void __fastcall EditorUI_onDeleteCustomItem(EditorUI* self, edx_t edx, CCObject*
     setIgnoreNewObjectsForSliderPercent(false);
 }
 
-GDMAKE_HOOK(0x79fd0)
+GDMAKE_HOOK(0x79fd0, "_ZN8EditorUI15onNewCustomItemEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onNewCustomItem(EditorUI* self, edx_t edx, CCObject* pSender) {
     setIgnoreNewObjectsForSliderPercent(true);
 
@@ -498,21 +498,21 @@ void __fastcall EditorUI_onNewCustomItem(EditorUI* self, edx_t edx, CCObject* pS
     setIgnoreNewObjectsForSliderPercent(false);
 }
 
-GDMAKE_HOOK(0x8def0)
+GDMAKE_HOOK(0x8def0, "_ZN8EditorUI19transformObjectCallEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_transformObjectCall(EditorUI* self, edx_t edx, CCObject* pSender) {
     GDMAKE_ORIG_V(self, edx, pSender);
 
     SoftSaveManager::save();
 }
 
-GDMAKE_HOOK(0x78280)
+GDMAKE_HOOK(0x78280, "_ZN8EditorUI13updateButtonsEv")
 void __fastcall EditorUI_updateButtons(EditorUI* self) {
     GDMAKE_ORIG_V(self);
 
     updatePasteRepeatButton(self);
 }
 
-GDMAKE_HOOK(0x87180)
+GDMAKE_HOOK(0x87180, "_ZN8EditorUI6showUIEb")
 void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     if (BetterEdit::isEditorViewOnlyMode())
         show = false;
@@ -556,7 +556,7 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     // showPositionLabel(self, show);
 }
 
-GDMAKE_HOOK(0x878a0)
+GDMAKE_HOOK(0x878a0, "_ZN8EditorUI10updateZoomEf")
 void __fastcall EditorUI_updateZoom(gd::EditorUI* self) {
     GDMAKE_ORIG_V(self);
 
@@ -586,7 +586,7 @@ void __fastcall EditorUI_updateZoom(gd::EditorUI* self) {
     updatePercentLabelPosition(self);
 }
 
-GDMAKE_HOOK(0x91a30)
+GDMAKE_HOOK(0x91a30, "_ZN8EditorUI7keyDownEN7cocos2d12enumKeyCodesE")
 void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t, enumKeyCodes key) {
     auto self = offset_cast<EditorUI*>(self_, -0xf8);
     
@@ -595,7 +595,7 @@ void __fastcall EditorUI_keyDown(EditorUI* self_, edx_t, enumKeyCodes key) {
     );
 }
 
-GDMAKE_HOOK(0x92180)
+GDMAKE_HOOK(0x92180, "_ZN8EditorUI5keyUpEN7cocos2d12enumKeyCodesE")
 void __fastcall EditorUI_keyUp(EditorUI* self_, edx_t, enumKeyCodes key) {
     auto self = offset_cast<EditorUI*>(self_, -0xf8);
 
@@ -606,7 +606,7 @@ void __fastcall EditorUI_keyUp(EditorUI* self_, edx_t, enumKeyCodes key) {
 
 // Credits to Alk1m123 (https://github.com/altalk23) for this scale fix
 // this lets you scale multiple objects without it fucking up the position
-GDMAKE_HOOK(0x8f150)
+GDMAKE_HOOK(0x8f150, "_ZN8EditorUI12scaleObjectsEPN7cocos2d7CCArrayEfNS0_7CCPointE")
 void __fastcall EditorUI_scaleObjects(gd::EditorUI* self, edx_t, CCArray* objs, CCPoint centerPos) {
     float scale;
     __asm movss scale, xmm2;

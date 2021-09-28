@@ -9,7 +9,7 @@ using namespace gdmake;
 
 static bool g_bUndid = false;
 
-GDMAKE_HOOK(0x86250)
+GDMAKE_HOOK(0x86250, "_ZN8EditorUI12selectObjectEP10GameObjectb")
 void __fastcall EditorUI_selectObject(EditorUI* self, edx_t edx, GameObject* obj, bool idk) {
     if (BetterEdit::isEditorViewOnlyMode())
         return;
@@ -26,7 +26,7 @@ void __fastcall EditorUI_selectObject(EditorUI* self, edx_t edx, GameObject* obj
     }
 }
 
-GDMAKE_HOOK(0x864a0)
+GDMAKE_HOOK(0x864a0, "_ZN8EditorUI13selectObjectsEPN7cocos2d7CCArrayEb")
 void __fastcall EditorUI_selectObjects(EditorUI* self, edx_t edx, cocos2d::CCArray* objs, bool idk) {
     if (BetterEdit::isEditorViewOnlyMode())
         return;
@@ -47,7 +47,7 @@ void __fastcall EditorUI_selectObjects(EditorUI* self, edx_t edx, cocos2d::CCArr
     updateContextMenu();
 }
 
-GDMAKE_HOOK(0x87070)
+GDMAKE_HOOK(0x87070, "_ZN8EditorUI14undoLastActionEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_undoLastAction(EditorUI* self, edx_t edx, CCObject* pSender) {
     g_bUndid = true;
     GDMAKE_ORIG_V(self, edx, pSender);

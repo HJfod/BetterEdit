@@ -74,7 +74,7 @@ bool pointIntersectsRotateControls(gd::EditorUI* self, cocos2d::CCTouch* touch, 
     return false;
 }
 
-// GDMAKE_HOOK(0x94020)
+// GDMAKE_HOOK(0x94020, "_ZN17GJRotationControl20updateSliderPositionEN7cocos2d7CCPointE")
 // void __fastcall GJRotationControl_updateSliderPosition(gd::GJRotationControl* self, edx_t edx, cocos2d::CCPoint pos) {
 //     GDMAKE_ORIG_V(self, edx, pos);
 
@@ -88,7 +88,7 @@ bool pointIntersectsRotateControls(gd::EditorUI* self, cocos2d::CCTouch* touch, 
 //         reinterpret_cast<gd::CCTextInputNode*>(t)->setString(s.c_str());
 // }
 
-// GDMAKE_HOOK(0x8fe70)
+// GDMAKE_HOOK(0x8fe70, "_ZN8EditorUI23activateRotationControlEPN7cocos2d8CCObjectE")
 // void __fastcall EditorUI_activateRotationControl(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
 //     GDMAKE_ORIG_V(self, edx, pSender);
 
@@ -117,7 +117,7 @@ bool pointIntersectsRotateControls(gd::EditorUI* self, cocos2d::CCTouch* touch, 
 //     self->m_pRotationControl->setAngle(angle);
 // }
 
-// GDMAKE_HOOK(0x93f10)
+// GDMAKE_HOOK(0x93f10, "_ZN17GJRotationControl4initEv")
 // bool __fastcall GJRotationControl_init(gd::GJRotationControl* self) {
 //     if (!GDMAKE_ORIG(self))
 //         return false;

@@ -9,7 +9,7 @@ void addEditorTab(const char* spr, addEditorTabFunc bbar) {
     g_tabs.push_back({ spr, bbar });
 }
 
-GDMAKE_HOOK(0x7caf0)
+GDMAKE_HOOK(0x7caf0, "_ZN8EditorUI15setupCreateMenuEv")
 void __fastcall EditorUI_setupCreateMenu(gd::EditorUI* self) {
     GDMAKE_ORIG_V(self);
 

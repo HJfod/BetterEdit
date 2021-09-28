@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../BetterEdit.hpp"
+#include <unordered_set>
 
 enum MouseButton {
     kMouseButtonNone        = -1,
@@ -218,6 +219,10 @@ class KeybindManager : public GManager {
 
         void invokeEditor(Target const&, EditorUI*, bool, bool);
         void invokePlay(Target const&, PlayLayer*, bool);
+
+        using mod_t = decltype(Keybind::modifiers);
+
+        std::vector<mod_t> partition(mod_t);
 
     public:
         void encodeDataTo(DS_Dictionary*) override;

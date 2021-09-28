@@ -967,15 +967,45 @@ void KeybindManager::invokePlay(Target const& target, PlayLayer* pl, bool keydow
     }
 }
 
+std::vector<KeybindManager::mod_t> KeybindManager::partition(
+    KeybindManager::mod_t collection
+) {
+    // https://stackoverflow.com/questions/728972/finding-all-the-subsets-of-a-set
+
+    #define ADD_KEY(x) \
+        if (i & Keybind::x && collection & Keybind::x) add |= Keybind::x;
+
+    std::vector<mod_t> res;
+    for (
+        size_t i = 0u;
+        i <
+            Keybind::kmControl +
+            Keybind::kmShift +
+            Keybind::kmAlt;
+        i++
+    ) {
+        mod_t add = 0;
+
+        ADD_KEY(kmControl);
+        ADD_KEY(kmShift);
+        ADD_KEY(kmAlt);
+
+        res.push_back(add);
+    }
+    return res;
+}
+
 std::vector<KeybindManager::Target> KeybindManager::figureOutTargets(Keybind const& bind) {
     auto targets = m_mKeybinds[bind];
-    bool stop_looking_for_targets = false;
-    while (!stop_looking_for_targets && !targets.size()) {
-        if (bind.modifiers) {
+    if (!targets.size() && bind.modifiers) {
+        for (auto const& t : this->partition(bind.modifiers)) {
             if (bind.key != KEY_None)
-                targets = m_mKeybinds[Keybind(bind.key, 0)];
+                targets = m_mKeybinds[Keybind(bind.key, t)];
             else if (bind.mouse != kMouseButtonNone)
-                targets = m_mKeybinds[Keybind(bind.mouse, 0)];
+                targets = m_mKeybinds[Keybind(bind.mouse, t)];
+            
+            if (targets.size())
+                break;
         }
     }
     return targets;

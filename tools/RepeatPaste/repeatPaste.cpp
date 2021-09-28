@@ -62,7 +62,7 @@ void repeatDuplicate(GameObject* target, GameObject* previous, GameObject* origi
     }
 }
 
-GDMAKE_HOOK(0x87d20)
+GDMAKE_HOOK(0x87d20, "_ZN8EditorUI11onDuplicateEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onDuplicate(EditorUI* self, edx_t edx, CCObject* pSender) {
     auto objs = CCArray::create();
     objs->retain();
@@ -87,7 +87,7 @@ void __fastcall EditorUI_onDuplicate(EditorUI* self, edx_t edx, CCObject* pSende
     }
 }
 
-GDMAKE_HOOK(0x86af0)
+GDMAKE_HOOK(0x86af0, "_ZN8EditorUI11deselectAllEv")
 void __fastcall EditorUI_deselectAll(EditorUI* self) {
     GDMAKE_ORIG_V(self);
 

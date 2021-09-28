@@ -106,7 +106,7 @@ void pauseRotations(LevelEditorLayer* self) {
 }
 
 
-GDMAKE_HOOK(0x2441a0)
+GDMAKE_HOOK(0x2441a0, "_ZN16SetupRotatePopup14keyBackClickedEv")
 void __fastcall SetupRotatePopup_keyBackClicked(CCLayer* self) {
     if (shouldRotateSaw()) {
         stopRotations(LevelEditorLayer::get());
@@ -116,7 +116,7 @@ void __fastcall SetupRotatePopup_keyBackClicked(CCLayer* self) {
     GDMAKE_ORIG_V(self);
 }
 
-GDMAKE_HOOK(0x244150)
+GDMAKE_HOOK(0x244150, "_ZN16SetupRotatePopup7onCloseEPN7cocos2d8CCObjectE")
 void __fastcall SetupRotatePopup_onClose(CCLayer* self, edx_t edx, CCObject* pSender) {
     if (shouldRotateSaw()) {
         stopRotations(LevelEditorLayer::get());
@@ -126,7 +126,7 @@ void __fastcall SetupRotatePopup_onClose(CCLayer* self, edx_t edx, CCObject* pSe
     GDMAKE_ORIG_V(self, edx, pSender);
 }
 
-GDMAKE_HOOK(0x1695a0)
+GDMAKE_HOOK(0x1695a0, "_ZN16LevelEditorLayer10onPlaytestEv")
 void __fastcall LevelEditorLayer_onPlaytest(LevelEditorLayer* self) {
     GDMAKE_ORIG_V(self);
 
@@ -136,7 +136,7 @@ void __fastcall LevelEditorLayer_onPlaytest(LevelEditorLayer* self) {
     updateEditorKeybindIndicators();
 }
 
-GDMAKE_HOOK(0x169d90)
+GDMAKE_HOOK(0x169d90, "_ZN16LevelEditorLayer16onResumePlaytestEv")
 void __fastcall LevelEditorLayer_onResumePlaytest(LevelEditorLayer* self) {
     GDMAKE_ORIG_V(self);
 
@@ -146,7 +146,7 @@ void __fastcall LevelEditorLayer_onResumePlaytest(LevelEditorLayer* self) {
     updateEditorKeybindIndicators();
 }
 
-GDMAKE_HOOK(0x169cc0)
+GDMAKE_HOOK(0x169cc0, "_ZN16LevelEditorLayer15onPausePlaytestEv")
 void __fastcall LevelEditorLayer_onPausePlaytest(LevelEditorLayer* self) {
     GDMAKE_ORIG_V(self);
 
@@ -156,7 +156,7 @@ void __fastcall LevelEditorLayer_onPausePlaytest(LevelEditorLayer* self) {
     updateEditorKeybindIndicators();
 }
 
-GDMAKE_HOOK(0x169f10)
+GDMAKE_HOOK(0x169f10, "_ZN16LevelEditorLayer14onStopPlaytestEv")
 void __fastcall LevelEditorLayer_onStopPlaytest(LevelEditorLayer* self) {
     GDMAKE_ORIG_V(self);
 

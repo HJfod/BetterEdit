@@ -58,7 +58,7 @@ public:
     }
 };
 
-GDMAKE_HOOK(0x253D60)
+GDMAKE_HOOK(0x253D60, "_ZN16EffectGameObject13triggerObjectEP15GJBaseGameLayer")
 void __fastcall EffectGameObject_triggerObject(GameObject* self, edx_t, GJBaseGameLayer* layer) {
     GDMAKE_ORIG_V(self, 0, layer);
     

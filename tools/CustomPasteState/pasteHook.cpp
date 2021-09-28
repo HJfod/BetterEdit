@@ -3,7 +3,7 @@
 
 using namespace gdmake;
 
-GDMAKE_HOOK(0x884c0)
+GDMAKE_HOOK(0x884c0, "_ZN8EditorUI12onPasteStateEPN7cocos2d8CCObjectE")
 void __fastcall EditorUI_onPasteState(gd::EditorUI* self, edx_t edx, cocos2d::CCObject* pSender) {
     if (BetterEdit::sharedState()->getPasteStateEnabled())
         PasteLayer::create()->show();
@@ -11,7 +11,7 @@ void __fastcall EditorUI_onPasteState(gd::EditorUI* self, edx_t edx, cocos2d::CC
         GDMAKE_ORIG_V(self, edx, pSender);
 }
 
-GDMAKE_HOOK(0xef6b0)
+GDMAKE_HOOK(0xef6b0, "_ZN10GameObject19duplicateAttributesEPS_")
 void __fastcall GameObject_duplicateAttributes(gd::GameObject* dest, edx_t edx, gd::GameObject *src) {
     if (!PasteLayer::wantsToPasteState())
         return GDMAKE_ORIG_V(dest, edx, src);
@@ -51,7 +51,7 @@ void __fastcall GameObject_duplicateAttributes(gd::GameObject* dest, edx_t edx, 
     LevelEditorLayer::get()->getEditorUI()->updateObjectInfoLabel();
 }
 
-GDMAKE_HOOK(0x16b600)
+GDMAKE_HOOK(0x16b600, "_ZN16LevelEditorLayer15copyObjectStateEP10GameObject")
 void __fastcall LevelEditorLayer_copyObjectState(gd::LevelEditorLayer* self, edx_t edx, gd::GameObject* obj) {
     GDMAKE_ORIG_V(self, edx, obj);
 

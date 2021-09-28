@@ -187,28 +187,28 @@ void KeybindingsLayer_CB::setSelectMode(bool b, Keybind const& kb) {
     this->reloadList();
 }
 
-GDMAKE_HOOK(0x153670)
+GDMAKE_HOOK(0x153670, "_ZN16KeybindingsLayer10addKeyPairEPKcS1_")
 CCLabelBMFont* __fastcall KeybindingsLayer_addKeyPair(
     KeybindingsLayer* self, char* key, char* combo
 ) {
     return nullptr;
 }
 
-GDMAKE_HOOK(0x153cc0)
+GDMAKE_HOOK(0x153cc0, "_ZN16KeybindingsLayer10onNextPageEPN7cocos2d8CCObjectE")
 void __fastcall KeybindingsLayer_onNextPage(
     KeybindingsLayer* self, edx_t edx, CCObject* pSender
 ) {
     self->goToPage(self->m_nCurrentPage + 1);
 }
 
-GDMAKE_HOOK(0x153cd0)
+GDMAKE_HOOK(0x153cd0, "_ZN16KeybindingsLayer10onPrevPageEPN7cocos2d8CCObjectE")
 void __fastcall KeybindingsLayer_onPrevPage(
     KeybindingsLayer* self, edx_t edx, CCObject* pSender
 ) {
     self->goToPage(self->m_nCurrentPage - 1);
 }
 
-GDMAKE_HOOK(0x153ce0)
+GDMAKE_HOOK(0x153ce0, "_ZN16KeybindingsLayer8goToPageEi")
 void __fastcall KeybindingsLayer_goToPage(
     KeybindingsLayer* self, edx_t edx, int page
 ) {
@@ -227,7 +227,7 @@ void __fastcall KeybindingsLayer_goToPage(
     // }
 }
 
-GDMAKE_HOOK(0x152f40)
+GDMAKE_HOOK(0x152f40, "_ZN16KeybindingsLayer4initEv")
 bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
     if (!self->initWithColor({ 0, 0, 0, 105 })) return false;
 
