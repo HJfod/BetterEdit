@@ -14,15 +14,15 @@ bool __fastcall CreateGuidelinesLayer_init(CreateGuidelinesLayer* self, edx_t ed
     if (!GDMAKE_ORIG(self, edx, pObj))
         return false;
     
-    auto info = CCLabelBMFont::create(
-        "Warning: Entering BPM may CRASH!\nI'm looking into a fix, "
-        "but for now,\nproceed with caution. -HJfod",
-        "bigFont.fnt"
-    );
-    info->setScale(.3f);
-    info->setColor(cc3x(0xf00));
-    info->setPosition(120.0f, -20.0f);
-    self->m_pButtonMenu->addChild(info);
+    // auto info = CCLabelBMFont::create(
+    //     "Warning: Entering BPM may CRASH!\nI'm looking into a fix, "
+    //     "but for now,\nproceed with caution. -HJfod",
+    //     "bigFont.fnt"
+    // );
+    // info->setScale(.3f);
+    // info->setColor(cc3x(0xf00));
+    // info->setPosition(120.0f, -20.0f);
+    // self->m_pButtonMenu->addChild(info);
 
     auto bpmBtn = CCMenuItemSpriteExtra::create(
         CCNodeConstructor<ButtonSprite*>()

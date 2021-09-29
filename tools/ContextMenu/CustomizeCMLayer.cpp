@@ -19,6 +19,12 @@ bool CustomizeCMLayer::init() {
     this->m_pBG->setOpacity(220);
 	this->addChild(this->m_pBG);
 
+    auto label = CCLabelBMFont::create("Customization doesn't work\n yet :( Sorry!", "bigFont.fnt",
+    1500.f, kCCTextAlignmentCenter);
+    label->setPosition(winSize.width / 2, winSize.height - 100.f);
+    label->setScale(.5f);
+    this->addChild(label);
+
     this->m_nSelectedMode = g_nSelectedMode;
 
     this->m_vModes = {

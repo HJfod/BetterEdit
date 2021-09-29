@@ -575,9 +575,13 @@ void PropContextMenuItem::drag(float val) {
     if (this->smallModifier())
         val /= 5.f;
     this->m_fDragCollect += val;
-    auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
-    CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
-        this->m_setValue(objs, val, false);
+    if (this->m_eType == kTypeNone) {
+        this->m_setValue(nullptr, val, false);
+    } else {
+        auto objs = LevelEditorLayer::get()->getEditorUI()->getSelectedObjects();
+        CCARRAY_FOREACH_B_TYPE(objs, obj, GameObject) {
+            this->m_setValue(objs, val, false);
+        }
     }
 }
 
@@ -634,7 +638,7 @@ bool PropContextMenuItem::keyDownSuper(enumKeyCodes key) {
 void PropContextMenuItem::visit() {
     auto size = this->getScaledContentSize();
     bool image = this->m_drawCube && size.height >= 15.f;
-    bool twoLineText = size.width < 60.f && !image;
+    bool twoLineText = !m_bOneLineText && size.width < 60.f && !image;
 
     if (this->m_bEditingText) {
         this->m_pValueLabel->setString(
@@ -664,23 +668,19 @@ void PropContextMenuItem::visit() {
     }
 
     auto scale = MORD(m_fFontScale, .4f) - (image ? .05f : 0.f);
-    this->m_pValueLabel->limitLabelHeight(
-        this->getContentSize().height - 3.f,
+    this->m_pValueLabel->limitLabelSize(
+        {
+            this->getContentSize().width - 8.f,
+            this->getContentSize().height - 3.f
+        },
         scale,
         .01f
     );
-    this->m_pValueLabel->limitLabelWidth(
-        this->getContentSize().width - 8.f,
-        scale,
-        .01f
-    );
-    this->m_pNameLabel->limitLabelHeight(
-        this->getContentSize().height - 3.f,
-        scale,
-        .01f
-    );
-    this->m_pNameLabel->limitLabelWidth(
-        this->getContentSize().width - 8.f,
+    this->m_pNameLabel->limitLabelSize(
+        {
+            this->getContentSize().width - 8.f,
+            this->getContentSize().height - 3.f
+        },
         scale,
         .01f
     );
@@ -796,7 +796,7 @@ void PropContextMenuItem::deactivate() {
 }
 
 void PropContextMenuItem::updateItem() {
-    if (this->m_pMenu) {
+    if (this->m_pMenu && this->m_eType == kTypeScale) {
         auto ui = this->m_pMenu->m_pEditor->m_pEditorUI;
 
         if (!ui) return;

@@ -28,7 +28,7 @@ bool QuickGroupContextMenuItem::init(ContextMenu* menu) {
 void QuickGroupContextMenuItem::visit() {
     auto count = this->getChildrenCount();
 
-    auto size = this->getScaledContentSize();
+    auto size = this->getContentSize();
     CCARRAY_FOREACH_B_BASE(this->getChildren(), btn, ContextMenuButton*, ix) {
         auto pos = (ix - (count - 1) / 2.f) * 15.f;
         pos += size.width / 2;

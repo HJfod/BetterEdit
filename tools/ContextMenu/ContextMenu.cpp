@@ -37,7 +37,7 @@ bool ContextMenu::init() {
                 { PropContextMenuItem::kTypeRotate },
                 { PropContextMenuItem::kTypeScale }
             }, 24.f},
-            {{ { ContextMenuStorageItem::kItemTypeQuickGroup } }},
+            // {{ { ContextMenuStorageItem::kItemTypeQuickGroup } }},
             {{
                 { PropContextMenuItem::kTypeZOrder },
                 { PropContextMenuItem::kTypeELayer },
@@ -55,12 +55,18 @@ bool ContextMenu::init() {
         }, {
             {{
                 { PropContextMenuItem::kTypePositionX },
-                { PropContextMenuItem::kTypePositionY }
-            }, 24.f},
-            {{
+                { PropContextMenuItem::kTypePositionY },
                 { PropContextMenuItem::kTypeRotate },
                 { PropContextMenuItem::kTypeScale }
             }, 24.f},
+            // {{ { ContextMenuStorageItem::kItemTypeQuickGroup } }},
+            {{
+                { PropContextMenuItem::kTypeZOrder },
+                { PropContextMenuItem::kTypeELayer },
+                { PropContextMenuItem::kTypeELayer2 },
+                { PropContextMenuItem::kTypeColor1 },
+                { PropContextMenuItem::kTypeColor2 },
+            }, 14.f},
             {{
                 "betteredit.edit_object",
                 "betteredit.edit_group",
@@ -82,7 +88,7 @@ void ContextMenu::draw() {
         ccDrawColor4B(m_colBorder);
         ccDrawRect(
             { 0, 0 },
-            this->getScaledContentSize()
+            this->getContentSize()
         );
     }
 }
@@ -109,10 +115,10 @@ void ContextMenu::updatePosition() {
     auto cssize = this->getScaledContentSize();
     auto x = pos.x + cssize.width / 2 - csize.width / 2;
     auto y = pos.y - cssize.height + cssize.height / 2 - csize.height / 2;
-    while (x + cssize.width > winSize.width)
-        x -= 20.f;
-    while (y < 0)
-        y += 20.f;
+    while (x + cssize.width - cssize.width / 2 + csize.width / 2 > winSize.width)
+        x -= 2.f;
+    while (y - cssize.height / 2 + csize.height / 2 < 0)
+        y += 2.f;
 
     this->setPosition(x, y);
     this->setSuperMouseHitOffset(csize / 2);
@@ -280,10 +286,13 @@ void ContextMenu::generate(ContextType s, bool multi) {
     this->addChild(settings);
 
     auto scaleLabel = DragContextMenuItem::create(
-        this, nullptr, "Scale", [this](auto, float v) -> void {
-            this->setScale(clamp(this->getScale() + v / 5, .5f, 4.f));
+        this, nullptr, "Scale", 25.f,
+        .5f, 2.5f,
+        [this](auto, float v) -> void {
+            this->setScale(v);
             this->updatePosition();
-        }, [this]() -> float {
+        },
+        [this]() -> float {
             return this->getScale();
         }
     );

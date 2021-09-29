@@ -8,7 +8,6 @@ bool ContextMenuItemWithBGAndPossiblyText::init(AnyLabel* label) {
     if (label) {
         this->addChild(label);
     }
-    this->setAnchorPoint({ .5f, .5f });
 
     return true;
 }
@@ -26,11 +25,9 @@ void ContextMenuItemWithBGAndPossiblyText::draw() {
         );
     }
     ccDrawSolidRect(
-        - size / 2,
-        size,
+        { 0, 0 }, size,
         this->m_obColor
     );
-    this->setScale(.5f);
     CCNode::draw();
 }
 

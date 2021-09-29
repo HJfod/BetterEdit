@@ -44,7 +44,7 @@ void ContextMenuButton::visit() {
         );
     }
 
-    // this->setContentSize(this->m_pBG->getScaledContentSize());
+    this->setContentSize(this->m_pBG->getContentSize());
     this->setSuperMouseHitSize(this->getScaledContentSize());
     this->setSuperMouseHitOffset(- this->getScaledContentSize() / 2);
 

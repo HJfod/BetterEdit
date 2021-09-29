@@ -112,6 +112,30 @@ class AnyLabel : public CCNodeRGBA, public CCLabelProtocol {
             }
             label->setScale(scale);
         }
+        inline void limitLabelSize(CCSize size, float def, float min) {
+            CCNode* label = nullptr;
+            if (m_pCCLabelBMFont) label = m_pCCLabelBMFont;
+            if (m_pCCLabelTTF) label = m_pCCLabelTTF;
+            if (!label) return;
+
+            float scale = label->getScale();
+            label->setScale(1.f);
+            auto [cwidth, cheight] = label->getContentSize();
+            if (size.height && size.height < cheight) {
+                scale = size.height / cheight;
+            }
+            if (size.width && size.width < cwidth) {
+                if (size.width / cwidth < scale)
+                    scale = size.width / cwidth;
+            }
+            if (def && def < scale) {
+                scale = def;
+            }
+            if (min && scale < min) {
+                scale = min;
+            }
+            label->setScale(scale);
+        }
         inline void setAnchorPoint(CCPoint const& pos) {
             CCNode* label = nullptr;
             if (m_pCCLabelBMFont) label = m_pCCLabelBMFont;
@@ -198,60 +222,6 @@ class ContextMenuItem :
         AnyLabel* createLabel(const char* txt = "");
 };
 
-class SpecialContextMenuItem : public ContextMenuItem {
-    public:
-        using Callback = std::function<bool(SpecialContextMenuItem*)>;
-
-    protected:
-        CCSprite* m_pSprite = nullptr;
-        Callback m_pCallback = nullptr;
-        AnyLabel* m_pLabel;
-        GLubyte m_nSpriteOpacity;
-        float m_fSpriteScale = .6f;
-
-        bool init(ContextMenu*, const char*, const char*, Callback);
-        void activate() override;
-        void visit() override;
-
-        friend class ContextMenu;
-
-    public:
-        static SpecialContextMenuItem* create(
-            ContextMenu*,
-            const char* spr,
-            const char* txt,
-            Callback = nullptr
-        );
-
-        void setSpriteOpacity(GLubyte);
-};
-
-class DragContextMenuItem : public SpecialContextMenuItem {
-    public:
-        using DragCallback = std::function<void(DragContextMenuItem*, float)>;
-        using DragValue = std::function<float()>;
-
-    protected:
-        DragCallback m_pDragCallback = nullptr;
-        DragValue m_pDragValue = nullptr;
-        const char* m_sText;
-
-        bool init(ContextMenu*, const char*, const char*, DragCallback, DragValue);
-        void drag(float) override;
-        void visit() override;
-
-        friend class ContextMenu;
-
-    public:
-        static DragContextMenuItem* create(
-            ContextMenu*,
-            const char* spr,
-            const char* txt,
-            DragCallback = nullptr,
-            DragValue = nullptr
-        );
-};
-
 class KeybindContextMenuItem : public ContextMenuItem {
     protected:
         keybind_id m_sID;
@@ -294,6 +264,7 @@ class PropContextMenuItem :
 {
     public:
         enum Type {
+            kTypeNone,
             kTypePositionX,
             kTypePositionY,
             kTypeScale,
@@ -327,13 +298,14 @@ class PropContextMenuItem :
         bool m_bEditingText = false;
         bool m_bTextSelected = false;
         bool m_bHasAbsoluteModifier = true;
+        bool m_bOneLineText = false;
         CCTextInputNode* m_pInput;
         int m_nCaretPos = 0;
         CCPoint m_obScaleCenter = CCPointZero;
         std::unordered_map<GameObject*, float> m_mStartValues;
 
-        float getValue(GameObject* = nullptr);
-        void setValue(float, bool = false);
+        virtual float getValue(GameObject* = nullptr);
+        virtual void setValue(float, bool = false);
         bool isUsable();
         bool absoluteModifier();
         bool smallModifier();
@@ -375,6 +347,73 @@ class QuickGroupContextMenuItem : public ContextMenuItem {
 
     public:
         static QuickGroupContextMenuItem* create(ContextMenu*);
+};
+
+class SpecialContextMenuItem : public ContextMenuItem {
+    public:
+        using Callback = std::function<bool(SpecialContextMenuItem*)>;
+
+    protected:
+        CCSprite* m_pSprite = nullptr;
+        Callback m_pCallback = nullptr;
+        AnyLabel* m_pLabel;
+        GLubyte m_nSpriteOpacity;
+        float m_fSpriteScale = .6f;
+
+        bool init(ContextMenu*, const char*, const char*, Callback);
+        void activate() override;
+        void visit() override;
+
+        friend class ContextMenu;
+
+    public:
+        static SpecialContextMenuItem* create(
+            ContextMenu*,
+            const char* spr,
+            const char* txt,
+            Callback = nullptr
+        );
+
+        void setSpriteOpacity(GLubyte);
+};
+
+class DragContextMenuItem : public PropContextMenuItem {
+    public:
+        using DragCallback = std::function<void(DragContextMenuItem*, float)>;
+        using DragValue = std::function<float()>;
+
+    protected:
+        DragCallback m_pDragCallback = nullptr;
+        DragValue m_pDragValue = nullptr;
+        const char* m_sText;
+        float m_fDivisor = 1.f;
+        float m_fMinLimit = 0.f;
+        float m_fMaxLimit = 10.f;
+
+        bool init(
+            ContextMenu*,
+            const char*,
+            const char*,
+            float, float, float,
+            DragCallback,
+            DragValue
+        );
+
+        float getValue(GameObject* = nullptr) override;
+        void setValue(float, bool = false) override;
+
+        friend class ContextMenu;
+
+    public:
+        static DragContextMenuItem* create(
+            ContextMenu*,
+            const char* spr,
+            const char* txt,
+            float divisor,
+            float min, float max,
+            DragCallback = nullptr,
+            DragValue = nullptr
+        );
 };
 
 struct ContextMenuStorageItem {
