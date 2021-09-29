@@ -976,16 +976,8 @@ void KeybindManager::clearCallbacks(Keybind const& bind) {
         m_mKeybinds.erase(bind);
 }
 
-std::vector<KeybindManager::Target> KeybindManager::getAllCallbacksForKeybind(Keybind const& bind) {
-    if (!m_mKeybinds.count(bind))
-        return {};
-    
-    std::vector<KeybindManager::Target> res;
-
-    for (auto & target : m_mKeybinds[bind])
-        res.push_back(target);
-    
-    return res;
+std::vector<KeybindManager::Target> KeybindManager::getAllCallbacksForKeybind(Keybind const& bind) {    
+    return m_mKeybinds[bind];
 }
 
 KeybindManager::CallbackList KeybindManager::getCallbacksForKeybind(KeybindType type, Keybind const& bind) {
