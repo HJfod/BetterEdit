@@ -86,6 +86,11 @@ bool SuperMouseManager::delegateIsHovered(SuperMouseDelegate* delegate, CCPoint 
 }
 
 bool SuperMouseManager::dispatchClickEvent(MouseButton btn, bool down, CCPoint const& pos) {
+    if (down) {
+        this->m_vButtonsDown.insert(btn);
+    } else {
+        this->m_vButtonsDown.erase(btn);
+    }
     if (m_pCapturing) {
         m_pCapturing->m_bSuperMouseDown = down;
         if (down)
@@ -142,8 +147,14 @@ void SuperMouseManager::dispatchMoveEvent(CCPoint const& pos) {
                 d->m_bSuperMouseHovered = hover;
 
                 if (hover) {
+                    for (auto const& btn : this->m_vButtonsDown) {
+                        d->m_bSuperMouseDown = true;
+                    }
                     d->mouseEnterSuper(pos);
                 } else {
+                    if (d->m_bSuperMouseDown) {
+                        d->m_bSuperMouseDown = false;
+                    }
                     d->mouseLeaveSuper(pos);
                 }
             }

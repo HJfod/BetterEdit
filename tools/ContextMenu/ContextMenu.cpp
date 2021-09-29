@@ -37,7 +37,7 @@ bool ContextMenu::init() {
                 { PropContextMenuItem::kTypeRotate },
                 { PropContextMenuItem::kTypeScale }
             }, 24.f},
-            // {{ { ContextMenuStorageItem::kItemTypeQuickGroup } }},
+            {{ { ContextMenuStorageItem::kItemTypeQuickGroup } }},
             {{
                 { PropContextMenuItem::kTypeZOrder },
                 { PropContextMenuItem::kTypeELayer },
@@ -59,7 +59,7 @@ bool ContextMenu::init() {
                 { PropContextMenuItem::kTypeRotate },
                 { PropContextMenuItem::kTypeScale }
             }, 24.f},
-            // {{ { ContextMenuStorageItem::kItemTypeQuickGroup } }},
+            {{ { ContextMenuStorageItem::kItemTypeQuickGroup } }},
             {{
                 { PropContextMenuItem::kTypeZOrder },
                 { PropContextMenuItem::kTypeELayer },
@@ -302,6 +302,8 @@ void ContextMenu::generate(ContextType s, bool multi) {
     this->addChild(scaleLabel);
 
     h += 8.f;
+
+    this->updateItems();
 
     this->setContentSize({ w, h });
 }

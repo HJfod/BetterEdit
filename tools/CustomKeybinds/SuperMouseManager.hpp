@@ -36,6 +36,7 @@ class SuperMouseManager {
         CCPoint m_obLastPosition;
         SuperMouseDelegate* m_pCapturing = nullptr;
         SuperMouseDelegate* m_pWeakCapture = nullptr;
+        std::set<MouseButton> m_vButtonsDown;
 
         bool init();
 

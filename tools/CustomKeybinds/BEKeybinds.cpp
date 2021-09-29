@@ -12,6 +12,7 @@
 #include "../History/UndoHistoryPopup.hpp"
 #include "../ContextMenu/ContextMenu.hpp"
 #include "../Screenshot/screenshot.hpp"
+#include "../GroupSummary/GroupSummaryPopup.hpp"
 
 static constexpr const float w_edge = 120.0f;
 
@@ -735,6 +736,13 @@ void loadBEKeybinds() {
             return false;
         }, "editor.modify", false
     }, {});
+
+    kbm->addEditorKeybind({ "View Group Summary", "betteredit.view_group_summary",
+        [](EditorUI* ui) -> bool {
+            GroupSummaryPopup::create(ui->m_pEditorLayer)->show();
+            return false;
+        }, "editor.modify", false
+    }, {{ KEY_G, Keybind::kmControl }});
 
     kbm->addEditorKeybind({ "Context Menu", "betteredit.show_context_menu",
         [](EditorUI* ui) -> bool {

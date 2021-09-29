@@ -18,6 +18,9 @@ class CustomizeCMLayer;
         if (p) this->addChild(p);           \
         this->setCascadeColorEnabled(true); \
         this->setCascadeOpacityEnabled(true);\
+        this->setContentSize(               \
+            p->getScaledContentSize()       \
+        );                                  \
         return true;                        \
     }                                       \
     public:                                 \
@@ -152,18 +155,22 @@ class ContextMenuItemWithBGAndPossiblyText : public CCNode {
         ButtonSprite* m_pButtonSprite = nullptr;
         AnyLabel* m_pLabel = nullptr;
         ccColor4F m_obColor;
+        float m_fPaddingVertical = 5.f;
+        float m_fPaddingHorizontal = 20.f;
 
-        bool init(AnyLabel* label);
+        bool init(AnyLabel* label, float padh, float padv);
 
         void draw() override;
     
     public:
         static ContextMenuItemWithBGAndPossiblyText* create(
-            AnyLabel* label
+            AnyLabel* label, float padh = 5.f, float padv = 20.f
         );
 
         void setString(const char*);
         const char* getString() const;
+
+        void updateSize();
 
         void setColor(ccColor4B);
 };
@@ -174,18 +181,24 @@ class ContextMenuButton :
     protected:
         ContextMenuItem* m_pItem;
         ContextMenuItemWithBGAndPossiblyText* m_pBG;
+        bool m_bToggled = false;
+        bool m_bToggleable = false;
 
-        bool init(ContextMenuItem*, const char* txt, SEL_MenuHandler);
+        bool init(ContextMenuItem*, const char* txt, SEL_MenuHandler, bool);
 
         bool mouseDownSuper(MouseButton btn, CCPoint const&) override;
         bool mouseUpSuper(MouseButton btn, CCPoint const&) override;
         void mouseLeaveSuper(CCPoint const&) override;
+        void mouseEnterSuper(CCPoint const&) override;
 
         void visit() override;
-        void draw() override;
 
     public:
         static ContextMenuButton* create(ContextMenuItem*, const char* txt, SEL_MenuHandler);
+        static ContextMenuButton* createToggle(ContextMenuItem*, const char* txt, SEL_MenuHandler);
+
+        void toggle(bool);
+        bool isToggled() const;
 };
 
 class ContextMenuItem :
@@ -341,6 +354,7 @@ class QuickGroupContextMenuItem : public ContextMenuItem {
         
         bool init(ContextMenu*);
         void visit() override;
+        void updateItem() override;
 
         void onAddGroup(CCObject*);
         void onAddNewGroup(CCObject*);
@@ -547,13 +561,16 @@ class ContextMenu :
         float m_fObjectMoveGridSnap = 30.f;
         ccColor4B m_colBG = { 0, 0, 0, 200 };
         ccColor4B m_colText = { 255, 255, 255, 255 };
-        ccColor4B m_colGray = { 150, 150, 150, 255 };
+        ccColor4B m_colGray = { 150, 150, 150, 130 };
         ccColor4B m_colHover = { 255, 255, 255, 52 };
         ccColor4B m_colBorder = { 150, 150, 150, 20 };
         ccColor4B m_colTransparent = { 0, 0, 0, 0 };
         ccColor3B m_colSelect = { 255, 194, 90 };
-        ccColor4B m_colHighlight = { 50, 255, 255, 255 };
+        ccColor4B m_colHighlight = { 50, 255, 200, 255 };
         std::set<int> m_vQuickGroups = { 1, 2, 10, 50 };
+        float m_fPaddingVertical = 10.f;
+        float m_fPaddingHorizontal = 20.f;
+        float m_fButtonSeparation = 2.f;
 
         friend class ContextMenuItem;
         friend class SpecialContextMenuItem;

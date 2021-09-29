@@ -11,10 +11,11 @@ bool QuickGroupContextMenuItem::init(ContextMenu* menu) {
     this->m_bNoHover = true;
 
     for (auto const& item : menu->m_vQuickGroups) {
-        auto btn = ContextMenuButton::create(
+        auto btn = ContextMenuButton::createToggle(
             this, std::to_string(item).c_str(),
             menu_selector(QuickGroupContextMenuItem::onAddGroup)
         );
+        btn->setTag(item);
         this->addChild(btn);
     }
     this->addChild(ContextMenuButton::create(
@@ -26,21 +27,46 @@ bool QuickGroupContextMenuItem::init(ContextMenu* menu) {
 }
 
 void QuickGroupContextMenuItem::visit() {
-    auto count = this->getChildrenCount();
-
-    auto size = this->getContentSize();
-    CCARRAY_FOREACH_B_BASE(this->getChildren(), btn, ContextMenuButton*, ix) {
-        auto pos = (ix - (count - 1) / 2.f) * 15.f;
-        pos += size.width / 2;
-        btn->setPosition(pos, size.height / 2);
-        limitNodeSize(btn, { 0, size.height - 5.f }, .5f, 0.1f);
-    }
-
     ContextMenuItem::visit();
 }
 
-void QuickGroupContextMenuItem::onAddGroup(CCObject* pSender) {
+void QuickGroupContextMenuItem::updateItem() {
+    std::set<short> ids;
+    CCARRAY_FOREACH_B_TYPE(EditorUI::get()->getSelectedObjects(), obj, GameObject) {
+        for (int i = 0; i < obj->m_nGroupCount; i++) {
+            ids.insert(obj->m_pGroups[i]);
+        }
+    }
+
+    auto count = this->getChildrenCount();
+
+    auto size = this->getContentSize();
     
+    float width = 0.f;
+    CCARRAY_FOREACH_B_BASE(this->getChildren(), btn, ContextMenuButton*, ix) {
+        limitNodeSize(btn, { 0, size.height - 5.f }, .5f, 0.1f);
+        width += btn->getScaledContentSize().width + m_pMenu->m_fButtonSeparation;
+    }
+
+    float pos = .0f;
+    CCARRAY_FOREACH_B_BASE(this->getChildren(), btn, ContextMenuButton*, ix) {
+        pos += btn->getScaledContentSize().width / 2;
+
+        btn->setPosition(pos + size.width / 2 - width / 2, size.height / 2);
+        btn->toggle(ids.count(btn->getTag()));
+
+        pos += btn->getScaledContentSize().width / 2 + m_pMenu->m_fButtonSeparation;
+    }
+}
+
+void QuickGroupContextMenuItem::onAddGroup(CCObject* pSender) {
+    CCARRAY_FOREACH_B_TYPE(EditorUI::get()->getSelectedObjects(), obj, GameObject) {
+        if (as<ContextMenuButton*>(pSender)->isToggled()) {
+            obj->addToGroup(pSender->getTag());
+        } else {
+            obj->removeFromGroup(pSender->getTag());
+        }
+    }
 }
 
 void QuickGroupContextMenuItem::onAddNewGroup(CCObject*) {

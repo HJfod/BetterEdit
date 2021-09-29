@@ -1,31 +1,36 @@
 #include "../ContextMenu.hpp"
 
-bool ContextMenuItemWithBGAndPossiblyText::init(AnyLabel* label) {
+bool ContextMenuItemWithBGAndPossiblyText::init(
+    AnyLabel* label, float padh, float padv
+) {
     if (!CCNode::init())
         return false;
     
+    this->m_fPaddingHorizontal = padh;
+    this->m_fPaddingHorizontal = padv;
     this->m_pLabel = label;
     if (label) {
         this->addChild(label);
+        this->updateSize();
     }
 
     return true;
 }
 
-void ContextMenuItemWithBGAndPossiblyText::draw() {
-    auto size = this->getScaledContentSize();
+void ContextMenuItemWithBGAndPossiblyText::updateSize() {
     if (this->m_pLabel) {
-        auto csize = this->m_pLabel->getScaledContentSize() * 1.1f;
-        if (csize.width < 25.f)
-            csize.width = 25.f;
-        this->setContentSize(csize);
-        size = this->getScaledContentSize();
-        this->m_pLabel->setPosition(
-            size / 2
-        );
+        auto size = this->m_pLabel->getScaledContentSize();
+        this->setContentSize({
+            size.width + m_fPaddingHorizontal * 2.f,
+            size.height + m_fPaddingVertical * 2.f
+        });
+        this->m_pLabel->setPosition(this->getContentSize() / 2);
     }
+}
+
+void ContextMenuItemWithBGAndPossiblyText::draw() {
     ccDrawSolidRect(
-        { 0, 0 }, size,
+        { 0, 0 }, this->getScaledContentSize(),
         this->m_obColor
     );
     CCNode::draw();
@@ -47,11 +52,11 @@ const char* ContextMenuItemWithBGAndPossiblyText::getString() const {
 }
 
 ContextMenuItemWithBGAndPossiblyText* ContextMenuItemWithBGAndPossiblyText::create(
-    AnyLabel* label
+    AnyLabel* label, float padh, float padv
 ) {
     auto ret = new ContextMenuItemWithBGAndPossiblyText;
 
-    if (ret && ret->init(label)) {
+    if (ret && ret->init(label, padv, padh)) {
         ret->autorelease();
         return ret;
     }
