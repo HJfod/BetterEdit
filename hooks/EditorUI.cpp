@@ -30,6 +30,7 @@ static constexpr const int VIEWMODE_BACKBTN_TAG = 59305;
 bool g_showUI = true;
 bool g_uiIsVisible = true;
 bool g_hasResetObjectsScale = true;
+bool g_lastSnap = false;
 std::chrono::time_point<std::chrono::system_clock> g_lastTouchTime
     = std::chrono::system_clock::now();
 
@@ -162,7 +163,7 @@ bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,
     if (self_->m_pEditorLayer->m_ePlaybackMode != kPlaybackModePlaying)
         self_->m_bMoveModifier = move;
     
-    patch(0x90984, { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
+    // patch(0x90984, { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 
     bool duplicate = KeybindManager::get()->isModifierPressed("gd.edit.duplicate_modifier");
     patch(0x909dd, duplicate ?
@@ -171,12 +172,15 @@ bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,
         false, true
     );
 
+    bool snap = KeybindManager::get()->isModifierPressed("gd.edit.snap_modifier");
     bool free_move = KeybindManager::get()->isModifierPressed("gd.edit.free_move_modifier");
-    patch(0x90971, free_move ?
+    patch(0x90971, (duplicate || snap || free_move) ?
         std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0xeb, 0x17 } :
         std::vector<uint8_t> { 0x90, 0x90, 0x90, 0x90,  0x90, 0x90 },
         false, true
     );
+
+    g_lastSnap = snap;
 
     return GDMAKE_ORIG(self, edx, touch, event);
 }
@@ -292,6 +296,12 @@ gd::GameObject* castToGameObject(CCObject* obj) {
 class EditorUIPulse : public gd::EditorUI {
 public:
     void updateObjectsPulse(float dt) {
+        bool snap = KeybindManager::get()->isModifierPressed("gd.edit.snap_modifier");
+        if (snap != g_lastSnap) {
+            this->toggleSnap(nullptr);
+            g_lastSnap = snap;
+        }
+
         // too lazy to add these to gd.h
         // theyre isMusicPlaying and isPlaybackMode
 

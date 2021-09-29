@@ -70,6 +70,7 @@ struct KeybindCallback {
     keybind_id id = "";
     std::string name;
     std::string subcategory = "";
+    std::string description = "";
     KeybindList defaults;
     bool repeatable = true;
     bool repeatChanged = false;
@@ -103,26 +104,30 @@ struct KeybindEditor : public KeybindCallback {
         std::string const& keybind,
         std::string const& id,
         bool isModifier,
-        std::string const& cat = ""
+        std::string const& cat = "",
+        std::string const& desc = ""
     ) {
         this->name = keybind;
         this->id = id;
         this->modifier = isModifier;
         this->repeatable = false;
         this->subcategory = cat;
+        this->description = desc;
     }
     
     inline KeybindEditor(
         std::string const& keybind,
         std::string const& id,
         decltype(call_b) bind,
-        std::string const& cat = ""
+        std::string const& cat = "",
+        std::string const& desc = ""
     ) {
         this->name = keybind;
         this->id = id;
         this->call_b = bind;
         this->repeatable = false;
         this->subcategory = cat;
+        this->description = desc;
     }
     
     inline KeybindEditor(
@@ -130,13 +135,29 @@ struct KeybindEditor : public KeybindCallback {
         std::string const& id,
         decltype(call) bind,
         std::string const& cat = "",
-        bool isRepeatable = true
+        std::string const& desc = ""
+    ) {
+        this->name = keybind;
+        this->id = id;
+        this->call = bind;
+        this->subcategory = cat;
+        this->description = desc;
+    }
+    
+    inline KeybindEditor(
+        std::string const& keybind,
+        std::string const& id,
+        decltype(call) bind,
+        std::string const& cat,
+        bool isRepeatable,
+        std::string const& desc = ""
     ) {
         this->name = keybind;
         this->id = id;
         this->call = bind;
         this->repeatable = isRepeatable;
         this->subcategory = cat;
+        this->description = desc;
     }
 };
 
@@ -156,31 +177,49 @@ struct KeybindPlayLayer : public KeybindCallback {
         this->id = copy.id;
         this->editor = alsoInEditor;
         this->repeatable = copy.repeatable;
+        this->description = copy.description;
     }
 
     inline KeybindPlayLayer(
         std::string const& keybind,
         std::string const& id,
         decltype(call) bind,
-        bool repeat = true
+        bool repeat,
+        std::string const& desc = ""
     ) {
         this->name = keybind;
         this->id = id;
         this->call = bind;
         this->repeatable = repeat;
         this->editor = false;
+        this->description = desc;
     }
 
     inline KeybindPlayLayer(
         std::string const& keybind,
         std::string const& id,
-        decltype(call_e) bind
+        decltype(call) bind,
+        std::string const& desc = ""
+    ) {
+        this->name = keybind;
+        this->id = id;
+        this->call = bind;
+        this->editor = false;
+        this->description = desc;
+    }
+
+    inline KeybindPlayLayer(
+        std::string const& keybind,
+        std::string const& id,
+        decltype(call_e) bind,
+        std::string const& desc = ""
     ) {
         this->name = keybind;
         this->id = id;
         this->call_e = bind;
         this->repeatable = false;
         this->editor = true;
+        this->description = desc;
     }
 };
 

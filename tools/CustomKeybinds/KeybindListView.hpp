@@ -73,6 +73,7 @@ class KeybindCell : public TableViewCell, public FLAlertLayerProtocol {
         void onReset(CCObject*);
         void onSelect(CCObject*);
         void onMore(CCObject*);
+        void onDescription(CCObject*);
 
 		static KeybindCell* create(const char* key, CCSize size);
 };

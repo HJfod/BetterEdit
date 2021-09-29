@@ -51,9 +51,12 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
     if (!bind->text.size())
         name = m_pBind->name.c_str();
 
+    m_pMenu = CCMenu::create();
+    m_pMenu->setPosition(m_fWidth / 2, m_fHeight / 2);
+    this->m_pLayer->addChild(m_pMenu);
+
     auto nameLabel = CCLabelBMFont::create(name, "bigFont.fnt");
     nameLabel->limitLabelWidth(140.0f, .5f, .0f);
-    nameLabel->setPosition(15.0f, this->m_fHeight / 2);
     nameLabel->setAnchorPoint({ 0.0f, 0.5f });
     if (!m_pBind) {
         nameLabel->setOpacity(180);
@@ -62,11 +65,21 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
         if (m_pBind->modifier)
             nameLabel->setColor(cc3x(0x8fa));
     }
-    this->m_pLayer->addChild(nameLabel);
 
-    m_pMenu = CCMenu::create();
-    m_pMenu->setPosition(m_fWidth / 2, m_fHeight / 2);
-    this->m_pLayer->addChild(m_pMenu);
+    auto nameBtn = CCMenuItemSpriteExtra::create(
+        nameLabel, this, menu_selector(KeybindCell::onDescription)
+    );
+    nameBtn->setPosition(- m_fWidth / 2 + 15.0f, 0.f);
+    nameBtn->setAnchorPoint({ 0.0f, 0.5f });
+
+    auto nameMenu = CCMenu::create();
+    nameMenu->addChild(nameBtn);
+    nameMenu->setPosition(m_fWidth / 2, m_fHeight / 2);
+    this->m_pLayer->addChild(nameMenu);
+
+    if (!m_pBind) {
+        nameBtn->setEnabled(false);
+    }
 
     if (m_pItem->text.size()) {
         auto foldBtn = CCMenuItemToggler::create(
@@ -81,6 +94,21 @@ void KeybindCell::loadFromItem(KeybindItem* bind) {
     }
 
     this->updateMenu();
+}
+
+void KeybindCell::onDescription(CCObject*) {
+    if (this->m_pBind) {
+        auto desc = this->m_pBind->description;
+        if (!desc.size())
+            desc = "No Description Provided";
+
+        FLAlertLayer::create(
+            nullptr,
+            this->m_pBind->name.c_str(),
+            "OK", nullptr,
+            360.f, desc
+        )->show();
+    }
 }
 
 void KeybindCell::onFold(CCObject* pSender) {
