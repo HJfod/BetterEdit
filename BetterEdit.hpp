@@ -20,6 +20,7 @@ enum DebugLogType {
     kLogTypeNone    = 0x0,
     kLogTypeConsole = 0x1,
     kLogTypeFile    = 0x2,
+    kLogTypeInternal= 0x4,
 };
 
 #pragma region macros (ew)

@@ -1,11 +1,58 @@
-#include <GDMake.h>
-#include <GUI/CCControlExtension/CCScale9Sprite.h>
 #include "passTouch.hpp"
-#include "../BetterEdit.hpp"
 #include "ScaleTextDelegate.hpp"
 
 bool g_bLockPosEnabled;
 bool g_bUnlockScaleEnabled;
+
+bool LockButton::init(
+    CCSprite* sprite,
+    CCNode* target,
+    SEL_MenuHandler cb,
+    LockType type
+) {
+    if (!CCMenuItemSprite::initWithNormalSprite(
+        sprite, nullptr, nullptr,
+        target, cb
+    )) return false;
+    if (!CCMenuItemSpriteExtra::init(sprite))
+        return false;
+    
+    this->m_eType = type;
+
+    return true;
+}
+
+void LockButton::mouseLeaveSuper(CCPoint const&) {
+    this->unselected();
+}
+
+bool LockButton::mouseDownSuper(MouseButton, CCPoint const&) {
+    this->selected();
+    return true;
+}
+
+bool LockButton::mouseUpSuper(MouseButton, CCPoint const&) {
+    this->activate();
+    return true;
+}
+
+LockButton* LockButton::create(
+    CCSprite* sprite,
+    CCNode* target,
+    SEL_MenuHandler cb,
+    LockType type
+) {
+    auto ret = new LockButton;
+
+    if (ret && ret->init(sprite, target, cb, type)) {
+        ret->autorelease();
+        return ret;
+    }
+
+    CC_SAFE_DELETE(ret);
+    return nullptr;
+}
+
 
 void ScaleTextDelegate::textChanged(CCTextInputNode* input) {
     float val = 1.0f;
@@ -73,6 +120,20 @@ class GJScaleControl_CB : public GJScaleControl {
         }
 };
 
+bool mouseIsHoveringNode(CCNode* node, CCPoint const& mpos) {
+    auto pos = node->getParent()->convertToWorldSpace(node->getPosition());
+    auto size = node->getScaledContentSize();
+
+    auto rect = CCRect {
+        pos.x - size.width / 2,
+        pos.y - size.height / 2,
+        size.width,
+        size.height
+    };
+
+    return rect.containsPoint(mpos);
+}
+
 bool pointIntersectsScaleControls(EditorUI* self, CCTouch* touch, CCEvent* event) {
     auto std = reinterpret_cast<ScaleTextDelegate*>(
         self->m_pScaleControl->getChildByTag(7777)
@@ -106,6 +167,16 @@ bool pointIntersectsScaleControls(EditorUI* self, CCTouch* touch, CCEvent* event
             std->m_pInputNode->getTextField()->attachWithIME();
         else
             std->m_pInputNode->getTextField()->detachWithIME();
+        
+        if (mouseIsHoveringNode(std->m_pLockPosBtn, touch->getLocation())) {
+            std->m_pLockPosBtn->selected();
+            return true;
+        }
+        
+        if (mouseIsHoveringNode(std->m_pLockScaleBtn, touch->getLocation())) {
+            std->m_pLockScaleBtn->selected();
+            return true;
+        }
 
         return inputRect.containsPoint(pos);
     }
@@ -217,12 +288,13 @@ bool __fastcall GJScaleControl_init(GJScaleControl* self) {
 
     /////////////////////////////////
 
-    auto unlockScaleBtn = CCMenuItemSpriteExtra::create(
+    auto unlockScaleBtn = LockButton::create(
         CCSprite::create(
             "GJ_button_01.png"
         ),
         self,
-        (SEL_MenuHandler)&GJScaleControl_CB::onUnlockScale
+        (SEL_MenuHandler)&GJScaleControl_CB::onUnlockScale,
+        kLockTypeSlider
     );
 
     unlockScaleBtn->setNormalImage(
@@ -237,10 +309,11 @@ bool __fastcall GJScaleControl_init(GJScaleControl* self) {
 
     /////////////////////////////////
 
-    auto lockPositionBtn = CCMenuItemSpriteExtra::create(
+    auto lockPositionBtn = LockButton::create(
         CCSprite::create("GJ_button_01.png"),
         self,
-        (SEL_MenuHandler)&GJScaleControl_CB::onLockPosition
+        (SEL_MenuHandler)&GJScaleControl_CB::onLockPosition,
+        kLockTypeAbsolute
     );
 
     lockPositionBtn->setNormalImage(

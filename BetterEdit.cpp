@@ -10,6 +10,7 @@ using namespace gd;
 using namespace cocos2d;
 
 log_stream g_obLogStream = log_stream();
+std::vector<std::string> g_internalLog;
 
 bool DSdictHasKey(DS_Dictionary* dict, std::string const& key) {
     return dict->getKey(dict->getIndexOfKey(key.c_str())) == key;
@@ -45,6 +46,9 @@ log_stream& log_stream::operator<<(log_end end) {
     }
     if (this->type & kLogTypeConsole) {
         std::cout << s;
+    }
+    if (this->type & kLogTypeInternal) {
+        g_internalLog.push_back(s);
     }
 
     this->output.str(std::string());

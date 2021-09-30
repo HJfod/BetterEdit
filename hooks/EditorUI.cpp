@@ -1,6 +1,6 @@
 #include "../BetterEdit.hpp"
-#include "passTouch.hpp"
-#include "ScaleTextDelegate.hpp"
+#include "../tools/SliderImprovement/passTouch.hpp"
+#include "../tools/SliderImprovement/ScaleTextDelegate.hpp"
 #include "../tools/GroupIDFilter/groupfilter.hpp"
 #include "../tools/GridSize/gridButton.hpp"
 #include "../tools/LevelPercent/levelPercent.hpp"

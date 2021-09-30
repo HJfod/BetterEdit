@@ -1,6 +1,6 @@
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
-#include "passTouch.hpp"
+#include "../tools/SliderImprovement/passTouch.hpp"
 
 using namespace gdmake;
 
