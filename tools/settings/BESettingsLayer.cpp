@@ -1,4 +1,5 @@
 #include "BESettingsLayer.hpp"
+#include "../Debug/IntegratedConsole.hpp"
 
 using namespace gdmake;
 using namespace gdmake::extra;
@@ -288,6 +289,9 @@ void BESettingsLayer::setup() {
         BE_SETTING_FUNC_B(EnableExperimentalFeatures)
     );
     this->addTitle("For Feedback / Support, Contact HJfod#1795\nor Join the Discord", "bigFont.fnt");
+    this->addButton(
+        "Debug Console", menu_selector(BESettingsLayer::onDebug), true
+    );
     // this->addToggle(
     //     "Check for Updates", "Checks for available updates at startup",
     //     BE_SETTING_FUNC_B(AutoUpdateEnabled)
@@ -433,6 +437,17 @@ CCMenuItemSpriteExtra* BESettingsLayer::addButton(CCNode* sprite, SEL_MenuHandle
     this->incrementPageCount();
 
     return btn;
+}
+
+CCMenuItemSpriteExtra* BESettingsLayer::addButton(const char* sprite, SEL_MenuHandler callback, bool large) {
+    return this->addButton(
+        CCNodeConstructor<ButtonSprite*>()
+            .fromButtonSprite(sprite, "GJ_button_05.png", "goldFont.fnt")
+            .scale(.75f)
+            .done(),
+        callback,
+        large
+    );
 }
 
 void BESettingsLayer::addToggle(
@@ -584,6 +599,10 @@ void BESettingsLayer::onURL(CCObject* pSender) {
         0, 0 ,
         SW_SHOW
     );
+}
+
+void BESettingsLayer::onDebug(CCObject*) {
+    IntegratedConsole::create()->show();
 }
 
 void BESettingsLayer::onClose(CCObject* pSender) {

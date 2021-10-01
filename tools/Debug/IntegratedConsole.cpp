@@ -9,14 +9,14 @@ void IntegratedConsole::setup() {
 
     auto arr = CCArray::create();
     for (auto const& str : BetterEdit::internal_log()) {
-        arr->addObject(CCString::create(str));
+        arr->addObject(new DebugObject(str));
     }
 
-    this->m_pList = DebugListView::create(arr, 400.f, 220.f);
+    this->m_pList = DebugListView::create(arr, 400.f, 210.f);
     this->m_pList->setPosition(
         winSize / 2 - CCSize {
             this->m_pList->m_fWidth,
-            this->m_pList->m_fHeight + 20.f
+            this->m_pList->m_fHeight + 15.f
         } / 2
     );
     this->m_pList->m_pTableView->m_pContentLayer->setPositionY(0);

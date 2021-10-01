@@ -10,7 +10,19 @@ using namespace gd;
 using namespace cocos2d;
 
 log_stream g_obLogStream = log_stream();
-std::vector<std::string> g_internalLog;
+std::vector<DebugMsg> g_internalLog;
+
+std::string DebugTypeToStr(DebugType type) {
+    switch (type) {
+        case kDebugTypeGeneric:         return "General";
+        case kDebugTypeHook:            return "Hook";
+        case kDebugTypeInitializing:    return "Initializing";
+        case kDebugTypeDeinitializing:  return "Deinitializing";
+        case kDebugTypeSaving:          return "Saving";
+        case kDebugTypeLoading:         return "Loading";
+        default:                        return "";
+    }
+}
 
 bool DSdictHasKey(DS_Dictionary* dict, std::string const& key) {
     return dict->getKey(dict->getIndexOfKey(key.c_str())) == key;
@@ -23,6 +35,7 @@ log_stream::log_stream() {
         } catch (...) {}
     }
     this->setType(this->type);
+    this->type |= kLogTypeInternal;
     writeFileString(g_sLogfile, "");
 }
 
@@ -48,12 +61,13 @@ log_stream& log_stream::operator<<(log_end end) {
         std::cout << s;
     }
     if (this->type & kLogTypeInternal) {
-        g_internalLog.push_back(s);
+        g_internalLog.push_back({ this->dbgType, s });
         if (g_internalLog.size() > 200) {
             g_internalLog.erase(g_internalLog.begin() + 200, g_internalLog.end());
         }
     }
 
+    this->dbgType = kDebugTypeGeneric;
     this->output.str(std::string());
 
     return *this;
@@ -63,7 +77,7 @@ log_stream& BetterEdit::log() {
     return g_obLogStream;
 }
 
-std::vector<std::string>& BetterEdit::internal_log() {
+std::vector<DebugMsg>& BetterEdit::internal_log() {
     return g_internalLog;
 }
 
@@ -108,29 +122,29 @@ bool BetterEdit::init() {
 }
 
 void BetterEdit::encodeDataTo(DS_Dictionary* data) {
-    BetterEdit::log() << "Saving Settings" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving Settings" << log_end();
     STEP_SUBDICT(data, "settings",
         BE_SETTINGS(BE_SAVE_SETTING)
     );
 
-    BetterEdit::log() << "Saving Bools" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving Bools" << log_end();
     STEP_SUBDICT(data, "bools",
         for (auto & [key, val] : m_mSaveBools)
             if (val.global)
                 data->setBoolForKey(key.c_str(), *val.global);
     );
 
-    BetterEdit::log() << "Saving Templates" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving Templates" << log_end();
     STEP_SUBDICT(data, "templates",
         m_pTemplateManager->encodeDataTo(data);
     );
 
-    BetterEdit::log() << "Saving Editor Layers" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving Editor Layers" << log_end();
     STEP_SUBDICT(data, "editor-layers",
         LayerManager::get()->encodeDataTo(data);
     );
 
-    BetterEdit::log() << "Saving Presets" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving Presets" << log_end();
     STEP_SUBDICT(data, "presets",
         auto ix = 0u;
         for (auto preset : m_vPresets)
@@ -141,47 +155,47 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
             );
     );
 
-    BetterEdit::log() << "Saving Favorites" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving Favorites" << log_end();
     std::string favStr = "";
     for (auto fav : m_vFavorites)
         favStr += std::to_string(fav) + ",";
     data->setStringForKey("favorites", favStr);
 
-    BetterEdit::log() << "Saving UI Customization" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving UI Customization" << log_end();
     STEP_SUBDICT(data, "ui",
         UIManager::get()->encodeDataTo(data);
     );
 
-    BetterEdit::log() << "Saving Backups" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving Backups" << log_end();
     LevelBackupManager::get()->save();
 
-    BetterEdit::log() << "Saving Keybinds" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving Keybinds" << log_end();
     KeybindManager::get()->save();
 }
 
 void BetterEdit::dataLoaded(DS_Dictionary* data) {
-    BetterEdit::log() << "Loading Settings" << log_end();
+    BetterEdit::log() << kDebugTypeLoading << "Loading Settings" << log_end();
     STEP_SUBDICT_NC(data, "settings",
         BE_SETTINGS(BE_LOAD_SETTING)
     );
 
-    BetterEdit::log() << "Loading Bools" << log_end();
+    BetterEdit::log() << kDebugTypeLoading << "Loading Bools" << log_end();
     STEP_SUBDICT_NC(data, "bools",
         for (auto key : data->getAllKeys())
             m_mSaveBools[key] = { nullptr, data->getBoolForKey(key.c_str()) };
     );
 
-    BetterEdit::log() << "Loading Templates" << log_end();
+    BetterEdit::log() << kDebugTypeLoading << "Loading Templates" << log_end();
     STEP_SUBDICT_NC(data, "templates",
         m_pTemplateManager->dataLoaded(data);
     );
 
-    BetterEdit::log() << "Loading Editor Layers" << log_end();
+    BetterEdit::log() << kDebugTypeLoading << "Loading Editor Layers" << log_end();
     STEP_SUBDICT_NC(data, "editor-layers",
         LayerManager::get()->dataLoaded(data);
     );
 
-    BetterEdit::log() << "Loading Presets" << log_end();
+    BetterEdit::log() << kDebugTypeLoading << "Loading Presets" << log_end();
     STEP_SUBDICT_NC(data, "presets",
         for (auto key : data->getAllKeys())
             STEP_SUBDICT_NC(data, key.c_str(),
@@ -192,11 +206,11 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
             );
     );
 
-    BetterEdit::log() << "Loading Favorites" << log_end();
+    BetterEdit::log() << kDebugTypeLoading << "Loading Favorites" << log_end();
     for (auto fav : stringSplit(data->getStringForKey("favorites"), ","))
         try { this->addFavorite(std::stoi(fav)); } catch (...) {}
     
-    BetterEdit::log() << "Loading UI Customization" << log_end();
+    BetterEdit::log() << kDebugTypeLoading << "Loading UI Customization" << log_end();
     STEP_SUBDICT_NC(data, "ui",
         UIManager::get()->dataLoaded(data);
     );

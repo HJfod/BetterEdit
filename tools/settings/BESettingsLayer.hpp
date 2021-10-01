@@ -6,14 +6,14 @@
 #include "../../BetterEdit.hpp"
 #include <array>
 
-class MoreOptionsLayer : public gd::FLAlertLayer,
-    gd::TextInputDelegate,
-    gd::GooglePlayDelegate
+class MoreOptionsLayer : public FLAlertLayer,
+    TextInputDelegate,
+    GooglePlayDelegate
 {
     protected:
         bool init() {
             return reinterpret_cast<bool(__fastcall*)(MoreOptionsLayer*)>(
-                gd::base + 0x1de8f0
+                base + 0x1de8f0
             )(this);
         };
 };
@@ -21,26 +21,26 @@ class MoreOptionsLayer : public gd::FLAlertLayer,
 using BE_Callback = void(*)(std::string const&);
 using BE_Callback_B = void(*)(bool);
 
-class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
+class BESettingsLayer : public BrownAlertDelegate, TextInputDelegate {
     protected:
         unsigned int m_nItemCount = 0;
         int m_nCurrentPage = 0;
         unsigned int m_nDestPage = 0;
-        std::vector<std::vector<cocos2d::CCNode*>> m_vPages;
-        gd::CCMenuItemSpriteExtra* m_pPrevPageBtn;
-        gd::CCMenuItemSpriteExtra* m_pNextPageBtn;
+        std::vector<std::vector<CCNode*>> m_vPages;
+        CCMenuItemSpriteExtra* m_pPrevPageBtn;
+        CCMenuItemSpriteExtra* m_pNextPageBtn;
         EditorPauseLayer* m_pPauseLayer;
 
         static constexpr const float s_fItemPaddingV = 35.0f;
         static constexpr const unsigned int s_nMaxItemsOnPage = 10;
 
         void setup() override;
-        void onClose(cocos2d::CCObject*);
+        void onClose(CCObject*);
         void keyDown(enumKeyCodes) override;
 
-        cocos2d::CCPoint getItemPos(bool large = false, bool center = false);
+        CCPoint getItemPos(bool large = false, bool center = false);
         void incrementPageCount(bool skip = false);
-        void addItem(cocos2d::CCNode* item);
+        void addItem(CCNode* item);
 
         void addInput(
             const char* text,
@@ -56,18 +56,20 @@ class BESettingsLayer : public BrownAlertDelegate, gd::TextInputDelegate {
             bool experimental = false,
             bool showDescOnToggle = false
         );
-        void addSlider(const char* text, cocos2d::SEL_MenuHandler onChange, float val = 0.0f);
-        cocos2d::CCLabelBMFont* addTitle(const char* text, const char* font = "goldFont.fnt");
-        cocos2d::CCLabelBMFont* addSubtitle(const char* text, bool centered = false);
-        gd::CCMenuItemSpriteExtra* addButton(cocos2d::CCNode* sprite, cocos2d::SEL_MenuHandler callback, bool large = false);
+        void addSlider(const char* text, SEL_MenuHandler onChange, float val = 0.0f);
+        CCLabelBMFont* addTitle(const char* text, const char* font = "goldFont.fnt");
+        CCLabelBMFont* addSubtitle(const char* text, bool centered = false);
+        CCMenuItemSpriteExtra* addButton(CCNode* sprite, SEL_MenuHandler callback, bool large = false);
+        CCMenuItemSpriteExtra* addButton(const char* label, SEL_MenuHandler callback, bool large = false);
 
-        void onInfo(cocos2d::CCObject*);
-        void onPage(cocos2d::CCObject*);
-        void onToggle(cocos2d::CCObject*);
-        void textChanged(gd::CCTextInputNode*) override;
+        void onInfo(CCObject*);
+        void onPage(CCObject*);
+        void onToggle(CCObject*);
+        void textChanged(CCTextInputNode*) override;
+        void onDebug(CCObject*);
 
-        void onShowAccount(cocos2d::CCObject*);
-        void onURL(cocos2d::CCObject*);
+        void onShowAccount(CCObject*);
+        void onURL(CCObject*);
 
     public:
         static BESettingsLayer* create(EditorPauseLayer*);

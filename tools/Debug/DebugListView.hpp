@@ -5,6 +5,18 @@
 static constexpr const BoomListType kBoomListType_Debug
     = static_cast<BoomListType>(0x428);
 
+class DebugObject : public CCObject {
+    public:
+        std::string m_sString;
+        DebugType m_eDebugType;
+
+        inline DebugObject(DebugMsg msg) {
+            this->m_sString = msg.str;
+            this->m_eDebugType = msg.type;
+            this->autorelease();
+        }
+};
+
 class DebugCell : public TableViewCell {
     protected:
         CCLabelBMFont* m_pLabel;
@@ -14,7 +26,7 @@ class DebugCell : public TableViewCell {
         void draw() override;
 	
 	public:
-        void loadFromString(CCString*);
+        void loadFromObject(DebugObject*);
         void updateBGColor(int);
         void updateLabelColor();
 

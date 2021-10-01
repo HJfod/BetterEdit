@@ -15,22 +15,30 @@ void DebugCell::updateBGColor(int ix) {
     this->m_pBGLayer->setColor({ 0, 0, 0 });
 }
 
-void DebugCell::loadFromString(CCString* str) {
+void DebugCell::loadFromObject(DebugObject* str) {
     this->m_pLayer->setVisible(true);
     this->m_pBGLayer->setOpacity(255);
     
-    // auto cell = CCLabelTTF::create(str->getCString(), "Consolas", 18.f);
-    auto cell = CCLabelBMFont::create(str->getCString(), "chatFont.fnt");
-    // cell->setAnchorPoint({ .0f, .75f });
-    cell->setAnchorPoint({ .0f, .5f });
-    cell->setPosition({
+    auto label = CCLabelBMFont::create(str->m_sString.c_str(), "chatFont.fnt");
+    label->setAnchorPoint({ .0f, .5f });
+    label->setPosition({
         this->m_fHeight / 2,
         this->m_fHeight / 2
     });
-    cell->setScale(.5f);
-    this->m_pLayer->addChild(cell);
+    label->setScale(.5f);
+    this->m_pLayer->addChild(label);
 
-    this->m_pLabel = cell;
+    this->m_pLabel = label;
+
+    auto typeLabel = CCLabelBMFont::create(DebugTypeToStr(str->m_eDebugType).c_str(), "chatFont.fnt");
+    typeLabel->setAnchorPoint({ 1.f, .5f });
+    typeLabel->setPosition({
+        this->m_fWidth - this->m_fHeight / 2,
+        this->m_fHeight / 2
+    });
+    typeLabel->setScale(.5f);
+    typeLabel->setColor({ 80, 255, 160 });
+    this->m_pLayer->addChild(typeLabel);
 
     this->updateLabelColor();
 }
@@ -80,8 +88,8 @@ TableViewCell* DebugListView::getListCell(const char* key) {
 }
 
 void DebugListView::loadCell(TableViewCell* cell, unsigned int index) {
-    as<DebugCell*>(cell)->loadFromString(
-        as<CCString*>(this->m_pEntries->objectAtIndex(index))
+    as<DebugCell*>(cell)->loadFromObject(
+        as<DebugObject*>(this->m_pEntries->objectAtIndex(index))
     );
     as<DebugCell*>(cell)->updateBGColor(index);
 }

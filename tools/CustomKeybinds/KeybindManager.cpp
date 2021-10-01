@@ -185,7 +185,7 @@ bool KeybindCallback::operator==(KeybindCallback const& other) const {
 }
 
 void KeybindManager::encodeDataTo(DS_Dictionary* dict) {
-    BetterEdit::log() << "Saving keybinds" << log_end();
+    BetterEdit::log() << kDebugTypeSaving << "Saving keybinds" << log_end();
 
     dict->setIntegerForKey("double-click-interval", this->m_nDoubleClickInterval);
     dict->setIntegerForKey("version", this->getVersion());
@@ -210,7 +210,7 @@ void KeybindManager::encodeDataTo(DS_Dictionary* dict) {
 }
 
 void KeybindManager::dataLoaded(DS_Dictionary* dict) {
-    BetterEdit::log() << "Loading keybinds" << log_end();
+    BetterEdit::log() << kDebugTypeLoading << "Loading keybinds" << log_end();
     
     if (DSdictHasKey(dict, "double-click-interval"))
         this->m_nDoubleClickInterval = dict->getIntegerForKey("double-click-interval");

@@ -23,6 +23,22 @@ enum DebugLogType {
     kLogTypeInternal= 0x4,
 };
 
+enum DebugType {
+    kDebugTypeGeneric,
+    kDebugTypeInitializing,
+    kDebugTypeDeinitializing,
+    kDebugTypeLoading,
+    kDebugTypeSaving,
+    kDebugTypeHook,
+};
+
+std::string DebugTypeToStr(DebugType);
+
+struct DebugMsg {
+    DebugType type;
+    std::string str;
+};
+
 #pragma region macros (ew)
 #define BE_SETTINGS(__macro__)                                                                  \
     __macro__(ScaleSnap, float, .25f, Float, std::stof, BE_MAKE_SFUNC_RANGE, 0.01f, 1.0f)       \
@@ -141,6 +157,7 @@ class log_stream {
     protected:
         std::stringstream output;
         int type = 0;
+        DebugType dbgType = kDebugTypeGeneric;
 
     public:
         log_stream();
@@ -159,6 +176,9 @@ class log_stream {
         }
         inline log_stream& operator<<(long n) {
             output << n; return *this;
+        }
+        inline log_stream& operator<<(DebugType n) {
+            dbgType = n; return *this;
         }
         inline log_stream& operator<<(CCPoint p) {
             output << p.x << ", " << p.y; return *this;
@@ -272,7 +292,7 @@ class BetterEdit : public gd::GManager {
         static void showHookConflictMessage();
 
         static log_stream& log();
-        static std::vector<std::string>& internal_log();
+        static std::vector<DebugMsg>& internal_log();
 
         inline void scheduleError(ScheduleTime time, std::string const& err) {
             if (!this->m_mScheduledErrors.count(time))
