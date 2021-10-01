@@ -49,6 +49,9 @@ log_stream& log_stream::operator<<(log_end end) {
     }
     if (this->type & kLogTypeInternal) {
         g_internalLog.push_back(s);
+        if (g_internalLog.size() > 200) {
+            g_internalLog.erase(g_internalLog.begin() + 200, g_internalLog.end());
+        }
     }
 
     this->output.str(std::string());
@@ -58,6 +61,10 @@ log_stream& log_stream::operator<<(log_end end) {
 
 log_stream& BetterEdit::log() {
     return g_obLogStream;
+}
+
+std::vector<std::string>& BetterEdit::internal_log() {
+    return g_internalLog;
 }
 
 #define BE_SAVE_Bool(_name_, _get_, _def_) \

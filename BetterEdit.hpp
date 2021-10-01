@@ -272,6 +272,7 @@ class BetterEdit : public gd::GManager {
         static void showHookConflictMessage();
 
         static log_stream& log();
+        static std::vector<std::string>& internal_log();
 
         inline void scheduleError(ScheduleTime time, std::string const& err) {
             if (!this->m_mScheduledErrors.count(time))

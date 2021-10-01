@@ -7,12 +7,16 @@ static constexpr const BoomListType kBoomListType_Debug
 
 class DebugCell : public TableViewCell {
     protected:
+        CCLabelBMFont* m_pLabel;
+
 		DebugCell(const char* name, CCSize size);
 
         void draw() override;
 	
 	public:
         void loadFromString(CCString*);
+        void updateBGColor(int);
+        void updateLabelColor();
 
 		static DebugCell* create(const char* key, CCSize size);
 };

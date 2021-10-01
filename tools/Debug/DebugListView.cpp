@@ -10,14 +10,43 @@ void DebugCell::draw() {
     )(this);
 }
 
+void DebugCell::updateBGColor(int ix) {
+    this->m_pBGLayer->setOpacity(ix % 2 ? 150 : 50);
+    this->m_pBGLayer->setColor({ 0, 0, 0 });
+}
+
 void DebugCell::loadFromString(CCString* str) {
     this->m_pLayer->setVisible(true);
     this->m_pBGLayer->setOpacity(255);
     
+    // auto cell = CCLabelTTF::create(str->getCString(), "Consolas", 18.f);
     auto cell = CCLabelBMFont::create(str->getCString(), "chatFont.fnt");
+    // cell->setAnchorPoint({ .0f, .75f });
     cell->setAnchorPoint({ .0f, .5f });
-    cell->setPosition(this->m_fHeight / 2, this->m_fHeight / 2);
+    cell->setPosition({
+        this->m_fHeight / 2,
+        this->m_fHeight / 2
+    });
+    cell->setScale(.5f);
     this->m_pLayer->addChild(cell);
+
+    this->m_pLabel = cell;
+
+    this->updateLabelColor();
+}
+
+void DebugCell::updateLabelColor() {
+    auto str = this->m_pLabel->getString();
+    ccColor3B col;
+    CCARRAY_FOREACH_B_BASE(this->m_pLabel->getChildren(), child, CCSprite*, ix) {
+        switch (str[ix]) {
+            case '[': col = { 100, 100, 100 }; break;
+        }
+        child->setColor(col);
+        switch (str[ix]) {
+            case ']': col = { 255, 255, 255 }; break;
+        }
+    }
 }
 
 DebugCell* DebugCell::create(const char* key, CCSize size) {
@@ -34,7 +63,7 @@ DebugCell* DebugCell::create(const char* key, CCSize size) {
 
 
 void DebugListView::setupList() {
-    this->m_fItemSeparation = 20.0f;
+    this->m_fItemSeparation = 16.0f;
 
     if (!this->m_pEntries->count()) return;
 
@@ -54,7 +83,7 @@ void DebugListView::loadCell(TableViewCell* cell, unsigned int index) {
     as<DebugCell*>(cell)->loadFromString(
         as<CCString*>(this->m_pEntries->objectAtIndex(index))
     );
-    as<StatsCell*>(cell)->updateBGColor(index);
+    as<DebugCell*>(cell)->updateBGColor(index);
 }
 
 DebugListView* DebugListView::create(

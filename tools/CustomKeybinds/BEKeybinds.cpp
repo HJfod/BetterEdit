@@ -13,6 +13,7 @@
 #include "../ContextMenu/ContextMenu.hpp"
 #include "../Screenshot/screenshot.hpp"
 #include "../GroupSummary/GroupSummaryPopup.hpp"
+#include "../Debug/IntegratedConsole.hpp"
 
 static constexpr const float w_edge = 120.0f;
 
@@ -743,6 +744,13 @@ void loadBEKeybinds() {
             return false;
         }, "editor.modify", false
     }, {{ KEY_G, Keybind::kmControl }});
+
+    kbm->addEditorKeybind({ "View Console", "betteredit.view_console",
+        [](EditorUI* ui) -> bool {
+            IntegratedConsole::create()->show();
+            return false;
+        }, "editor.modify", false
+    }, {});
 
     kbm->addEditorKeybind({ "Context Menu", "betteredit.show_context_menu",
         [](EditorUI* ui) -> bool {
