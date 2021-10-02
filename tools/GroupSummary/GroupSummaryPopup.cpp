@@ -1,5 +1,6 @@
 #include "GroupSummaryPopup.hpp"
 #include "MoreTriggersPopup.hpp"
+#include "GroupListView.hpp"
 
 static constexpr const cocos2d::ccColor3B listBGLight { 142, 68, 28 };
 static constexpr const cocos2d::ccColor3B listBGDark  { 114, 55, 22 };
@@ -9,117 +10,192 @@ void GroupSummaryPopup::setup() {
 
     this->m_bNoElasticity = true;
 
-    this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
-        .fromNode(CCMenuItemSpriteExtra::create(
-            CCNodeConstructor()
-                .fromFrameName("GJ_arrow_01_001.png")
-                .scale(.8f)
-                .done(),
-            this,
-            (SEL_MenuHandler)&GroupSummaryPopup::onPage
-        ))
-        .udata(-1)
-        .move(- m_fItemWidth / 2 - 25.0f, 0.0f)
-        .done()
+    {
+        auto topItem = CCSprite::createWithSpriteFrameName("GJ_commentTop_001.png");
+        topItem->setPosition({
+            winSize.width / 2,
+            winSize.height / 2 + 85.0f
+        });
+        topItem->setZOrder(500);
+        this->m_pLayer->addChild(topItem);
+
+        auto bottomItem = CCSprite::createWithSpriteFrameName("GJ_commentTop_001.png");
+        bottomItem->setPosition({
+            winSize.width / 2,
+            winSize.height / 2 - 115.0f
+        });
+        bottomItem->setZOrder(500);
+        bottomItem->setFlipY(true);
+        this->m_pLayer->addChild(bottomItem);
+
+        auto sideItem = CCSprite::createWithSpriteFrameName("GJ_commentSide_001.png");
+        sideItem->setPosition({
+            winSize.width / 2 - 173.5f,
+            winSize.height / 2 - 14.0f
+        });
+        sideItem->setZOrder(500);
+        sideItem->setScaleY(6.f);
+        this->m_pLayer->addChild(sideItem);
+
+        auto sideItemRight = CCSprite::createWithSpriteFrameName("GJ_commentSide_001.png");
+        sideItemRight->setPosition({
+            winSize.width / 2 + 173.5f,
+            winSize.height / 2 - 14.0f
+        });
+        sideItemRight->setZOrder(500);
+        sideItemRight->setScaleY(6.f);
+        sideItemRight->setFlipX(true);
+        this->m_pLayer->addChild(sideItemRight);
+    }
+
+    {
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor()
+                    .fromFrameName("GJ_arrow_01_001.png")
+                    .scale(.8f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&GroupSummaryPopup::onPage
+            ))
+            .udata(-1)
+            .move(- m_fItemWidth / 2 - 25.0f, 0.0f)
+            .done()
+        );
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
+            .fromNode(CCMenuItemSpriteExtra::create(
+                CCNodeConstructor()
+                    .fromFrameName("GJ_arrow_01_001.png")
+                    .scale(.8f)
+                    .flipX()
+                    .done(),
+                this,
+                (SEL_MenuHandler)&GroupSummaryPopup::onPage
+            ))
+            .udata(1)
+            .move(m_fItemWidth / 2 + 25.0f, 0.0f)
+            .done()
+        );
+    }
+
+    {
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
+            .fromNode(CCMenuItemToggler::create(
+                CCNodeConstructor<ButtonSprite*>()
+                    .fromNode(ButtonSprite::create(
+                        "A", 20, 1, "goldFont.fnt", "GJ_button_01.png", 0x20, .8f
+                    ))
+                    .scale(.5f)
+                    .done(),
+                CCNodeConstructor()
+                    .fromNode(ButtonSprite::create(
+                        "A", 20, 1, "goldFont.fnt", "GJ_button_02.png", 0x20, .8f
+                    ))
+                    .scale(.5f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&GroupSummaryPopup::onShow
+            ))
+            .tag(kShowAll)
+            .move(- this->m_pLrSize.width / 2 + 35.f, this->m_pLrSize.height / 2 - 25.f)
+            .exec([this](auto t) -> void { m_vShowBtns.push_back(t); })
+            .done()
+        );
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
+            .fromNode(CCMenuItemToggler::create(
+                CCNodeConstructor<ButtonSprite*>()
+                    .fromNode(ButtonSprite::create(
+                        ">0", 20, 1, "goldFont.fnt", "GJ_button_01.png", 0x20, .8f
+                    ))
+                    .scale(.5f)
+                    .done(),
+                CCNodeConstructor()
+                    .fromNode(ButtonSprite::create(
+                        ">0", 20, 1, "goldFont.fnt", "GJ_button_02.png", 0x20, .8f
+                    ))
+                    .scale(.5f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&GroupSummaryPopup::onShow
+            ))
+            .tag(kShowOnlyOnesWithSomething)
+            .move(- this->m_pLrSize.width / 2 + 55.f, this->m_pLrSize.height / 2 - 25.f)
+            .exec([this](auto t) -> void { m_vShowBtns.push_back(t); })
+            .done()
+        );
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
+            .fromNode(CCMenuItemToggler::create(
+                CCNodeConstructor<ButtonSprite*>()
+                    .fromNode(ButtonSprite::create(
+                        "T", 20, 1, "goldFont.fnt", "GJ_button_01.png", 0x20, .8f
+                    ))
+                    .scale(.5f)
+                    .done(),
+                CCNodeConstructor()
+                    .fromNode(ButtonSprite::create(
+                        "T", 20, 1, "goldFont.fnt", "GJ_button_02.png", 0x20, .8f
+                    ))
+                    .scale(.5f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&GroupSummaryPopup::onShow
+            ))
+            .tag(kShowOnesWithTriggersButNoObjects)
+            .move(- this->m_pLrSize.width / 2 + 75.f, this->m_pLrSize.height / 2 - 25.f)
+            .exec([this](auto t) -> void { m_vShowBtns.push_back(t); })
+            .done()
+        );
+        this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
+            .fromNode(CCMenuItemToggler::create(
+                CCNodeConstructor<ButtonSprite*>()
+                    .fromNode(ButtonSprite::create(
+                        "O", 20, 1, "goldFont.fnt", "GJ_button_01.png", 0x20, .8f
+                    ))
+                    .scale(.5f)
+                    .done(),
+                CCNodeConstructor()
+                    .fromNode(ButtonSprite::create(
+                        "O", 20, 1, "goldFont.fnt", "GJ_button_02.png", 0x20, .8f
+                    ))
+                    .scale(.5f)
+                    .done(),
+                this,
+                (SEL_MenuHandler)&GroupSummaryPopup::onShow
+            ))
+            .tag(kShowOnesWithObjectsButNoTriggers)
+            .move(- this->m_pLrSize.width / 2 + 95.f, this->m_pLrSize.height / 2 - 25.f)
+            .exec([this](auto t) -> void { m_vShowBtns.push_back(t); })
+            .done()
+        );
+
+        this->m_pGroupCount = CCLabelBMFont::create("", "goldFont.fnt");
+        this->m_pGroupCount->setScale(.3f);
+        this->m_pGroupCount->setPosition(
+            winSize.width / 2 - this->m_pLrSize.width / 2 + 65.f,
+            winSize.height / 2 + this->m_pLrSize.height / 2 - 40.f
+        );
+        this->addChild(this->m_pGroupCount);
+    }
+
+    this->m_pNoFilterInfo = CCLabelBMFont::create(
+        "No groups match\nselected filters",
+        "bigFont.fnt",
+        500.f,
+        kCCTextAlignmentCenter
     );
-    this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
-        .fromNode(CCMenuItemSpriteExtra::create(
-            CCNodeConstructor()
-                .fromFrameName("GJ_arrow_01_001.png")
-                .scale(.8f)
-                .flipX()
-                .done(),
-            this,
-            (SEL_MenuHandler)&GroupSummaryPopup::onPage
-        ))
-        .udata(1)
-        .move(m_fItemWidth / 2 + 25.0f, 0.0f)
-        .done()
+    this->m_pNoFilterInfo->setScale(.5f);
+    this->m_pNoFilterInfo->setPosition(
+        winSize.width / 2,
+        winSize.height / 2 - 10.f
     );
+    this->m_pNoFilterInfo->setVisible(false);
+    this->addChild(this->m_pNoFilterInfo);
+
+    CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
+    this->registerWithTouchDispatcher();
 
     this->updateGroups();
     this->updatePage();
-}
-
-CCNode* GroupSummaryPopup::createItem(int group) {
-    auto node = CCNode::create();
-
-    bool color = group % 2;
-
-    auto bg = CCScale9Sprite::create(
-        "square02b_001.png", { 0.0f, 0.0f, 80.0f, 80.0f }
-    );
-    bg->setScale(.5f);
-    bg->setColor(color ? listBGLight : listBGDark);
-    bg->setContentSize({ m_fItemWidth * 2.f, 60.f });
-    bg->setZOrder(static_cast<int>(color));
-    node->addChild(bg);
-
-    auto menu = CCMenu::create();
-    menu->setPosition(0, 0);
-    menu->setZOrder(2);
-    node->addChild(menu);
-
-    auto num = CCLabelBMFont::create(std::to_string(group).c_str(), "goldFont.fnt");
-    num->setPosition(- m_fItemWidth / 2 + 15.f, 0.f);
-    num->setScale(.5f);
-    num->setAnchorPoint({ .0f, .5f });
-    num->setZOrder(2);
-    node->addChild(num);
-
-    auto info = this->m_mGroupInfo[group];
-
-    auto count = CCLabelBMFont::create(
-        (
-            std::to_string(info.m_vObjects.size()) +
-            " obj" +
-            (info.m_vObjects.size() == 1 ? "" : "s")
-        ).c_str(),
-        "bigFont.fnt"
-    );
-    count->setPosition(- m_fItemWidth / 2 + 45.f, 0.f);
-    count->setScale(.375f);
-    count->setAnchorPoint({ .0f, .5f });
-    count->setZOrder(2);
-    node->addChild(count);
-
-    auto posx = - m_fItemWidth / 2 + 155.f;
-    int showCount = 3;
-    int shown = 0;
-    for (auto trigger : info.m_vTriggers) {
-        if (shown >= showCount) {
-            auto moreCount = CCLabelBMFont::create(
-                ("+ "_s + std::to_string(info.m_vTriggers.size() - showCount) + " more").c_str(),
-                "bigFont.fnt"
-            );
-            moreCount->setScale(.3f);
-            moreCount->setAnchorPoint({ .0f, .5f });
-
-            auto moreBtn = CCMenuItemSpriteExtra::create(
-                moreCount, this, menu_selector(GroupSummaryPopup::onShowRestOfTheTriggers)
-            );
-            moreBtn->setPosition(posx - 15.f, 0.f);
-            moreBtn->setAnchorPoint({ .0f, .5f });
-            moreBtn->setTag(group);
-            menu->addChild(moreBtn);
-
-            break;
-        }
-        auto sprName = ObjectToolbox::sharedState()->intKeyToFrame(trigger->m_nObjectID);
-        auto spr = CCSprite::createWithSpriteFrameName(sprName);
-        spr->setScale(.65f);
-        spr->setPosition({ posx, 0.f });
-        spr->setZOrder(2);
-        node->addChild(spr);
-        posx += 30.f;
-        shown++;
-    }
-
-    return node;
-}
-
-void GroupSummaryPopup::onShowRestOfTheTriggers(CCObject* pSender) {
-    MoreTriggersPopup::create(this, as<CCNode*>(pSender))->show();
 }
 
 void GroupSummaryPopup::addGroups(GameObject* obj) {
@@ -160,42 +236,151 @@ void GroupSummaryPopup::updateGroups() {
             this->addGroups(obj);
         }
     }
+
+    this->updateFilters();
 }
 
-void GroupSummaryPopup::updatePage() {
-    auto winSize = CCDirector::sharedDirector()->getWinSize();
+void GroupSummaryPopup::updateFilters(CCObject* noToggle) {
+    this->m_vShowArray.clear();
 
-    for (auto ix = 0; ix < m_nItemCount; ix++) {
-        auto i = ix + m_nPage * m_nItemCount + 1;
+    for (auto btn : this->m_vShowBtns) {
+        if (btn != noToggle) {
+            btn->toggle(this->m_eShow == static_cast<Show>(btn->getTag()));
+        }
+    }
 
-        auto x = winSize.width / 2;
-        auto y = winSize.height / 2 + this->m_pLrSize.height / 2 - 60.f - 30.f * ix;
-
-        auto item = this->createItem(i);
-        item->setPosition(x, y);
-        this->m_pLayer->addChild(item);
-
-        this->m_vPageContent.push_back(item);
+    for (auto group = 1; group < 1000; group++) {
+        auto sum = this->m_mGroupInfo[group];
+        switch (this->m_eShow) {
+            case kShowAll:
+                this->m_vShowArray.push_back(group);
+                break;
+            
+            case kShowOnlyOnesWithSomething:
+                if (
+                    sum.m_vObjects.size() ||
+                    sum.m_vTriggers.size()
+                )
+                    this->m_vShowArray.push_back(group);
+                break;
+            
+            case kShowOnesWithObjectsButNoTriggers:
+                if (
+                    sum.m_vObjects.size() &&
+                    !sum.m_vTriggers.size()
+                )
+                    this->m_vShowArray.push_back(group);
+                break;
+            
+            case kShowOnesWithTriggersButNoObjects:
+                if (
+                    !sum.m_vObjects.size() &&
+                    sum.m_vTriggers.size()
+                )
+                    this->m_vShowArray.push_back(group);
+                break;
+        }
     }
 }
 
+void GroupSummaryPopup::updatePage() {
+    for (auto const& node : m_vPageContent) {
+        node->removeFromParent();
+    }
+    this->m_vPageContent.clear();
+
+    if (m_nPage * m_nItemCount > static_cast<int>(this->m_vShowArray.size())) {
+        this->m_nPage = this->m_vShowArray.size() / m_nItemCount;
+    }
+    this->m_pNoFilterInfo->setVisible(!this->m_vShowArray.size());
+    this->m_pGroupCount->setString(
+        CCString::createWithFormat("Showing %d groups", this->m_vShowArray.size())->getCString()
+    );
+
+    auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+    if (this->m_pList) {
+        this->m_pList->removeFromParent();
+    }
+
+    auto arr = CCArray::create();
+
+    for (auto ix = 0; ix < m_nItemCount; ix++) {
+        auto i = ix + m_nPage * m_nItemCount;
+
+        if (i >= static_cast<int>(this->m_vShowArray.size()))
+            break;
+        
+        arr->addObject(CCInteger::create(this->m_vShowArray.at(i)));
+    }
+
+    this->m_pList = GroupListView::create(
+        this, arr, 340.0f, 210.0f
+    );
+    this->m_pList->setPosition(
+        winSize / 2 - CCPoint { 170.0f, 118.0f }
+    );
+    this->m_pLayer->addChild(this->m_pList);
+}
+
 void GroupSummaryPopup::onPage(CCObject* pSender) {
-    this->m_nPage += as<int>(as<CCNode*>(pSender)->getUserData());
+    this->incrementPage(
+        as<int>(as<CCNode*>(pSender)->getUserData())
+    );
+}
+
+void GroupSummaryPopup::incrementPage(int page) {
+    this->m_nPage += page;
 
     if (this->m_nPage < 0)
         this->m_nPage = 0;
     if (this->m_nPage > 999 / m_nItemCount)
         this->m_nPage = 999 / m_nItemCount;
 
-    for (auto const& node : m_vPageContent) {
-        node->removeFromParent();
-    }
-    this->m_vPageContent.clear();
-
     this->updatePage();
 }
 
-GroupSummaryPopup::~GroupSummaryPopup() {}
+void GroupSummaryPopup::goToPage(int page) {
+    this->m_nPage = page;
+    this->updatePage();
+}
+
+void GroupSummaryPopup::onShow(CCObject* pSender) {
+    if (this->m_eShow == static_cast<Show>(pSender->getTag())) {
+        as<CCMenuItemToggler*>(pSender)->toggle(false);
+    } else {
+        this->m_eShow = static_cast<Show>(pSender->getTag());
+        this->updateFilters(pSender);
+        this->updatePage();
+    }
+}
+
+void GroupSummaryPopup::keyDown(enumKeyCodes key) {
+    switch (key) {
+        case KEY_Left:
+            this->incrementPage(-1);
+            break;
+
+        case KEY_Right:
+            this->incrementPage(1);
+            break;
+
+        default:
+            return BrownAlertDelegate::keyDown(key);
+    }
+}
+
+decltype(GroupSummaryPopup::m_mGroupInfo) & GroupSummaryPopup::getGroupInfo() {
+    return this->m_mGroupInfo;
+}
+
+GroupSummary & GroupSummaryPopup::getGroup(int group) {
+    return this->m_mGroupInfo[group];
+}
+
+GroupSummaryPopup::~GroupSummaryPopup() {
+    CCDirector::sharedDirector()->getTouchDispatcher()->decrementForcePrio(2);
+}
 
 GroupSummaryPopup* GroupSummaryPopup::create(LevelEditorLayer* lel) {
     auto ret = new GroupSummaryPopup;

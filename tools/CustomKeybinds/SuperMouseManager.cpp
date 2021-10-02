@@ -28,6 +28,57 @@ SuperMouseDelegate::~SuperMouseDelegate() {
 }
 
 
+void getTouchChildren(CCArray* arr, CCNode* node) {
+    if (!node) return;
+    CCARRAY_FOREACH_B_TYPE(node->getChildren(), obj, CCNode) {
+        if (dynamic_cast<CCTouchDelegate*>(obj)) {
+            arr->addObject(obj);
+        } else if (obj->getChildrenCount()) {
+            getTouchChildren(arr, obj);
+        }
+    }
+}
+
+bool BlockPassingTouchesDelegate::mouseDownSuper(MouseButton btn, CCPoint const& pos) {
+    if (btn == kMouseButtonLeft) {
+        auto arr = CCArray::create();
+        getTouchChildren(arr, dynamic_cast<CCNode*>(this));
+
+        CCARRAY_FOREACH_B_TYPE(arr, node, CCNode) {
+            if (nodeIsHovered(node, pos)) {
+                auto touch = new CCTouch();
+                touch->setTouchInfo(999, pos.x, pos.y);
+                dynamic_cast<CCTouchDelegate*>(node)->ccTouchBegan(touch, new CCEvent);
+                this->m_pBlockPassingHoveredNode = node;
+                break;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool BlockPassingTouchesDelegate::mouseUpSuper(MouseButton btn, CCPoint const& pos) {
+    if (btn == kMouseButtonLeft && this->m_pBlockPassingHoveredNode) {
+        auto touch = new CCTouch();
+        touch->setTouchInfo(999, pos.x, pos.y);
+        dynamic_cast<CCTouchDelegate*>(this->m_pBlockPassingHoveredNode)
+            ->ccTouchEnded(touch, new CCEvent);
+        this->m_pBlockPassingHoveredNode = nullptr;
+    }
+    return true;
+}
+
+void BlockPassingTouchesDelegate::mouseMoveSuper(CCPoint const& pos) {
+    if (this->m_pBlockPassingHoveredNode) {
+        auto touch = new CCTouch();
+        touch->setTouchInfo(999, pos.x, pos.y);
+        dynamic_cast<CCTouchDelegate*>(this->m_pBlockPassingHoveredNode)
+            ->ccTouchMoved(touch, new CCEvent);
+    }
+}
+
+
 bool SuperMouseManager::init() {
     return true;
 }

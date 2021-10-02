@@ -30,6 +30,16 @@ class SuperMouseDelegate {
         virtual void setSuperMouseHitOffset(CCPoint const&);
 };
 
+class BlockPassingTouchesDelegate : public SuperMouseDelegate {
+    protected:
+        CCNode* m_pBlockPassingHoveredNode = nullptr;
+
+    public:
+        bool mouseDownSuper(MouseButton, CCPoint const&) override;
+        bool mouseUpSuper(MouseButton, CCPoint const&) override;
+        void mouseMoveSuper(CCPoint const&) override;
+};
+
 class SuperMouseManager {
     protected:
         std::vector<SuperMouseDelegate*> m_vDelegates;
