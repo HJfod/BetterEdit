@@ -175,11 +175,7 @@ void SoftSaveManager::saveObjectBinary(std::ofstream & stream, GameObject* obj) 
         bin_write(stream, eobj->m_fFadeOutTime);
         bin_write(stream, eobj->m_bPulseHSVMode);
         bin_write(stream, eobj->m_bPulseGroupMode);
-        bin_write(stream, eobj->m_fColorHue);
-        bin_write(stream, eobj->m_fColorSaturation);
-        bin_write(stream, eobj->m_fColorBrightness);
-        bin_write(stream, eobj->m_bAbsoluteSaturation);
-        bin_write(stream, eobj->m_bAbsoluteBrightness);
+        bin_write(stream, eobj->m_obHSVValue);
         bin_write(stream, eobj->m_nCopyColorID);
         bin_write(stream, eobj->m_bCopyOpacity);
         bin_write(stream, eobj->m_bPulseMainOnly);
@@ -281,11 +277,7 @@ void SoftSaveManager::loadObjectBinary(std::ifstream & stream) {
         M_BIN_READ(stream, eobj->m_fFadeOutTime);
         M_BIN_READ(stream, eobj->m_bPulseHSVMode);
         M_BIN_READ(stream, eobj->m_bPulseGroupMode);
-        M_BIN_READ(stream, eobj->m_fColorHue);
-        M_BIN_READ(stream, eobj->m_fColorSaturation);
-        M_BIN_READ(stream, eobj->m_fColorBrightness);
-        M_BIN_READ(stream, eobj->m_bAbsoluteSaturation);
-        M_BIN_READ(stream, eobj->m_bAbsoluteBrightness);
+        M_BIN_READ(stream, eobj->m_obHSVValue);
         M_BIN_READ(stream, eobj->m_nCopyColorID);
         M_BIN_READ(stream, eobj->m_bCopyOpacity);
         M_BIN_READ(stream, eobj->m_bPulseMainOnly);
@@ -324,11 +316,7 @@ void SoftSaveManager::saveColorBinary(std::ofstream & stream, int colorID) {
     bin_write(stream, color->m_color);
     bin_write(stream, color->m_blending);
     bin_write(stream, color->m_opacity);
-    bin_write(stream, color->m_copyHue);
-    bin_write(stream, color->m_copySaturation);
-    bin_write(stream, color->m_copyBrightness);
-    bin_write(stream, color->m_saturationChecked);
-    bin_write(stream, color->m_brightnessChecked);
+    bin_write(stream, color->m_obCopyHSV);
     bin_write(stream, color->m_copyID);
     bin_write(stream, color->m_copyOpacity);
 }
@@ -344,11 +332,7 @@ void SoftSaveManager::loadColorBinary(std::ifstream & stream) {
     M_BIN_READ(stream, color->m_color);
     M_BIN_READ(stream, color->m_blending);
     M_BIN_READ(stream, color->m_opacity);
-    M_BIN_READ(stream, color->m_copyHue);
-    M_BIN_READ(stream, color->m_copySaturation);
-    M_BIN_READ(stream, color->m_copyBrightness);
-    M_BIN_READ(stream, color->m_saturationChecked);
-    M_BIN_READ(stream, color->m_brightnessChecked);
+    M_BIN_READ(stream, color->m_obCopyHSV);
     M_BIN_READ(stream, color->m_copyID);
     M_BIN_READ(stream, color->m_copyOpacity);
 }

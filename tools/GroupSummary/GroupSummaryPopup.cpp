@@ -1,9 +1,63 @@
 #include "GroupSummaryPopup.hpp"
 #include "MoreTriggersPopup.hpp"
 #include "GroupListView.hpp"
+#include <InputPrompt.hpp>
+#include "../../utils/moveGameLayer.hpp"
 
 static constexpr const cocos2d::ccColor3B listBGLight { 142, 68, 28 };
 static constexpr const cocos2d::ccColor3B listBGDark  { 114, 55, 22 };
+
+ButtonSprite* GroupSummaryPopup::createFilterSpr(const char* sprName, const char* bg) {
+    auto spr = ButtonSprite::create(
+        createBESprite(sprName),
+        20, 1, 1.f, 0, bg, true, 0x20 
+    );
+    spr->m_pSubSprite->setScale(1.0f);
+    spr->setScale(.55f);
+    return spr;
+}
+
+CCSprite* GroupSummaryPopup::createSpriteForTrigger(EffectGameObject* trigger, int group) {
+    auto sprName = ObjectToolbox::sharedState()->intKeyToFrame(trigger->m_nObjectID);
+    auto spr = CCSprite::createWithSpriteFrameName(sprName);
+    spr->setScale(.65f);
+
+    if (trigger->m_nObjectID == 1049) {
+        auto toggleSpr = CCSprite::createWithSpriteFrameName("edit_eToggleBtn2_001.png");
+        toggleSpr->setPosition({
+            spr->getContentSize().width / 2,
+            spr->getContentSize().height / 2
+        });
+        if (trigger->m_bActivateGroup) {
+            toggleSpr->setColor({ 0, 255, 127 });
+        } else {
+            toggleSpr->setColor({ 255, 63, 63 });
+        }
+        spr->addChild(toggleSpr);
+    }
+
+    std::string text = "";
+    if (trigger->m_nTargetGroupID == group) {
+        text = "T";
+    }
+    if (trigger->m_nCenterGroupID == group) {
+        if (text.size()) {
+            text = "T+C";
+        } else {
+            text = "C";
+        }
+    }
+    
+    auto label = CCLabelBMFont::create(text.c_str(), "bigFont.fnt");
+    label->setScale(.5f);
+    label->setPosition(
+        spr->getContentSize().width / 2,
+        spr->getContentSize().height / 2 - 5.f
+    );
+    spr->addChild(label);
+
+    return spr;
+}
 
 void GroupSummaryPopup::setup() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -81,89 +135,49 @@ void GroupSummaryPopup::setup() {
     {
         this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
             .fromNode(CCMenuItemToggler::create(
-                CCNodeConstructor<ButtonSprite*>()
-                    .fromNode(ButtonSprite::create(
-                        "A", 20, 1, "goldFont.fnt", "GJ_button_01.png", 0x20, .8f
-                    ))
-                    .scale(.5f)
-                    .done(),
-                CCNodeConstructor()
-                    .fromNode(ButtonSprite::create(
-                        "A", 20, 1, "goldFont.fnt", "GJ_button_02.png", 0x20, .8f
-                    ))
-                    .scale(.5f)
-                    .done(),
+                this->createFilterSpr("BE_all.png", "GJ_button_01.png"),
+                this->createFilterSpr("BE_all.png", "GJ_button_02.png"),
                 this,
                 (SEL_MenuHandler)&GroupSummaryPopup::onShow
             ))
             .tag(kShowAll)
-            .move(- this->m_pLrSize.width / 2 + 35.f, this->m_pLrSize.height / 2 - 25.f)
+            .move(- this->m_pLrSize.width / 2 + 40.f, this->m_pLrSize.height / 2 - 20.f)
             .exec([this](auto t) -> void { m_vShowBtns.push_back(t); })
             .done()
         );
         this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
             .fromNode(CCMenuItemToggler::create(
-                CCNodeConstructor<ButtonSprite*>()
-                    .fromNode(ButtonSprite::create(
-                        ">0", 20, 1, "goldFont.fnt", "GJ_button_01.png", 0x20, .8f
-                    ))
-                    .scale(.5f)
-                    .done(),
-                CCNodeConstructor()
-                    .fromNode(ButtonSprite::create(
-                        ">0", 20, 1, "goldFont.fnt", "GJ_button_02.png", 0x20, .8f
-                    ))
-                    .scale(.5f)
-                    .done(),
+                this->createFilterSpr("BE_0_objs.png", "GJ_button_01.png"),
+                this->createFilterSpr("BE_0_objs.png", "GJ_button_02.png"),
                 this,
                 (SEL_MenuHandler)&GroupSummaryPopup::onShow
             ))
             .tag(kShowOnlyOnesWithSomething)
-            .move(- this->m_pLrSize.width / 2 + 55.f, this->m_pLrSize.height / 2 - 25.f)
+            .move(- this->m_pLrSize.width / 2 + 65.f, this->m_pLrSize.height / 2 - 20.f)
             .exec([this](auto t) -> void { m_vShowBtns.push_back(t); })
             .done()
         );
         this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
             .fromNode(CCMenuItemToggler::create(
-                CCNodeConstructor<ButtonSprite*>()
-                    .fromNode(ButtonSprite::create(
-                        "T", 20, 1, "goldFont.fnt", "GJ_button_01.png", 0x20, .8f
-                    ))
-                    .scale(.5f)
-                    .done(),
-                CCNodeConstructor()
-                    .fromNode(ButtonSprite::create(
-                        "T", 20, 1, "goldFont.fnt", "GJ_button_02.png", 0x20, .8f
-                    ))
-                    .scale(.5f)
-                    .done(),
+                this->createFilterSpr("BE_trigger_only.png", "GJ_button_01.png"),
+                this->createFilterSpr("BE_trigger_only.png", "GJ_button_02.png"),
                 this,
                 (SEL_MenuHandler)&GroupSummaryPopup::onShow
             ))
             .tag(kShowOnesWithTriggersButNoObjects)
-            .move(- this->m_pLrSize.width / 2 + 75.f, this->m_pLrSize.height / 2 - 25.f)
+            .move(- this->m_pLrSize.width / 2 + 90.f, this->m_pLrSize.height / 2 - 20.f)
             .exec([this](auto t) -> void { m_vShowBtns.push_back(t); })
             .done()
         );
         this->m_pButtonMenu->addChild(CCNodeConstructor<CCMenuItemToggler*>()
             .fromNode(CCMenuItemToggler::create(
-                CCNodeConstructor<ButtonSprite*>()
-                    .fromNode(ButtonSprite::create(
-                        "O", 20, 1, "goldFont.fnt", "GJ_button_01.png", 0x20, .8f
-                    ))
-                    .scale(.5f)
-                    .done(),
-                CCNodeConstructor()
-                    .fromNode(ButtonSprite::create(
-                        "O", 20, 1, "goldFont.fnt", "GJ_button_02.png", 0x20, .8f
-                    ))
-                    .scale(.5f)
-                    .done(),
+                this->createFilterSpr("BE_obj_only.png", "GJ_button_01.png"),
+                this->createFilterSpr("BE_obj_only.png", "GJ_button_02.png"),
                 this,
                 (SEL_MenuHandler)&GroupSummaryPopup::onShow
             ))
             .tag(kShowOnesWithObjectsButNoTriggers)
-            .move(- this->m_pLrSize.width / 2 + 95.f, this->m_pLrSize.height / 2 - 25.f)
+            .move(- this->m_pLrSize.width / 2 + 115.f, this->m_pLrSize.height / 2 - 20.f)
             .exec([this](auto t) -> void { m_vShowBtns.push_back(t); })
             .done()
         );
@@ -171,10 +185,10 @@ void GroupSummaryPopup::setup() {
         this->m_pGroupCount = CCLabelBMFont::create("", "goldFont.fnt");
         this->m_pGroupCount->setScale(.3f);
         this->m_pGroupCount->setPosition(
-            winSize.width / 2 - this->m_pLrSize.width / 2 + 65.f,
-            winSize.height / 2 + this->m_pLrSize.height / 2 - 40.f
+            winSize.width / 2 - this->m_pLrSize.width / 2 + 75.f,
+            winSize.height / 2 + this->m_pLrSize.height / 2 - 37.5f
         );
-        this->addChild(this->m_pGroupCount);
+        this->m_pLayer->addChild(this->m_pGroupCount);
     }
 
     this->m_pNoFilterInfo = CCLabelBMFont::create(
@@ -189,7 +203,21 @@ void GroupSummaryPopup::setup() {
         winSize.height / 2 - 10.f
     );
     this->m_pNoFilterInfo->setVisible(false);
-    this->addChild(this->m_pNoFilterInfo);
+    this->m_pLayer->addChild(this->m_pNoFilterInfo);
+
+    this->m_pPageBtn = ButtonSprite::create(
+        "Page n/nn", 0, 0, "goldFont.fnt", "GJ_button_05.png", 0, .5f
+    );
+    this->m_pPageBtn->setScale(.8f);
+
+    auto pageBtn = CCMenuItemSpriteExtra::create(
+        this->m_pPageBtn, this, menu_selector(GroupSummaryPopup::onGoToPage)
+    );
+    pageBtn->setPosition(
+        this->m_pLrSize.width / 2 - 65.f,
+        this->m_pLrSize.height / 2 - 25.f
+    );
+    this->m_pButtonMenu->addChild(pageBtn);
 
     CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
     this->registerWithTouchDispatcher();
@@ -289,12 +317,19 @@ void GroupSummaryPopup::updatePage() {
     }
     this->m_vPageContent.clear();
 
-    if (m_nPage * m_nItemCount > static_cast<int>(this->m_vShowArray.size())) {
-        this->m_nPage = this->m_vShowArray.size() / m_nItemCount;
+    int maxPage = this->m_vShowArray.size() / m_nItemCount;
+    if (m_nPage > maxPage) {
+        this->m_nPage = maxPage;
+    }
+    if (m_nPage < 0) {
+        this->m_nPage = 0;
     }
     this->m_pNoFilterInfo->setVisible(!this->m_vShowArray.size());
     this->m_pGroupCount->setString(
         CCString::createWithFormat("Showing %d groups", this->m_vShowArray.size())->getCString()
+    );
+    this->m_pPageBtn->setString(
+        CCString::createWithFormat("Page %d/%d", this->m_nPage + 1, maxPage + 1)->getCString()
     );
 
     auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -327,6 +362,16 @@ void GroupSummaryPopup::onPage(CCObject* pSender) {
     this->incrementPage(
         as<int>(as<CCNode*>(pSender)->getUserData())
     );
+}
+
+void GroupSummaryPopup::onGoToPage(CCObject*) {
+    InputPrompt::create("Go to Page", "#", [this](const char* t) -> void {
+        if (t && strlen(t)) {
+            try {
+                this->goToPage(std::stoi(t) - 1);
+            } catch (...) {}
+        }
+    }, "Go")->setFilter(inputf_Numeral)->show();
 }
 
 void GroupSummaryPopup::incrementPage(int page) {
@@ -368,6 +413,16 @@ void GroupSummaryPopup::keyDown(enumKeyCodes key) {
         default:
             return BrownAlertDelegate::keyDown(key);
     }
+}
+
+void GroupSummaryPopup::onViewTrigger(CCObject* pSender) {
+    auto ui = this->m_pEditor->m_pEditorUI;
+    auto obj = as<GameObject*>(as<CCNode*>(pSender)->getUserObject());
+    ui->deselectAll();
+    ui->selectObject(obj, true);
+    ui->updateButtons();
+    focusGameLayerOnObject(ui, obj);
+    this->onClose(nullptr);
 }
 
 decltype(GroupSummaryPopup::m_mGroupInfo) & GroupSummaryPopup::getGroupInfo() {

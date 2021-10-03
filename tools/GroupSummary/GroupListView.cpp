@@ -1,11 +1,14 @@
 #include "GroupListView.hpp"
 #include "MoreTriggersPopup.hpp"
+#include "../../utils/moveGameLayer.hpp"
 
 GroupCell::GroupCell(const char* name, CCSize size) :
     TableViewCell(name, size.width, size.height) {}
 
 GroupCell::~GroupCell() {
-    CCDirector::sharedDirector()->getTouchDispatcher()->decrementForcePrio(2);
+    if (this->m_pContextPopup) {
+        this->m_pContextPopup->hide();
+    }
 }
 
 void GroupCell::draw() {
@@ -16,21 +19,23 @@ void GroupCell::draw() {
 }
 
 void GroupCell::onShowRestOfTheTriggers(CCObject* pSender) {
-    MoreTriggersPopup::create(this->m_pPopup, as<CCNode*>(pSender))->show();
+    auto more = MoreTriggersPopup::create(this->m_pPopup, as<CCNode*>(pSender));
+    more->setDelegate(this);
+    more->show();
+    this->m_pContextPopup = more;
 }
 
 void GroupCell::loadFromGroup(int group) {
     this->m_pLayer->setVisible(true);
     this->m_pBGLayer->setOpacity(255);
 
+    this->m_nGroup = group;
+
     bool color = group % 2;
 
     auto menu = CCMenu::create();
     menu->setPosition(0, 0);
     this->m_pLayer->addChild(menu);
-    
-    CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
-    this->registerWithTouchDispatcher();
 
     auto num = CCLabelBMFont::create(std::to_string(group).c_str(), "goldFont.fnt");
     num->setPosition(
@@ -77,18 +82,52 @@ void GroupCell::loadFromGroup(int group) {
             moreBtn->setPosition(posx - 15.f, this->m_fHeight / 2);
             moreBtn->setAnchorPoint({ .0f, .5f });
             moreBtn->setTag(group);
-            this->m_pLayer->addChild(moreBtn);
+            menu->addChild(moreBtn);
 
             break;
         }
-        auto sprName = ObjectToolbox::sharedState()->intKeyToFrame(trigger->m_nObjectID);
-        auto spr = CCSprite::createWithSpriteFrameName(sprName);
-        spr->setScale(.65f);
-        spr->setPosition({ posx, this->m_fHeight / 2 });
-        this->m_pLayer->addChild(spr);
+        auto spr = this->m_pPopup->createSpriteForTrigger(trigger, group);
+
+        auto triggerBtn = CCMenuItemSpriteExtra::create(
+            spr, this->m_pPopup, menu_selector(GroupSummaryPopup::onViewTrigger)
+        );
+        triggerBtn->setPosition({ posx, this->m_fHeight / 2 });
+        triggerBtn->setUserObject(trigger);
+        menu->addChild(triggerBtn);
+
         posx += 30.f;
         shown++;
     }
+
+    if (info.m_vObjects.size()) {
+        auto selSpr = this->m_pPopup->createFilterSpr("BE_select_group.png", "GJ_button_01.png");
+        auto selBtn = CCMenuItemSpriteExtra::create(
+            selSpr, this, menu_selector(GroupCell::onSelectGroup)
+        );
+        selBtn->setPosition(this->m_fWidth - 20.f, this->m_fHeight / 2);
+        menu->addChild(selBtn);
+    }
+}
+
+void GroupCell::onSelectGroup(CCObject*) {
+    auto ui = this->m_pPopup->m_pEditor->m_pEditorUI;
+    auto objs = CCArray::create();
+    auto info = this->m_pPopup->getGroup(this->m_nGroup);
+    for (auto obj : info.m_vObjects) {
+        objs->addObject(obj);
+    }
+    if (objs->count()) {
+        ui->deselectAll();
+        ui->selectObjects(objs, true);
+        focusGameLayerToSelection(ui);
+        ui->updateButtons();
+        this->m_pPopup->onClose(nullptr);
+    }
+    CC_SAFE_RELEASE(objs);
+}
+
+void GroupCell::contextPopupWillHide(ContextPopup* popup) {
+    this->m_pContextPopup = nullptr;
 }
 
 GroupCell* GroupCell::create(const char* key, CCSize size) {

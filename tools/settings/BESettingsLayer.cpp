@@ -7,6 +7,7 @@ using namespace gd;
 using namespace cocos2d;
 
 int g_nSettingsPage = 0;
+bool g_bFool = false;
 
 #define BE_SETTING_FUNC(__name__) \
     BetterEdit::get##__name__##AsString(),\
@@ -25,6 +26,15 @@ int g_nSettingsPage = 0;
         (SEL_MenuHandler)&BESettingsLayer::onShowAccount,       \
         false                                                   \
     )->setUserData(reinterpret_cast<void*>(gdid));
+
+
+bool shouldGetFoolAchievement() {
+    return g_bFool;
+}
+
+void showedFoolAchievement() {
+    g_bFool = false;
+}
 
 void BESettingsLayer::setup() {
     this->m_bNoElasticity = true;
@@ -263,7 +273,7 @@ void BESettingsLayer::setup() {
             .fromText("And You :)", "goldFont.fnt")
             .limit(this->m_pLrSize.width / 2 - 64.0f, .75f, .1f)
             .done(),
-        (SEL_MenuHandler)&BESettingsLayer::onURL,
+        (SEL_MenuHandler)&BESettingsLayer::onFool,
         false
     )->setUserObject(CCString::create("https://www.youtube.com/watch?v=4TnAKurylA8"));
 
@@ -593,6 +603,16 @@ void BESettingsLayer::onShowAccount(CCObject* pSender) {
 }
 
 void BESettingsLayer::onURL(CCObject* pSender) {
+    ShellExecuteA(
+        0, 0,
+        as<CCString*>(as<CCNode*>(pSender)->getUserObject())->getCString(),
+        0, 0 ,
+        SW_SHOW
+    );
+}
+
+void BESettingsLayer::onFool(CCObject* pSender) {
+    g_bFool = true;
     ShellExecuteA(
         0, 0,
         as<CCString*>(as<CCNode*>(pSender)->getUserObject())->getCString(),

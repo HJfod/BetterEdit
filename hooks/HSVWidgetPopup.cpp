@@ -118,13 +118,7 @@ ccColor3B getColorChannelBaseColor(int channelID, int stackLimit = 0) {
     if (col->m_copyID) {
         auto copy = getColorChannelBaseColor(col->m_copyID, stackLimit + 1);
 
-        GameToolbox::transformColor(copy, copy, cchsv(
-            col->m_copyHue,
-            col->m_copySaturation,
-            col->m_copyBrightness,
-            col->m_saturationChecked,
-            col->m_brightnessChecked
-        ));
+        GameToolbox::transformColor(copy, copy, col->m_obCopyHSV);
 
         return copy;
     }

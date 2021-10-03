@@ -6,6 +6,7 @@
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../History/UndoHistoryManager.hpp"
 #include "../ContextMenu/loadContextMenu.hpp"
+#include "../../utils/moveGameLayer.hpp"
 
 static constexpr const int SLIDERLABEL_TAG = 420;
 static constexpr const int EPOSITION_TAG = 421;

@@ -1,22 +1,33 @@
 #pragma once
 
 #include "GroupSummaryPopup.hpp"
+#include "MoreTriggersPopup.hpp"
 
 static constexpr const BoomListType kBoomListType_Group
     = static_cast<BoomListType>(0x429);
 
 class GroupListView;
+class MoreTriggersPopup;
+class ContextPopup;
 
-class GroupCell : public TableViewCell {
+class GroupCell :
+    public TableViewCell,
+    public ContextPopupDelegate
+{
     protected:
+        int m_nGroup;
         GroupSummaryPopup* m_pPopup;
         CCLabelBMFont* m_pLabel;
+        MoreTriggersPopup* m_pContextPopup = nullptr;
 
 		GroupCell(const char* name, CCSize size);
         virtual ~GroupCell();
 
         void draw() override;
         void onShowRestOfTheTriggers(CCObject*);
+        void onSelectGroup(CCObject*);
+
+        void contextPopupWillHide(ContextPopup*) override;
 
         friend class GroupListView;
 	

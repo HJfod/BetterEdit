@@ -12,6 +12,7 @@ struct GroupSummary {
 
 class MoreTriggersPopup;
 class GroupListView;
+class GroupCell;
 
 class GroupSummaryPopup :
     public BrownAlertDelegate
@@ -37,10 +38,12 @@ class GroupSummaryPopup :
         std::vector<CCMenuItemToggler*> m_vShowBtns;
         CCLabelBMFont* m_pNoFilterInfo;
         CCLabelBMFont* m_pGroupCount;
+        ButtonSprite* m_pPageBtn;
 
         void setup() override;
         void onShow(CCObject*);
         void onPage(CCObject*);
+        void onGoToPage(CCObject*);
         void incrementPage(int);
         void goToPage(int);
         void updatePage();
@@ -49,14 +52,18 @@ class GroupSummaryPopup :
         void addGroups(GameObject* obj);
         void addGroups(EffectGameObject* obj);
         void keyDown(enumKeyCodes) override;
+        void onViewTrigger(CCObject*);
 
         virtual ~GroupSummaryPopup();
         
         friend class MoreTriggersPopup;
+        friend class GroupCell;
 
     public:
         decltype(m_mGroupInfo) & getGroupInfo();
         GroupSummary & getGroup(int);
+        static ButtonSprite* createFilterSpr(const char* spr, const char* bg);
+        static CCSprite* createSpriteForTrigger(EffectGameObject* obj, int group);
 
         static GroupSummaryPopup* create(LevelEditorLayer*);
 };

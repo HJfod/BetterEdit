@@ -4,6 +4,7 @@
 #include "loadEditorKeybindIndicators.hpp"
 #include "SuperKeyboardManager.hpp"
 #include "SuperMouseManager.hpp"
+#include "../settings/BESettingsLayer.hpp"
 
 GDMAKE_HOOK("libcocos2d.dll::?dispatchScrollMSG@CCMouseDispatcher@cocos2d@@QAE_NMM@Z") GDMAKE_ATTR(NoLog)
 bool __fastcall dispatchScrollMSGHook(CCMouseDelegate* self, edx_t edx, float y, float x) {
@@ -37,6 +38,13 @@ void __fastcall AppDelegate_applicationWillEnterForeground(CCApplication* self) 
     
     CCDirector::sharedDirector()->getKeyboardDispatcher()
         ->updateModifierKeys(false, false, false, false);
+    
+    if (shouldGetFoolAchievement()) {
+        AchievementNotifier::sharedState()->notifyAchievement(
+            "You Fool...", "what the dog doin", "BE_trollface.png", true
+        );
+        showedFoolAchievement();
+    }
 }
 
 GDMAKE_HOOK(0x6ebc0, "_ZN13EditButtonBar8goToPageEi")

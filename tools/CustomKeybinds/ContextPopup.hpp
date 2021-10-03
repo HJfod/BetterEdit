@@ -16,6 +16,12 @@ enum ContextPopupType {
     kContextPopupTypeBrown,
 };
 
+class ContextPopup;
+
+struct ContextPopupDelegate {
+    virtual void contextPopupWillHide(ContextPopup*) {}
+};
+
 class ContextPopup :
     public CCNodeRGBA,
     public SuperMouseDelegate,
@@ -30,6 +36,7 @@ class ContextPopup :
         CCPoint m_obOrigin;
         CCPoint m_obDestination;
         bool m_bAnimationComplete = false;
+        ContextPopupDelegate* m_pDelegate = nullptr;
 
         virtual void setup() = 0;
         void mouseLeaveSuper(CCPoint const&) override;
@@ -48,6 +55,8 @@ class ContextPopup :
     public:
         virtual void onAnimationComplete();
         virtual void onHide();
+
+        void setDelegate(ContextPopupDelegate*);
 
         void show();
         void hide();

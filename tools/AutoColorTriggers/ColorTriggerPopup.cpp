@@ -131,11 +131,7 @@ void ColorTriggerPopup::onCreate(CCObject* pSender) {
         obj->m_bPlayerColor1 = color->m_playerColor == 1;
         obj->m_bPlayerColor2 = color->m_playerColor == 2;
         obj->m_nCopyColorID = color->m_copyID;
-        obj->m_fColorHue = color->m_copyHue;
-        obj->m_fColorSaturation = color->m_copySaturation;
-        obj->m_fColorBrightness = color->m_copyBrightness;
-        obj->m_bAbsoluteSaturation = color->m_saturationChecked;
-        obj->m_bAbsoluteBrightness = color->m_brightnessChecked;
+        obj->m_obHSVValue = color->m_obCopyHSV;
         obj->updateLabel();
 
         if (lel->m_nCurrentLayer != -1)

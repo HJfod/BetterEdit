@@ -57,6 +57,9 @@ void ContextPopup::hide() {
         nullptr
     ));
 
+    if (this->m_pDelegate) {
+        this->m_pDelegate->contextPopupWillHide(this);
+    }
     this->onHide();
 }
 
@@ -85,6 +88,10 @@ bool ContextPopup::mouseScrollSuper(float, float) {
 bool ContextPopup::keyDownSuper(enumKeyCodes) {
     this->hide();
     return false;
+}
+
+void ContextPopup::setDelegate(ContextPopupDelegate* d) {
+    this->m_pDelegate = d;
 }
 
 bool ContextPopup::init(

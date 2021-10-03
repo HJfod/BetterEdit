@@ -5,20 +5,25 @@ void MoreTriggersPopup::setup() {
 
     constexpr int grid_h = 7;
 
+    auto menu = CCMenu::create();
+    menu->setPosition(0, 0);
+    this->addChild(menu);
+
     auto ix = 0;
     for (auto trigger : info.m_vTriggers) {
         auto sprName = ObjectToolbox::sharedState()->intKeyToFrame(trigger->m_nObjectID);
 
-        auto spr = CCSprite::createWithSpriteFrameName(sprName);
-        spr->setScale(.65f);
-        spr->setZOrder(2);
+        auto spr = this->m_pPopup->createSpriteForTrigger(trigger, this->m_nGroup);
 
-        spr->setPosition({
+        auto btn = CCMenuItemSpriteExtra::create(
+            spr, this->m_pPopup, menu_selector(GroupSummaryPopup::onViewTrigger)
+        );
+        btn->setPosition({
             27.5f * (ix % grid_h - (grid_h - 1) / 2.f),
-            this->m_obSize.height - 10.f - 27.5f * (ix / grid_h)
+            this->m_obSize.height / 2 - 18.75f - 27.5f * (ix / grid_h)
         });
-
-        this->addChild(spr);
+        btn->setUserObject(trigger);
+        menu->addChild(btn);
 
         ix++;
     }

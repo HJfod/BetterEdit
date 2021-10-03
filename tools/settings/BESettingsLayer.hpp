@@ -18,6 +18,9 @@ class MoreOptionsLayer : public FLAlertLayer,
         };
 };
 
+bool shouldGetFoolAchievement();
+void showedFoolAchievement();
+
 using BE_Callback = void(*)(std::string const&);
 using BE_Callback_B = void(*)(bool);
 
@@ -70,6 +73,7 @@ class BESettingsLayer : public BrownAlertDelegate, TextInputDelegate {
 
         void onShowAccount(CCObject*);
         void onURL(CCObject*);
+        void onFool(CCObject*);
 
     public:
         static BESettingsLayer* create(EditorPauseLayer*);
