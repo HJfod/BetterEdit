@@ -191,6 +191,11 @@ void BESettingsLayer::setup() {
         "Disables <cg>Easter Eggs</c>",
         BE_SETTING_FUNC_B(NoEasterEggs)
     );
+    this->addToggle(
+        "Oh God Do Not Use This Option",
+        nullptr,
+        BE_SETTING_FUNC_B(UseHorrifyingEditorPauseMenu)
+    );
 
     this->incrementPageCount(true);
 

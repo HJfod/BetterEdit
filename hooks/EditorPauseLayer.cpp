@@ -23,6 +23,23 @@ bool shouldShowKeybindIndicator() { return g_bShowKeybinds; }
 void enableRotations(bool b) { g_bRotateSaws = b; }
 void setupRotateSaws() { BetterEdit::saveGlobalBool("rotate-saws", &g_bRotateSaws); }
 
+CCMenuItemSpriteExtra* createNewPlayBtn(
+    EditorPauseLayer* self, const char* sprName, SEL_MenuHandler cb, float scale = 1.f
+) {
+    auto spr = CCScale9Sprite::create(
+        "GJ_button_01.png", { 0, 0, 40, 40 }
+    );
+    spr->setContentSize({ 65.f, 65.f });
+    auto addSpr = CCSprite::createWithSpriteFrameName(sprName);
+    addSpr->setPosition(spr->getContentSize() / 2);
+    addSpr->setScale(scale);
+    spr->addChild(addSpr);
+    auto btn = CCMenuItemSpriteExtra::create(
+        spr, self, cb
+    );
+    return btn;
+}
+
 void EditorPauseLayer_CB::onBESettings(cocos2d::CCObject* pSender) {
     BESettingsLayer::create(this)->show();
 }
@@ -137,9 +154,56 @@ bool __fastcall EditorPauseLayer_init(
     auto menu = as<CCMenu*>(self->m_pButton0->getParent());
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
-    if (BetterEdit::isEditorViewOnlyMode()) {
-        auto mainMenu = as<CCMenu*>(self->getChildren()->objectAtIndex(0));
+    auto mainMenu = as<CCMenu*>(self->getChildren()->objectAtIndex(0));
 
+    if (BetterEdit::getUseHorrifyingEditorPauseMenu()) {
+        mainMenu->removeAllChildren();
+
+        auto resumeBtn = createNewPlayBtn(
+            self,
+            "BE_epl_resume.png",
+            menu_selector(EditorPauseLayer::onResume),
+            1.3f
+        );
+        resumeBtn->setPosition(-75.f, 60.f);
+        mainMenu->addChild(resumeBtn);
+
+        auto playBtn = createNewPlayBtn(
+            self,
+            "BE_epl_play.png",
+            menu_selector(EditorPauseLayer::onSaveAndPlay),
+            .8f
+        );
+        playBtn->setPosition(0.f, 60.f);
+        mainMenu->addChild(playBtn);
+
+        auto saveExitBtn = createNewPlayBtn(
+            self,
+            "BE_epl_save_and_exit.png",
+            menu_selector(EditorPauseLayer::onSaveAndExit)
+        );
+        saveExitBtn->setPosition(-37.5f, -15.f);
+        mainMenu->addChild(saveExitBtn);
+
+        auto saveBtn = createNewPlayBtn(
+            self,
+            "BE_epl_save_icon_except_it_sucks_ass.png",
+            menu_selector(EditorPauseLayer::onSave),
+            .9f
+        );
+        saveBtn->setPosition(75.f, 60.f);
+        mainMenu->addChild(saveBtn);
+
+        auto exitBtn = createNewPlayBtn(
+            self,
+            "BE_epl_exit.png",
+            menu_selector(EditorPauseLayer::onExitNoSave)
+        );
+        exitBtn->setPosition(37.5f, -15.f);
+        mainMenu->addChild(exitBtn);
+    }
+
+    if (BetterEdit::isEditorViewOnlyMode()) {
         CCARRAY_FOREACH_B_BASE(mainMenu->getChildren(), btn, CCMenuItemSpriteExtra*, ix) {
             if (!ix) continue;
 

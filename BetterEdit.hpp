@@ -90,6 +90,7 @@ struct DebugMsg {
     __macro__(NoEasterEggs, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                  \
     __macro__(EnableExperimentalFeatures, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)     \
     __macro__(FixScaleSliderPosition, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)         \
+    __macro__(UseHorrifyingEditorPauseMenu, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)  \
 
 #define STEP_SUBDICT_NC(dict, key, ...)         \
     if (dict->stepIntoSubDictWithKey(key)) {    \
