@@ -7,3 +7,4 @@ void registerDashOrb(GameObject*);
 void unregisterDashOrb(GameObject*);
 void loadDashOrbLines();
 void unloadDashOrbLines();
+void clearDashOrbLines();

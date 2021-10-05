@@ -11,6 +11,7 @@ static constexpr const float f_0  = 0.0f;
 bool g_bHideLDM = false;
 bool g_bShowPosLine = true;
 bool g_bShowPortalLines = true;
+bool g_bDashLines = true;
 
 void setHideLDMObjects() { g_bHideLDM = !g_bHideLDM; }
 void setHideLDMObjects(bool b) { g_bHideLDM = b; }
@@ -117,6 +118,7 @@ void loadVisibilityTab(EditorUI* self) {
     BetterEdit::saveGlobalBool("hide-ldm", &g_bHideLDM);
     BetterEdit::saveGlobalBool("pos-line", &g_bShowPosLine);
     BetterEdit::saveGlobalBool("portal-borders", &g_bShowPortalLines);
+    BetterEdit::saveGlobalBool("dash-lines", &g_bDashLines);
 
     if (BetterEdit::getDisableVisibilityTab())
         return;
@@ -292,6 +294,12 @@ void loadVisibilityTab(EditorUI* self) {
         [](bool value, auto) -> void { BetterEdit::setHighlightTriggers(value); }
     ));
 
+    btns->addObject(VisibilityToggle::create(
+        "BE_v_dash.png",
+        []() -> bool { return g_bDashLines; },
+        [](bool b, auto) -> void { g_bDashLines = b; }
+    ));
+
     auto buttonBar = EditButtonBar::create(
         btns,
         { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f },
@@ -336,6 +344,10 @@ void showVisibilityTab(EditorUI* self, bool show) {
 
 bool shouldHidePortalLine() {
     return !g_bShowPortalLines;
+}
+
+bool shouldShowDashLines() {
+    return g_bDashLines;
 }
 
 GDMAKE_HOOK(0x7ad20, "_ZN8EditorUI10toggleModeEPN7cocos2d8CCObjectE")

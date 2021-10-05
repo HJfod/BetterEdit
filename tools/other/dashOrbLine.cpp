@@ -1,4 +1,5 @@
 #include "dashOrbLine.hpp"
+#include "../VisibilityTab/loadVisibilityTab.hpp"
 
 CCArray* g_pDashOrbs = nullptr;
 CCArray* g_pDashOrbEnds = nullptr;
@@ -14,6 +15,11 @@ float mdistf(float pct1X, float pct1Y, float pct2X, float pct2Y, float pct3X, fl
     float a, b, c;
     mgetlinef(pct2X, pct2Y, pct3X, pct3Y, a, b, c);
     return abs(a * pct1X + b * pct1Y + c) / sqrt(a * a + b * b);
+}
+
+void clearDashOrbLines() {
+    g_pDashOrbs->removeAllObjects();
+    g_pDashOrbEnds->removeAllObjects();
 }
 
 void loadDashOrbLines() {
@@ -50,6 +56,9 @@ void unregisterDashOrb(GameObject* obj) {
 }
 
 void drawDashOrbLines(DrawGridLayer* self) {
+    if (!shouldShowDashLines())
+        return;
+
     CCARRAY_FOREACH_B_TYPE(g_pDashOrbs, obj, GameObject) {
         switch (obj->m_nObjectID) {
             case 1704:  // green dash orb

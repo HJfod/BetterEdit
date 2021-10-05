@@ -13,3 +13,4 @@ bool shouldHideLDMObject(GameObject*);
 void drawVisibilityStuff();
 void showVisibilityTab(EditorUI*, bool);
 bool shouldHidePortalLine();
+bool shouldShowDashLines();

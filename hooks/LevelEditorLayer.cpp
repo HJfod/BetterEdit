@@ -47,6 +47,7 @@ void __fastcall LevelEditorLayer_destructorHook(LevelEditorLayer* self) {
     BetterEdit::setEditorInitialized(false);
     BetterEdit::setEditorViewOnlyMode(false);
     UndoHistoryManager::get()->clearHistory();
+    clearDashOrbLines();
 
     return GDMAKE_ORIG_V(self);
 }

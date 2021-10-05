@@ -672,10 +672,10 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "View Undo History", "betteredit.view_undo_history",
         [](EditorUI* ui) -> bool {
-            UndoHistoryPopup::create()->show();
+            UndoHistoryPopup::create(ui->m_pEditorLayer)->show();
             return false;
         }, "editor.modify", false
-    }, {});
+    }, {{ KEY_U, Keybind::kmControl }});
 
     kbm->addEditorKeybind({ "View Group Summary", "betteredit.view_group_summary",
         [](EditorUI* ui) -> bool {
