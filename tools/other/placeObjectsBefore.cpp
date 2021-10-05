@@ -1,4 +1,5 @@
 #include "../../BetterEdit.hpp"
+#include "dashOrbLine.hpp"
 
 float g_fEdge = 180.0f;
 float g_fEdgeInverted = -g_fEdge;
@@ -14,7 +15,9 @@ void __fastcall DrawGridLayer_draw(DrawGridLayer* self) {
 
     // __asm { movss xmm2, g_fEdge }
 
-    return GDMAKE_ORIG_V(self);
+    GDMAKE_ORIG_V(self);
+
+    drawDashOrbLines(self);
 }
 
 GDMAKE_HOOK(0x8f920, "_ZN8EditorUI26constrainGameLayerPositionEv")

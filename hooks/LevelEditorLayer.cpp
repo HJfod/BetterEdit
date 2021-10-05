@@ -7,6 +7,7 @@
 #include "../tools/History/UndoHistoryManager.hpp"
 #include "../tools/Tutorial/tutorial.hpp"
 #include "../tools/ContextMenu/loadContextMenu.hpp"
+#include "../tools/other/dashOrbLine.hpp"
 
 GDMAKE_HOOK(0x15ee00, "_ZN16LevelEditorLayer4initEP11GJGameLevel")
 bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameLevel* level) {
@@ -64,6 +65,8 @@ void __fastcall LevelEditorLayer_addSpecial(
     handleObjectAddForSlider(self, obj);
 
     updateContextMenu();
+
+    registerDashOrb(obj);
     
     if (BetterEdit::isEditorInitialized())
         SoftSaveManager::saveObject(obj);
@@ -87,6 +90,8 @@ void __fastcall LevelEditorLayer_removeObject(
     GDMAKE_ORIG_V(self, edx, obj, idk);
 
     updateContextMenu();
+
+    unregisterDashOrb(obj);
 
     handleObjectAddForSlider(self, obj);
     SoftSaveManager::removeObject(obj);

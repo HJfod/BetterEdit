@@ -23,6 +23,7 @@
 #include "tools/other/placeObjectsBefore.hpp"
 #include "tools/CustomUI/UIManager.hpp"
 #include "tools/History/UndoHistoryManager.hpp"
+#include "tools/other/dashOrbLine.hpp"
 
 GDMAKE_DEBUG(song, args) {
     LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->songID = std::stoi(args[1]);
@@ -107,6 +108,7 @@ GDMAKE_MAIN_HM(hMod) {
     loadTeleportScaleFix();
     loadFLAlertLayerFix();
     loadPlaceObjectsBefore();
+    loadDashOrbLines();
 
     // checkForUpdates();
 
@@ -122,7 +124,10 @@ GDMAKE_UNLOAD {
 
     // unpatch all addresses
     unpatch(0);
+    
+    BetterEdit::log() << kDebugTypeDeinitializing << "Unloading Tools" << log_end();
     unloadEnterSearch();
+    unloadDashOrbLines();
 
     BetterEdit::log() << kDebugTypeDeinitializing << "Uninitializing GDMake" << log_end();
 }
