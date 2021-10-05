@@ -12,11 +12,11 @@ void UndoHistoryPopup::setup() {
     auto gdModeBtnSpr = ButtonSprite::create(
         "GD", 0, 0, "goldFont.fnt", "GJ_button_01.png", 0, .9f
     );
-    gdModeBtnSpr->setScale(.8f);
+    gdModeBtnSpr->setScale(.5f);
     auto gdModeBtnSpr2 = ButtonSprite::create(
         "GD", 0, 0, "goldFont.fnt", "GJ_button_02.png", 0, .9f
     );
-    gdModeBtnSpr2->setScale(.8f);
+    gdModeBtnSpr2->setScale(.5f);
     auto gdModeBtn = CCMenuItemToggler::create(
         gdModeBtnSpr, gdModeBtnSpr2,
         this, menu_selector(UndoHistoryPopup::onMode)
@@ -28,11 +28,11 @@ void UndoHistoryPopup::setup() {
     auto hardModeBtnSpr = ButtonSprite::create(
         "Full", 0, 0, "goldFont.fnt", "GJ_button_01.png", 0, .9f
     );
-    hardModeBtnSpr->setScale(.8f);
+    hardModeBtnSpr->setScale(.5f);
     auto hardModeBtnSpr2 = ButtonSprite::create(
         "Full", 0, 0, "goldFont.fnt", "GJ_button_02.png", 0, .9f
     );
-    hardModeBtnSpr2->setScale(.8f);
+    hardModeBtnSpr2->setScale(.5f);
     auto hardModeBtn = CCMenuItemToggler::create(
         hardModeBtnSpr, hardModeBtnSpr2,
         this, menu_selector(UndoHistoryPopup::onMode)
@@ -43,8 +43,8 @@ void UndoHistoryPopup::setup() {
 
     this->m_pButtonMenu->alignItemsHorizontallyWithPadding(5.f);
     
-    gdModeBtn->setPositionY(m_pLrSize.height / 2 - 40.f);
-    hardModeBtn->setPositionY(m_pLrSize.height / 2 - 40.f);
+    gdModeBtn->setPositionY(m_pLrSize.height / 2 - 45.f);
+    hardModeBtn->setPositionY(m_pLrSize.height / 2 - 45.f);
 
     this->m_pInfoLabel = CCLabelBMFont::create("No History Found!", "bigFont.fnt");
     this->m_pInfoLabel->setScale(.6f);

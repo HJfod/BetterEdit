@@ -2,12 +2,13 @@
 
 std::string UndoCommandToString(UndoCommand u) {
     switch (u) {
-        case kUndoCommandNew:       return "New";
-        case kUndoCommandPaste:     return "Paste";
-        case kUndoCommandDelete:    return "Delete";
-        case kUndoCommandTransform: return "Transform";
-        case kUndoCommandSelect:    return "Select";
-        default:                    return "Unknown";
+        case kUndoCommandNew:           return "New";
+        case kUndoCommandPaste:         return "Paste";
+        case kUndoCommandDelete:        return "Delete";
+        case kUndoCommandTransform:     return "Transform";
+        case kUndoCommandSelect:        return "Select";
+        case kUndoCommandDeleteMulti:   return "Delete Multi";
+        default:                        return "Unknown";
     }
 };
 
@@ -39,15 +40,20 @@ void ActionCell::loadFromUndoObject(UndoObject* obj) {
 
     auto actionStr = UndoCommandToString(obj->m_eCommand);
 
-    auto label = CCLabelBMFont::create(actionStr.c_str(), "bigFont.fnt");
+    auto label = CCLabelBMFont::create(
+        CCString::createWithFormat("%s | %d objs",
+            actionStr.c_str(), obj->m_pObjects ? obj->m_pObjects->count() : 0
+        )->getCString(),
+        "bigFont.fnt"
+    );
     label->setScale(.5f);
     label->setAnchorPoint({ .0f, .5f });
     label->setPosition(this->m_fHeight / 2, this->m_fHeight / 2);
     this->m_pLayer->addChild(label);
 
     auto idLabel = CCLabelBMFont::create(
-        std::to_string(obj->m_eCommand).c_str(),
-        "bigFont.fnt"
+        CCString::createWithFormat("ID: %d", obj->m_eCommand)->getCString(),
+        "goldFont.fnt"
     );
     idLabel->setScale(.5f);
     idLabel->setAnchorPoint({ 1.f, .5f });
