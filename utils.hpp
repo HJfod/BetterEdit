@@ -317,6 +317,28 @@ class CCNodeConstructor {
         }
 };
 
+class CCFuncPointer : public CCObject {
+    protected:
+        std::function<void()> m_pFunction;
+    
+    public:
+        static CCFuncPointer* create(decltype(m_pFunction) func) {
+            auto ret = new CCFuncPointer;
+
+            if (ret && (ret->m_pFunction = func)) {
+                ret->autorelease();
+                return ret;
+            }
+
+            CC_SAFE_DELETE(ret);
+            return nullptr;
+        }
+
+        void invoke() {
+            this->m_pFunction();
+        }
+};
+
 inline std::string stringToLower(std::string const& orig) {
     auto res = orig;
     std::transform(res.begin(), res.end(), res.begin(), [](unsigned char c){ return std::tolower(c); });

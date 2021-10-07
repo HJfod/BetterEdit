@@ -3,6 +3,7 @@
 #include "tools/AutoSave/Backup/LevelBackupManager.hpp"
 #include "tools/CustomKeybinds/KeybindManager.hpp"
 #include "tools/CustomUI/UIManager.hpp"
+#include "tools/Notifications/NotificationManager.hpp"
 
 using namespace gdmake;
 using namespace gdmake::extra;
@@ -248,7 +249,10 @@ void BetterEdit::FLAlert_Clicked(FLAlertLayer* l, bool btn2) {
     if (l->getTag() == 2) {
         if (btn2) {
             BetterEdit::setEnableExperimentalFeatures(true);
-            as<decltype(this->msg_cb)>(l)();
+            NotificationManager::get()->schedule(
+                Notification::create(kNotificationTypeError, "Enabled Experimental Features")
+            );
+            as<CCFuncPointer*>(l->getUserObject())->invoke();
         }
     }
 }
@@ -259,7 +263,7 @@ bool BetterEdit::useExperimentalFeatures(std::function<void()> msg_cb) {
 
     if (msg_cb) {
         auto fl = FLAlertLayer::create(
-            nullptr,
+            BetterEdit::sharedState(),
             "Experimental Features",
             "Cancel", "Enable",
             380.0f,
@@ -269,7 +273,7 @@ bool BetterEdit::useExperimentalFeatures(std::function<void()> msg_cb) {
             "Would you like to <cg>enable Experimental Features</c>?"
         );
         fl->setTag(2);
-        fl->setUserData(&msg_cb);
+        fl->setUserObject(CCFuncPointer::create(msg_cb));
         fl->show();
     }
 

@@ -38,7 +38,7 @@ void ActionCell::loadFromUndoObject(UndoObject* obj) {
     this->m_pLayer->setVisible(true);
     this->m_pBGLayer->setOpacity(255);
 
-    auto actionStr = UndoCommandToString(obj->m_eCommand);
+    auto actionStr = UndoCommandToString(obj->m_eCommand); 
 
     auto label = CCLabelBMFont::create(
         CCString::createWithFormat("%s | %d objs",

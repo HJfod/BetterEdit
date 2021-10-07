@@ -15,6 +15,7 @@
 #include "../GroupSummary/GroupSummaryPopup.hpp"
 #include "../Debug/IntegratedConsole.hpp"
 #include "../../utils/moveGameLayer.hpp"
+#include "../Notifications/NotificationManager.hpp"
 
 enum Direction {
     kDirLeft, kDirRight, kDirUp, kDirDown,
@@ -672,10 +673,19 @@ void loadBEKeybinds() {
 
     kbm->addEditorKeybind({ "View Undo History", "betteredit.view_undo_history",
         [](EditorUI* ui) -> bool {
-            UndoHistoryPopup::popup(this->m_pEditorLayer);
+            UndoHistoryPopup::popup(ui->m_pEditorLayer);
             return false;
         }, "editor.modify", false
     }, {{ KEY_U, Keybind::kmControl }});
+
+    kbm->addEditorKeybind({ "Test Notification", "betteredit.test_notification",
+        [](EditorUI* ui) -> bool {
+            NotificationManager::get()->schedule(
+                Notification::create(kNotificationTypeInfo, "Test Notification :)")
+            );
+            return false;
+        }, "editor.global", false
+    }, {{ KEY_U, 0 }});
 
     kbm->addEditorKeybind({ "View Group Summary", "betteredit.view_group_summary",
         [](EditorUI* ui) -> bool {

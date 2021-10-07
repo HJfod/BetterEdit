@@ -24,6 +24,8 @@
 #include "tools/CustomUI/UIManager.hpp"
 #include "tools/History/UndoHistoryManager.hpp"
 #include "tools/other/dashOrbLine.hpp"
+#include "tools/Notifications/BEAchievementManager.hpp"
+#include "tools/Notifications/NotificationManager.hpp"
 
 GDMAKE_DEBUG(song, args) {
     LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->songID = std::stoi(args[1]);
@@ -93,6 +95,14 @@ GDMAKE_MAIN_HM(hMod) {
     BetterEdit::log() << kDebugTypeInitializing << "Initializing UndoHistoryManager" << log_end();
     if (!UndoHistoryManager::initGlobal())
         return "Unable to initialize UndoHistoryManager!";
+
+    BetterEdit::log() << kDebugTypeInitializing << "Initializing NotificationManager" << log_end();
+    if (!NotificationManager::initGlobal())
+        return "Unable to initialize NotificationManager!";
+
+    BetterEdit::log() << kDebugTypeInitializing << "Initializing BEAchievementManager" << log_end();
+    if (!BEAchievementManager::initGlobal())
+        return "Unable to initialize BEAchievementManager!";
 
     BetterEdit::log() << kDebugTypeInitializing << "Creating midhooks" << log_end();
     if (!loadUpdateVisibilityHook())

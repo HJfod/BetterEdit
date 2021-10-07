@@ -133,7 +133,7 @@ UndoHistoryPopup* UndoHistoryPopup::create(LevelEditorLayer* lel) {
 }
 
 void UndoHistoryPopup::popup(LevelEditorLayer* lel) {
-    if (BetterEdit::useExperimentalFeatures([lel]() -> void {
+    if (BetterEdit::useExperimentalFeatures([lel](void) -> void {
         UndoHistoryPopup::create(lel)->show();
     })) {
         UndoHistoryPopup::create(lel)->show();

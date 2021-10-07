@@ -366,5 +366,5 @@ class BetterEdit : public GManager, public FLAlertLayerProtocol {
             vectorMove(m_vFavorites, idPos, idPos + pos);
         } 
 
-        static bool useExperimentalFeatures(std::function<void()> msg_cb = nullptr);
+        static bool useExperimentalFeatures(std::function<void()> = nullptr);
 };
