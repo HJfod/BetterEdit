@@ -6,12 +6,18 @@ class UndoHistoryManager;
 
 GameObject* getObjectByUUID(LevelEditorLayer* lel, int uuid);
 
+enum ActionLevel {
+    kActionLevelNormal,
+    kActionLevelHard,
+};
+
 class ActionObject : public CCObject {
     protected:
         inline static int g_nID = 0;
         int m_nID;
         std::chrono::system_clock::time_point m_obTime;
         bool m_bUndone;
+        ActionLevel m_eLevel = kActionLevelNormal;
 
         ActionObject();
 

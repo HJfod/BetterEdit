@@ -24,4 +24,5 @@ class UndoHistoryPopup : public BrownAlertDelegate {
     
     public:
         static UndoHistoryPopup* create(LevelEditorLayer*);
+        static void popup(LevelEditorLayer*);
 };

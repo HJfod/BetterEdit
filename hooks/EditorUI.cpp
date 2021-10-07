@@ -96,7 +96,7 @@ void EditorUI_CB::onExitViewMode(CCObject*) {
 }
 
 void EditorUI_CB::onViewUndoHistory(CCObject*) {
-    UndoHistoryPopup::create(this->m_pEditorLayer)->show();
+    UndoHistoryPopup::popup(this->m_pEditorLayer);
 }
 
 bool touchIntersectsInput(CCNode* input, CCTouch* touch) {

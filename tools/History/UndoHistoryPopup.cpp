@@ -131,3 +131,11 @@ UndoHistoryPopup* UndoHistoryPopup::create(LevelEditorLayer* lel) {
     CC_SAFE_DELETE(ret);
     return nullptr;
 }
+
+void UndoHistoryPopup::popup(LevelEditorLayer* lel) {
+    if (BetterEdit::useExperimentalFeatures([lel]() -> void {
+        UndoHistoryPopup::create(lel)->show();
+    })) {
+        UndoHistoryPopup::create(lel)->show();
+    }
+}

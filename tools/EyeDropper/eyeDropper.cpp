@@ -120,15 +120,7 @@ void __fastcall CCScheduler_update(CCScheduler* self, edx_t edx, float dt) {
     // cant just do this in GDMAKE_MAIN)
     if (GDMAKE_IS_CONSOLE_ENABLED && !g_bLoadedResources) {
         g_bLoadedResources = true;
-
-        CCTextureCache::sharedTextureCache()
-            ->addImage("BE_GameSheet01.png", false);
-        CCSpriteFrameCache::sharedSpriteFrameCache()
-            ->addSpriteFramesWithFile("BE_GameSheet01.plist");
-        CCTextureCache::sharedTextureCache()
-            ->addImage("BE_ContextSheet01.png", false);
-        CCSpriteFrameCache::sharedSpriteFrameCache()
-            ->addSpriteFramesWithFile("BE_ContextSheet01.plist");
+        BetterEdit::sharedState()->loadTextures();
     }
 
     KeybindManager::get()->handleRepeats(dt);

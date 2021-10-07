@@ -13,14 +13,7 @@ void __fastcall LoadingLayer_loadAssets(LoadingLayer* self) {
 
     self->addChild(label, 999);
 
-    CCTextureCache::sharedTextureCache()
-        ->addImage("BE_GameSheet01.png", false);
-    CCSpriteFrameCache::sharedSpriteFrameCache()
-        ->addSpriteFramesWithFile("BE_GameSheet01.plist");
-    CCTextureCache::sharedTextureCache()
-        ->addImage("BE_ContextSheet01.png", false);
-    CCSpriteFrameCache::sharedSpriteFrameCache()
-        ->addSpriteFramesWithFile("BE_ContextSheet01.plist");
+    BetterEdit::sharedState()->loadTextures();
     
     label->removeFromParent();
 }

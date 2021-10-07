@@ -88,9 +88,10 @@ struct DebugMsg {
     __macro__(CopyObjectsToClipboard, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
     __macro__(EnableCustomEditMenu, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
     __macro__(NoEasterEggs, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                  \
-    __macro__(EnableExperimentalFeatures, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)     \
+    __macro__(EnableExperimentalFeatures, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)    \
     __macro__(FixScaleSliderPosition, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)         \
     __macro__(UseHorrifyingEditorPauseMenu, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)  \
+    __macro__(UseBetterUndoHistory, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
 
 #define STEP_SUBDICT_NC(dict, key, ...)         \
     if (dict->stepIntoSubDictWithKey(key)) {    \
@@ -187,7 +188,7 @@ class log_stream {
         log_stream& operator<<(log_end n);
 };
 
-class BetterEdit : public gd::GManager {
+class BetterEdit : public GManager, public FLAlertLayerProtocol {
     public:
         struct Preset {
             std::string name;
@@ -211,6 +212,7 @@ class BetterEdit : public gd::GManager {
         std::vector<Preset> m_vPresets;
         std::map<ScheduleTime, std::vector<std::string>> m_mScheduledErrors;
         std::map<std::string, save_bool> m_mSaveBools;
+        std::vector<std::string> m_vTextureSheets;
         FavoritesList m_vFavorites;
         bool m_bEditorInitialized;
         bool m_bDisableEditorEditing;
@@ -223,6 +225,8 @@ class BetterEdit : public gd::GManager {
         virtual void encodeDataTo(DS_Dictionary* data);
         virtual void dataLoaded(DS_Dictionary* data);
         virtual void firstLoad();
+
+		void FLAlert_Clicked(FLAlertLayer*, bool btn2);
     
     public:
         template<typename T>
@@ -295,6 +299,14 @@ class BetterEdit : public gd::GManager {
         static log_stream& log();
         static std::vector<DebugMsg>& internal_log();
 
+        inline std::vector<std::string> const& getTextures() const {
+            return m_vTextureSheets;
+        }
+        inline void addTexture(std::string const& tex) {
+            this->m_vTextureSheets.push_back(tex);
+        }
+        void loadTextures();
+
         inline void scheduleError(ScheduleTime time, std::string const& err) {
             if (!this->m_mScheduledErrors.count(time))
                 this->m_mScheduledErrors[time] = std::vector<std::string>();
@@ -305,9 +317,17 @@ class BetterEdit : public gd::GManager {
             return this->m_mScheduledErrors[time]; 
         }
 
-        inline std::vector<Preset> & getPresets() { return m_vPresets; }
-        inline BetterEdit* addPreset(Preset const& preset) { m_vPresets.push_back(preset); return this; }
-        inline BetterEdit* removePreset(unsigned int index) { m_vPresets.erase(m_vPresets.begin() + index); return this; }
+        inline std::vector<Preset> & getPresets() {
+            return m_vPresets;
+        }
+        inline BetterEdit* addPreset(Preset const& preset) {
+            m_vPresets.push_back(preset);
+            return this;
+        }
+        inline BetterEdit* removePreset(unsigned int index) {
+            m_vPresets.erase(m_vPresets.begin() + index);
+            return this;
+        }
         inline BetterEdit* removePreset(std::string const& name) {
             auto ix = 0u;
             for (auto preset : m_vPresets)
@@ -345,4 +365,6 @@ class BetterEdit : public gd::GManager {
 
             vectorMove(m_vFavorites, idPos, idPos + pos);
         } 
+
+        static bool useExperimentalFeatures(std::function<void()> msg_cb = nullptr);
 };

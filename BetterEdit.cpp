@@ -233,9 +233,51 @@ bool BetterEdit::initGlobal() {
     return false;
 }
 
+void BetterEdit::loadTextures() {
+    this->log() << kDebugTypeInitializing << "Loading Textures" << log_end();
+
+    for (auto const& tex : this->m_vTextureSheets) {
+        CCTextureCache::sharedTextureCache()
+            ->addImage((tex + ".png").c_str(), false);
+        CCSpriteFrameCache::sharedSpriteFrameCache()
+            ->addSpriteFramesWithFile((tex + ".plist").c_str());
+    }
+}
+
+void BetterEdit::FLAlert_Clicked(FLAlertLayer* l, bool btn2) {
+    if (l->getTag() == 2) {
+        if (btn2) {
+            BetterEdit::setEnableExperimentalFeatures(true);
+            as<decltype(this->msg_cb)>(l)();
+        }
+    }
+}
+
+bool BetterEdit::useExperimentalFeatures(std::function<void()> msg_cb) {
+    if (BetterEdit::getEnableExperimentalFeatures())
+        return true;
+
+    if (msg_cb) {
+        auto fl = FLAlertLayer::create(
+            nullptr,
+            "Experimental Features",
+            "Cancel", "Enable",
+            380.0f,
+            "You're trying to use an <cb>Experimental Feature.</c>\n "
+            "These features are likely <cy>unfinished</c> and may "
+            "<cr>crash</c>, or just not work at all.\n "
+            "Would you like to <cg>enable Experimental Features</c>?"
+        );
+        fl->setTag(2);
+        fl->setUserData(&msg_cb);
+        fl->show();
+    }
+
+    return false;
+}
 
 void BetterEdit::showHookConflictMessage() {
-    gd::FLAlertLayer::create(
+    FLAlertLayer::create(
         nullptr,
         "Hook Conflict Detected",
         "OK", nullptr,

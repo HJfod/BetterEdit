@@ -98,7 +98,7 @@ void ContextMenu::show() {
 }
 
 void ContextMenu::show(CCPoint const& pos) {
-    if (!BetterEdit::getEnableExperimentalFeatures())
+    if (!BetterEdit::useExperimentalFeatures())
         return;
 
     this->generate();

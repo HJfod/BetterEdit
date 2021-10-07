@@ -110,6 +110,11 @@ GDMAKE_MAIN_HM(hMod) {
     loadPlaceObjectsBefore();
     loadDashOrbLines();
 
+    BetterEdit::log() << kDebugTypeInitializing << "Adding Texture Sheets" << log_end();
+
+    BetterEdit::sharedState()->addTexture("BE_GameSheet01");
+    BetterEdit::sharedState()->addTexture("BE_ContextSheet01");
+
     // checkForUpdates();
 
     BetterEdit::log() << kDebugTypeInitializing << "Initializing GDMake hooks" << log_end();
