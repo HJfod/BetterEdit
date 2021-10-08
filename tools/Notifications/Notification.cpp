@@ -38,9 +38,11 @@ bool Notification::init(NotificationType type, const char* msg) {
             false, msg, .4f,
             size.width - size.height,
             size.height,
-            { .9f, .0f }
+            { .5f, .0f }
         );
-        text->setPosition({ size.width / 2 + size.height / 2, size.height / 2 });
+        text->setPosition({ size.height, size.height / 2 });
+        text->setAnchorPoint({ .0f, .5f });
+        text->colorAllCharactersTo(cc3x(0x33210b));
         this->addChild(text);
     }
 
