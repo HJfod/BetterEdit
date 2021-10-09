@@ -9,6 +9,7 @@
     "gd.h",
     "MinHook",
     "Cocos2d",
+    "Zipper",
     "nodes"
   ],
   "IgnoredFiles": [],

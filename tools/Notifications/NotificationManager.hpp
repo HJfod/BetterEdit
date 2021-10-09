@@ -6,7 +6,7 @@
 class NotificationManager : public NotificationDelegate {
     protected:
         CCArray* m_pQueue;
-        bool m_bShowingNotification = false;
+        CCArray* m_pVisible;
 
         bool init();
         void showNextNotificationInQueue();

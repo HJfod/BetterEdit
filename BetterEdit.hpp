@@ -92,6 +92,7 @@ struct DebugMsg {
     __macro__(FixScaleSliderPosition, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)         \
     __macro__(UseHorrifyingEditorPauseMenu, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)  \
     __macro__(UseBetterUndoHistory, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
+    __macro__(SaveLevelsAsGmd, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                \
 
 #define STEP_SUBDICT_NC(dict, key, ...)         \
     if (dict->stepIntoSubDictWithKey(key)) {    \

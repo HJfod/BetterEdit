@@ -424,6 +424,21 @@
     <key>textureRotated</key>
     <false/>
    </dict>
+   <key>BE_solid_bg.png</key>
+   <dict>
+    <key>aliases</key>
+    <array/>
+    <key>spriteOffset</key>
+    <string>{0,0}</string>
+    <key>spriteSize</key>
+    <string>{180,183}</string>
+    <key>spriteSourceSize</key>
+    <string>{180,183}</string>
+    <key>textureRect</key>
+    <string>{{550,484},{180,183}}</string>
+    <key>textureRotated</key>
+    <false/>
+   </dict>
    <key>BE_square_001_small.png</key>
    <dict>
     <key>aliases</key>
@@ -450,7 +465,7 @@
     <key>spriteSourceSize</key>
     <string>{180,184}</string>
     <key>textureRect</key>
-    <string>{{550,484},{180,184}}</string>
+    <string>{{732,484},{180,184}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>
@@ -484,6 +499,21 @@
     <key>textureRotated</key>
     <false/>
    </dict>
+   <key>BE_ugly_fucking_camera_btn.png</key>
+   <dict>
+    <key>aliases</key>
+    <array/>
+    <key>spriteOffset</key>
+    <string>{0,0}</string>
+    <key>spriteSize</key>
+    <string>{180,183}</string>
+    <key>spriteSourceSize</key>
+    <string>{180,183}</string>
+    <key>textureRect</key>
+    <string>{{914,484},{180,183}}</string>
+    <key>textureRotated</key>
+    <false/>
+   </dict>
    <key>BE_v_bpm_line.png</key>
    <dict>
     <key>aliases</key>
@@ -499,7 +529,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_dur_line.png</key>
+   <key>BE_v_dash.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -514,7 +544,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_eff_line.png</key>
+   <key>BE_v_dur_line.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -529,7 +559,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_grid.png</key>
+   <key>BE_v_eff_line.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -544,7 +574,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_grnd.png</key>
+   <key>BE_v_grid.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -559,7 +589,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_highlight.png</key>
+   <key>BE_v_grnd.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -574,7 +604,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_ldm.png</key>
+   <key>BE_v_highlight.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -589,7 +619,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_portal_borders.png</key>
+   <key>BE_v_ldm.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -604,7 +634,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_pos_line.png</key>
+   <key>BE_v_portal_borders.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -619,7 +649,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_prevmode.png</key>
+   <key>BE_v_pos_line.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -634,7 +664,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_pulse.png</key>
+   <key>BE_v_prevmode.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -649,7 +679,7 @@
     <key>textureRotated</key>
     <false/>
    </dict>
-   <key>BE_v_rotate.png</key>
+   <key>BE_v_pulse.png</key>
    <dict>
     <key>aliases</key>
     <array/>
@@ -661,6 +691,21 @@
     <string>{92,101}</string>
     <key>textureRect</key>
     <string>{{2609,121},{92,101}}</string>
+    <key>textureRotated</key>
+    <false/>
+   </dict>
+   <key>BE_v_rotate.png</key>
+   <dict>
+    <key>aliases</key>
+    <array/>
+    <key>spriteOffset</key>
+    <string>{0,0}</string>
+    <key>spriteSize</key>
+    <string>{92,101}</string>
+    <key>spriteSourceSize</key>
+    <string>{92,101}</string>
+    <key>textureRect</key>
+    <string>{{2703,121},{92,101}}</string>
     <key>textureRotated</key>
     <false/>
    </dict>

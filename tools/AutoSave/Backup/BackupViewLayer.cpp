@@ -61,7 +61,7 @@ bool BackupViewLayer::init(GJGameLevel* level) {
     timeBtn->setPosition(winSize.width / 2 - 40.0f, - winSize.height / 2 + 95.0f);
     this->m_pButtonMenu->addChild(timeBtn);
 
-    m_sTitle = "Backups for " + this->m_pLevel->levelName;
+    m_sTitle = "Backups for " + this->m_pLevel->m_sLevelName;
 
     m_pListLabel = CCLabelBMFont::create("No backups found!", "bigFont.fnt");
 

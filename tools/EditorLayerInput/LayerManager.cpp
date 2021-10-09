@@ -7,7 +7,7 @@ LayerManager::LevelName LayerManager::getLevelName() {
         return "";
     }
 
-    return LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->levelName;
+    return LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->m_sLevelName;
 }
 
 LayerManager::Layer* LayerManager::getLayer(int number) {

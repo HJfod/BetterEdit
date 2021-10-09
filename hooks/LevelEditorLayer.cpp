@@ -16,7 +16,7 @@ bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameL
 
     BetterEdit::setEditorInitialized(true);
 
-    if (SoftSaveManager::hasLoad(level->levelName)) {
+    if (SoftSaveManager::hasLoad(level->m_sLevelName)) {
         auto layer = FLAlertLayer::create(
             SoftSaveAlertDelegate::create(),
             "Unsaved Work Detected",

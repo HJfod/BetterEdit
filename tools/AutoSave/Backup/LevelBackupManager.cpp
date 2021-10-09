@@ -86,7 +86,7 @@ LevelBackupManager* LevelBackupManager::get() {
 }
 
 bool LevelBackupManager::levelHasBackupSettings(GJGameLevel* level) {
-    return m_pLevels->objectForKey(level->levelName);
+    return m_pLevels->objectForKey(level->m_sLevelName);
 }
 
 bool LevelBackupManager::levelHasBackups(GJGameLevel* level) {
@@ -98,11 +98,11 @@ bool LevelBackupManager::levelHasBackups(GJGameLevel* level) {
 
 LevelBackupSettings* LevelBackupManager::getBackupSettingsForLevel(GJGameLevel* level, bool create) {
     if (levelHasBackupSettings(level))
-        return as<LevelBackupSettings*>(m_pLevels->objectForKey(level->levelName));
+        return as<LevelBackupSettings*>(m_pLevels->objectForKey(level->m_sLevelName));
     
     if (create) {
         auto obj = LevelBackupSettings::create(level);
-        m_pLevels->setObject(obj, level->levelName);
+        m_pLevels->setObject(obj, level->m_sLevelName);
         return obj;
     }
 
@@ -119,9 +119,9 @@ void LevelBackupManager::createBackupForLevel(GJGameLevel* level) {
     LevelBackupSettings* arr;
     if (!levelHasBackupSettings(level)) {
         arr = LevelBackupSettings::create(level);
-        m_pLevels->setObject(arr, level->levelName);
+        m_pLevels->setObject(arr, level->m_sLevelName);
     } else {
-        arr = as<LevelBackupSettings*>(m_pLevels->objectForKey(level->levelName));
+        arr = as<LevelBackupSettings*>(m_pLevels->objectForKey(level->m_sLevelName));
     }
 
     arr->m_pBackups->insertObject(new LevelBackup(level, ""), 0u);
@@ -133,7 +133,7 @@ void LevelBackupManager::removeBackupForLevel(GJGameLevel* level, LevelBackup* b
     if (!levelHasBackupSettings(level))
         return;
 
-    as<LevelBackupSettings*>(m_pLevels->objectForKey(level->levelName))
+    as<LevelBackupSettings*>(m_pLevels->objectForKey(level->m_sLevelName))
         ->m_pBackups->removeObject(backup);
 
     this->save();

@@ -1,14 +1,16 @@
 #include "Notification.hpp"
 #include "../FLAlertLayerFix/FLAlertLayerFix.hpp"
 
+const float Notification::s_fNotificationHeight = 30.f;
+
 bool Notification::init(NotificationType type, const char* msg) {
     if (!CCNode::init())
         return false;
 
-    CCSize const size = { 150.f, 30.f };
+    CCSize const size = { 150.f, s_fNotificationHeight };
 
     auto bg = CCScale9Sprite::create(
-        "GJ_square01.png", { 0.0f, 0.0f, 80.0f, 80.0f }
+        "GJ_square02.png", { 0.0f, 0.0f, 80.0f, 80.0f }
     );
     bg->setScale(.5f);
     bg->setContentSize(size * 2);
@@ -33,16 +35,11 @@ bool Notification::init(NotificationType type, const char* msg) {
         this->addChild(spr);
     }
     if (msg) {
-        auto text = TextArea::create(
-            "chatFont.fnt",
-            false, msg, .4f,
-            size.width - size.height,
-            size.height,
-            { .5f, .0f }
-        );
+        auto text = CCLabelBMFont::create(msg, "chatFont.fnt");
         text->setPosition({ size.height, size.height / 2 });
         text->setAnchorPoint({ .0f, .5f });
-        text->colorAllCharactersTo(cc3x(0x33210b));
+        text->setScale(.5f);
+        // text->setColor(cc3x(0x33210b));
         this->addChild(text);
     }
 
@@ -82,10 +79,15 @@ void Notification::show() {
 }
 
 void Notification::hide() {
+    this->m_bHiding = true;
     if (this->m_pDelegate) {
         this->m_pDelegate->notificationClosed(this);
     }
     this->removeFromParent();
+}
+
+bool Notification::isHiding() {
+    return this->m_bHiding;
 }
 
 void Notification::setDelegate(NotificationDelegate* delegate) {

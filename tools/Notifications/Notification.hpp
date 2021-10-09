@@ -14,8 +14,12 @@ struct NotificationDelegate {
 };
 
 class Notification : public CCNode {
+    public:
+        static const float s_fNotificationHeight;
+    
     protected:
         NotificationDelegate* m_pDelegate = nullptr;
+        bool m_bHiding = false;
 
         bool init(NotificationType, const char*);
 
@@ -24,6 +28,7 @@ class Notification : public CCNode {
 
         void show();
         void waitToHide();
+        bool isHiding();
         void hide();
         void setDelegate(NotificationDelegate*);
 };

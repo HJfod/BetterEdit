@@ -380,7 +380,7 @@ void SoftSaveManager::save() {
     
     std::ofstream f(g_softSave_file, std::ios::binary | std::ios::out);
 
-    auto lvlName = LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->levelName.c_str();
+    auto lvlName = LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->m_sLevelName.c_str();
 
     if (f.is_open()) {
         bin_write(f, strlen(lvlName));
