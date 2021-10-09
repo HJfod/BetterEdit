@@ -28,7 +28,7 @@
 #include "tools/Notifications/NotificationManager.hpp"
 
 GDMAKE_DEBUG(song, args) {
-    LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->songID = std::stoi(args[1]);
+    LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->m_nSongID = std::stoi(args[1]);
 }
 
 GDMAKE_MAIN_HM(hMod) {

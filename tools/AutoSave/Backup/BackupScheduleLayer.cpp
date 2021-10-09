@@ -35,7 +35,7 @@ void BackupScheduleLayer::setup() {
     auto label3 = CCLabelBMFont::create(
         (
             "Objects added since last backup: " +
-            std::to_string(m_pLevel->objectCount - m_pBackup->m_nLastBackupObjectCount)
+            std::to_string(m_pLevel->m_nObjectCount - m_pBackup->m_nLastBackupObjectCount)
         ).c_str(), "goldFont.fnt"
     );
     label3->setPosition(winSize / 2 + CCPoint { 0.0f, -65.0f });

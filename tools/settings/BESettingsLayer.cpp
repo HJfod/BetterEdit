@@ -196,6 +196,14 @@ void BESettingsLayer::setup() {
         nullptr,
         BE_SETTING_FUNC_B(UseHorrifyingEditorPauseMenu)
     );
+    this->addToggle(
+        "Save Levels as Files",
+        "Saves levels as individual <cg>.gmd2</c> files instead of "
+        "<cp>CCLocalLevels.dat</c>. Should make make data loss a "
+        "thing of the past, but might also make saving/loading a bit "
+        "slower.",
+        BE_SETTING_FUNC_B(SaveLevelsAsGmd)
+    );
 
     this->incrementPageCount(true);
 

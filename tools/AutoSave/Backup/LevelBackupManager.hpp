@@ -45,8 +45,8 @@ struct LevelBackup : public CCObject {
     inline LevelBackup(GJGameLevel* level, std::string const& cname) {
         savetime = std::chrono::system_clock::now();
         name = cname;
-        objectCount = level->objectCount;
-        data = level->levelString;
+        objectCount = level->m_nObjectCount;
+        data = level->m_sLevelString;
 
         this->autorelease();
     }
@@ -71,7 +71,7 @@ struct LevelBackupSettings : public CCObject {
             ret->m_nBackupEvery = s_defaultBackupEvery;
             ret->m_pBackups = CCArray::create();
             ret->m_pBackups->retain();
-            if (level) ret->m_nLastBackupObjectCount = level->objectCount;
+            if (level) ret->m_nLastBackupObjectCount = level->m_nObjectCount;
             ret->autorelease();
             return ret;
         }
