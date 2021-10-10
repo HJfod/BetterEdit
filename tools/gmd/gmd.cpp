@@ -55,9 +55,9 @@ GmdFile::GmdFile(std::string const& pathStr) {
     this->m_sFullPath = pathStr;
 
     switch (hash(path.extension().string().c_str())) {
-        case "gmd"_h:   this->m_eFormat = kGmdTypeGmd; break;
-        case "gmd2"_h:  this->m_eFormat = kGmdTypeGmd2; break;
-        case "lvl"_h:   this->m_eFormat = kGmdTypeLvl; break;
+        case ".gmd"_h:   this->m_eFormat = kGmdTypeGmd; break;
+        case ".gmd2"_h:  this->m_eFormat = kGmdTypeGmd2; break;
+        case ".lvl"_h:   this->m_eFormat = kGmdTypeLvl; break;
     }
 }
 
