@@ -21,6 +21,9 @@ std::string DebugTypeToStr(DebugType type) {
         case kDebugTypeDeinitializing:  return "Deinitializing";
         case kDebugTypeSaving:          return "Saving";
         case kDebugTypeLoading:         return "Loading";
+        case kDebugTypeError:           return "Error";
+        case kDebugTypeMinorError:      return "Minor Error";
+        case kDebugTypeFatalError:      return "Fatal Error";
         default:                        return "";
     }
 }

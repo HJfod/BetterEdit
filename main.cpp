@@ -26,6 +26,13 @@
 #include "tools/other/dashOrbLine.hpp"
 #include "tools/Notifications/BEAchievementManager.hpp"
 #include "tools/Notifications/NotificationManager.hpp"
+#include "tools/gmd/associateGmdFileType.hpp"
+#include "tools/gmd/GmdSaveManager.hpp"
+
+#define INIT_MANAGER(name) \
+    BetterEdit::log() << kDebugTypeInitializing << "Initializing " #name << log_end();   \
+    if (!name::initGlobal())                   \
+        return "Unable to initialize " #name " !";   \
 
 GDMAKE_DEBUG(song, args) {
     LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->m_nSongID = std::stoi(args[1]);
@@ -60,49 +67,18 @@ GDMAKE_MAIN_HM(hMod) {
     // this enables pulses in FMODAudioEngine in every layer, instead of just in PlayLayer
     patch(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing UIManager" << log_end();
-    if (!UIManager::initGlobal())
-        return "Unable to initialize UIManager!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing BetterEdit" << log_end();
-    if (!BetterEdit::initGlobal())
-        return "Unable to initialize BetterEdit!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing LiveManager" << log_end();
-    if (!LiveManager::initGlobal())
-        return "Unable to initialize LiveManager!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing SoftSaveManager" << log_end();
-    if (!SoftSaveManager::initGlobal())
-        return "Unable to initialize SoftSaveManager!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing LevelBackupManager" << log_end();
-    if (!LevelBackupManager::initGlobal())
-        return "Unable to initialize LevelBackupManager!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing KeybindManager" << log_end();
-    if (!KeybindManager::initGlobal())
-        return "Unable to initialize KeybindManager!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing SuperKeyboardManager" << log_end();
-    if (!SuperKeyboardManager::initGlobal())
-        return "Unable to initialize SuperKeyboardManager!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing SuperMouseManager" << log_end();
-    if (!SuperMouseManager::initGlobal())
-        return "Unable to initialize SuperMouseManager!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing UndoHistoryManager" << log_end();
-    if (!UndoHistoryManager::initGlobal())
-        return "Unable to initialize UndoHistoryManager!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing NotificationManager" << log_end();
-    if (!NotificationManager::initGlobal())
-        return "Unable to initialize NotificationManager!";
-
-    BetterEdit::log() << kDebugTypeInitializing << "Initializing BEAchievementManager" << log_end();
-    if (!BEAchievementManager::initGlobal())
-        return "Unable to initialize BEAchievementManager!";
+    INIT_MANAGER(UIManager);
+    INIT_MANAGER(BetterEdit);
+    INIT_MANAGER(LiveManager);
+    INIT_MANAGER(SoftSaveManager);
+    INIT_MANAGER(LevelBackupManager);
+    INIT_MANAGER(KeybindManager);
+    INIT_MANAGER(SuperKeyboardManager);
+    INIT_MANAGER(SuperMouseManager);
+    INIT_MANAGER(UndoHistoryManager);
+    INIT_MANAGER(NotificationManager);
+    INIT_MANAGER(BEAchievementManager);
+    INIT_MANAGER(GmdSaveManager);
 
     BetterEdit::log() << kDebugTypeInitializing << "Creating midhooks" << log_end();
     if (!loadUpdateVisibilityHook())
@@ -124,6 +100,12 @@ GDMAKE_MAIN_HM(hMod) {
 
     BetterEdit::sharedState()->addTexture("BE_GameSheet01");
     BetterEdit::sharedState()->addTexture("BE_ContextSheet01");
+
+    BetterEdit::log() << kDebugTypeInitializing << "Creating File Association" << log_end();
+
+    if (!associateGmdFileTypes()) {
+        BetterEdit::log() << kDebugTypeMinorError << "Unable to Create File Associations!" << log_end();
+    }
 
     // checkForUpdates();
 

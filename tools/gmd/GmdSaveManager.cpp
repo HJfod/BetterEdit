@@ -1,4 +1,5 @@
 #include "GmdSaveManager.hpp"
+#include "gmd.hpp"
 
 GmdSaveManager* g_manager;
 
@@ -27,15 +28,16 @@ void GmdSaveManager::load(LocalLevelManager* llm) {
 void GmdSaveManager::save(LocalLevelManager* llm) {
     BetterEdit::log() << kDebugTypeLoading << "Saving levels..." << log_end();
 
-    CCFileUtils::getWritablePath();
+    std::cout << CCFileUtils::sharedFileUtils()->getWritablePath() << "\n";
+    std::cout << this->m_sDirName << "\n";
 
     if (!std::filesystem::exists(this->m_sDirName)) {
         std::filesystem::create_directory(this->m_sDirName);
     }
 
-    CCARRAY_FOREACH_B_TYPE(llm->m_pLevels, lvl, GJGameLevel) {
-        auto file = GmdFile();
-    }
+    // CCARRAY_FOREACH_B_TYPE(llm->m_pLevels, lvl, GJGameLevel) {
+        // auto file = GmdFile();
+    // }
 }
 
 void GmdSaveManager::backupCCLocalLevels(DS_Dictionary* dict) {

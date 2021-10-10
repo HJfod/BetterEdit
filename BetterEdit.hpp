@@ -30,6 +30,9 @@ enum DebugType {
     kDebugTypeLoading,
     kDebugTypeSaving,
     kDebugTypeHook,
+    kDebugTypeError,
+    kDebugTypeMinorError,
+    kDebugTypeFatalError,
 };
 
 std::string DebugTypeToStr(DebugType);

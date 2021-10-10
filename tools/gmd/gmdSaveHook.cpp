@@ -4,7 +4,7 @@ GDMAKE_HOOK(0x18e040)
 void __fastcall LocalLevelManager_encodeDataTo(
     LocalLevelManager* self, edx_t edx, DS_Dictionary* dict
 ) {
-    if (!BetterEdit::getSaveLevelsAsGmd()) {
+    if (true ||!BetterEdit::getSaveLevelsAsGmd()) {
         return GDMAKE_ORIG_V(self, edx, dict);
     }
 
@@ -21,9 +21,7 @@ GDMAKE_HOOK(0x18e070)
 void __fastcall LocalLevelManager_dataLoaded(
     LocalLevelManager* self, edx_t edx, DS_Dictionary* dict
 ) {
-    std::cout << CCFileUtils::sharedFileUtils()->getWritablePath() << "\n";
-
-    if (!BetterEdit::getSaveLevelsAsGmd()) {
+    if (true ||!BetterEdit::getSaveLevelsAsGmd()) {
         return GDMAKE_ORIG_V(self, edx, dict);
     }
 

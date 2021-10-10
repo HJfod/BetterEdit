@@ -3,7 +3,7 @@
 
 using namespace gmd;
 
-std::string gmd::sanitizeString(const std::string & _text, bool _actually_do_it = true) {
+std::string gmd::sanitizeString(std::string const& _text, bool _actually_do_it) {
     if (_actually_do_it) {
         std::string s = _text;
         std::transform(s.begin(), s.end(), s.begin(),
@@ -14,7 +14,7 @@ std::string gmd::sanitizeString(const std::string & _text, bool _actually_do_it 
     return _text;
 }
 
-std::string gmd::decodeCompression(std::string _text, std::string _comp_args) {
+std::string gmd::decodeCompression(std::string const& _text, std::string const& _comp_args) {
     // decode compression if such has been applied
     if (!(_comp_args == "" || _comp_args == "none")) {
         std::vector<uint8_t> decr = convert_vs(_text);
@@ -60,7 +60,7 @@ std::string gmd::decodeCompression(std::string _text, std::string _comp_args) {
     return _text;
 }
 
-std::string gmd::applyCompression(std::string _text, std::string _comp_args) {
+std::string gmd::applyCompression(std::string const& _text, std::string const& _comp_args) {
     if (!(_comp_args == "" || _comp_args == "none")) {
         std::vector<uint8_t> decr = convert_vs(_text);
         std::string comps = _comp_args;
@@ -105,7 +105,7 @@ std::string gmd::applyCompression(std::string _text, std::string _comp_args) {
     return _text;
 }
 
-std::string gmd::fixPlist(const std::string & _text) {
+std::string gmd::fixPlist(std::string const& _text) {
     return "<plist version=\"1.0\" gjver=\"2.0\"><dict><k>lvl</k>" + _text + "</dict></plist>";
 }
 

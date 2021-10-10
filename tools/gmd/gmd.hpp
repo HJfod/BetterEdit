@@ -12,6 +12,8 @@ namespace gmd {
     };
 
     constexpr const char* GmdTypeToString(GmdType);
+
+    bool isLevelFileName(std::string const& fname);
     
     const enum ExportFlag {
         kfExportFlag_None           = 0b0000000,
@@ -49,6 +51,12 @@ namespace gmd {
             this->error = other.error;
         }
 
+        inline Result() {}
+        inline Result(T data) {
+            this->success = true;
+            this->data = data;
+        }
+
         inline Result(bool suc) {
             this->success = suc;
         }
@@ -57,21 +65,21 @@ namespace gmd {
             return this->success;
         }
 
-        inline static Result res() {
-            auto res = Result;
+        inline static Result<T> res() {
+            Result<T> res;
             res.success = true;
             return res;
         }
 
-        inline static Result res(T d) {
-            auto res = Result;
+        inline static Result<T> res(T d) {
+            Result<T> res;
             res.data = d;
             res.success = true;
             return res;
         }
 
-        inline static Result err(const char* e) {
-            auto res = Result;
+        inline static Result<T> err(const char* e) {
+            Result<T> res;
             res.error = e;
             res.success = false;
             return res;
@@ -90,6 +98,8 @@ namespace gmd {
             byte_array m_vSongData;
 
             void saveFileFormat();
+
+            Result<GJGameLevel*> createLevel(std::string const&);
 
         public:
             GmdFile(GJGameLevel*);

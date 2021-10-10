@@ -1,21 +1,34 @@
 #include "gmd.hpp"
 #include <zipper.h>
 #include <unzipper.h>
-#include "../../include/json.hpp"
 #include "helpers.hpp"
+#undef snprintf
+#include "../../include/json.hpp"
 #include "../../include/ZlibHelper.hpp"
 
 using namespace gmd;
 using namespace zipper;
 namespace fs = std::filesystem;
 
-constexpr const char* GmdTypeToString(GmdType type) {
+
+#define bruhshit(member, shouldBe) \
+    std::cout << #member << " == " << #shouldBe << " => " << std::hex << offsetOf(&GJGameLevel::member) << "\n";
+
+constexpr const char* gmd::GmdTypeToString(GmdType type) {
     switch (type) {
         case kGmdTypeGmd:   return "gmd";
         case kGmdTypeGmd2:  return "gmd2";
         case kGmdTypeLvl:   return "lvl";
         default:            return "gmd";
     }
+}
+
+bool gmd::isLevelFileName(std::string const& fname) {
+    return (
+        fname.ends_with(GmdTypeToString(kGmdTypeGmd)) ||
+        fname.ends_with(GmdTypeToString(kGmdTypeGmd2)) ||
+        fname.ends_with(GmdTypeToString(kGmdTypeLvl))
+    );
 }
 
 byte_array gmd::convert_vs(std::string const& data) {
@@ -68,6 +81,90 @@ void GmdFile::removeNullbytesFromString(std::string & str) {
     for (auto i = 0u; i < str.size(); i++) {
         if (!str[i]) str[i] = 32;
     }
+}
+
+Result<GJGameLevel*> GmdFile::createLevel(std::string const& data) {
+    auto ret = GJGameLevel::create();
+
+    ret->m_eLevelType = kGJLevelTypeEditor;
+    ret->m_bIsEditable = true;
+
+    this->removeNullbytesFromString(const_cast<std::string&>(data));
+
+    // DS_Dictionary crashes on large files bruh
+    // so i guess we gotta do this manually after all
+    tinyxml2::XMLDocument doc;
+
+    auto res = doc.Parse(data.c_str());
+
+    if (res == tinyxml2::XML_NO_ERROR) {
+        tinyxml2::XMLNode* first = &doc;
+        if (doc.FirstChildElement("d")) {
+            first = doc.FirstChildElement("d");
+        }
+
+        for (
+            auto child = first->FirstChildElement("k");
+            child;
+            child = child->NextSiblingElement("k")
+        ) {
+            switch (hash(child->GetText())) {
+                case "k2"_h: {
+                    auto val = child->NextSiblingElement()->GetText();
+                    if (val && strlen(val)) {
+                        ret->m_sLevelName = val;
+                    }
+                } break;
+
+                case "k3"_h: {
+                    auto val = child->NextSiblingElement()->GetText();
+                    if (val && strlen(val)) {
+                        auto dval = decoder::Base64(val);
+                        ret->m_sLevelDesc = dval;
+                    }
+                } break;
+
+                case "k4"_h: {
+                    auto val = child->NextSiblingElement()->GetText();
+                    if (val && strlen(val)) {
+                        ret->setLevelData(val);
+                    }
+                } break;
+
+                case "k5"_h: {
+                    auto val = child->NextSiblingElement()->GetText();
+                    if (val && strlen(val)) {
+                        ret->m_sCreatorName = val;
+                    }
+                } break;
+
+                case "k8"_h: {
+                    auto val = child->NextSiblingElement()->GetText();
+                    if (val && strlen(val)) {
+                        try {
+                            ret->m_nAudioTrack = std::stoi(val);
+                        } catch(...) {}
+                    }
+                } break;
+
+                case "k45"_h: {
+                    auto val = child->NextSiblingElement()->GetText();
+                    if (val && strlen(val)) {
+                        try {
+                            ret->m_nSongID = std::stoi(val);
+                        } catch(...) {}
+                    }
+                } break;
+            }
+        }
+    } else {
+        ret->release();
+        return Result<GJGameLevel*>::err(
+            ("XML parse error: "_s + std::to_string(res)).c_str()
+        );
+    }
+
+    return ret;
 }
 
 Result<GJGameLevel*> GmdFile::parseLevel() {
@@ -144,12 +241,7 @@ Result<GJGameLevel*> GmdFile::parseLevel() {
             if (!data.size())
                 return Result<GJGameLevel*>::err("Unable to decode compression!");
 
-            auto dict = new DS_Dictionary;
-            dict->loadRootSubDictFromString(data);
-
-            return Result<GJGameLevel*>::res(
-                GJGameLevel::createWithCoder(dict)
-            );
+            return this->createLevel(data);
         } break;
 
         case kGmdTypeGmd: {
@@ -158,12 +250,7 @@ Result<GJGameLevel*> GmdFile::parseLevel() {
             if (!data.size())
                 return Result<GJGameLevel*>::err("File is empty");
 
-            auto dict = new DS_Dictionary;
-            dict->loadRootSubDictFromString(data);
-
-            return Result<GJGameLevel*>::res(
-                GJGameLevel::createWithCoder(dict)
-            );
+            return this->createLevel(data);
         } break;
 
         case kGmdTypeLvl: {
@@ -175,12 +262,7 @@ Result<GJGameLevel*> GmdFile::parseLevel() {
             auto data = gmd::decoder::GZip(datac);
             data = "<d>" + data + "</d>";
 
-            auto dict = new DS_Dictionary;
-            dict->loadRootSubDictFromString(data);
-
-            return Result<GJGameLevel*>::res(
-                GJGameLevel::createWithCoder(dict)
-            );
+            return this->createLevel(data);
         } break;
 
         default:
@@ -226,9 +308,10 @@ Result<> GmdFile::saveFile() {
 
                 std::string metadata = metajson.dump();
 
-                if (fs::exists(this->m_sFullPath))
+                if (fs::exists(this->m_sFullPath)) {
                     if (!fs::remove(this->m_sFullPath))
                         return Result<>::err("Unable to write file!");
+                }
 
                 Zipper zip (this->m_sFullPath);
 
