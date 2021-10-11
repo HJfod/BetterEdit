@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../BetterEdit.hpp"
+#include "../../../BetterEdit.hpp"
 
 namespace gmd {
     using byte_array = std::vector<uint8_t>;

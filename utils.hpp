@@ -700,3 +700,23 @@ static bool nodeIsHovered(CCNode* node, CCPoint const& gpos) {
 
     return rect.containsPoint(gpos);
 }
+
+static HWND glfwGetWin32Window(GLFWwindow* wnd) {
+    auto cocosBase = GetModuleHandleA("libcocos2d.dll");
+
+    auto pRet = reinterpret_cast<HWND(__cdecl*)(GLFWwindow*)>(
+        reinterpret_cast<uintptr_t>(cocosBase) + 0x112c10
+    )(wnd);
+
+    return pRet;
+}
+
+static HWND getGDHWND() {
+    static HWND g_hwnd = nullptr;
+
+    if (!g_hwnd) {
+        g_hwnd = glfwGetWin32Window(CCDirector::sharedDirector()->getOpenGLView()->getWindow());
+    }
+
+    return g_hwnd;
+}

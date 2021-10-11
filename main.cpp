@@ -26,8 +26,8 @@
 #include "tools/other/dashOrbLine.hpp"
 #include "tools/Notifications/BEAchievementManager.hpp"
 #include "tools/Notifications/NotificationManager.hpp"
-#include "tools/gmd/associateGmdFileType.hpp"
-#include "tools/gmd/GmdSaveManager.hpp"
+#include "tools/gmd/tools/associateGmdFileType.hpp"
+#include "tools/gmd/logic/GmdSaveManager.hpp"
 
 #define INIT_MANAGER(name) \
     BetterEdit::log() << kDebugTypeInitializing << "Initializing " #name << log_end();   \
@@ -36,6 +36,10 @@
 
 GDMAKE_DEBUG(song, args) {
     LevelEditorLayer::get()->m_pLevelSettings->m_pLevel->m_nSongID = std::stoi(args[1]);
+}
+
+GDMAKE_DEBUG(fe, args) {
+    exit(0);
 }
 
 GDMAKE_MAIN_HM(hMod) {

@@ -1,4 +1,4 @@
-#include "GmdSaveManager.hpp"
+#include "../logic/GmdSaveManager.hpp"
 
 GDMAKE_HOOK(0x18e040)
 void __fastcall LocalLevelManager_encodeDataTo(

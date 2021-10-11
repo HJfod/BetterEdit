@@ -7,16 +7,6 @@ ccColor3B g_obColorUnderCursor;
 EyeDropperColorOverlay* g_pOverlay;
 HWND g_hwnd;
 
-HWND glfwGetWin32Window(GLFWwindow* wnd) {
-    auto cocosBase = GetModuleHandleA("libcocos2d.dll");
-
-    auto pRet = reinterpret_cast<HWND(__cdecl*)(GLFWwindow*)>(
-        reinterpret_cast<uintptr_t>(cocosBase) + 0x112c10
-    )(wnd);
-
-    return pRet;
-}
-
 void updateEyeDropperColor() {
     if (g_bPickingColor) {
         POINT mpos;
@@ -71,7 +61,7 @@ class PickCallback : public CCObject {
             g_pOverlay = EyeDropperColorOverlay::addToCurrentScene(popup);
             g_pOverlay->setStatusBool(&g_bPickingColor);
 
-            g_hwnd = glfwGetWin32Window(CCDirector::sharedDirector()->getOpenGLView()->getWindow());
+            g_hwnd = getGDHWND();
 
             SetCapture(g_hwnd);
         }

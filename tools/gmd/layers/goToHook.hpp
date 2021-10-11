@@ -1,5 +1,5 @@
 #pragma once
 
-#include "../../BetterEdit.hpp"
+#include "../../../BetterEdit.hpp"
 
 void goToImportLayer(CCArray*);

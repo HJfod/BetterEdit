@@ -3,8 +3,8 @@
 #include <unzipper.h>
 #include "helpers.hpp"
 #undef snprintf
-#include "../../include/json.hpp"
-#include "../../include/ZlibHelper.hpp"
+#include "../../../include/json.hpp"
+#include "../../../include/ZlibHelper.hpp"
 
 using namespace gmd;
 using namespace zipper;

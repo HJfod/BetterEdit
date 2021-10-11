@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../BetterEdit.hpp"
+#include "../../../BetterEdit.hpp"
 
 class GmdSaveManager {
     protected:

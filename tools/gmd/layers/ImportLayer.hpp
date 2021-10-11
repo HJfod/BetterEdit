@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../BetterEdit.hpp"
+#include "../../../BetterEdit.hpp"
 
 class ImportLayer : public CCLayer, public FLAlertLayerProtocol {
     protected:

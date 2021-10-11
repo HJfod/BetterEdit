@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../BetterEdit.hpp"
+#include "../../../BetterEdit.hpp"
 
 static constexpr const BoomListType kBoomListType_Import
     = static_cast<BoomListType>(0x42c);
