@@ -36,7 +36,14 @@ bool ImportLayer::init(CCArray* arr) {
 	this->addChild(bottomLeft);
 	this->addChild(topRight);
 
+    this->m_pInfoLabel = CCLabelBMFont::create("", "bigFont.fnt");
+    this->m_pInfoLabel->setPosition(winSize / 2);
+    this->m_pInfoLabel->setZOrder(99);
+    this->m_pInfoLabel->setScale(.65f);
+    this->addChild(this->m_pInfoLabel);
+
     this->m_pButtonMenu = CCMenu::create();
+    this->m_pButtonMenu->setZOrder(100);
     this->addChild(this->m_pButtonMenu);
 
     auto backBtn = CCMenuItemSpriteExtra::create(
@@ -47,18 +54,31 @@ bool ImportLayer::init(CCArray* arr) {
 	backBtn->setPosition(-winSize.width / 2 + 25.0f, winSize.height / 2 - 25.0f);
 	this->m_pButtonMenu->addChild(backBtn);
 
-    auto importAllBtnSpr = ButtonSprite::create(
-        "Import All", 0, 0, "goldFont.fnt", "GJ_button_01.png", 0, .8f
+    auto importSelectedBtnSpr = ButtonSprite::create(
+        "Import Selected", 0, 0, "goldFont.fnt", "GJ_button_02.png", 0, .8f
     );
-    importAllBtnSpr->setScale(.6f);
+    importSelectedBtnSpr->setScale(.6f);
 
-    auto importAllBtn = CCMenuItemSpriteExtra::create(
-		importAllBtnSpr,
+    auto importSelectedBtn = CCMenuItemSpriteExtra::create(
+		importSelectedBtnSpr,
 		this,
-		menu_selector(ImportLayer::onImportAll)
+		menu_selector(ImportLayer::onImportSelected)
 	);
-	importAllBtn->setPosition(-winSize.width / 2 + 45.0f, - winSize.height / 2 + 20.0f);
-	this->m_pButtonMenu->addChild(importAllBtn);
+	importSelectedBtn->setPosition(-65.f, - winSize.height / 2 + 30.0f);
+	this->m_pButtonMenu->addChild(importSelectedBtn);
+
+    auto deleteSelectedBtnSpr = ButtonSprite::create(
+        "Delete Selected", 0, 0, "goldFont.fnt", "GJ_button_06.png", 0, .8f
+    );
+    deleteSelectedBtnSpr->setScale(.6f);
+
+    auto deleteSelectedBtn = CCMenuItemSpriteExtra::create(
+		deleteSelectedBtnSpr,
+		this,
+		menu_selector(ImportLayer::onDeleteSelected)
+	);
+	deleteSelectedBtn->setPosition(65.f, - winSize.height / 2 + 30.0f);
+	this->m_pButtonMenu->addChild(deleteSelectedBtn);
 
     this->reloadList();
 
@@ -74,6 +94,9 @@ void ImportLayer::reloadList() {
         this->m_pList = nullptr;
     }
 
+    this->m_pInfoLabel->setVisible(!this->m_pImportLevels->count());
+    this->m_pInfoLabel->setString("No Levels to Import");
+
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     this->m_pList = GJListLayer::create(
@@ -88,6 +111,11 @@ void ImportLayer::reloadList() {
 
 void ImportLayer::addItemsToList(CCArray* arr) {
     this->m_pImportLevels->addObjectsFromArray(arr);
+    this->reloadList();
+}
+
+void ImportLayer::removeItemFromList(ImportObject* obj) {
+    this->m_pImportLevels->removeObject(obj);
     this->reloadList();
 }
 
@@ -107,14 +135,42 @@ void ImportLayer::onExit(CCObject*) {
     }
 }
 
-void ImportLayer::onImportAll(CCObject*) {
-    // todo
+void ImportLayer::onImportSelected(CCObject*) {
+    CCARRAY_FOREACH_B_BASE(
+        this->m_pList->m_pListView->m_pTableView->m_pContentLayer->getChildren(),
+        cell,
+        ImportLevelCell*,
+        ix
+    ) {
+        if (cell->isSelected()) {
+            LocalLevelManager::sharedState()->m_pLevels->insertObject(
+                cell->getObject()->m_pLevel, 0u
+            );
+            this->m_pImportLevels->removeObject(cell->getObject());
+        }
+    }
+    this->reloadList();
+}
+
+void ImportLayer::onDeleteSelected(CCObject*) {
+    CCARRAY_FOREACH_B_BASE(
+        this->m_pList->m_pListView->m_pTableView->m_pContentLayer->getChildren(),
+        cell,
+        ImportLevelCell*,
+        ix
+    ) {
+        if (cell->isSelected()) {
+            this->m_pImportLevels->removeObject(cell->getObject());
+        }
+    }
+    this->reloadList();
 }
 
 void ImportLayer::exitForReal() {
-    CCDirector::sharedDirector()->replaceScene(
-        CCTransitionFade::create(.5f, MenuLayer::scene(false))
-    );
+    // CCDirector::sharedDirector()->replaceScene(
+    //     CCTransitionFade::create(.5f, MenuLayer::scene(false))
+    // );
+    LevelBrowserLayer::scene(GJSearchObject::create(kGJSearchTypeMyLevels));
 }
 
 void ImportLayer::FLAlert_Clicked(FLAlertLayer*, bool btn2) {

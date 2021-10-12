@@ -20,10 +20,13 @@ class DebugObject : public CCObject {
 class DebugCell : public TableViewCell {
     protected:
         CCLabelBMFont* m_pLabel;
+        std::string m_sText;
 
 		DebugCell(const char* name, CCSize size);
 
         void draw() override;
+
+        void onMore(CCObject*);
 	
 	public:
         void loadFromObject(DebugObject*);

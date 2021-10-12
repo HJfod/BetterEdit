@@ -1,5 +1,6 @@
 #include "ImportListView.hpp"
 #include "ImportLevelLayer.hpp"
+#include "ImportLayer.hpp"
 
 ImportLevelCell::ImportLevelCell(const char* name, CCSize size) :
     TableViewCell(name, size.width, size.height) {}
@@ -63,12 +64,24 @@ void ImportLevelCell::loadFromObject(ImportObject* obj) {
     this->m_pBGLayer->setOpacity(255);
 }
 
+void ImportLevelCell::onDelete(CCObject*) {
+    this->m_pList->getLayer()->removeItemFromList(this->m_pObject);
+}
+
 void ImportLevelCell::onView(CCObject*) {
     ImportLevelLayer::scene(this->m_pList, this->m_pObject);
 }
 
-void ImportLevelCell::onSelect(CCObject*) {
+void ImportLevelCell::onSelect(CCObject* pSender) {
+    this->m_bSelected = !as<CCMenuItemToggler*>(pSender)->isToggled();
+}
 
+bool ImportLevelCell::isSelected() const {
+    return this->m_bSelected;
+}
+
+ImportObject* ImportLevelCell::getObject() const {
+    return this->m_pObject;
 }
 
 ImportLevelCell* ImportLevelCell::create(ImportListView* list, const char* key, CCSize size) {

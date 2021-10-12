@@ -1,29 +1,10 @@
 #pragma once
 
 #include "../../../BetterEdit.hpp"
+#include "ImportObject.hpp"
 
 static constexpr const BoomListType kBoomListType_Import
     = static_cast<BoomListType>(0x42c);
-
-class ImportObject : public CCObject {
-    public:
-        GJGameLevel* m_pLevel;
-        std::string m_sFilePath;
-
-        inline ImportObject(
-            GJGameLevel* lvl,
-            std::string path
-        ) {
-            this->m_pLevel = lvl;
-            this->m_pLevel->retain();
-            this->m_sFilePath = path;
-            this->autorelease();
-        }
-
-        virtual inline ~ImportObject() {
-            this->m_pLevel->release();
-        }
-};
 
 class ImportListView;
 class ImportLayer;
@@ -32,16 +13,20 @@ class ImportLevelCell : public TableViewCell {
     protected:
         ImportListView* m_pList;
         ImportObject* m_pObject;
+        bool m_bSelected = false;
 
 		ImportLevelCell(const char* name, CCSize size);
         ~ImportLevelCell();
 
         void draw() override;
         void onView(CCObject*);
+        void onDelete(CCObject*);
         void onSelect(CCObject*);
 	
 	public:
         void loadFromObject(ImportObject*);
+        bool isSelected() const;
+        ImportObject* getObject() const;
 
 		static ImportLevelCell* create(ImportListView*, const char* key, CCSize size);
 };

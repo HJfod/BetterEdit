@@ -18,8 +18,16 @@ void DebugCell::updateBGColor(int ix) {
 void DebugCell::loadFromObject(DebugObject* str) {
     this->m_pLayer->setVisible(true);
     this->m_pBGLayer->setOpacity(255);
+
+    bool showMore = false;
+    auto text = str->m_sString;
+    if (text.size() > 72) {
+        text = text.substr(0, 72) + "...";
+        showMore = true;
+    }
+    this->m_sText = str->m_sString;
     
-    auto label = CCLabelBMFont::create(str->m_sString.c_str(), "chatFont.fnt");
+    auto label = CCLabelBMFont::create(text.c_str(), "chatFont.fnt");
     label->setAnchorPoint({ .0f, .5f });
     label->setPosition({
         this->m_fHeight / 2,
@@ -29,6 +37,32 @@ void DebugCell::loadFromObject(DebugObject* str) {
     this->m_pLayer->addChild(label);
 
     this->m_pLabel = label;
+
+    if (showMore) {
+        auto menu = CCMenu::create();
+
+        auto moreLabel = CCLabelBMFont::create("More", "chatFont.fnt");
+        moreLabel->setScale(.5f);
+        moreLabel->setColor(cc3x(0x7bf));
+        
+        auto moreBtn = CCMenuItemSpriteExtra::create(
+            moreLabel, this, menu_selector(DebugCell::onMore)
+        );
+        moreBtn->setPosition(0, 0);
+        menu->addChild(moreBtn);
+
+        menu->setPosition(
+            this->m_fHeight / 2 +
+            label->getScaledContentSize().width +
+            moreLabel->getScaledContentSize().width / 2 + 10.f,
+            this->m_fHeight / 2
+        );
+
+        this->m_pLayer->addChild(menu);
+
+        this->registerWithTouchDispatcher();
+        CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
+    }
 
     auto typeLabel = CCLabelBMFont::create(DebugTypeToStr(str->m_eDebugType).c_str(), "chatFont.fnt");
     typeLabel->setAnchorPoint({ 1.f, .5f });
@@ -55,6 +89,16 @@ void DebugCell::updateLabelColor() {
             case ']': col = { 255, 255, 255 }; break;
         }
     }
+}
+
+void DebugCell::onMore(CCObject*) {
+    FLAlertLayer::create(
+        nullptr,
+        "Log Message",
+        "OK", nullptr,
+        340.f,
+        this->m_sText
+    )->show();
 }
 
 DebugCell* DebugCell::create(const char* key, CCSize size) {

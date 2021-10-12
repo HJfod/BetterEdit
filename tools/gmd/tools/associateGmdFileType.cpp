@@ -1,7 +1,7 @@
 #include "associateGmdFileType.hpp"
 #include "../logic/gmd.hpp"
 #include "../layers/goToHook.hpp"
-#include "../layers/ImportListView.hpp"
+#include "../layers/ImportObject.hpp"
 #include "passGmdFile.hpp"
 
 // https://www.cplusplus.com/forum/windows/26987/
@@ -91,6 +91,7 @@ void handleCli(std::string const& args) {
     }
 
     auto importList = CCArray::create();
+    std::vector<std::string> errors;
 
     auto ix = 0;
     BetterEdit::log() << kDebugTypeLoading << "Importing levels" << log_end();
@@ -104,6 +105,10 @@ void handleCli(std::string const& args) {
                     BetterEdit::log() << kDebugTypeLoading << "Added " << token << " to import list" << log_end();
                     importList->addObject(new ImportObject(res.data, token));
                 } else {
+                    errors.push_back(
+                        "Unable to Import "_s + token + ": " + res.error
+                    );
+
                     BetterEdit::log() << kDebugTypeMinorError
                         << "Unable to Import " << token << ": "
                         << res.error << log_end();
@@ -111,6 +116,10 @@ void handleCli(std::string const& args) {
             }
         }
         ix++;
+    }
+
+    if (errors.size()) {
+        notifyErrorsWhileImporting(errors);
     }
 
     if (importList->count()) {
