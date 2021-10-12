@@ -1,11 +1,16 @@
 #include "ImportLayer.hpp"
 #include "ImportListView.hpp"
 
+ImportLayer* g_pIsOpen = nullptr;
+
 bool ImportLayer::init(CCArray* arr) {
     if (!CCLayer::init())
         return false;
 
+    g_pIsOpen = this;
+
     this->m_pImportLevels = arr;
+    this->m_pImportLevels->retain();
 
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     auto sRight = CCDirector::sharedDirector()->getScreenRight();
@@ -81,6 +86,11 @@ void ImportLayer::reloadList() {
     this->addChild(this->m_pList);
 }
 
+void ImportLayer::addItemsToList(CCArray* arr) {
+    this->m_pImportLevels->addObjectsFromArray(arr);
+    this->reloadList();
+}
+
 void ImportLayer::onExit(CCObject*) {
     if (this->m_pImportLevels->count()) {
         // !note: might be too confusing.
@@ -123,6 +133,7 @@ void ImportLayer::keyDown(enumKeyCodes key) {
 
 ImportLayer::~ImportLayer() {
     CC_SAFE_RELEASE(this->m_pImportLevels);
+    g_pIsOpen = nullptr;
 }
 
 ImportLayer* ImportLayer::create(CCArray* arr) {
@@ -151,4 +162,8 @@ ImportLayer* ImportLayer::scene(CCArray* arr, bool transition) {
     CCDirector::sharedDirector()->replaceScene(scene);
 
     return layer;
+}
+
+ImportLayer* ImportLayer::isOpen() {
+    return g_pIsOpen;
 }

@@ -189,6 +189,10 @@ class log_stream {
         inline log_stream& operator<<(CCPoint p) {
             output << p.x << ", " << p.y; return *this;
         }
+        template<typename T>
+        inline log_stream& operator<<(T p) {
+            output << p; return *this;
+        }
         log_stream& operator<<(log_end n);
 };
 

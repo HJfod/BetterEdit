@@ -712,10 +712,17 @@ static HWND glfwGetWin32Window(GLFWwindow* wnd) {
 }
 
 static HWND getGDHWND() {
+    // le matcool
     static HWND g_hwnd = nullptr;
 
     if (!g_hwnd) {
-        g_hwnd = glfwGetWin32Window(CCDirector::sharedDirector()->getOpenGLView()->getWindow());
+        auto dir = CCDirector::sharedDirector();
+        if (!dir) return nullptr;
+        auto opengl = dir->getOpenGLView();
+        if (!opengl) return nullptr;
+        auto wnd = dir->getOpenGLView()->getWindow();
+        if (!wnd) return nullptr;
+        g_hwnd = glfwGetWin32Window(wnd);
     }
 
     return g_hwnd;

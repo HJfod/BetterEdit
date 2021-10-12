@@ -3,40 +3,36 @@
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
     auto found = reinterpret_cast<HWND*>(lParam);
 
-    TCHAR buffer[MAX_PATH] = {0};
-    DWORD dwProcId = 0;
-    GetWindowThreadProcessId(hwnd, &dwProcId);
-
-    GetModuleFileName((HMODULE)dwProcId, buffer, MAX_PATH);
-
-    std::string exePath = buffer;
-
     // buffer long enough to hold "Geometry Dash"
     char name[16];
     GetWindowTextA(hwnd, name, 16);
 
-    std::cout << "title: " << name << " -> " << buffer << "\n";
+    // buffer long enough to hold "GLFW30"
+    char className[16];
+    GetClassNameA(hwnd, className, 16);
 
-    if (exePath.ends_with("GeometryDash.exe")) {
+    if (strcmp(name, "Geometry Dash") == 0 && strcmp(className, "GLFW30") == 0) {
         // check that window isn't the current one
+
         auto gd_wnd = getGDHWND();
         if (gd_wnd == hwnd) {
             return TRUE;
         }
 
-        std::cout << "found\n";
-        *found = hwnd;
-        // return FALSE;
-    }
+        // check when the window was created??
+        // somehow??
 
+        *found = hwnd;
+        return FALSE;
+    }
+    
     return TRUE;
 }
 
 HWND anotherInstanceIsOpen() {
     HWND found = nullptr;
 
-    std::cout << "enmummeratin\n";
-    EnumWindows(&EnumWindowsProc, reinterpret_cast<LPARAM>(&found));
+    EnumWindows(&EnumWindowsProc, as<LPARAM>(&found));
 
     return found;
 }

@@ -90,7 +90,7 @@ void handleCli(std::string const& args) {
             << log_end();
     }
 
-    auto importList = CCArray::create(); 
+    auto importList = CCArray::create();
 
     auto ix = 0;
     BetterEdit::log() << kDebugTypeLoading << "Importing levels" << log_end();
@@ -115,16 +115,22 @@ void handleCli(std::string const& args) {
 
     if (importList->count()) {
         if (anotherInstance) {
+            importList->retain();
+            std::string constr = "";
+            CCARRAY_FOREACH_B_TYPE(importList, str, CCString) {
+                constr += str->getCString() + std::string(GD_IMPORT_SEPARATOR);
+            }
             COPYDATASTRUCT data;
             data.dwData = MSG_GD_IMPORT_LEVEL;
-            data.cbData = sizeof(importList);
-            data.lpData = importList;
+            data.cbData = constr.size();
+            data.lpData = constr.data();
             SendMessage(
                 anotherInstance,
                 WM_COPYDATA,
                 as<WPARAM>(nullptr),
                 as<LPARAM>(&data)
             );
+            importList->release();
         } else {
             goToImportLayer(importList);
         }
@@ -132,7 +138,7 @@ void handleCli(std::string const& args) {
 
     if (anotherInstance) {
         // force quit
-        // exit(0);
+        exit(0);
     }
 }
 

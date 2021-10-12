@@ -19,8 +19,10 @@ class ImportLayer : public CCLayer, public FLAlertLayerProtocol {
 
     public:
         void reloadList();
+        void addItemsToList(CCArray*);
 
         static ImportLayer* create(CCArray*);
         static ImportLayer* scene(CCArray*, bool transition = false);
+        static ImportLayer* isOpen();
 };
 
