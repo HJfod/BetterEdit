@@ -53,7 +53,6 @@ LRESULT __stdcall CCEGLView_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
                 } else if (std::string(sItem).ends_with(".zip")) {
                     Unzipper zip (sItem);
                     for (auto const& entry : zip.entries()) {
-                        std::cout << entry.name << "\n";
                         if (gmd::isLevelFileName(entry.name)) {
                             auto targetDir = std::filesystem::current_path() / "be_temp_unzip";
                             zip.extractEntry(entry.name, targetDir.string());
