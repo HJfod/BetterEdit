@@ -36,8 +36,8 @@ bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameL
     getAutoSaveTimer(self->m_pEditorUI)->resetTimer();
     updateContextMenu(self);
 
-    if (!BetterEdit::getShownTutorial())
-        askToShowTutorial();
+    // if (!BetterEdit::getShownTutorial())
+    //     askToShowTutorial();
 
     return true;
 }
