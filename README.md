@@ -34,7 +34,7 @@ Download is available on my Discord Server: https://discord.gg/K9Kuh3hzTC
    
    `gdmake submodules add-src nodes *.cpp`
 
-   `gdmake submodules add Zipper https://github.com/HJfod/Zipper`
+   `gdmake submodules add Zipper https://github.com/sebastiandev/Zipper`
 
    `gdmake submodules add-inc Zipper zipper`
 
