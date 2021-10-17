@@ -38,7 +38,7 @@ Download is available on my Discord Server: https://discord.gg/K9Kuh3hzTC
 
    `gdmake submodules add-inc Zipper zipper`
 
-   (you may also need to do `gdmake add-inc <path/to/zlib>` and `gdmake add-inc <path/to/zlib>` if you run into issues finding `zlib.h`)
+   (you may also need to do `gdmake add-inc <path/to/zlib>` and `gdmake add-lib <path/to/zlib>` if you run into issues finding `zlib.h`)
 
    `gdmake submodules add-inc Cocos2d cocos2dx/support/zip_support`
 
