@@ -20,6 +20,15 @@ bool __fastcall UILayer_init(UILayer* self) {
     if (!GDMAKE_ORIG(self))
         return false;
 
+    struct get_bool_from_byte {
+        bool a, b, c, d;
+    };
+
+    auto app = CCApplication::sharedApplication();
+    // if controller plugged in
+    if (as<get_bool_from_byte*>((as<int>(app) + 0x90))->b)
+        return true;
+
     if (!self->m_pCheckPointMenu)
         return true;
 

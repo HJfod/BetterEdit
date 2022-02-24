@@ -41,7 +41,6 @@ class EditorUI_CB : public EditorUI {
         void onToggleShowUI(CCObject*);
         void onExitViewMode(CCObject*);
         void onGoToPercentage(CCObject* pSender);
-        void onViewUndoHistory(CCObject*);
 };
 
 void showLayerControls(EditorUI*, bool);

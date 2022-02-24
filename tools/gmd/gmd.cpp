@@ -3,8 +3,8 @@
 #include <unzipper.h>
 #include "helpers.hpp"
 #undef snprintf
-#include "../../../include/json.hpp"
-#include "../../../include/ZlibHelper.hpp"
+#include "../../include/json.hpp"
+#include "../../include/ZlibHelper.hpp"
 
 using namespace gmd;
 using namespace zipper;
@@ -49,7 +49,7 @@ GmdFile::GmdFile(std::string const& pathStr) {
     if (fs::is_directory(path)) {
         this->m_sPath = pathStr;
     } else {
-        this->m_sPath = path.parent_path().string();
+        this->m_sPath = path.parent_path();
     }
     this->m_sFileName = path.stem().string();
     this->m_sFullPath = pathStr;
@@ -349,4 +349,8 @@ Result<> GmdFile::saveFile() {
     }
 
     return Result<>::res();
+}
+
+void GmdFile::setPath(std::filesystem::path const& path) {
+    m_sPath = path;
 }

@@ -6,14 +6,11 @@
 #include "../tools/LevelPercent/levelPercent.hpp"
 #include "../tools/GlobalClipboard/clipboardHook.hpp"
 #include "../tools/EditorLayerInput/editorLayerInput.hpp"
-#include "../tools/RepeatPaste/repeatPaste.hpp"
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/AutoSave/Backup/BackupViewLayer.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include "../tools/CustomKeybinds/KeybindManager.hpp"
 #include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
-#include "../tools/CustomUI/customUI.hpp"
-#include "../tools/History/UndoHistoryPopup.hpp"
 #include "../tools/ContextMenu/loadContextMenu.hpp"
 #include "EditorPauseLayer.hpp"
 #include "EditorUI.hpp"
@@ -95,10 +92,6 @@ void EditorUI_CB::onExitViewMode(CCObject*) {
     );
 }
 
-void EditorUI_CB::onViewUndoHistory(CCObject*) {
-    UndoHistoryPopup::popup(this->m_pEditorLayer);
-}
-
 bool touchIntersectsInput(CCNode* input, CCTouch* touch) {
     if (!input)
         return false;
@@ -126,9 +119,6 @@ bool __fastcall EditorUI_ccTouchBegan(EditorUI* self, edx_t edx, CCTouch* touch,
 
     g_bHoldingDownTouch = true;
     
-    if (UIManager::get()->isCustomizing())
-        return true;
-
     if (touchIntersectsInput(self_->getChildByTag(LAYERINPUT_TAG), touch))
         return true;
     if (touchIntersectsInput(getGridButtonParent(self_)->getChildByTag(ZOOMINPUT_TAG), touch))
@@ -189,8 +179,6 @@ GDMAKE_HOOK(0x90cd0, "_ZN8EditorUI12ccTouchMovedEPN7cocos2d7CCTouchEPNS0_7CCEven
 void __fastcall EditorUI_ccTouchMoved(EditorUI* self_, edx_t edx, CCTouch* touch, CCEvent* event) {
     auto self = reinterpret_cast<EditorUI*>(reinterpret_cast<uintptr_t>(self_) - 0xEC);
 
-    if (UIManager::get()->isCustomizing()) return;
-
     float prevScale = self->m_pEditorLayer->m_pObjectLayer->getScale();
     auto swipeStart =
         self->m_pEditorLayer->m_pObjectLayer->convertToNodeSpace(self->m_obSwipeStart) * prevScale;
@@ -223,8 +211,6 @@ void __fastcall EditorUI_ccTouchEnded(
     CCEvent* event
 ) {
     g_bHoldingDownTouch = false;
-
-    if (UIManager::get()->isCustomizing()) return;
 
     auto now = std::chrono::system_clock::now();
 
@@ -407,27 +393,6 @@ bool __fastcall EditorUI_init(EditorUI* self, edx_t edx, LevelEditorLayer* lel) 
             .save(&toggleBtn)
             .done()
     );
-    // self->m_pSwipeBtn->getParent()->addChild(
-    //     CCNodeConstructor<CCMenuItemSpriteExtra*>()
-    //         .fromNode(
-    //             CCMenuItemSpriteExtra::create(
-    //                 CCNodeConstructor<ButtonSprite*>()
-    //                     .fromButtonSprite("Undo History", "GJ_button_01.png", "goldFont.fnt")
-    //                     .scale(.45f)
-    //                     .done(),
-    //                 self,
-    //                 (SEL_MenuHandler)&EditorUI_CB::onViewUndoHistory
-    //             )
-    //         )
-    //         .exec([self](auto p) -> void {
-    //             addKeybindIndicator(self, p, "betteredit.view_undo_history");
-    //         })
-    //         .move(
-    //             self->m_pPlaybackBtn->getPositionX() + 70.0f,
-    //             self->m_pPlaybackBtn->getPositionY()
-    //         )
-    //         .done()
-    // );
     updateToggleButtonSprite(toggleBtn);
 
     loadEditorLayerInput(self);
@@ -435,7 +400,6 @@ bool __fastcall EditorUI_init(EditorUI* self, edx_t edx, LevelEditorLayer* lel) 
     loadGridButtons(self);
     loadSliderPercent(self);
     loadClipboard(self);
-    loadPasteRepeatButton(self);
     loadAutoSaveTimer(self);
     loadVisibilityTab(self);
     loadEditorKeybindIndicators(self);
@@ -513,13 +477,6 @@ void __fastcall EditorUI_transformObjectCall(EditorUI* self, edx_t edx, CCObject
     GDMAKE_ORIG_V(self, edx, pSender);
 
     SoftSaveManager::save();
-}
-
-GDMAKE_HOOK(0x78280, "_ZN8EditorUI13updateButtonsEv")
-void __fastcall EditorUI_updateButtons(EditorUI* self) {
-    GDMAKE_ORIG_V(self);
-
-    updatePasteRepeatButton(self);
 }
 
 GDMAKE_HOOK(0x87180, "_ZN8EditorUI6showUIEb")

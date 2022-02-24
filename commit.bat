@@ -55,8 +55,8 @@ git push origin master
 
 popd
 
-cd webhook
+@REM cd webhook
 
-node webhook.js
+@REM node webhook.js
 
 :done

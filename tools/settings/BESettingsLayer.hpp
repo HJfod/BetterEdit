@@ -69,7 +69,6 @@ class BESettingsLayer : public BrownAlertDelegate, TextInputDelegate {
         void onPage(CCObject*);
         void onToggle(CCObject*);
         void textChanged(CCTextInputNode*) override;
-        void onDebug(CCObject*);
 
         void onShowAccount(CCObject*);
         void onURL(CCObject*);

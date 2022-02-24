@@ -1,6 +1,6 @@
 #include "gmd.hpp"
-#include "../../../include/ZlibHelper.hpp"
-#include "../../../include/Base64.hpp"
+#include "../../include/ZlibHelper.hpp"
+#include "../../include/Base64.hpp"
 
 using namespace gmd;
 
