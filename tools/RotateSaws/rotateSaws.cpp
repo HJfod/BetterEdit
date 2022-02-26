@@ -1,6 +1,5 @@
 #include "rotateSaws.hpp"
 #include <array>
-#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 static constexpr const int ROTATEACTION_TAG = 0x42069;
 
@@ -132,8 +131,6 @@ void __fastcall LevelEditorLayer_onPlaytest(LevelEditorLayer* self) {
 
     if (BetterEdit::getRotateSawsInEditor() && !shouldRotateSaw())
         beginRotations(self);
-        
-    updateEditorKeybindIndicators();
 }
 
 GDMAKE_HOOK(0x169d90, "_ZN16LevelEditorLayer16onResumePlaytestEv")
@@ -142,8 +139,6 @@ void __fastcall LevelEditorLayer_onResumePlaytest(LevelEditorLayer* self) {
 
     if (BetterEdit::getRotateSawsInEditor() && !shouldRotateSaw())
         resumeRotations(self);
-        
-    updateEditorKeybindIndicators();
 }
 
 GDMAKE_HOOK(0x169cc0, "_ZN16LevelEditorLayer15onPausePlaytestEv")
@@ -152,8 +147,6 @@ void __fastcall LevelEditorLayer_onPausePlaytest(LevelEditorLayer* self) {
 
     if (BetterEdit::getRotateSawsInEditor() && !shouldRotateSaw())
         pauseRotations(self);
-        
-    updateEditorKeybindIndicators();
 }
 
 GDMAKE_HOOK(0x169f10, "_ZN16LevelEditorLayer14onStopPlaytestEv")
@@ -162,6 +155,4 @@ void __fastcall LevelEditorLayer_onStopPlaytest(LevelEditorLayer* self) {
 
     if (BetterEdit::getRotateSawsInEditor() && !shouldRotateSaw())
         stopRotations(self);
-        
-    updateEditorKeybindIndicators();
 }

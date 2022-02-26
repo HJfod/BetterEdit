@@ -46,5 +46,4 @@ class EditorUI_CB : public EditorUI {
 void showLayerControls(EditorUI*, bool);
 void updateEditorLayerInputText(EditorUI*);
 void loadEditorLayerInput(EditorUI*);
-bool loadUpdateVisibilityHook();
 bool testSelectObjectLayer(GameObject*);

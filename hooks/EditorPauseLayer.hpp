@@ -11,5 +11,4 @@ class EditorPauseLayer_CB : public gd::EditorPauseLayer {
 };
 
 void setupRotateSaws();
-bool shouldShowKeybindIndicator();
 int countLDMObjects(LevelEditorLayer*);

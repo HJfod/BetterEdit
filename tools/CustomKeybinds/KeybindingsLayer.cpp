@@ -375,11 +375,7 @@ bool __fastcall KeybindingsLayer_init(KeybindingsLayer* self) {
         "A <cg>modifier</c> is a keybind that modifies the "
         "behaviour of other inputs like scrolling. A modifier "
         "can be a modifier key alone, while normal keybinds "
-        "can only be a <cl>key</c> or a <cl>key</c> + <cg>modifier</c>.\n\n "
-
-        "<cp>Repeating</c> means that when you hold down a shortcut, "
-        "it'll start repeating at the set <cr>interval</c> after "
-        "the set <cb>start</c> time.",
+        "can only be a <cl>key</c> or a <cl>key</c> + <cg>modifier</c>.",
         .65f,
         210.0f - 90.0f,
         140.0f - 25.0f,

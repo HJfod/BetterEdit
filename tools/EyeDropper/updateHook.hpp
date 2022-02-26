@@ -2,4 +2,4 @@
 
 #include <functional>
 
-void scheduleOneTimeFuncInGDThread(std::function<void()>);
+bool isLeftMouseButtonPressed();

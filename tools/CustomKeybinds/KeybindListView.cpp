@@ -269,18 +269,6 @@ void KeybindCell::updateMenu() {
             x -= spr->getScaledContentSize().width + 5.0f;
         }
     
-        if (m_pBind->repeatable) {
-            auto spr = createKeybindBtnSprite(nullptr, true, "GJ_timeIcon_001.png");
-            if (m_pBind->repeatChanged)
-                spr->m_pSubSprite->setColor({ 160, 255, 200 });
-            auto btn = CCMenuItemSpriteExtra::create(
-                spr, this, menu_selector(KeybindCell::onRepeat)
-            );
-            btn->setPosition(x - spr->getScaledContentSize().width / 2, 0.0f);
-            x -= spr->getScaledContentSize().width + 5.0f;
-            m_pMenu->addChild(btn);
-        }
-
         if (resettable) {
             auto spr = createKeybindBtnSprite(nullptr, true, "edit_cwBtn_001.png");
             auto btn = CCMenuItemSpriteExtra::create(

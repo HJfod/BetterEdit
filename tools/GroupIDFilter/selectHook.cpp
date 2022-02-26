@@ -14,11 +14,6 @@ void __fastcall EditorUI_selectObject(EditorUI* self, edx_t edx, GameObject* obj
     if (BetterEdit::isEditorViewOnlyMode())
         return;
     
-    if (shouldHideLDMObject(obj))
-        return;
-
-    SoftSaveManager::saveObject(obj);
-
     if (AdvancedFilterLayer::testSelectObject(obj) && testSelectObjectLayer(obj)) {
         GDMAKE_ORIG_V(self, edx, obj, idk);
 
@@ -33,11 +28,8 @@ void __fastcall EditorUI_selectObjects(EditorUI* self, edx_t edx, cocos2d::CCArr
 
     if (!g_bUndid) {
         CCARRAY_FOREACH_B_BASE(objs, obj, GameObject*, ix) {
-            SoftSaveManager::saveObject(obj);
-
             if (!AdvancedFilterLayer::testSelectObject(obj) ||
-                !testSelectObjectLayer(obj) ||
-                shouldHideLDMObject(obj))
+                !testSelectObjectLayer(obj))
                 objs->removeObjectAtIndex(ix--);
         }
     }

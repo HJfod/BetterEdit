@@ -624,14 +624,6 @@ void loadBEKeybinds() {
         }, "editor.visibility", false
     }, {});
 
-    kbm->addEditorKeybind({ "Toggle LDM", "betteredit.toggle_ldm",
-        [](EditorUI* ui) -> bool {
-            setHideLDMObjects();
-            updateVisibilityTab(ui);
-            return false;
-        }, "editor.visibility", false
-    }, {});
-
     kbm->addEditorKeybind({ "Lock Layer", "betteredit.lock_layer",
         [](EditorUI* ui) -> bool {
             as<EditorUI_CB*>(ui)->onLockLayer(nullptr);

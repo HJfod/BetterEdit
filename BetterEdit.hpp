@@ -48,7 +48,6 @@ struct DebugMsg {
     __macro__(ObjectsPreStartLine, int, 15, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 60)     \
     __macro__(PercentageAccuracy, int, 0, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 0, 10)       \
     __macro__(AutoSaveTime, int, 1, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 60)             \
-    __macro__(SoftSaveFrequency, int, 1, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 999)       \
     __macro__(GridSizeEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(ShowGridOnChange, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(AlwaysUseCustomGridSize, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)       \
@@ -72,12 +71,7 @@ struct DebugMsg {
     __macro__(DisableNewColorSelection, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)      \
     __macro__(UseUpArrowForGameplay, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)         \
     __macro__(EnableAutoSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                \
-    __macro__(EnableSoftAutoSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
-    __macro__(EnableAsyncSave, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(DisableVisibilityTab, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)          \
-    __macro__(AutoUpdateEnabled, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
-    __macro__(AutoUpdateBetaTest, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
-    __macro__(DontColorGamemodeBorders, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)      \
     __macro__(HighlightTriggers, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(DisableDoubleClick, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)            \
     __macro__(KeybindRepeatEnabled, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \

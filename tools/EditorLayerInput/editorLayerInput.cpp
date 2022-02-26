@@ -2,44 +2,6 @@
 #include "LayerManager.hpp"
 #include "LayerViewPopup.hpp"
 #include "../VisibilityTab/loadVisibilityTab.hpp"
-#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
-
-// #define MAKE_MIDHOOK(addr, func)
-
-#define MAKE_MIDHOOK(addr, func)        \
-    if (MH_CreateHook(                  \
-        as<LPVOID>(gd::base + addr),    \
-        as<LPVOID>(func##_midHook),     \
-        as<LPVOID*>(&func##_retAddr)    \
-    ) != MH_OK) return false;           \
-                                        \
-    if (MH_EnableHook(                  \
-        as<LPVOID>(gd::base + addr)     \
-    ) != MH_OK)                         \
-        return false;
-    
-#define MAKE_VALIDGROUP_MIDHOOK_DEF(name)     \
-    void (*name##_retAddr)();                 \
-    __declspec(naked) void name##_midHook() { \
-    __asm push eax                            \
-    __asm push edx                            \
-    __asm push ebx                            \
-    __asm push esp                            \
-    __asm push ebp                            \
-    __asm push esi                            \
-    __asm push edi                            \
-    __asm pushfd                              \
-    __asm call LevelEditorLayer_validGroup_hook\
-    __asm popfd                               \
-    __asm pop edi                             \
-    __asm pop esi                             \
-    __asm pop ebp                             \
-    __asm add esp, 0x4                        \
-    __asm pop ebx                             \
-    __asm pop edx                             \
-    __asm pop eax                             \
-    __asm jmp name##_retAddr                  \
-    }
 
 void EditorUI_CB::onNextFreeEditorLayer(CCObject*) {
     auto objs = this->m_pEditorLayer->getAllObjects();
@@ -125,120 +87,6 @@ void __fastcall EditorUI_onGoToBaseLayer(gd::EditorUI* self, edx_t edx, cocos2d:
 
     updateEditorLayerInputText(self);
 }
-
-
-void LevelEditorLayer_updateVisibility() {
-    int opacity;
-    GameObject* obj;
-
-    __asm {
-        mov opacity, eax
-        mov [obj], edi
-    }
-
-    if (shouldHideLDMObject(obj)) {
-        opacity = 0;
-        __asm {
-            mov eax, opacity
-        }
-        return;
-    }
-
-    if (opacity < 255) {
-        auto layer = LayerManager::get()->getLayer(obj->m_nEditorLayer);
-
-        if (layer)
-            if (!layer->m_bVisible)
-                opacity = 0;
-            else
-                if (layer->m_nOpacity == LayerManager::use_default_opacity)
-                    opacity = LayerManager::get()->default_opacity;
-                else
-                    opacity = layer->m_nOpacity;
-    }
-
-    __asm {
-        mov eax, opacity
-    }
-}
-
-void LevelEditorLayer_validGroup_hook() {
-    int clickable;
-    GameObject* obj;
-
-    __asm {
-        mov clickable, ecx
-        mov [obj], edi
-    }
-
-    // std::cout << obj->m_nEditorLayer << " == " << clickable << "\n";
-
-    // clickable = -1;
-
-    __asm {
-        mov ecx, clickable
-    }
-}
-
-void (*LevelEditorLayer_updateVisibility_retAddr)();
-__declspec(naked) void LevelEditorLayer_updateVisibility_midHook() {
-    // funny lil stuff
-    // pushad doesn't work because we
-    // want to modify the eax register
-    __asm {
-        push ecx
-        push edx
-        push ebx
-        push esp
-        push ebp
-        push esi
-        push edi
-        pushfd
-        call LevelEditorLayer_updateVisibility
-        popfd
-        pop edi
-        pop esi
-        pop ebp
-        add esp, 0x4
-        pop ebx
-        pop edx
-        pop ecx
-        jmp LevelEditorLayer_updateVisibility_retAddr
-    }
-}
-
-MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_objectAtPosition)
-MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_objectsAtPosition)
-MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_typeExistsAtPosition)
-MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_objectsInRect)
-MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_selectAllWithDirection)
-MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_selectAll)
-MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_draw)
-MAKE_VALIDGROUP_MIDHOOK_DEF(LevelEditorLayer_updateVisibility2)
-
-bool loadUpdateVisibilityHook() {
-    MAKE_MIDHOOK(0x163a2e, LevelEditorLayer_updateVisibility);
-
-    // LevelEditorLayer::objectsAtPosition
-    // MAKE_MIDHOOK(0x1615f7, LevelEditorLayer_objectsAtPosition);
-    // LevelEditorLayer::objectAtPosition
-    // MAKE_MIDHOOK(0x161417, LevelEditorLayer_objectAtPosition);
-    // LevelEditorLayer::typeExistsAtPosition
-    // MAKE_MIDHOOK(0x160f5a, LevelEditorLayer_typeExistsAtPosition);
-    // LevelEditorLayer::objectsInRect
-    // MAKE_MIDHOOK(0x161bf0, LevelEditorLayer_objectsInRect);
-    // EditorUI::selectAllWithDirection
-    // MAKE_MIDHOOK(0x86e50, LevelEditorLayer_selectAllWithDirection);
-    // EditorUI::selectAll
-    // MAKE_MIDHOOK(0x86c93, LevelEditorLayer_selectAll);
-    // LevelEditorLayer::draw
-    // MAKE_MIDHOOK(0x16b89d, LevelEditorLayer_draw);
-    // LevelEditorLayer::updateVisibility
-    // MAKE_MIDHOOK(0x1639f6, LevelEditorLayer_updateVisibility2);
-
-    return true;
-}
-
 
 void showLayerControls(EditorUI* self, bool show) {
     self->m_pCurrentLayerLabel->setVisible(false);
@@ -356,11 +204,6 @@ void loadEditorLayerInput(EditorUI* self) {
                 self,
                 (SEL_MenuHandler)&EditorUI_CB::onNextFreeEditorLayer
             ))
-            .exec([self](auto t) -> void {
-                addKeybindIndicator(
-                    self, t, "betteredit.go_to_next_free_layer"
-                );
-            })
             .move(9.0f, goToAllBtn->getPositionY())
             .tag(NEXTFREELAYER_TAG)
             .done()
@@ -376,9 +219,6 @@ void loadEditorLayerInput(EditorUI* self) {
                 self,
                 (SEL_MenuHandler)&EditorUI_CB::onLockLayer
             ))
-            .exec([self](auto t) -> void {
-                addKeybindIndicator(self, t, "betteredit.lock_layer");
-            })
             .move(-106.0f, goToAllBtn->getPositionY())
             .tag(LOCKLAYER_TAG)
             .done()
@@ -394,9 +234,6 @@ void loadEditorLayerInput(EditorUI* self) {
                 self,
                 (SEL_MenuHandler)&EditorUI_CB::onShowLayerPopup
             ))
-            .exec([self](auto t) -> void {
-                addKeybindIndicator(self, t, "betteredit.view_layer_list");
-            })
             .move(-130.0f, goToAllBtn->getPositionY())
             .tag(VIEWLAYERS_TAG)
             .done()

@@ -6,11 +6,9 @@
 #include "tools/EditorLayerInput/LayerManager.hpp"
 #include "tools/EditorLayerInput/editorLayerInput.hpp"
 #include "tools/EnterToSearch/loadEnterSearch.hpp"
-#include "tools/EyeDropper/eyeDropper.hpp"
 #include "tools/AutoSave/autoSave.hpp"
 #include "tools/AutoSave/Backup/LevelBackupManager.hpp"
 #include "tools/other/teleportScaleFix.hpp"
-#include "tools/PortalLineColors/portalLineColors.hpp"
 #include "tools/FLAlertLayerFix/FLAlertLayerFix.hpp"
 #include "tools/CustomKeybinds/KeybindManager.hpp"
 #include "tools/CustomKeybinds/BEKeybinds.hpp"
@@ -62,17 +60,10 @@ GDMAKE_MAIN_HM(hMod) {
     patch(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 
     INIT_MANAGER(BetterEdit);
-    INIT_MANAGER(SoftSaveManager);
     INIT_MANAGER(LevelBackupManager);
     INIT_MANAGER(KeybindManager);
     INIT_MANAGER(SuperKeyboardManager);
     INIT_MANAGER(SuperMouseManager);
-
-    BetterEdit::log() << kDebugTypeInitializing << "Creating midhooks" << log_end();
-    if (!loadUpdateVisibilityHook())
-        return "Unable to midhook updateVisibility!";
-    if (!loadDrawGridLayerMidHook())
-        return "Unable to midhook DrawGridLayer::draw!";
 
     BetterEdit::log() << kDebugTypeInitializing << "Loading tools" << log_end();
     loadBEKeybinds();

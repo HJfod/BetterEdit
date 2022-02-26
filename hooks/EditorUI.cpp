@@ -10,7 +10,6 @@
 #include "../tools/AutoSave/Backup/BackupViewLayer.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include "../tools/CustomKeybinds/KeybindManager.hpp"
-#include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
 #include "../tools/ContextMenu/loadContextMenu.hpp"
 #include "EditorPauseLayer.hpp"
 #include "EditorUI.hpp"
@@ -261,7 +260,6 @@ GDMAKE_HOOK(0x76090, "_ZN8EditorUID2Ev")
 void __fastcall EditorUI_destructorHook(gd::EditorUI* self) {
     saveClipboard(self);
     resetSliderPercent(self);
-    clearEditorKeybindIndicators(self);
     getAutoSaveTimer(self)->resetTimer();
 
     return GDMAKE_ORIG_V(self);
@@ -385,9 +383,6 @@ bool __fastcall EditorUI_init(EditorUI* self, edx_t edx, LevelEditorLayer* lel) 
                     (SEL_MenuHandler)&EditorUI_CB::onToggleShowUI
                 )
             )
-            .exec([self](auto p) -> void {
-                addKeybindIndicator(self, p, "betteredit.toggle_ui");
-            })
             .tag(TOGGLEUI_TAG)
             .move(getShowButtonPosition(self))
             .save(&toggleBtn)
@@ -402,7 +397,6 @@ bool __fastcall EditorUI_init(EditorUI* self, edx_t edx, LevelEditorLayer* lel) 
     loadClipboard(self);
     loadAutoSaveTimer(self);
     loadVisibilityTab(self);
-    loadEditorKeybindIndicators(self);
 
     if (BetterEdit::isEditorViewOnlyMode()) {
         auto viewOnlyLabel = CCLabelBMFont::create("View-Only Mode", "bigFont.fnt");
@@ -472,13 +466,6 @@ void __fastcall EditorUI_onNewCustomItem(EditorUI* self, edx_t edx, CCObject* pS
     setIgnoreNewObjectsForSliderPercent(false);
 }
 
-GDMAKE_HOOK(0x8def0, "_ZN8EditorUI19transformObjectCallEPN7cocos2d8CCObjectE")
-void __fastcall EditorUI_transformObjectCall(EditorUI* self, edx_t edx, CCObject* pSender) {
-    GDMAKE_ORIG_V(self, edx, pSender);
-
-    SoftSaveManager::save();
-}
-
 GDMAKE_HOOK(0x87180, "_ZN8EditorUI6showUIEb")
 void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     if (BetterEdit::isEditorViewOnlyMode())
@@ -511,8 +498,6 @@ void __fastcall EditorUI_showUI(gd::EditorUI* self, edx_t edx, bool show) {
     showGridButtons(self, show);
     showLayerControls(self, show);
     showVisibilityTab(self, show);
-
-    updateEditorKeybindIndicators();
 
     if (toggleBtn) {
         toggleBtn->setVisible(show || !g_showUI);

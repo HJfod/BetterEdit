@@ -144,12 +144,6 @@ void BESettingsLayer::setup() {
         true
     );
     this->addToggle(
-        "Don't Color Borders",
-        "BetterEdit makes portals that are <cy>checked</c> have the line color match "
-        "the portal color",
-        BE_SETTING_FUNC_B(DontColorGamemodeBorders)
-    );
-    this->addToggle(
         "Disable Double Click",
         "Double-clicking an object opens the <cy>Edit Object</c> menu",
         BE_SETTING_FUNC_B(DisableDoubleClick)
@@ -195,25 +189,7 @@ void BESettingsLayer::setup() {
         BE_SETTING_FUNC_B(EnableAutoSave),
         true
     );
-    this->addToggle(
-        "Soft Save",
-        "<cy>Saves objects to a file immediately when they're placed</c>\n "
-        "<cg>Use the frequency to modify how many blocks have to be placed until data is saved</c>\n "
-        "<cp>Can cause lag, but if the game crashes, you can recover the level</c>\n "
-        "<cl>Not the same as saving a level; to commit a level to your local data, use auto-saving or "
-        "manually save!</c>\n "
-        "<cr>Extremely experimental!</c>",
-        BE_SETTING_FUNC_B(EnableSoftAutoSave),
-        true
-    );
-    // this->addToggle(
-    //     "Fast Save",
-    //     "Enables <cl>asynchronous</c> saving\n\n <cr>Ridiculously experimental!</c>",
-    //     BE_SETTING_FUNC_B(EnableAsyncSave),
-    //     true
-    // );
     this->addInput("Save Every (min):", BE_SETTING_FUNC(AutoSaveTime), "0123456789");
-    this->addInput("Soft Save Freq.:", BE_SETTING_FUNC(SoftSaveFrequency), "0123456789");
 
     this->addSlider(
         "Music",
@@ -228,7 +204,6 @@ void BESettingsLayer::setup() {
 
     this->addInput("Grid Size:", BE_SETTING_FUNC(GridSize), "0123456789.");
     this->addInput("Scale Snap:", BE_SETTING_FUNC(ScaleSnap), "0123456789.");
-    this->addInput("Objects Before Start Line:", BE_SETTING_FUNC(ObjectsPreStartLine), "0123456789");
     this->addInput("Percentage Accuracy:", BE_SETTING_FUNC(PercentageAccuracy), "0123456789");
     this->incrementPageCount(true);
 

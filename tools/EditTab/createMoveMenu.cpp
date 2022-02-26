@@ -1,7 +1,6 @@
 #include "moveForCommand.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "CustomEditMenu.hpp"
-#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 void addMoveButton(
     EditorUI* self,
@@ -26,9 +25,6 @@ void addMoveButton(
         ->m_pSubSprite->setScale(scale);
 
     self->m_pEditButtonBar->addButton(btn, false);
-
-    if (keybind)
-        addKeybindIndicator(self, btn, keybind);
 }
 
 GDMAKE_HOOK(0x8c0d0, "_ZN8EditorUI14createMoveMenuEv")

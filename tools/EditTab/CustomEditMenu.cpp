@@ -1,5 +1,4 @@
 #include "CustomEditMenu.hpp"
-#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 #include "MoveInfoPopup.hpp"
 
 #define ADD_MOVE_GROUP(_size_, _spr_, _text_, _scale_, _bind_)  \
@@ -71,9 +70,6 @@ CCMenuItemSpriteExtra* CustomEditMenu::createButton(
 
     btn->getNormalImage()->setScale(.583f);
 
-    if (keybind)
-        addKeybindIndicator(this->m_pUI, btn, keybind);
-    
     return btn;
 }
 

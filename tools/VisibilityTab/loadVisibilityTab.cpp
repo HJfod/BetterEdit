@@ -2,19 +2,13 @@
 #include "../../hooks/EditorPauseLayer.hpp"
 #include "../RotateSaws/rotateSaws.hpp"
 #include "VisibilityToggle.hpp"
-#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 // for patching stuff
 static constexpr const float f_96 = 96.0f;
 static constexpr const float f_0  = 0.0f;
 
-bool g_bHideLDM = false;
 bool g_bShowPosLine = true;
-bool g_bShowPortalLines = true;
 bool g_bDashLines = true;
-
-void setHideLDMObjects() { g_bHideLDM = !g_bHideLDM; }
-void setHideLDMObjects(bool b) { g_bHideLDM = b; }
 
 class CCVoidPointer : public CCObject {
     public:
@@ -115,9 +109,7 @@ void makeVisibilityPatches() {
 }
 
 void loadVisibilityTab(EditorUI* self) {
-    BetterEdit::saveGlobalBool("hide-ldm", &g_bHideLDM);
     BetterEdit::saveGlobalBool("pos-line", &g_bShowPosLine);
-    BetterEdit::saveGlobalBool("portal-borders", &g_bShowPortalLines);
     BetterEdit::saveGlobalBool("dash-lines", &g_bDashLines);
 
     if (BetterEdit::getDisableVisibilityTab())
@@ -156,7 +148,6 @@ void loadVisibilityTab(EditorUI* self) {
 
     vTabBtn->setTag(4);
     vTabBtn->setPosition(scr.x + item_sep, scr.y);
-    addKeybindIndicator(self, vTabBtn, "betteredit.view_mode");
 
     self->m_pBuildModeBtn->getParent()->addChild(vTabBtn);
 
@@ -179,14 +170,6 @@ void loadVisibilityTab(EditorUI* self) {
                 ->onRotateSaws(p);
         }
     ));
-    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "betteredit.rotate_saws");
-
-    btns->addObject(VisibilityToggle::create(
-        "BE_v_ldm.png",
-        []() -> bool { return g_bHideLDM; },
-        [&](bool b, auto) -> void { g_bHideLDM = b; }
-    ));
-    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "betteredit.toggle_ldm");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_pulse.png",
@@ -205,7 +188,6 @@ void loadVisibilityTab(EditorUI* self) {
             self->m_pEditorLayer->updateEditorMode();
         }
     ));
-    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "betteredit.preview_mode");
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_bpm_line.png",
@@ -280,13 +262,6 @@ void loadVisibilityTab(EditorUI* self) {
             self->m_pEditorLayer->updateOptions();
         }
     ));
-    addKeybindIndicator(self, as<CCNode*>(btns->lastObject()), "betteredit.toggle_grid");
-
-    btns->addObject(VisibilityToggle::create(
-        "BE_v_portal_borders.png",
-        [self]() -> bool { return g_bShowPortalLines; },
-        [self](bool b, auto) -> void { g_bShowPortalLines = b; }
-    ));
 
     btns->addObject(VisibilityToggle::create(
         "BE_v_highlight.png",
@@ -330,20 +305,12 @@ void updateVisibilityTab(EditorUI* self) {
     }
 }
 
-bool shouldHideLDMObject(GameObject* obj) {
-    return g_bHideLDM && obj->m_bHighDetail;
-}
-
 void showVisibilityTab(EditorUI* self, bool show) {
     CATCH_NULL(as<EditButtonBar*>(self->getChildByTag(VIEWBUTTONBAR_TAG)))
         ->setVisible(show && self->m_nSelectedMode == 4);
     
     CATCH_NULL(self->m_pBuildModeBtn->getParent()->getChildByTag(4))
         ->setVisible(show);
-}
-
-bool shouldHidePortalLine() {
-    return !g_bShowPortalLines;
 }
 
 bool shouldShowDashLines() {
@@ -381,7 +348,5 @@ void __fastcall EditorUI_toggleMode(EditorUI* self, edx_t edx, CCObject* pSender
         self->m_pEditButtonBar->setVisible(tag == 3);
         self->updateGridNodeSize();
         self->getChildByTag(VIEWBUTTONBAR_TAG)->setVisible(tag == 4);
-
-        updateEditorKeybindIndicators();
     }
 }

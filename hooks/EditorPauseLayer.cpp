@@ -6,10 +6,8 @@
 #include "../tools/IDRemap/remapHook.hpp"
 #include "../tools/PasteString/loadPasteButton.hpp"
 #include "../tools/RotateSaws/rotateSaws.hpp"
-#include "../tools/EyeDropper/eyeDropper.hpp"
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
-#include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 using namespace gdmake;
 
@@ -17,7 +15,6 @@ bool g_bRotateSaws = false;
 bool g_bShowKeybinds = false;
 
 bool shouldRotateSaw() { return g_bRotateSaws; }
-bool shouldShowKeybindIndicator() { return g_bShowKeybinds; }
 void enableRotations(bool b) { g_bRotateSaws = b; }
 void setupRotateSaws() { BetterEdit::saveGlobalBool("rotate-saws", &g_bRotateSaws); }
 
@@ -44,8 +41,6 @@ void EditorPauseLayer_CB::onBESettings(cocos2d::CCObject* pSender) {
 
 void EditorPauseLayer_CB::onShowKeybinds(CCObject* pSender) {
     g_bShowKeybinds = !as<CCMenuItemToggler*>(pSender)->isToggled();
-
-    showEditorKeybindIndicators(g_bShowKeybinds);
 }
 
 void EditorPauseLayer_CB::onRotateSaws(CCObject* pSender) {
@@ -117,8 +112,6 @@ void __fastcall EditorPauseLayer_onResume(EditorPauseLayer* self, edx_t edx, CCO
         getAutoSaveTimer(ui)->cancel();
         
     getAutoSaveTimer(ui)->resume();
-
-    updateEditorKeybindIndicators();
 
     updatePercentLabelPosition(ui);
     // showPositionLabel(LevelEditorLayer::get()->getEditorUI(), true);
@@ -219,16 +212,6 @@ bool __fastcall EditorPauseLayer_init(
         str += " | " + std::to_string(c) + " LDM (" +
             BetterEdit::formatToString(p) + "%)";
         objCountLabel->setString(str.c_str());
-    }
-
-    if (isPickingEyeDropperColor()) {
-        FLAlertLayer::create(
-            nullptr,
-            "Warning",
-            "OK", nullptr,
-            "You can not leave the <co>Editor</c> with the "
-            "<cl>Color Picker</c> enabled - <cr>this will cause a guaranteed crash!</c>"
-        )->show();
     }
 
     getAutoSaveTimer(LevelEditorLayer::get()->getEditorUI())->pause();

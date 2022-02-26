@@ -13,21 +13,6 @@ bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameL
 
     BetterEdit::setEditorInitialized(true);
 
-    if (SoftSaveManager::hasLoad(level->m_sLevelName)) {
-        auto layer = FLAlertLayer::create(
-            SoftSaveAlertDelegate::create(),
-            "Unsaved Work Detected",
-            "Cancel", "Load",
-            340.0f,
-            "It appears the game unexpectedly closed and you have "
-            "unsaved work. <cy>Would you like to recover it?</c>"
-        );
-
-        layer->m_pTargetLayer = self->m_pEditorUI;
-        
-        layer->show();
-    }
-    
     updatePercentLabelPosition(self->m_pEditorUI);
     getAutoSaveTimer(self->m_pEditorUI)->resetTimer();
     updateContextMenu(self);
@@ -58,9 +43,6 @@ void __fastcall LevelEditorLayer_addSpecial(
 
     registerDashOrb(obj);
     
-    if (BetterEdit::isEditorInitialized())
-        SoftSaveManager::saveObject(obj);
-
     if (shouldRotateSaw() && objectIsSaw(obj))
         beginRotateSaw(obj);
 
@@ -81,8 +63,7 @@ void __fastcall LevelEditorLayer_removeObject(
     unregisterDashOrb(obj);
 
     handleObjectAddForSlider(self, obj);
-    SoftSaveManager::removeObject(obj);
-
+    
     if (shouldRotateSaw() && objectIsSaw(obj))
         stopRotateSaw(obj);
 }

@@ -4,62 +4,7 @@ void KeybindSettingsLayer::setup() {
     auto winSize = CCDirector::sharedDirector()->getWinSize();
 
     this->m_bNoElasticity = true;
-
-    this->m_pLayer->addChild(
-        CCNodeConstructor<CCLabelBMFont*>()
-            .fromText("Interval (ms)", "bigFont.fnt")
-            .scale(.4f)
-            .moveR(winSize, -60.0f, 60.0f)
-            .done()
-    );
-
-    this->m_pLayer->addChild(
-        CCNodeConstructor<InputNode*>()
-            .fromNode(InputNode::create(100.0f, "ms"))
-            .exec([this](auto i) -> void {
-                i->setString(
-                    BetterEdit::getKeybindRepeatIntervalAsString().c_str()
-                );
-                i->getInputNode()->setTag(0);
-                i->getInputNode()->setDelegate(this);
-            })
-            .moveR(winSize, -60.0f, 35.0f)
-            .done()
-    );
-
-    this->m_pLayer->addChild(
-        CCNodeConstructor<CCLabelBMFont*>()
-            .fromText("Start (ms)", "bigFont.fnt")
-            .scale(.4f)
-            .moveR(winSize, 60.0f, 60.0f)
-            .done()
-    );
-
-    this->m_pLayer->addChild(
-        CCNodeConstructor<InputNode*>()
-            .fromNode(InputNode::create(100.0f, "ms"))
-            .exec([this](auto i) -> void {
-                i->setString(
-                    BetterEdit::getKeybindRepeatStartAsString().c_str()
-                );
-                i->getInputNode()->setTag(1);
-                i->getInputNode()->setDelegate(this);
-            })
-            .moveR(winSize, 60.0f, 35.0f)
-            .done()
-    );
-
-    GameToolbox::createToggleButton(
-        menu_selector(KeybindSettingsLayer::onEnable),
-        BetterEdit::getKeybindRepeatEnabled(),
-        this->m_pButtonMenu, this,
-        this->m_pLayer, .7f, .4f,
-        120.0f, "", false, 0,
-        nullptr, "Enable Repeating",
-        { winSize.width / 2 - 65.0f, winSize.height / 2 + 0.0f },
-        { 5.0f, .0f }
-    );
-
+    
     this->m_pLayer->addChild(
         CCNodeConstructor<CCLabelBMFont*>()
             .fromText("Double-Click Speed (ms)", "bigFont.fnt")
@@ -96,24 +41,6 @@ void KeybindSettingsLayer::setup() {
             ))
             .move(0.0f, - this->m_pLrSize.height / 2 + 25.0f)
             .done()
-    );
-    
-    MAKE_INFOBUTTON(
-        "Keybind Repeating",
-        
-        "<cp>Repeating</c> means that when you hold down a shortcut, "
-        "it will start repeating after a certain amount of time. "
-        "For example, you can hold to move an object continuously instead "
-        "of spamming the shortcut to do it.\n\n "
-        "<cg>Interval:</c> How fast the shortcut should be repeated\n "
-        "<cy>Start:</c> How long should the shortcut be held down until "
-        "repeating starts\n\n "
-        "This popup will edit the settings for all keybinds, <cr>except "
-        "ones that have different settings from default.</c>",
-        .65f,
-        this->m_pLrSize.width / 2 - 25.0f,
-        - this->m_pLrSize.height / 2 + 25.0f,
-        this->m_pButtonMenu
     );
 }
 

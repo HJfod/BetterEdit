@@ -1,4 +1,6 @@
 #include "autoSave.hpp"
+#include "../RotateSaws/rotateSaws.hpp"
+#include "Backup/LevelBackupManager.hpp"
 
 static constexpr const int AUTOSAVETIMER_TAG = 4234509;
 SEL_SCHEDULE g_timerFunc;
@@ -156,3 +158,23 @@ AutoSaveTimer* getAutoSaveTimer(EditorUI* ui) {
     
     return timer;
 }
+
+GDMAKE_HOOK(0x75010, "_ZN16EditorPauseLayer9saveLevelEv")
+void __fastcall EditorPauseLayer_saveLevel(EditorPauseLayer* self) {
+    if (shouldRotateSaw())
+        stopRotations(self->m_pEditorLayer);
+    
+    if (self->m_pEditorLayer->m_ePlaybackMode != kPlaybackModeNot) {
+        self->m_pEditorLayer->m_pEditorUI->onStopPlaytest(nullptr);
+    }
+
+    GDMAKE_ORIG_V(self);
+    
+    if (shouldRotateSaw())
+        beginRotations(self->m_pEditorLayer);
+
+    LevelBackupManager::get()->handleAutoBackupForLevel(
+        self->m_pEditorLayer->m_pLevelSettings->m_pLevel
+    );
+}
+

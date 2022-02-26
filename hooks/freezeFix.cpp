@@ -1,6 +1,5 @@
 #include <GDMake.h>
 #include "../tools/SliderImprovement/passTouch.hpp"
-#include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 using namespace gdmake;
 using namespace gd;

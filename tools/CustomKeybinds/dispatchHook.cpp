@@ -1,7 +1,6 @@
 #pragma once
 
 #include "KeybindManager.hpp"
-#include "loadEditorKeybindIndicators.hpp"
 #include "SuperKeyboardManager.hpp"
 #include "SuperMouseManager.hpp"
 #include "../settings/BESettingsLayer.hpp"
@@ -45,25 +44,4 @@ void __fastcall AppDelegate_applicationWillEnterForeground(CCApplication* self) 
         );
         showedFoolAchievement();
     }
-}
-
-GDMAKE_HOOK(0x6ebc0, "_ZN13EditButtonBar8goToPageEi")
-void __fastcall EditButtonBar_goToPage(EditButtonBar* self, edx_t edx, int page) {
-    GDMAKE_ORIG_V(self, edx, page);
-
-    updateEditorKeybindIndicators();
-}
-
-GDMAKE_HOOK(0x6ec20, "_ZN13EditButtonBar7onRightEPN7cocos2d8CCObjectE")
-void __fastcall EditButtonBar_onRight(EditButtonBar* self, edx_t edx, CCObject* obj) {
-    GDMAKE_ORIG_V(self, edx, obj);
-
-    updateEditorKeybindIndicators();
-}
-
-GDMAKE_HOOK(0x6ec80, "_ZN13EditButtonBar6onLeftEPN7cocos2d8CCObjectE")
-void __fastcall EditButtonBar_onLeft(EditButtonBar* self, edx_t edx, CCObject* obj) {
-    GDMAKE_ORIG_V(self, edx, obj);
-
-    updateEditorKeybindIndicators();
 }

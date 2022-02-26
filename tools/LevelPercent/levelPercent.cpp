@@ -232,8 +232,6 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
     
     GDMAKE_ORIG_V(self, edx, obj, pos);
 
-    SoftSaveManager::save();
-
     if (g_bDontUpdateSlider || !self) return;
 
     updateLastObjectX(self->m_pEditorLayer, obj);

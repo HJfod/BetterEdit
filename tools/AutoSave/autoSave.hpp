@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../BetterEdit.hpp"
-#include "softSave.hpp"
 
 class AutoSaveTimer : public CCNode {
     protected:

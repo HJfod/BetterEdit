@@ -3,7 +3,6 @@
 #include <InputNode.hpp>
 #include <string>
 #include <sstream>
-#include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 
 using namespace gd;
 using namespace gdmake;
@@ -145,9 +144,6 @@ void loadGridButtons(EditorUI* self) {
                 )
             )
             .udata(1)
-            .exec([self](auto t) -> void {
-                addKeybindIndicator(self, t, "betteredit.increase_grid_size");
-            })
             .tag(ZOOMIN_TAG)
             .move(getGridButtonPosition(self, 1))
             .done()
@@ -179,9 +175,6 @@ void loadGridButtons(EditorUI* self) {
                     (SEL_MenuHandler)&EditorUI_CB::zoomGrid
                 )
             )
-            .exec([self](auto t) -> void {
-                addKeybindIndicator(self, t, "betteredit.decrease_grid_size");
-            })
             .udata(0)
             .tag(ZOOMOUT_TAG)
             .move(getGridButtonPosition(self, -1))

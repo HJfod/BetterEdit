@@ -1,5 +1,5 @@
 #include "Scrollbar.hpp"
-#include "../EyeDropper/eyeDropper.hpp"
+#include "../EyeDropper/updateHook.hpp"
 
 bool Scrollbar::ccTouchBegan(CCTouch* touch, CCEvent*) {
     m_pTouch = touch;
