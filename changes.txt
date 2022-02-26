@@ -1,3 +1,6 @@
+Additions:
+ - Backup everything button that exports all of your levels as .gmd2 files
+
 Bugfixes:
  - Opening a level with a controller plugged in no longer crashes
  - Fixed crashing when holding keys with repeating enabled
@@ -8,3 +11,5 @@ Changes:
  - Editor Layer settings (name, opacity, locking) are no longer saved due to it being likely the root cause of the bug where the game would not open. I apologize for the inconvenience
  - Removed favourites
  - Removed a bunch of unused/unfinished features & code, including but not at all limited to: Templates, Undo History, Paste Repeating, Integrated Console, etc.. Sorry if you liked these features, they'll come back in better(edit) quality for BE 5. Or not. Some of them were actually bad ideas.
+ - Please note that regardless of if you do / don't have a Z order bypass enabled, the Z order on every object is limited to a value between -999 and 9999. The reason for this is because of a BE feature that allows mixed Z orders to be edited simultaniously, and that GD considers -1000 to be Mixed.
+ - Saving order has been changed so that GD data is saved first and BE data after, so if BE data saving fails, your GD progress should still be kept.

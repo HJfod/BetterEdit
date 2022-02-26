@@ -101,11 +101,8 @@ void figureOutMixed(SetGroupIDLayer* self) {
 }
 
 void clampZOrder(int & val) {
-    if (val < -100)
-        val = -100;
-        
-    if (val > 100)
-        val = 100;
+    if (val < -999) val = -999;
+    if (val > 9999) val = 9999;
 }
 
 void clampELayer(int & val) {
