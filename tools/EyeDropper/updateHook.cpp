@@ -3,7 +3,6 @@
 #include "../CustomKeybinds/KeybindManager.hpp"
 #include "../CustomKeybinds/loadEditorKeybindIndicators.hpp"
 #include "../CustomKeybinds/SuperMouseManager.hpp"
-#include "../Tutorial/tutorial.hpp"
 #include "updateHook.hpp"
 #include <mutex>
 
@@ -24,9 +23,6 @@ GDMAKE_HOOK("libcocos2d.dll::?onGLFWMouseCallBack@CCEGLView@cocos2d@@IAEXPAUGLFW
 void __fastcall CCEGLView_onGLFWMouseCallBack(CCEGLView* self, edx_t edx, GLFWwindow* wnd, int btn, int pressed, int z) {
     if (handleEyeDropperClick(btn, pressed))
         return;
-
-    if (showingTutorial())
-        return showNextTutorialPage();
 
     g_bPressedButtons[btn] = pressed;
 

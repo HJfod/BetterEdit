@@ -15,8 +15,8 @@ let char_count = 0;
 let largest_count = 0;
 let larget_line_count = 0;
 let largest_file = "";
-let larget_header_count = 0;
-let larget_header_line_count = 0;
+let largest_header_count = 0;
+let largest_header_line_count = 0;
 let largest_header = "";
 let class_count = 0;
 const letter_count = {};
@@ -56,9 +56,9 @@ const rd = (dpath) => {
                         largest_file = file;
                     }
 
-                    if (is_header && larget_header_line_count < data.split('\n').length) {
-                        larget_header_count = data.split('').length;
-                        larget_header_line_count = data.split('\n').length;
+                    if (is_header && largest_header_line_count < data.split('\n').length) {
+                        largest_header_count = data.split('').length;
+                        largest_header_line_count = data.split('\n').length;
                         largest_header = file;
                     }
 
@@ -122,7 +122,7 @@ console.log(`${p}${line_count}${n} lines of code (${g}${Math.round(comment_count
 `.replace(/\n/g, ''));
 console.log(`Largest file is ${b}${largest_file}${n} (${r}${largest_count}${n} chars, ${g}${larget_line_count}${n} lines)
 `.replace(/\n/g, ''));
-console.log(`Largest header is ${b}${largest_header}${n} (${r}${largest_header_count}${n} chars, ${g}${larget_header_line_count}${n} lines)
+console.log(`Largest header is ${b}${largest_header}${n} (${r}${largest_header_count}${n} chars, ${g}${largest_header_line_count}${n} lines)
 `.replace(/\n/g, ''));
 console.log(`Average line count per file is ${c}${Math.round(line_count / file_count)}${n}
 `.replace(/\n/g, ''));

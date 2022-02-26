@@ -2,7 +2,6 @@
 
 #include <GDMake.h>
 #include <GUI/CCControlExtension/CCScale9Sprite.h>
-#include "tools/Templates/TemplateManager.hpp"
 #include "utils.hpp"
 #include "utils/InfoButton.hpp"
 #include <set>
@@ -63,7 +62,6 @@ struct DebugMsg {
     __macro__(DisableZoomText, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)               \
     __macro__(DisablePercentage, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(DisableExtraObjectInfo, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
-    __macro__(DisableFavoritesTab, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
     __macro__(DisableGlobalClipboard, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
     __macro__(ShowAllLayers, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                 \
     __macro__(EnableControlA, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                \
@@ -87,15 +85,11 @@ struct DebugMsg {
     __macro__(KeybindRepeatStart, int, 700, Integer, std::stoi, BE_MAKE_SFUNC_RANGE, 1, 10000)  \
     __macro__(ShowKeybindOnHover, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)             \
     __macro__(MoveCameraWhenMovingObjects, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)    \
-    __macro__(ShownTutorial, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                 \
     __macro__(CopyObjectsToClipboard, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)        \
     __macro__(EnableCustomEditMenu, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
     __macro__(NoEasterEggs, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                  \
     __macro__(EnableExperimentalFeatures, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)    \
     __macro__(FixScaleSliderPosition, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)         \
-    __macro__(UseHorrifyingEditorPauseMenu, bool, false, Bool, std::stoi, BE_MAKE_SFUNC, _, _)  \
-    __macro__(UseBetterUndoHistory, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)           \
-    __macro__(SaveLevelsAsGmd, bool, true, Bool, std::stoi, BE_MAKE_SFUNC, _, _)                \
 
 #define STEP_SUBDICT_NC(dict, key, ...)         \
     if (dict->stepIntoSubDictWithKey(key)) {    \
@@ -203,8 +197,6 @@ class BetterEdit : public GManager, public FLAlertLayerProtocol {
             std::string data;
         };
     
-        using FavoritesList = std::vector<int>;
-
         enum ScheduleTime {
             kScheduleTimeMenuLayer,
         };
@@ -216,12 +208,10 @@ class BetterEdit : public GManager, public FLAlertLayerProtocol {
             bool skip_loaded = false;
         };
 
-        TemplateManager* m_pTemplateManager;
         std::vector<Preset> m_vPresets;
         std::map<ScheduleTime, std::vector<std::string>> m_mScheduledErrors;
         std::map<std::string, save_bool> m_mSaveBools;
         std::vector<std::string> m_vTextureSheets;
-        FavoritesList m_vFavorites;
         bool m_bEditorInitialized;
         bool m_bDisableEditorEditing;
 
@@ -344,35 +334,6 @@ class BetterEdit : public GManager, public FLAlertLayerProtocol {
                 else ix++;
             return this;
         }
-
-        inline FavoritesList & getFavorites() { return m_vFavorites; }
-        inline bool addFavorite(int id) {
-            if (std::find(m_vFavorites.begin(), m_vFavorites.end(), id) != m_vFavorites.end())
-                return false;
-            m_vFavorites.push_back(id);
-            return true;
-        }
-        inline bool removeFavorite(int id) {
-            for (size_t ix = 0; ix < m_vFavorites.size(); ix++)
-                if (m_vFavorites[ix] == id) {
-                    m_vFavorites.erase(m_vFavorites.begin() + ix);
-                    return true;
-                }
-            
-            return false;
-        }
-        inline void moveFavorite(int id, int pos) {
-            auto idPosIt = std::find(m_vFavorites.begin(), m_vFavorites.end(), id);
-
-            if (idPosIt == m_vFavorites.end()) return;
-
-            size_t idPos = std::distance(m_vFavorites.begin(), idPosIt);
-            
-            if (idPos + pos < 0) return;
-            if (idPos + pos > m_vFavorites.size() - 1) return;
-
-            vectorMove(m_vFavorites, idPos, idPos + pos);
-        } 
 
         static bool useExperimentalFeatures(std::function<void()> = nullptr);
 };

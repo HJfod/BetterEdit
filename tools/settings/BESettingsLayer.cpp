@@ -1,5 +1,4 @@
 #include "BESettingsLayer.hpp"
-#include "../Debug/IntegratedConsole.hpp"
 
 using namespace gdmake;
 using namespace gdmake::extra;
@@ -104,11 +103,6 @@ void BESettingsLayer::setup() {
     this->addToggle("Disable Percentage", nullptr, BE_SETTING_FUNC_B(DisablePercentage));
     this->addToggle("Disable Extra Object Info", nullptr, BE_SETTING_FUNC_B(DisableExtraObjectInfo));
     this->addToggle(
-        "Disable Favorites Tab",
-        "Requires a restart to apply",
-        BE_SETTING_FUNC_B(DisableFavoritesTab)
-    );
-    this->addToggle(
         "Bypass Object Limit",
         "Disables the 80k Object Limit and 100 Custom Object Limit",
         BE_SETTING_FUNC_B(BypassObjectLimit)
@@ -190,19 +184,6 @@ void BESettingsLayer::setup() {
         "Become Unfunny",
         "Disables <cg>Easter Eggs</c>",
         BE_SETTING_FUNC_B(NoEasterEggs)
-    );
-    this->addToggle(
-        "Oh God Do Not Use This Option",
-        nullptr,
-        BE_SETTING_FUNC_B(UseHorrifyingEditorPauseMenu)
-    );
-    this->addToggle(
-        "Save Levels as Files",
-        "Saves levels as individual <cg>.gmd2</c> files instead of "
-        "<cp>CCLocalLevels.dat</c>. Should make make data loss a "
-        "thing of the past, but might also make saving/loading a bit "
-        "slower.",
-        BE_SETTING_FUNC_B(SaveLevelsAsGmd)
     );
 
     this->incrementPageCount(true);
@@ -312,9 +293,6 @@ void BESettingsLayer::setup() {
         BE_SETTING_FUNC_B(EnableExperimentalFeatures)
     );
     this->addTitle("For Feedback / Support, Contact HJfod#1795\nor Join the Discord", "bigFont.fnt");
-    this->addButton(
-        "Debug Console", menu_selector(BESettingsLayer::onDebug), true
-    );
     // this->addToggle(
     //     "Check for Updates", "Checks for available updates at startup",
     //     BE_SETTING_FUNC_B(AutoUpdateEnabled)
@@ -632,10 +610,6 @@ void BESettingsLayer::onFool(CCObject* pSender) {
         0, 0 ,
         SW_SHOW
     );
-}
-
-void BESettingsLayer::onDebug(CCObject*) {
-    IntegratedConsole::create()->show();
 }
 
 void BESettingsLayer::onClose(CCObject* pSender) {

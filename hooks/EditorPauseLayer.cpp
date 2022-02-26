@@ -1,7 +1,6 @@
 #include <GDMake.h>
 #include "EditorPauseLayer.hpp"
 #include "../tools/settings/BESettingsLayer.hpp"
-#include "../tools/LiveCollab/pauseMenuHook.hpp"
 #include "../tools/AutoColorTriggers/autoCT.hpp"
 #include "../tools/LevelPercent/levelPercent.hpp"
 #include "../tools/IDRemap/remapHook.hpp"
@@ -11,7 +10,6 @@
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include "../tools/CustomKeybinds/loadEditorKeybindIndicators.hpp"
-#include "../tools/CustomUI/customUI.hpp"
 
 using namespace gdmake;
 
@@ -149,59 +147,10 @@ bool __fastcall EditorPauseLayer_init(
     if (!GDMAKE_ORIG(self, edx, el))
         return false;
 
-    UIManager::get()->stopCustomizing();
-
     auto menu = as<CCMenu*>(self->m_pButton0->getParent());
     auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
     auto mainMenu = as<CCMenu*>(self->getChildren()->objectAtIndex(0));
-
-    if (BetterEdit::getUseHorrifyingEditorPauseMenu()) {
-        mainMenu->removeAllChildren();
-
-        auto resumeBtn = createNewPlayBtn(
-            self,
-            "BE_epl_resume.png",
-            menu_selector(EditorPauseLayer::onResume),
-            1.3f
-        );
-        resumeBtn->setPosition(-75.f, 60.f);
-        mainMenu->addChild(resumeBtn);
-
-        auto playBtn = createNewPlayBtn(
-            self,
-            "BE_epl_play.png",
-            menu_selector(EditorPauseLayer::onSaveAndPlay),
-            .8f
-        );
-        playBtn->setPosition(0.f, 60.f);
-        mainMenu->addChild(playBtn);
-
-        auto saveExitBtn = createNewPlayBtn(
-            self,
-            "BE_epl_save_and_exit.png",
-            menu_selector(EditorPauseLayer::onSaveAndExit)
-        );
-        saveExitBtn->setPosition(-37.5f, -15.f);
-        mainMenu->addChild(saveExitBtn);
-
-        auto saveBtn = createNewPlayBtn(
-            self,
-            "BE_epl_save_icon_except_it_sucks_ass.png",
-            menu_selector(EditorPauseLayer::onSave),
-            .9f
-        );
-        saveBtn->setPosition(75.f, 60.f);
-        mainMenu->addChild(saveBtn);
-
-        auto exitBtn = createNewPlayBtn(
-            self,
-            "BE_epl_exit.png",
-            menu_selector(EditorPauseLayer::onExitNoSave)
-        );
-        exitBtn->setPosition(37.5f, -15.f);
-        mainMenu->addChild(exitBtn);
-    }
 
     if (BetterEdit::isEditorViewOnlyMode()) {
         CCARRAY_FOREACH_B_BASE(mainMenu->getChildren(), btn, CCMenuItemSpriteExtra*, ix) {
@@ -230,11 +179,9 @@ bool __fastcall EditorPauseLayer_init(
 
     gdSettingsBtn->setPositionX(winSize.width / 2 - 30);
 
-    loadLiveButton(self);
     loadColorTriggerButton(self);
     loadRemapHook(self);
     loadPasteButton(self);
-    loadUICustomizeBtn(self);
 
     GameToolbox::createToggleButton(
         (SEL_MenuHandler)&EditorPauseLayer_CB::onRotateSaws,

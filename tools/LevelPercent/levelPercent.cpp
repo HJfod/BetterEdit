@@ -4,7 +4,6 @@
 #include "../AutoSave/autoSave.hpp"
 #include "../CustomKeybinds/BEKeybinds.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
-#include "../History/UndoHistoryManager.hpp"
 #include "../ContextMenu/loadContextMenu.hpp"
 #include "../../utils/moveGameLayer.hpp"
 
@@ -232,9 +231,6 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
         return;
     
     GDMAKE_ORIG_V(self, edx, obj, pos);
-
-    if (BetterEdit::isEditorInitialized())
-        UndoHistoryManager::get()->addAction(new MoveObjectAction(obj, pos));
 
     SoftSaveManager::save();
 

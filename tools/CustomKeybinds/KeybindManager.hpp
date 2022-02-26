@@ -247,6 +247,7 @@ class KeybindManager : public GManager {
         > m_mLoadedBinds;
         std::unordered_map<enumKeyCodes, float> m_mHeldKeys;
         std::unordered_map<MouseButton, float> m_mHeldMouse;
+        KeybindType m_heldType;
         int m_nDoubleClickInterval = 250;
         bool m_bPropagateKeyPresses = false;
         static constexpr int s_nVersion = 2;

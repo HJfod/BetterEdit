@@ -3,9 +3,6 @@
 #include "../tools/RotateSaws/rotateSaws.hpp"
 #include "../tools/AutoSave/autoSave.hpp"
 #include "../tools/other/teleportScaleFix.hpp"
-#include "../tools/SickAnimation/sickAnimation.hpp"
-#include "../tools/History/UndoHistoryManager.hpp"
-#include "../tools/Tutorial/tutorial.hpp"
 #include "../tools/ContextMenu/loadContextMenu.hpp"
 #include "../tools/other/dashOrbLine.hpp"
 
@@ -32,12 +29,8 @@ bool __fastcall LevelEditorLayer_init(LevelEditorLayer* self, edx_t edx, GJGameL
     }
     
     updatePercentLabelPosition(self->m_pEditorUI);
-    doTheSickAnimation(self);
     getAutoSaveTimer(self->m_pEditorUI)->resetTimer();
     updateContextMenu(self);
-
-    // if (!BetterEdit::getShownTutorial())
-    //     askToShowTutorial();
 
     return true;
 }
@@ -46,7 +39,6 @@ GDMAKE_HOOK(0x15e8d0, "_ZN16LevelEditorLayerD2Ev")
 void __fastcall LevelEditorLayer_destructorHook(LevelEditorLayer* self) {
     BetterEdit::setEditorInitialized(false);
     BetterEdit::setEditorViewOnlyMode(false);
-    UndoHistoryManager::get()->clearHistory();
     clearDashOrbLines();
 
     return GDMAKE_ORIG_V(self);
@@ -58,9 +50,6 @@ void __fastcall LevelEditorLayer_addSpecial(
     edx_t edx,
     GameObject* obj
 ) {
-    if (BetterEdit::isEditorInitialized())
-        UndoHistoryManager::get()->addAction(new AddObjectAction(obj));
-
     GDMAKE_ORIG_V(self, edx, obj);
 
     handleObjectAddForSlider(self, obj);
@@ -85,9 +74,6 @@ void __fastcall LevelEditorLayer_removeObject(
     GameObject* obj,
     bool idk
 ) {
-    if (BetterEdit::isEditorInitialized())
-        UndoHistoryManager::get()->addAction(new RemoveObjectAction(obj));
-
     GDMAKE_ORIG_V(self, edx, obj, idk);
 
     updateContextMenu();

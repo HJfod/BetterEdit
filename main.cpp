@@ -3,9 +3,6 @@
 // include GDMake & submodules
 #include <GDMake.h>
 #include "BetterEdit.hpp"
-#include "tools/Templates/templates.hpp"
-#include "tools/Favourites/favourite.hpp"
-#include "tools/LiveCollab/LiveManager.hpp"
 #include "tools/EditorLayerInput/LayerManager.hpp"
 #include "tools/EditorLayerInput/editorLayerInput.hpp"
 #include "tools/EnterToSearch/loadEnterSearch.hpp"
@@ -13,7 +10,6 @@
 #include "tools/AutoSave/autoSave.hpp"
 #include "tools/AutoSave/Backup/LevelBackupManager.hpp"
 #include "tools/other/teleportScaleFix.hpp"
-#include "tools/AutoUpdate/autoUpdate.hpp"
 #include "tools/PortalLineColors/portalLineColors.hpp"
 #include "tools/FLAlertLayerFix/FLAlertLayerFix.hpp"
 #include "tools/CustomKeybinds/KeybindManager.hpp"
@@ -21,13 +17,7 @@
 #include "tools/CustomKeybinds/SuperKeyboardManager.hpp"
 #include "tools/CustomKeybinds/SuperMouseManager.hpp"
 #include "tools/other/placeObjectsBefore.hpp"
-#include "tools/CustomUI/UIManager.hpp"
-#include "tools/History/UndoHistoryManager.hpp"
 #include "tools/other/dashOrbLine.hpp"
-#include "tools/Notifications/BEAchievementManager.hpp"
-#include "tools/Notifications/NotificationManager.hpp"
-#include "tools/gmd/tools/associateGmdFileType.hpp"
-#include "tools/gmd/logic/GmdSaveManager.hpp"
 
 #define INIT_MANAGER(name) \
     BetterEdit::log() << kDebugTypeInitializing << "Initializing " #name << log_end();   \
@@ -71,18 +61,12 @@ GDMAKE_MAIN_HM(hMod) {
     // this enables pulses in FMODAudioEngine in every layer, instead of just in PlayLayer
     patch(0x23b56, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 });
 
-    INIT_MANAGER(UIManager);
     INIT_MANAGER(BetterEdit);
-    INIT_MANAGER(LiveManager);
     INIT_MANAGER(SoftSaveManager);
     INIT_MANAGER(LevelBackupManager);
     INIT_MANAGER(KeybindManager);
     INIT_MANAGER(SuperKeyboardManager);
     INIT_MANAGER(SuperMouseManager);
-    INIT_MANAGER(UndoHistoryManager);
-    INIT_MANAGER(NotificationManager);
-    INIT_MANAGER(BEAchievementManager);
-    INIT_MANAGER(GmdSaveManager);
 
     BetterEdit::log() << kDebugTypeInitializing << "Creating midhooks" << log_end();
     if (!loadUpdateVisibilityHook())
@@ -92,8 +76,6 @@ GDMAKE_MAIN_HM(hMod) {
 
     BetterEdit::log() << kDebugTypeInitializing << "Loading tools" << log_end();
     loadBEKeybinds();
-    loadTemplates();
-    loadFavouriteTab();
     loadEnterSearch();
     loadTeleportScaleFix();
     loadFLAlertLayerFix();
@@ -104,14 +86,6 @@ GDMAKE_MAIN_HM(hMod) {
 
     BetterEdit::sharedState()->addTexture("BE_GameSheet01");
     BetterEdit::sharedState()->addTexture("BE_ContextSheet01");
-
-    BetterEdit::log() << kDebugTypeInitializing << "Creating File Association" << log_end();
-
-    if (!associateGmdFileTypes()) {
-        BetterEdit::log() << kDebugTypeMinorError << "Unable to Create File Associations!" << log_end();
-    }
-
-    // checkForUpdates();
 
     BetterEdit::log() << kDebugTypeInitializing << "Initializing GDMake hooks" << log_end();
 

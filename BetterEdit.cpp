@@ -2,8 +2,6 @@
 #include "tools/EditorLayerInput/LayerManager.hpp"
 #include "tools/AutoSave/Backup/LevelBackupManager.hpp"
 #include "tools/CustomKeybinds/KeybindManager.hpp"
-#include "tools/CustomUI/UIManager.hpp"
-#include "tools/Notifications/NotificationManager.hpp"
 
 using namespace gdmake;
 using namespace gdmake::extra;
@@ -112,7 +110,6 @@ BetterEdit* g_betterEdit;
 
 
 bool BetterEdit::init() {
-    this->m_pTemplateManager = TemplateManager::sharedState();
     this->m_sFileName = "BetterEdit.dat";
 
     if (!LayerManager::initGlobal())
@@ -138,15 +135,10 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
                 data->setBoolForKey(key.c_str(), *val.global);
     );
 
-    BetterEdit::log() << kDebugTypeSaving << "Saving Templates" << log_end();
-    STEP_SUBDICT(data, "templates",
-        m_pTemplateManager->encodeDataTo(data);
-    );
-
-    BetterEdit::log() << kDebugTypeSaving << "Saving Editor Layers" << log_end();
-    STEP_SUBDICT(data, "editor-layers",
-        LayerManager::get()->encodeDataTo(data);
-    );
+    // BetterEdit::log() << kDebugTypeSaving << "Saving Editor Layers" << log_end();
+    // STEP_SUBDICT(data, "editor-layers",
+    //     LayerManager::get()->encodeDataTo(data);
+    // );
 
     BetterEdit::log() << kDebugTypeSaving << "Saving Presets" << log_end();
     STEP_SUBDICT(data, "presets",
@@ -157,17 +149,6 @@ void BetterEdit::encodeDataTo(DS_Dictionary* data) {
                 data->setStringForKey("data", preset.data);
                 ix++;
             );
-    );
-
-    BetterEdit::log() << kDebugTypeSaving << "Saving Favorites" << log_end();
-    std::string favStr = "";
-    for (auto fav : m_vFavorites)
-        favStr += std::to_string(fav) + ",";
-    data->setStringForKey("favorites", favStr);
-
-    BetterEdit::log() << kDebugTypeSaving << "Saving UI Customization" << log_end();
-    STEP_SUBDICT(data, "ui",
-        UIManager::get()->encodeDataTo(data);
     );
 
     BetterEdit::log() << kDebugTypeSaving << "Saving Backups" << log_end();
@@ -189,15 +170,10 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
             m_mSaveBools[key] = { nullptr, data->getBoolForKey(key.c_str()) };
     );
 
-    BetterEdit::log() << kDebugTypeLoading << "Loading Templates" << log_end();
-    STEP_SUBDICT_NC(data, "templates",
-        m_pTemplateManager->dataLoaded(data);
-    );
-
-    BetterEdit::log() << kDebugTypeLoading << "Loading Editor Layers" << log_end();
-    STEP_SUBDICT_NC(data, "editor-layers",
-        LayerManager::get()->dataLoaded(data);
-    );
+    // BetterEdit::log() << kDebugTypeLoading << "Loading Editor Layers" << log_end();
+    // STEP_SUBDICT_NC(data, "editor-layers",
+    //     LayerManager::get()->dataLoaded(data);
+    // );
 
     BetterEdit::log() << kDebugTypeLoading << "Loading Presets" << log_end();
     STEP_SUBDICT_NC(data, "presets",
@@ -208,15 +184,6 @@ void BetterEdit::dataLoaded(DS_Dictionary* data) {
                     data->getStringForKey("data")
                 });
             );
-    );
-
-    BetterEdit::log() << kDebugTypeLoading << "Loading Favorites" << log_end();
-    for (auto fav : stringSplit(data->getStringForKey("favorites"), ","))
-        try { this->addFavorite(std::stoi(fav)); } catch (...) {}
-    
-    BetterEdit::log() << kDebugTypeLoading << "Loading UI Customization" << log_end();
-    STEP_SUBDICT_NC(data, "ui",
-        UIManager::get()->dataLoaded(data);
     );
 }
 
@@ -252,9 +219,6 @@ void BetterEdit::FLAlert_Clicked(FLAlertLayer* l, bool btn2) {
     if (l->getTag() == 2) {
         if (btn2) {
             BetterEdit::setEnableExperimentalFeatures(true);
-            NotificationManager::get()->schedule(
-                Notification::create(kNotificationTypeError, "Enabled Experimental Features")
-            );
             as<CCFuncPointer*>(l->getUserObject())->invoke();
         }
     }

@@ -1069,6 +1069,7 @@ std::vector<KeybindManager::Target> KeybindManager::figureOutTargets(Keybind con
 void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, bool keydown, bool onlyPlay) {
     if (!m_mKeybinds.count(bind))
         return;
+    m_heldType = kKBEditor;
     for (auto & target : figureOutTargets(bind)) {
         this->invokeEditor(target, ui, keydown, onlyPlay);
     }
@@ -1077,6 +1078,7 @@ void KeybindManager::executeEditorCallbacks(Keybind const& bind, EditorUI* ui, b
 void KeybindManager::executePlayCallbacks(Keybind const& bind, PlayLayer* pl, bool keydown) {
     if (!m_mKeybinds.count(bind))
         return;
+    m_heldType = kKBPlayLayer;
     for (auto & target : figureOutTargets(bind)) {
         this->invokePlay(target, pl, keydown);
     }
@@ -1118,7 +1120,7 @@ void KeybindManager::handleRepeats(float dt) {
         return;
     }
 
-    std::unordered_map<Keybind, float> held;
+    std::unordered_map<Keybind, float&> held;
     for (auto & [key, time] : m_mHeldKeys) {
         held.insert({ Keybind(key), time });
     }
@@ -1129,11 +1131,9 @@ void KeybindManager::handleRepeats(float dt) {
     for (auto & [k, time] : held) {
         time += dt * 1000.0f;
         for (auto const& [type, bind] : m_mKeybinds[k]) {
+            if (m_heldType != type) continue;
             if (bind->repeatable && bind->repeat) {
-                if (
-                    (time - bind->repeatStart) >=
-                    0
-                ) {
+                if ((time - bind->repeatStart) >= 0) {
                     time -= bind->repeatInterval;
                     switch (type) {
                         case kKBEditor: {
@@ -1144,7 +1144,6 @@ void KeybindManager::handleRepeats(float dt) {
                         
                         case kKBPlayLayer:
                             auto pl = PlayLayer::get();
-
                             if (pl)
                                 this->executePlayCallbacks(k, pl, true);
                             break;

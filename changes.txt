@@ -1,0 +1,10 @@
+Bugfixes:
+ - Opening a level with a controller plugged in no longer crashes
+ - Fixed crashing when holding keys with repeating enabled
+ - Anything else that was fixed during the alpha releases
+ - Fixed the infamous game not opening bug (see the first part of Changes for an important note)
+
+Changes:
+ - Editor Layer settings (name, opacity, locking) are no longer saved due to it being likely the root cause of the bug where the game would not open. I apologize for the inconvenience
+ - Removed favourites
+ - Removed a bunch of unused/unfinished features & code, including but not at all limited to: Templates, Undo History, Paste Repeating, Integrated Console, etc.. Sorry if you liked these features, they'll come back in better(edit) quality for BE 5. Or not. Some of them were actually bad ideas.

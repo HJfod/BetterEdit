@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../BetterEdit.hpp"
+#include "../../BetterEdit.hpp"
 
 namespace gmd {
     using byte_array = std::vector<uint8_t>;
@@ -89,7 +89,7 @@ namespace gmd {
     class GmdFile {
         protected:
             GJGameLevel* m_pLevel = nullptr;
-            std::string m_sPath;
+            std::filesystem::path m_sPath;
             std::string m_sFullPath;
             std::string m_sFileName;
             int m_nFlags = kfExportFlag_None;
@@ -110,6 +110,7 @@ namespace gmd {
             Result<> saveFile();
 
             void setFileName(std::string const&);
+            void setPath(std::filesystem::path const&);
             void setType(GmdType);
             void setExportFlags(int);
             void setExportFlag(ExportFlag);

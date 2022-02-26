@@ -8,14 +8,10 @@
 #include "../VisibilityTab/loadVisibilityTab.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../EditTab/moveForCommand.hpp"
-#include "../RepeatPaste/repeatPaste.hpp"
-#include "../History/UndoHistoryPopup.hpp"
 #include "../ContextMenu/ContextMenu.hpp"
 #include "../Screenshot/screenshot.hpp"
 #include "../GroupSummary/GroupSummaryPopup.hpp"
-#include "../Debug/IntegratedConsole.hpp"
 #include "../../utils/moveGameLayer.hpp"
-#include "../Notifications/NotificationManager.hpp"
 
 enum Direction {
     kDirLeft, kDirRight, kDirUp, kDirDown,
@@ -478,13 +474,6 @@ void loadBEKeybinds() {
         }, "editor.modify", false
     }, {});
 
-    // kbm->addEditorKeybind({ "Repeat Copy + Paste", "betteredit.repeat_paste",
-    //     [](EditorUI* ui) -> bool {
-    //         repeatPaste(ui);
-    //         return false;
-    //     }, "editor.modify", false
-    // }, {});
-
     kbm->addEditorKeybind({ "Open Level Settings", "betteredit.open_level_settings",
         [](EditorUI* ui) -> bool {
             ui->onSettings(nullptr);
@@ -671,35 +660,12 @@ void loadBEKeybinds() {
         }, "editor.modify", false
     }, {});
 
-    kbm->addEditorKeybind({ "View Undo History", "betteredit.view_undo_history",
-        [](EditorUI* ui) -> bool {
-            UndoHistoryPopup::popup(ui->m_pEditorLayer);
-            return false;
-        }, "editor.modify", false
-    }, {{ KEY_U, Keybind::kmControl }});
-
-    kbm->addEditorKeybind({ "Test Notification", "betteredit.test_notification",
-        [](EditorUI* ui) -> bool {
-            NotificationManager::get()->schedule(
-                Notification::create(kNotificationTypeInfo, "Test Notification :)")
-            );
-            return false;
-        }, "editor.global", false
-    }, {{ KEY_U, 0 }});
-
     kbm->addEditorKeybind({ "View Group Summary", "betteredit.view_group_summary",
         [](EditorUI* ui) -> bool {
             GroupSummaryPopup::create(ui->m_pEditorLayer)->show();
             return false;
         }, "editor.modify", false
     }, {{ KEY_G, Keybind::kmControl }});
-
-    kbm->addEditorKeybind({ "View Console", "betteredit.view_console",
-        [](EditorUI* ui) -> bool {
-            IntegratedConsole::create()->show();
-            return false;
-        }, "editor.modify", false
-    }, {});
 
     kbm->addEditorKeybind({ "Context Menu", "betteredit.show_context_menu",
         [](EditorUI* ui) -> bool {
