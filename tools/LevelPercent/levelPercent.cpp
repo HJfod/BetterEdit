@@ -242,9 +242,6 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
 
     updatePercentLabelPosition(self);
 
-    if (BetterEdit::getMoveCameraWhenMovingObjects())
-        focusGameLayerToSelection(self);
-
     self->updateSlider();
 }
 

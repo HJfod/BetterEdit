@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>frames</key>
+	<dict>
+		<key>BE_all.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{58, 58}</string>
+			<key>spriteSourceSize</key>
+			<string>{58, 58}</string>
+			<key>textureRect</key>
+			<string>{{61, 1}, {58, 58}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_trigger_only.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{58, 58}</string>
+			<key>spriteSourceSize</key>
+			<string>{58, 58}</string>
+			<key>textureRect</key>
+			<string>{{316, 297}, {58, 58}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_eye-off-btn.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{91, 92}</string>
+			<key>spriteSourceSize</key>
+			<string>{91, 92}</string>
+			<key>textureRect</key>
+			<string>{{93, 203}, {91, 92}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_edit_01.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{109, 89}</string>
+			<key>spriteSourceSize</key>
+			<string>{109, 89}</string>
+			<key>textureRect</key>
+			<string>{{233, 112}, {109, 89}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_highlight.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{95, 391}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_create_01.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{114, 89}</string>
+			<key>spriteSourceSize</key>
+			<string>{114, 89}</string>
+			<key>textureRect</key>
+			<string>{{1, 112}, {114, 89}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_eff_line.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{407, 389}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_visible_01.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{114, 89}</string>
+			<key>spriteSourceSize</key>
+			<string>{114, 89}</string>
+			<key>textureRect</key>
+			<string>{{153, 379}, {114, 89}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_epl_play_ldm.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{65, 89}</string>
+			<key>spriteSourceSize</key>
+			<string>{65, 89}</string>
+			<key>textureRect</key>
+			<string>{{569, 112}, {65, 89}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_eyedropper.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{48, 48}</string>
+			<key>spriteSourceSize</key>
+			<string>{48, 48}</string>
+			<key>textureRect</key>
+			<string>{{342, 242}, {48, 48}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_grid-icon-alt.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{46, 46}</string>
+			<key>spriteSourceSize</key>
+			<string>{46, 46}</string>
+			<key>textureRect</key>
+			<string>{{186, 266}, {46, 46}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_pos_line.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{648, 440}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_hourglassBtn_001.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{90, 92}</string>
+			<key>spriteSourceSize</key>
+			<string>{90, 92}</string>
+			<key>textureRect</key>
+			<string>{{440, 295}, {90, 92}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_prevmode.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{407, 441}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_epl_save_and_play.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{90, 90}</string>
+			<key>spriteSourceSize</key>
+			<string>{90, 90}</string>
+			<key>textureRect</key>
+			<string>{{594, 203}, {90, 90}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_dash.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{269, 379}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_trollface.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{58, 58}</string>
+			<key>spriteSourceSize</key>
+			<string>{58, 58}</string>
+			<key>textureRect</key>
+			<string>{{153, 314}, {58, 58}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_grid.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{454, 389}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_delete_01.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{114, 89}</string>
+			<key>spriteSourceSize</key>
+			<string>{114, 89}</string>
+			<key>textureRect</key>
+			<string>{{117, 112}, {114, 89}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_epl_exit.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{90, 90}</string>
+			<key>spriteSourceSize</key>
+			<string>{90, 90}</string>
+			<key>textureRect</key>
+			<string>{{410, 112}, {90, 90}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_0_objs.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{58, 58}</string>
+			<key>spriteSourceSize</key>
+			<string>{58, 58}</string>
+			<key>textureRect</key>
+			<string>{{1, 1}, {58, 58}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_edit_layer_btn.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{64, 65}</string>
+			<key>spriteSourceSize</key>
+			<string>{64, 65}</string>
+			<key>textureRect</key>
+			<string>{{344, 112}, {64, 65}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_pulse.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{454, 441}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_bpm_line.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{1, 355}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_epl_save_icon_except_it_sucks_ass.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{90, 90}</string>
+			<key>spriteSourceSize</key>
+			<string>{90, 90}</string>
+			<key>textureRect</key>
+			<string>{{1, 203}, {90, 90}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_timeBtn_001.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{90, 92}</string>
+			<key>spriteSourceSize</key>
+			<string>{90, 92}</string>
+			<key>textureRect</key>
+			<string>{{61, 297}, {90, 92}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_epl_play.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{65, 89}</string>
+			<key>spriteSourceSize</key>
+			<string>{65, 89}</string>
+			<key>textureRect</key>
+			<string>{{502, 112}, {65, 89}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_grnd.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{48, 391}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_epl_save_and_exit.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{90, 90}</string>
+			<key>spriteSourceSize</key>
+			<string>{90, 90}</string>
+			<key>textureRect</key>
+			<string>{{502, 203}, {90, 90}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_dur_line.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{648, 388}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_ugly_fucking_camera_btn.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{89, 91}</string>
+			<key>spriteSourceSize</key>
+			<string>{89, 91}</string>
+			<key>textureRect</key>
+			<string>{{316, 357}, {89, 91}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_square_001_small.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{80, 80}</string>
+			<key>spriteSourceSize</key>
+			<string>{80, 80}</string>
+			<key>textureRect</key>
+			<string>{{234, 297}, {80, 80}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_visible_02.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{114, 89}</string>
+			<key>spriteSourceSize</key>
+			<string>{114, 89}</string>
+			<key>textureRect</key>
+			<string>{{532, 388}, {114, 89}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_grid-icon.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{46, 46}</string>
+			<key>spriteSourceSize</key>
+			<string>{46, 46}</string>
+			<key>textureRect</key>
+			<string>{{392, 267}, {46, 46}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_scrollbar.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{20, 60}</string>
+			<key>spriteSourceSize</key>
+			<string>{20, 60}</string>
+			<key>textureRect</key>
+			<string>{{696, 112}, {20, 60}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_ldm.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{1, 407}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_eye-on-alt.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{61, 61}</string>
+			<key>spriteSourceSize</key>
+			<string>{61, 61}</string>
+			<key>textureRect</key>
+			<string>{{186, 203}, {61, 61}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_commentGradient_001.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{708, 49}</string>
+			<key>spriteSourceSize</key>
+			<string>{708, 49}</string>
+			<key>textureRect</key>
+			<string>{{1, 61}, {708, 49}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_rotate.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{48, 443}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_solid_bg.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{89, 91}</string>
+			<key>spriteSourceSize</key>
+			<string>{89, 91}</string>
+			<key>textureRect</key>
+			<string>{{592, 295}, {89, 91}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_epl_resume.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{58, 54}</string>
+			<key>spriteSourceSize</key>
+			<string>{58, 54}</string>
+			<key>textureRect</key>
+			<string>{{636, 112}, {58, 54}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_select_group.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{58, 58}</string>
+			<key>spriteSourceSize</key>
+			<string>{58, 58}</string>
+			<key>textureRect</key>
+			<string>{{532, 295}, {58, 58}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_eye-on.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{61, 61}</string>
+			<key>spriteSourceSize</key>
+			<string>{61, 61}</string>
+			<key>textureRect</key>
+			<string>{{407, 204}, {61, 61}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_eye-off.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{61, 61}</string>
+			<key>spriteSourceSize</key>
+			<string>{61, 61}</string>
+			<key>textureRect</key>
+			<string>{{344, 179}, {61, 61}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_eye-on-btn.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{91, 92}</string>
+			<key>spriteSourceSize</key>
+			<string>{91, 92}</string>
+			<key>textureRect</key>
+			<string>{{249, 203}, {91, 92}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_v_portal_borders.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{45, 50}</string>
+			<key>spriteSourceSize</key>
+			<string>{45, 50}</string>
+			<key>textureRect</key>
+			<string>{{269, 431}, {45, 50}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_obj_only.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{58, 58}</string>
+			<key>spriteSourceSize</key>
+			<string>{58, 58}</string>
+			<key>textureRect</key>
+			<string>{{1, 295}, {58, 58}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+	</dict>
+	<key>metadata</key>
+	<dict>
+		<key>format</key>
+		<integer>3</integer>
+	</dict>
+</dict>
+</plist>

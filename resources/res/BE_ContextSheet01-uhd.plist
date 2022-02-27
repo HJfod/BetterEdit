@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>frames</key>
+	<dict>
+		<key>BE_ri_gear_001.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{116, 116}</string>
+			<key>spriteSourceSize</key>
+			<string>{116, 116}</string>
+			<key>textureRect</key>
+			<string>{{1, 355}, {116, 116}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_ri_clipboard_001.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{116, 116}</string>
+			<key>spriteSourceSize</key>
+			<string>{116, 116}</string>
+			<key>textureRect</key>
+			<string>{{1, 237}, {116, 116}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_ri_camera_001.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{116, 116}</string>
+			<key>spriteSourceSize</key>
+			<string>{116, 116}</string>
+			<key>textureRect</key>
+			<string>{{1, 119}, {116, 116}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+		<key>BE_ri_arrow_001.png</key>
+		<dict>
+			<key>textureRotated</key>
+			<false/>
+			<key>spriteSize</key>
+			<string>{116, 116}</string>
+			<key>spriteSourceSize</key>
+			<string>{116, 116}</string>
+			<key>textureRect</key>
+			<string>{{1, 1}, {116, 116}}</string>
+			<key>spriteOffset</key>
+			<string>{0, 0}</string>
+		</dict>
+	</dict>
+	<key>metadata</key>
+	<dict>
+		<key>format</key>
+		<integer>3</integer>
+	</dict>
+</dict>
+</plist>

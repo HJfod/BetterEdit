@@ -160,12 +160,6 @@ void BESettingsLayer::setup() {
         BE_SETTING_FUNC_B(ShowKeybindOnHover)
     );
     this->addToggle(
-        "Move Camera On Object Move",
-        "When moving object(s), if they go outside the camera, the camera will "
-        "reposition to show them again",
-        BE_SETTING_FUNC_B(MoveCameraWhenMovingObjects)
-    );
-    this->addToggle(
         "Copy Objects to Clipboard",
         "When you copy objects, the object string will be copied on "
         "your <cr>clipboard</c>, meaning you can paste it in a <cb>Discord "
