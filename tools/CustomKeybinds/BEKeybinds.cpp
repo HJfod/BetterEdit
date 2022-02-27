@@ -8,7 +8,6 @@
 #include "../VisibilityTab/loadVisibilityTab.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../EditTab/moveForCommand.hpp"
-#include "../ContextMenu/ContextMenu.hpp"
 #include "../Screenshot/screenshot.hpp"
 #include "../GroupSummary/GroupSummaryPopup.hpp"
 #include "../../utils/moveGameLayer.hpp"
@@ -658,13 +657,6 @@ void loadBEKeybinds() {
             return false;
         }, "editor.modify", false
     }, {{ KEY_G, Keybind::kmControl }});
-
-    kbm->addEditorKeybind({ "Context Menu", "betteredit.show_context_menu",
-        [](EditorUI* ui) -> bool {
-            ContextMenu::get()->show();
-            return true;
-        }, "editor.global", false
-    }, {{ kMouseButtonRight, 0 }});
 
     kbm->addEditorKeybind({ "Take Screenshot", "betteredit.screenshot",
         [](EditorUI* ui) -> bool {

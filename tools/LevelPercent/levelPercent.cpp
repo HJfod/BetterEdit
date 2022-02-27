@@ -4,7 +4,6 @@
 #include "../AutoSave/autoSave.hpp"
 #include "../CustomKeybinds/BEKeybinds.hpp"
 #include "../EditorLayerInput/editorLayerInput.hpp"
-#include "../ContextMenu/loadContextMenu.hpp"
 #include "../../utils/moveGameLayer.hpp"
 
 static constexpr const int SLIDERLABEL_TAG = 420;
@@ -236,12 +235,7 @@ void __fastcall EditorUI_moveObject(EditorUI* self, edx_t edx, GameObject* obj, 
 
     updateLastObjectX(self->m_pEditorLayer, obj);
 
-    updateContextMenu();
-
     updatePercentLabelPosition(self);
-
-    if (BetterEdit::getMoveCameraWhenMovingObjects())
-        focusGameLayerToSelection(self);
 
     self->updateSlider();
 }

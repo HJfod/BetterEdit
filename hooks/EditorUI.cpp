@@ -10,7 +10,6 @@
 #include "../tools/AutoSave/Backup/BackupViewLayer.hpp"
 #include "../tools/VisibilityTab/loadVisibilityTab.hpp"
 #include "../tools/CustomKeybinds/KeybindManager.hpp"
-#include "../tools/ContextMenu/loadContextMenu.hpp"
 #include "EditorPauseLayer.hpp"
 #include "EditorUI.hpp"
 #include <thread>
@@ -431,8 +430,6 @@ bool __fastcall EditorUI_init(EditorUI* self, edx_t edx, LevelEditorLayer* lel) 
 
     g_hasResetObjectsScale = true;
     self->schedule(schedule_selector(EditorUIPulse::updateObjectsPulse));
-
-    loadContextMenu();
 
     return true;
 }

@@ -3,7 +3,6 @@
 #include "../EditorLayerInput/editorLayerInput.hpp"
 #include "../AutoSave/autoSave.hpp"
 #include "../VisibilityTab/loadVisibilityTab.hpp"
-#include "../ContextMenu/loadContextMenu.hpp"
 
 using namespace gdmake;
 
@@ -16,8 +15,6 @@ void __fastcall EditorUI_selectObject(EditorUI* self, edx_t edx, GameObject* obj
     
     if (AdvancedFilterLayer::testSelectObject(obj) && testSelectObjectLayer(obj)) {
         GDMAKE_ORIG_V(self, edx, obj, idk);
-
-        updateContextMenu();
     }
 }
 
@@ -35,8 +32,6 @@ void __fastcall EditorUI_selectObjects(EditorUI* self, edx_t edx, cocos2d::CCArr
     }
     
     GDMAKE_ORIG_V(self, edx, objs, idk);
-
-    updateContextMenu();
 }
 
 GDMAKE_HOOK(0x87070, "_ZN8EditorUI14undoLastActionEPN7cocos2d8CCObjectE")

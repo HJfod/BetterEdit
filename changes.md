@@ -1,3 +1,9 @@
+@Update Tag **BetterEdit v4.0.5**
+
+As stated previously, this is just a bugfixdate for BE 4 to make it more usable while I work on BE 5. Although, since v4.0.4 was never officially released, some features new in regard to v4.0.3 are included. See the **Changelog** for details.
+
+I don't know when BE 5 will be finished, but I hope this makes BE 4 a bit more bearable. Also included is a new **minified** version that removes a bunch of features that are unfinished / unstable / laggy, which should make it perform better for users on low-end devices. See the **Changelog** for information on what features the minified version removes.
+
 **Changes for v4.0.4 (alpha):**
 
 **Additions**
@@ -43,6 +49,7 @@
  - Removed a bunch of unused/unfinished features & code, including but not at all limited to: Templates, Undo History, Paste Repeating, Integrated Console, etc.. Sorry if you liked these features, they'll come back in better(edit) quality for BE 5. Or not. Some of them were actually bad ideas.
  - Please note that regardless of if you do / don't have a Z order bypass enabled, the Z order on every object is limited to a value between -999 and 9999. The reason for this is because of a BE feature that allows mixed Z orders to be edited simultaniously, and that GD considers -1000 to be Mixed.
  - Saving order has been changed so that GD data is saved first and BE data after, so if BE data saving fails, your GD progress should still be kept.
+ - Removed the "Move Camera on Object Move" option due to no one liking it. It having 0 bitches, if you will.
 
 ```
 ---
