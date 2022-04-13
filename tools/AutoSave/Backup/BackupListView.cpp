@@ -95,11 +95,11 @@ void BackupListView::setupList() {
     this->m_fItemSeparation = 55.0f;
 
     this->m_pTableView->reloadData();
+	
+    this->m_pTableView->moveToTop();
 
     if (this->m_pEntries->count() == 1)
         this->m_pTableView->moveToTopWithOffset(this->m_fItemSeparation);
-    
-    this->m_pTableView->moveToTop();
 }
 
 TableViewCell* BackupListView::getListCell(const char* key) {
