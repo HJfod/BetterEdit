@@ -72,7 +72,7 @@ void EnterBPMLayer::onCreate(CCObject*) {
     
     if (m_pOffsetInput->getString() && strlen(m_pOffsetInput->getString()))
         try {
-            std::stof(m_pOffsetInput->getString());
+            offset = std::stof(m_pOffsetInput->getString());
         } catch (...) {}
 
     std::vector<char> pattern {};
@@ -94,10 +94,10 @@ void EnterBPMLayer::onCreate(CCObject*) {
     std::string guidelineString = "";
 
     auto secondsPerBeat = fabsf(60 / bpm);
-    auto secs = offset / 1000.0f;
+    auto secs = offset;
     auto beat = 0u;
 
-    while (secs < 150.0f) {
+    while (secs < offset + 150.0f) {
         guidelineString += BetterEdit::formatToString(secs) + "~" +
             patternCharToString(pattern.at(beat % pattern.size())) + "~";
 
