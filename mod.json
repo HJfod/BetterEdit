@@ -1,0 +1,23 @@
+{
+	"geode": "v0.1.0",
+	"version": "v4.6.0",
+	"id": "hjfod.betteredit",
+	"name": "BetterEdit",
+	"developer": "HJfod",
+	"description": "The ultimate editor improvement mod",
+	"binary": "BetterEdit",
+	"settings": {
+		"mouse-move-on-zoom": {
+			"type": "bool",
+			"default": true,
+			"name": "Zoom Towards Cursor",
+			"description": "When enabled, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen"
+		},
+		"show-zoom-text": {
+			"type": "bool",
+			"default": true,
+			"name": "Show Zoom Text",
+			"description": "When enabled, flashes the current zoom level as text when you zoom in / out in the editor"
+		}
+	}
+}
