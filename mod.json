@@ -6,6 +6,7 @@
 	"developer": "HJfod",
 	"description": "The ultimate editor improvement mod",
 	"binary": "BetterEdit",
+	"repository": "https://github.com/hjfod/BetterEdit",
 	"settings": {
 		"mouse-move-on-zoom": {
 			"type": "bool",
@@ -19,5 +20,9 @@
 			"name": "Show Zoom Text",
 			"description": "When enabled, flashes the current zoom level as text when you zoom in / out in the editor"
 		}
+	},
+	"issues": {
+		"info": "Please post your issues on the <cy>BetterEdit GitHub repository</c>.",
+		"url": "https://github.com/hjfod/BetterEdit/issues/new"
 	}
 }
