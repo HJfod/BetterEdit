@@ -3,7 +3,7 @@
 static auto TAG_ZOOM = 0xB00B;
 
 void showZoomText(EditorUI* ui) {
-    if (Mod::get()->getSettingValue<bool>("show-zoom-text")) {
+    if (Mod::get()->template getSettingValue<bool>("show-zoom-text")) {
         auto label = static_cast<CCLabelBMFont*>(ui->getChildByTag(TAG_ZOOM));
 
         if (label) {
