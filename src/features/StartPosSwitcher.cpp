@@ -9,8 +9,76 @@
 
 USE_GEODE_NAMESPACE();
 
-class $modify(StartPosAwareLevel, GJGameLevel) {
-    std::optional<CCPoint> m_startPos;
+struct FromLevelStart {};
+struct DefaultBehaviour {};
+using FromPoint = CCPoint;
+using FromObj = StartPosObject*;
+using StartPosKind = std::variant<
+    FromLevelStart,
+    DefaultBehaviour,
+    FromPoint,
+    FromObj
+>;
+
+class SelectStartPosPopup : public Popup<LevelEditorLayer*> {
+protected:
+    LevelEditorLayer* m_editor;
+
+    bool setup(LevelEditorLayer* editor) override {
+        m_editor = editor;
+        m_noElasticity = true;
+
+        this->setTitle("Select Start Pos");
+
+        auto goToStartSpr = ButtonSprite::create(
+            "From Level Start", "goldFont.fnt", "GJ_button_01.png"
+        );
+        goToStartSpr->setScale(.7f);
+        auto goToStartBtn = CCMenuItemSpriteExtra::create(
+            goToStartSpr, this, menu_selector(SelectStartPosPopup::onSelectFromStart)
+        );
+        goToStartBtn->setPosition(0.f, 20.f);
+        m_buttonMenu->addChild(goToStartBtn);
+
+        auto goToEndSpr = ButtonSprite::create(
+            "From Last Start Pos", "goldFont.fnt", "GJ_button_01.png"
+        );
+        goToEndSpr->setScale(.7f);
+        auto goToEndBtn = CCMenuItemSpriteExtra::create(
+            goToEndSpr, this, menu_selector(SelectStartPosPopup::onSelectFromLast)
+        );
+        goToEndBtn->setPosition(0.f, -20.f);
+        m_buttonMenu->addChild(goToEndBtn);
+
+        return true;
+    }
+
+    void onSelectFromStart(CCObject*);
+    void onSelectFromLast(CCObject*);
+
+public:
+    static SelectStartPosPopup* create(LevelEditorLayer* editor) {
+        auto ret = new SelectStartPosPopup();
+        if (ret && ret->init(220.f, 150.f, editor)) {
+            ret->autorelease();
+            return ret;
+        }
+        CC_SAFE_DELETE(ret);
+        return nullptr;
+    }
+};
+
+class $modify(StartPosLevel, GJGameLevel) {
+    StartPosKind m_startPos;
+
+    StartPosLevel() : m_startPos(DefaultBehaviour()) {}
+
+    bool match(CCPoint const& pos) {
+        if (std::holds_alternative<FromPoint>(m_fields->m_startPos)) {
+            return std::get<FromPoint>(m_fields->m_startPos) == pos;
+        }
+        return false;
+    }
 };
 
 class PlaytestHerePopup : public CCNode {
@@ -86,7 +154,7 @@ protected:
 
 public:
     void select() {
-        static_cast<StartPosAwareLevel*>(
+        static_cast<StartPosLevel*>(
             m_editor->m_level
         )->m_fields->m_startPos = m_startPos->getPosition();
     }
@@ -125,32 +193,32 @@ class $modify(PlayLayer) {
             m_playerStartPosition = oldStartPos->getPosition();
         }
         if (obj->m_objectID == 31) {
-            if (auto pos = static_cast<StartPosAwareLevel*>(
+            if (static_cast<StartPosLevel*>(m_level)->match(obj->getPosition())) {
+                m_startPos = static_cast<StartPosObject*>(obj);
+                m_playerStartPosition = obj->getPosition();
+            }
+            if (std::holds_alternative<FromLevelStart>(static_cast<StartPosLevel*>(
                 m_level
-            )->m_fields->m_startPos) {
-                if (obj->getPosition() == pos.value()) {
-                    m_startPos = static_cast<StartPosObject*>(obj);
-                    m_playerStartPosition = obj->getPosition();
-                }
+            )->m_fields->m_startPos)) {
+                m_startPos = nullptr;
+                m_playerStartPosition = CCPoint { 0, 105.f };
             }
         }
     }
 };
 
 class $modify(StartPosSwitchLayer, LevelEditorLayer) {
-    StartPosObject* m_selectedStartPos;
+    StartPosKind m_selectedStartPos;
 
-    StartPosSwitchLayer() : m_selectedStartPos(nullptr) {
+    StartPosSwitchLayer() : m_selectedStartPos(DefaultBehaviour()) {
         PlaytestHerePopup::hide();
     }
 
     void addSpecial(GameObject* obj) {
         LevelEditorLayer::addSpecial(obj);
         if (obj->m_objectID == 31) {
-            if (auto pos = static_cast<StartPosAwareLevel*>(m_level)->m_fields->m_startPos) {
-                if (pos.value() == obj->getPosition()) {
-                    m_fields->m_selectedStartPos = static_cast<StartPosObject*>(obj);
-                }
+            if (static_cast<StartPosLevel*>(m_level)->match(obj->getPosition())) {
+                m_fields->m_selectedStartPos = static_cast<StartPosObject*>(obj);
             }
         }
     }
@@ -165,18 +233,30 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
     }
 
     void setupLevelStart(LevelSettingsObject* obj) {
-        if (!m_fields->m_selectedStartPos) {
-            return LevelEditorLayer::setupLevelStart(obj);
+        // selected start position
+        if (std::holds_alternative<FromObj>(m_fields->m_selectedStartPos)) {
+            auto obj = std::get<FromObj>(m_fields->m_selectedStartPos);
+            this->setStartPosObject(obj);
+            auto startPos = obj->getPosition();
+            m_player1->setStartPos(startPos);
+            m_player1->resetObject();
+            m_player2->setStartPos(startPos);
+            m_player2->resetObject();
+            LevelEditorLayer::setupLevelStart(obj->m_levelSettings);
         }
-        this->setStartPosObject(m_fields->m_selectedStartPos);
-        auto startPos = m_fields->m_selectedStartPos->getPosition();
-        m_player1->setStartPos(startPos);
-        m_player1->resetObject();
-        m_player2->setStartPos(startPos);
-        m_player2->resetObject();
-        LevelEditorLayer::setupLevelStart(
-            m_fields->m_selectedStartPos->m_levelSettings
-        );
+        // from level start
+        else if (std::holds_alternative<FromLevelStart>(m_fields->m_selectedStartPos)) {
+            this->setStartPosObject(nullptr);
+            m_player1->setStartPos({ 0.f, 105.f });
+            m_player1->resetObject();
+            m_player2->setStartPos({ 0.f, 105.f });
+            m_player2->resetObject();
+            LevelEditorLayer::setupLevelStart(m_levelSettings);
+        }
+        // default behaviour
+        else {
+            LevelEditorLayer::setupLevelStart(obj);
+        }
     }
 };
 
@@ -187,6 +267,43 @@ void PlaytestHerePopup::onPlaytest(CCObject*) {
     )->m_fields->m_selectedStartPos = m_startPos;
     m_editor->setStartPosObject(m_startPos);
     EditorUI::get()->onPlaytest(EditorUI::get()->m_playtestBtn);
+}
+
+void SelectStartPosPopup::onSelectFromStart(CCObject*) {
+    static_cast<StartPosSwitchLayer*>(
+        m_editor
+    )->m_fields->m_selectedStartPos = FromLevelStart();
+    static_cast<StartPosLevel*>(
+        m_editor->m_level
+    )->m_fields->m_startPos = FromLevelStart();
+    this->onClose(nullptr);
+}
+
+void SelectStartPosPopup::onSelectFromLast(CCObject*) {
+    StartPosObject* last = nullptr;
+    CCARRAY_FOREACH_B_TYPE(m_editor->m_objects, obj, StartPosObject) {
+        if (obj->m_objectID == 31) {
+            if (!last || last->getPositionX() < obj->getPositionX()) {
+                last = obj;
+            }
+        }
+    }
+    if (last) {
+        static_cast<StartPosSwitchLayer*>(
+            m_editor
+        )->m_fields->m_selectedStartPos = last;
+        static_cast<StartPosLevel*>(
+            m_editor->m_level
+        )->m_fields->m_startPos = last->getPosition();
+    } else {
+        static_cast<StartPosSwitchLayer*>(
+            m_editor
+        )->m_fields->m_selectedStartPos = DefaultBehaviour();
+        static_cast<StartPosLevel*>(
+            m_editor->m_level
+        )->m_fields->m_startPos = DefaultBehaviour();
+    }
+    this->onClose(nullptr);
 }
 
 class $modify(EditorPauseLayer) {
@@ -201,6 +318,39 @@ class $modify(EditorPauseLayer) {
 };
 
 class $modify(EditorUI) {
+    CCMenuItemSpriteExtra* m_startPosBtn;
+
+    bool init(LevelEditorLayer* lel) {
+        if (!EditorUI::init(lel))
+            return false;
+        
+        auto startPosInnerSpr = CCSprite::createWithSpriteFrameName(
+            "start-pos-border.png"_spr
+        );
+        startPosInnerSpr->setScale(.75f);
+
+        auto startPosSpr = CircleButtonSprite::create(startPosInnerSpr);
+        startPosSpr->setScale(.8f);
+
+        m_fields->m_startPosBtn = CCMenuItemSpriteExtra::create(
+            startPosSpr, this, makeMenuSelector([this](CCObject*) {
+                SelectStartPosPopup::create(m_editorLayer)->show();
+            })
+        );
+        m_fields->m_startPosBtn->setPosition(
+            m_playtestBtn->getPositionX() + 50.f,
+            m_playtestBtn->getPositionY()
+        );
+        m_playtestBtn->getParent()->addChild(m_fields->m_startPosBtn);
+
+        return true;
+    }
+
+    void showUI(bool show) {
+        EditorUI::showUI(show);
+        m_fields->m_startPosBtn->setVisible(show);
+    }
+
     void moveObject(GameObject* obj, CCPoint pos) {
         EditorUI::moveObject(obj, pos);
         PlaytestHerePopup::move();

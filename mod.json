@@ -20,6 +20,13 @@
 			"description": "When enabled, flashes the current zoom level as text when you zoom in / out in the editor"
 		}
 	},
+	"resources": {
+		"spritesheets": {
+			"UISheet": [
+				"resources/*.png"
+			]
+		}
+	},
 	"issues": {
 		"info": "Please post your issues on the <cy>BetterEdit GitHub repository</c>.",
 		"url": "https://github.com/hjfod/BetterEdit/issues/new"
