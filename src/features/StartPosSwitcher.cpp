@@ -1,6 +1,8 @@
 #include <Geode/Bindings.hpp>
 #include <Geode/Modify.hpp>
 #include <Geode/Loader.hpp>
+#include <Geode/ui/Popup.hpp>
+#include <Geode/utils/operators.hpp>
 #include <BetterEdit.hpp>
 #include <Geode/utils/WackyGeodeMacros.hpp>
 
@@ -317,8 +319,12 @@ class $modify(EditorPauseLayer) {
     }
 };
 
-class $modify(EditorUI) {
+class $modify(MyEditorUI, EditorUI) {
     CCMenuItemSpriteExtra* m_startPosBtn;
+
+    void onSelectStartPos(CCObject*) {
+        SelectStartPosPopup::create(m_editorLayer)->show();
+    }
 
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
@@ -333,9 +339,7 @@ class $modify(EditorUI) {
         startPosSpr->setScale(.8f);
 
         m_fields->m_startPosBtn = CCMenuItemSpriteExtra::create(
-            startPosSpr, this, makeMenuSelector([this](CCObject*) {
-                SelectStartPosPopup::create(m_editorLayer)->show();
-            })
+            startPosSpr, this, menu_selector(MyEditorUI::onSelectStartPos)
         );
         m_fields->m_startPosBtn->setPosition(
             m_playtestBtn->getPositionX() + 50.f,

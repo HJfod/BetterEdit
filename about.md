@@ -4,15 +4,12 @@ The next generation of BetterEdit.
 
 #### <cr>This is an Alpha build! Not all features are finished / usable. Use at your own risk.</c>
 
-### Alpha version schedule:
+## Features
 
- * `v4.6.x` - Initial development
+ - Zoom with Control + Scroll Wheel
+ - Displays current zoom level when you zoom in/out
+ - Start Pos switcher
 
- * `v4.7.x` - Big features ready for testing
+More features coming soon. If you have <cr>**suggestions**</c>, please post them [on the GitHub as an issue](https://github.com/HJfod/BetterEdit/issues).
 
- * `v4.8.x` - Big features finished, testing other stuff
-
- * `v4.9.x` - Polishing up
-
- * `v5.0.0` - Release :)
-
+If you'd like to <cy>**support development**</c>, click the `Support` button :)
