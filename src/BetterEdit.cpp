@@ -5,7 +5,7 @@ USE_GEODE_NAMESPACE();
 
 std::unordered_map<uintptr_t, Patch*> PATCHES;
 
-void be::patch(uintptr_t address, byte_array const& bytes, bool apply) {
+void be::patch(uintptr_t address, geode::ByteVector const& bytes, bool apply) {
     if (apply) {
         // apply existing patch
         if (PATCHES.count(address)) {
@@ -13,7 +13,7 @@ void be::patch(uintptr_t address, byte_array const& bytes, bool apply) {
         }
         // otherwise create new patch
         else if (auto p = Mod::get()->patch(
-            as<void*>(base::get() + address), bytes
+            reinterpret_cast<void*>(base::get() + address), bytes
         )) {
             PATCHES.insert({ address, p.value() });
         }
@@ -25,5 +25,5 @@ void be::patch(uintptr_t address, byte_array const& bytes, bool apply) {
 }
 
 void be::nopOut(uintptr_t address, size_t amount, bool apply) {
-    be::patch(address, byte_array(amount, 0x90), apply);
+    be::patch(address, ByteVector(amount, 0x90), apply);
 }

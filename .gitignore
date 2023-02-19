@@ -47,6 +47,7 @@ Source/Geode/pkg/uber-apk-signer.jar
 
 # Ignore build folders
 **/build
+**/b
 
 # ILY vscode
 **/.vscode

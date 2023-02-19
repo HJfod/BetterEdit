@@ -1,11 +1,11 @@
-#include <Geode/Bindings.hpp>
-#include <Geode/Modify.hpp>
-#include <Geode/Loader.hpp>
-#include <Geode/ui/Popup.hpp>
-#include <Geode/utils/operators.hpp>
+#include <Geode/Geode.hpp>
 #include <BetterEdit.hpp>
-#include <Geode/utils/WackyGeodeMacros.hpp>
-
+#include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/EditorPauseLayer.hpp>
+#include <Geode/modify/GJGameLevel.hpp>
+#include <Geode/modify/PlayLayer.hpp>
+#include <Geode/modify/LevelEditorLayer.hpp>
+#include <Geode/modify/GameObject.hpp>
 #undef min
 #undef max
 
@@ -283,7 +283,7 @@ void SelectStartPosPopup::onSelectFromStart(CCObject*) {
 
 void SelectStartPosPopup::onSelectFromLast(CCObject*) {
     StartPosObject* last = nullptr;
-    CCARRAY_FOREACH_B_TYPE(m_editor->m_objects, obj, StartPosObject) {
+	for(auto* obj : cocos::CCArrayExt<StartPosObject>(m_editor->m_objects)) {
         if (obj->m_objectID == 31) {
             if (!last || last->getPositionX() < obj->getPositionX()) {
                 last = obj;
@@ -351,6 +351,7 @@ class $modify(MyEditorUI, EditorUI) {
     }
 
     void showUI(bool show) {
+		
         EditorUI::showUI(show);
         m_fields->m_startPosBtn->setVisible(show);
     }
