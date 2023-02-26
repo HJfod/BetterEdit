@@ -372,7 +372,7 @@ class $modify(MyEditorUI, EditorUI) {
 };
 
 class $modify(GameObject) {
-    void selectObject(ccColor3B const& color) {
+    void selectObject(ccColor3B color) {
         GameObject::selectObject(color);
         PlaytestHerePopup::hide();
         if (m_objectID == 31) {

@@ -18,6 +18,12 @@
 			"default": true,
 			"name": "Show Zoom Text",
 			"description": "When enabled, flashes the current zoom level as text when you zoom in / out in the editor"
+		},
+		"show-percentage": {
+			"type": "bool",
+			"default": true,
+			"name": "Show Percentage",
+			"description": "When enabled, flashes the current percentage in the position slider when you move around the editor"
 		}
 	},
 	"resources": {
@@ -30,5 +36,12 @@
 	"issues": {
 		"info": "Please post your issues on the <cy>BetterEdit GitHub repository</c>.",
 		"url": "https://github.com/hjfod/BetterEdit/issues/new"
-	}
+	},
+	"dependencies": [
+		{
+			"id": "hjfod.gmd-api",
+			"version": "v1.0.0",
+			"required": true
+		}
+	]
 }

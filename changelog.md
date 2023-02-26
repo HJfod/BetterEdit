@@ -1,8 +1,12 @@
 
 # v5.0.0-alpha.3
 
+### Additions
+ - Add level percentage in editor
+
 ### Changes
  - Retroactively switched versioning to v5.0.0-alpha.X as Geode now supports that
+ - Update to Geode v1.0.0-beta
 
 # v5.0.0-alpha.2
 
