@@ -351,7 +351,6 @@ class $modify(MyEditorUI, EditorUI) {
     }
 
     void showUI(bool show) {
-		
         EditorUI::showUI(show);
         m_fields->m_startPosBtn->setVisible(show);
     }
