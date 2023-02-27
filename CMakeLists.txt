@@ -4,11 +4,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(BetterEdit VERSION 4.6.0)
 
-# Use GLOB_RECURSE instead of GLOB
-# to recursively add all source files 
-# under src/ 
 file(GLOB SOURCES
 	src/features/*.cpp
+	src/script/*.cpp
 	src/*.cpp
 )
 

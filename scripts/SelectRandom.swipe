@@ -1,0 +1,8 @@
+@version 1.0.0
+
+objs = getSelectedObjects()
+for obj in objs {
+    if random() > 0.5 {
+        obj.deselect()
+    }
+}
