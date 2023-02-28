@@ -15,6 +15,10 @@ namespace script {
     using InputStream = std::istream;
 
     struct Expr;
+    struct FunExpr;
+
+    template <class T>
+    using Rc = std::shared_ptr<T>;
 
     struct Rollback {
     private:
@@ -66,12 +70,12 @@ namespace script {
         And,    // a && b
         Or,     // a || b
     };
-    using NullLit = std::nullptr_t;
+    using NullLit = std::monostate; // std::nullptr_t is not <=>!!!
     using BoolLit = bool;
     using StrLit = std::string;
     using IntLit = int64_t;
     using FloatLit = double;
-    using ArrLit = std::vector<Expr>;
+    using ArrLit = std::vector<Rc<Expr>>;
     using Lit = std::variant<NullLit, BoolLit, StrLit, IntLit, FloatLit, ArrLit>;
     using Ident = std::string;
     using Punct = char;
@@ -160,77 +164,21 @@ namespace script {
             ));
         }
 
-        template <Op O>
-        static Result<> pull(InputStream& stream) {
-            Rollback rb(stream);
-            GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
-            if (auto value = std::get_if<Op>(&token.value)) {
-                if (*value == O) {
-                    rb.commit();
-                    return Ok();
-                }
-                else {
-                    return Err(fmt::format(
-                        "Expected {}, got {}",
-                        tokenToString(O), tokenToString(*value)
-                    ));
-                }
-            }
-            return Err(fmt::format(
-                "Expected {}, got '{}'",
-                tokenToString(O), token.toString()
-            ));
-        }
-
-        template <Keyword Kw>
-        static Result<> pull(InputStream& stream) {
-            Rollback rb(stream);
-            GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
-            if (auto value = std::get_if<Keyword>(&token.value)) {
-                if (*value == Kw) {
-                    rb.commit();
-                    return Ok();
-                }
-                else {
-                    return Err(fmt::format(
-                        "Expected {}, got {}",
-                        tokenToString(Kw), tokenToString(*value)
-                    ));
-                }
-            }
-            return Err(fmt::format(
-                "Expected {}, got '{}'",
-                tokenToString(Kw), token.toString()
-            ));
-        }
-
-        template <char C>
-        static Result<> pull(InputStream& stream) {
-            Rollback rb(stream);
-            GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
-            if (auto value = std::get_if<Punct>(&token.value)) {
-                if (*value == C) {
-                    rb.commit();
-                    return Ok();
-                }
-            }
-            return Err(fmt::format("Expected '{}', got '{}'", C, token.toString()));
-        }
+        static Result<> pull(Op op, InputStream& stream);
+        static Result<> pull(Keyword kw, InputStream& stream);
+        static Result<> pull(char c, InputStream& stream);
     };
 
     bool isIdent(std::string const& ident);
     bool isOp(std::string const& op);
     bool isUnOp(Op op);
 
-    template <class T>
-    using Rc = std::shared_ptr<T>;
-
     struct Value;
     using Array = std::vector<Value>;
     struct Value {
         std::variant<
             NullLit, BoolLit, IntLit, FloatLit, StrLit,
-            Array, Ref<GameObject>
+            Array, Ref<GameObject>, Rc<const FunExpr>
         > value;
 
         Value(decltype(Value::value) const& value) : value(value) {}
@@ -252,79 +200,109 @@ namespace script {
     };
 
     struct State {
-        std::unordered_map<std::string, Rc<Value>> variables;
+        std::unordered_map<std::string, std::pair<Rc<Value>, size_t>> entities;
+        size_t scope = 0;
+        void add(std::string const& name, Rc<Value> value);
+        Rc<Value> get(std::string const& name);
+        void push();
+        void drop();
     };
 
     struct LitExpr {
         Lit value;
         static constexpr auto EXPR_NAME = "LitExpr";
-        static Result<LitExpr> pull(InputStream& stream);
+        static Result<Rc<LitExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
     };
     struct IdentExpr {
         Ident ident;
         static constexpr auto EXPR_NAME = "IdentExpr";
-        static Result<IdentExpr> pull(InputStream& stream);
+        static Result<Rc<IdentExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
     };
     struct UnOpExpr {
         Rc<Expr> expr;
         Op op;
         static constexpr auto EXPR_NAME = "UnOpExpr";
-        static Result<UnOpExpr> pull(InputStream& stream);
+        static Result<Rc<UnOpExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
     };
     struct BinOpExpr {
         Rc<Expr> lhs;
         Rc<Expr> rhs;
         Op op;
         static constexpr auto EXPR_NAME = "BinOpExpr";
-        static Result<Expr> pull(InputStream& stream, size_t p, Expr lhs);
-        static Result<Expr> pull(InputStream& stream);
+        static Result<Rc<Expr>> pull(InputStream& stream, size_t p, Rc<Expr> lhs);
+        static Result<Rc<Expr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
     };
     struct CallExpr {
         Rc<Expr> expr;
-        std::vector<Expr> args;
-        std::unordered_map<std::string, Expr> named;
+        std::vector<Rc<Expr>> args;
+        std::unordered_map<std::string, Rc<Expr>> named;
         static constexpr auto EXPR_NAME = "CallExpr";
-        static Result<CallExpr> pull(InputStream& stream);
+        static Result<Rc<CallExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
     };
     struct ForInExpr {
         Ident item;
         Rc<Expr> expr;
         Rc<Expr> body;
         static constexpr auto EXPR_NAME = "ForInExpr";
-        static Result<ForInExpr> pull(InputStream& stream);
+        static Result<Rc<ForInExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
     };
     struct IfExpr {
         Rc<Expr> cond;
         Rc<Expr> truthy;
         Rc<Expr> falsy;
         static constexpr auto EXPR_NAME = "IfExpr";
-        static Result<IfExpr> pull(InputStream& stream);
+        static Result<Rc<IfExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
+    };
+    struct FunExpr : public std::enable_shared_from_this<FunExpr> {
+        Ident ident;
+        std::vector<std::pair<Ident, std::optional<Rc<Expr>>>> params;
+        Rc<Expr> body;
+        static constexpr auto EXPR_NAME = "FunExpr";
+        static Result<Rc<FunExpr>> pull(InputStream& stream);
+        Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
     };
     struct ListExpr {
-        std::vector<Expr> exprs;
+        std::vector<Rc<Expr>> exprs;
         static constexpr auto EXPR_NAME = "ListExpr";
-        static Result<ListExpr> pull(InputStream& stream);
+        static Result<Rc<Expr>> pullBlock(InputStream& stream);
+        static Result<Rc<ListExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
     };
     struct Expr {
         std::variant<
-            LitExpr, IdentExpr,
-            UnOpExpr, BinOpExpr,
-            CallExpr,
-            ForInExpr, IfExpr,
-            ListExpr
+            Rc<LitExpr>, Rc<IdentExpr>,
+            Rc<UnOpExpr>, Rc<BinOpExpr>,
+            Rc<CallExpr>, Rc<FunExpr>,
+            Rc<ForInExpr>, Rc<IfExpr>,
+            Rc<ListExpr>
         > value;
 
-        Rc<Expr> rc() const;
-        static Result<Expr> pullPrimary(InputStream& stream);
-        static Result<Expr> pull(InputStream& stream);
+        static Result<Rc<Expr>> pullPrimary(InputStream& stream);
+        static Result<Rc<Expr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state) const;
+        Result<> preval(State& state) const;
     };
+
+    bool operator==(Array const& a, Array const b);
+    bool operator!=(Array const& a, Array const b);
+    bool operator<(Array const& a, Array const b);
+    bool operator<=(Array const& a, Array const b);
+    bool operator>(Array const& a, Array const b);
+    bool operator>=(Array const& a, Array const b);
 }

@@ -6,12 +6,22 @@
 using namespace script;
 
 template <class T>
-static impl::Failure<std::string> unimplemented(Op op) {
+static impl::Failure<std::string> internal(std::string const& msg) {
     return Err(fmt::format(
-        "Internal error in {}: Unimplemented {}",
-        T::EXPR_NAME, tokenToString(op, true)
+        "Internal error in {}: {}. Please report this bug to HJfod!",
+        T::EXPR_NAME, msg
     ));
+}
+
+template <class T>
+static impl::Failure<std::string> unimplemented(Op op) {
+    return internal<T>(fmt::format("Unimplemented {}", tokenToString(op, true)));
 };
+
+template <class T>
+Result<Rc<T>> make(T value) {
+    return Ok(std::make_shared<T>(value));
+}
 
 static std::unordered_map<Keyword, std::string> KEYWORDS {
     { Keyword::For,         "for" },
@@ -150,8 +160,8 @@ std::string script::tokenToString(Lit lit, bool debug) {
                     res += ", ";
                 }
                 first = false;
-                if (auto lit = std::get_if<LitExpr>(&expr.value)) {
-                    res += tokenToString(lit->value, debug);
+                if (auto lit = std::get_if<Rc<LitExpr>>(&expr->value)) {
+                    res += tokenToString(lit->get()->value, debug);
                 }
                 else {
                     res += "Expr";
@@ -247,7 +257,7 @@ Result<Token> Token::pull(InputStream& stream) {
         return Ok(Token(Lit(false)));
     }
     if (value == "null") {
-        return Ok(Token(Lit(nullptr)));
+        return Ok(Token(Lit(NullLit())));
     }
 
     // operator
@@ -276,6 +286,60 @@ Result<Token> Token::pull(InputStream& stream) {
     }
     
     return Err(fmt::format("Invalid keyword or identifier '{}'", value));
+}
+
+Result<> Token::pull(Op op, InputStream& stream) {
+    Rollback rb(stream);
+    GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
+    if (auto value = std::get_if<Op>(&token.value)) {
+        if (*value == op) {
+            rb.commit();
+            return Ok();
+        }
+        else {
+            return Err(fmt::format(
+                "Expected {}, got {}",
+                tokenToString(op), tokenToString(*value)
+            ));
+        }
+    }
+    return Err(fmt::format(
+        "Expected {}, got '{}'",
+        tokenToString(op), token.toString()
+    ));
+}
+
+Result<> Token::pull(Keyword kw, InputStream& stream) {
+    Rollback rb(stream);
+    GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
+    if (auto value = std::get_if<Keyword>(&token.value)) {
+        if (*value == kw) {
+            rb.commit();
+            return Ok();
+        }
+        else {
+            return Err(fmt::format(
+                "Expected {}, got {}",
+                tokenToString(kw), tokenToString(*value)
+            ));
+        }
+    }
+    return Err(fmt::format(
+        "Expected {}, got '{}'",
+        tokenToString(kw), token.toString()
+    ));
+}
+
+Result<> Token::pull(char c, InputStream& stream) {
+    Rollback rb(stream);
+    GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
+    if (auto value = std::get_if<Punct>(&token.value)) {
+        if (*value == c) {
+            rb.commit();
+            return Ok();
+        }
+    }
+    return Err(fmt::format("Expected '{}', got '{}'", c, token.toString()));
 }
 
 std::optional<Token> Token::peek(InputStream& stream) {
@@ -331,10 +395,22 @@ bool Value::truthy() const {
         [&](Ref<GameObject> const&) {
             return true;
         },
+        [&](Rc<const FunExpr> const&) {
+            return true;
+        },
     }, value);
 }
 
 bool Value::typeEq(Rc<Value> other) const {
+    // null type compares equal to everything else :cowboy:
+    // this allows things like obj = null; obj = <actual object>
+    // this also allows circumventing the type system but that's a lil trolling
+    if (
+        std::holds_alternative<NullLit>(value) ||
+        std::holds_alternative<NullLit>(other->value)
+    ) {
+        return true;
+    }
     return value.index() == other->value.index();
 }
 
@@ -359,6 +435,12 @@ std::string Value::toString(bool debug) const {
             res += debug ? ")" : "]";
             return res;
         },
+        [&](Rc<const FunExpr> const& fun) {
+            if (debug) {
+                return fmt::format("function({})", fun->ident);
+            }
+            return fun->ident;
+        },
         [&](auto const& lit) {
             return tokenToString(static_cast<Lit>(lit), debug);
         },
@@ -370,36 +452,65 @@ std::string Value::typeName() const {
         [&](NullLit const&) {
             return "null";
         },
-        [&](BoolLit const& b) {
+        [&](BoolLit const&) {
             return "bool";
         },
-        [&](IntLit const& num) {
+        [&](IntLit const&) {
             return "int";
         },
-        [&](FloatLit const& num) {
+        [&](FloatLit const&) {
             return "float";
         },
-        [&](StrLit const& str) {
+        [&](StrLit const&) {
             return "string";
         },
-        [&](std::vector<Value> const& arr) {
+        [&](std::vector<Value> const&) {
             return "array";
         },
         [&](Ref<GameObject> const&) {
             return "object";
         },
+        [&](Rc<const FunExpr> const&) {
+            return "function";
+        },
     }, value);
 }
 
-Result<LitExpr> LitExpr::pull(InputStream& stream) {
+void State::add(std::string const& name, Rc<Value> value) {
+    entities.insert({ name, { value, scope }});
+}
+
+Rc<Value> State::get(std::string const& name) {
+    return entities.at(name).first;
+}
+
+void State::push() {
+    scope += 1;
+}
+
+void State::drop() {
+    for (auto& [ent, val] : entities) {
+        if (val.second >= scope) {
+            entities.erase(ent);
+        }
+    }
+    if (scope) {
+        scope -= 1;
+    }
+    else {
+        throw std::runtime_error("Internal error: Base scope dropped");
+    }
+}
+
+Result<Rc<LitExpr>> LitExpr::pull(InputStream& stream) {
     // arrays
     Rollback rb(stream);
-    if (Token::pull<'['>(stream)) {
+    if (Token::pull('[', stream)) {
         ArrLit arr;
         while (true) {
             GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
             arr.push_back(expr);
-            if (!Token::pull<','>(stream)) {
+            if (!Token::pull(',', stream)) {
                 break;
             }
             // allow trailing comma
@@ -407,15 +518,15 @@ Result<LitExpr> LitExpr::pull(InputStream& stream) {
                 break;
             }
         }
-        GEODE_UNWRAP(Token::pull<']'>(stream));
+        GEODE_UNWRAP(Token::pull(']', stream));
         rb.commit();
-        return Ok(LitExpr {
+        return make<LitExpr>({
             .value = arr
         });
     }
     GEODE_UNWRAP_INTO(auto value, Token::pull<Lit>(stream));
     rb.commit();
-    return Ok(LitExpr {
+    return make<LitExpr>({
         .value = value
     });
 }
@@ -423,7 +534,7 @@ Result<LitExpr> LitExpr::pull(InputStream& stream) {
 Result<Rc<Value>> LitExpr::eval(State& state) const {
     return std::visit(makeVisitor {
         [&](NullLit const&) -> Result<Rc<Value>> {
-            return Ok(Value::rc(nullptr));
+            return Ok(Value::rc(NullLit()));
         },
         [&](BoolLit const& b) -> Result<Rc<Value>> {
             return Ok(Value::rc(b));
@@ -441,7 +552,7 @@ Result<Rc<Value>> LitExpr::eval(State& state) const {
             Array value;
             value.reserve(arr.size());
             for (auto& expr : arr) {
-                GEODE_UNWRAP_INTO(auto val, expr.eval(state));
+                GEODE_UNWRAP_INTO(auto val, expr->eval(state));
                 value.push_back(*val.get());
             }
             return Ok(Value::rc(value));
@@ -449,21 +560,21 @@ Result<Rc<Value>> LitExpr::eval(State& state) const {
     }, value);
 }
 
-Result<IdentExpr> IdentExpr::pull(InputStream& stream) {
+Result<Rc<IdentExpr>> IdentExpr::pull(InputStream& stream) {
     GEODE_UNWRAP_INTO(auto ident, Token::pull<Ident>(stream));
-    return Ok(IdentExpr {
+    return make<IdentExpr>({
         .ident = ident
     });
 }
 
 Result<Rc<Value>> IdentExpr::eval(State& state) const {
-    if (!state.variables.count(ident)) {
-        state.variables.insert({ ident, nullptr });
+    if (!state.entities.count(ident)) {
+        state.add(ident, Value::rc(NullLit()));
     }
-    return Ok(state.variables.at(ident));
+    return Ok(state.get(ident));
 }
 
-Result<UnOpExpr> UnOpExpr::pull(InputStream& stream) {
+Result<Rc<UnOpExpr>> UnOpExpr::pull(InputStream& stream) {
     Rollback rb(stream);
     GEODE_UNWRAP_INTO(auto op, Token::pull<Op>(stream));
     if (!isUnOp(op)) {
@@ -471,8 +582,8 @@ Result<UnOpExpr> UnOpExpr::pull(InputStream& stream) {
     }
     GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
     rb.commit();
-    return Ok(UnOpExpr {
-        .expr = expr.rc(),
+    return make<UnOpExpr>({
+        .expr = expr,
         .op = op
     });
 }
@@ -516,7 +627,7 @@ Result<Rc<Value>> UnOpExpr::eval(State& state) const {
     }
 }
 
-Result<Expr> BinOpExpr::pull(InputStream& stream, size_t p, Expr lhs) {
+Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, size_t p, Rc<Expr> lhs) {
     Rollback rb(stream);
     while (true) {
         if (!Token::peek<Op>(stream)) break;
@@ -533,19 +644,19 @@ Result<Expr> BinOpExpr::pull(InputStream& stream, size_t p, Expr lhs) {
             GEODE_UNWRAP_INTO(rhs, BinOpExpr::pull(stream, pop + 1, rhs));
         }
 
-        lhs = Expr {
-            .value = BinOpExpr {
-                .lhs = lhs.rc(),
-                .rhs = rhs.rc(),
+        lhs = Rc<Expr>(new Expr {
+            .value = Rc<BinOpExpr>(new BinOpExpr {
+                .lhs = lhs,
+                .rhs = rhs,
                 .op = op
-            }
-        };
+            })
+        });
     }
     rb.commit();
     return Ok(lhs);
 }
 
-Result<Expr> BinOpExpr::pull(InputStream& stream) {
+Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream) {
     Rollback rb(stream);
     GEODE_UNWRAP_INTO(auto lhs, Expr::pullPrimary(stream));
     if (Token::peek<Op>(stream)) {
@@ -561,12 +672,9 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) const {
     GEODE_UNWRAP_INTO(auto rhsValue, rhs->eval(state));
     switch (op) {
         case Op::Assign: {
-            if (
-                !lhsValue->isNull() && !rhsValue->isNull() &&
-                !lhsValue->typeEq(rhsValue)
-            ) {
+            if (!lhsValue->typeEq(rhsValue)) {
                 return Err(fmt::format(
-                    "Attempted to assign {} to {}",
+                    "Can't assign type {} to type {}",
                     lhsValue->typeName(), rhsValue->typeName()
                 ));
             }
@@ -575,44 +683,35 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) const {
 
         case Op::Add: {
             auto value = std::visit(makeVisitor {
-                [&](IntLit const& a) -> std::optional<Rc<Value>> {
-                    if (auto b = rhsValue->has<IntLit>()) {
-                        return Value::rc(a + *b);
-                    }
-                    if (auto b = rhsValue->has<FloatLit>()) {
-                        return Value::rc(a + *b);
-                    }
-                    return std::nullopt;
+                [&](IntLit const& a, IntLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a + b);
                 },
-                [&](FloatLit const& a) -> std::optional<Rc<Value>> {
-                    if (auto b = rhsValue->has<IntLit>()) {
-                        return Value::rc(a + *b);
-                    }
-                    if (auto b = rhsValue->has<FloatLit>()) {
-                        return Value::rc(a + *b);
-                    }
-                    return std::nullopt;
+                [&](IntLit const& a, FloatLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a + b);
                 },
-                [&](StrLit const& a) -> std::optional<Rc<Value>> {
-                    if (auto b = rhsValue->has<StrLit>()) {
-                        return Value::rc(a + *b);
-                    }
-                    return std::nullopt;
+                [&](FloatLit const& a, IntLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a + b);
                 },
-                [&](Array const& a) -> std::optional<Rc<Value>> {
+                [&](FloatLit const& a, FloatLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a + b);
+                },
+                [&](StrLit const& a, StrLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a + b);
+                },
+                [&](Array const& a, auto const& b) -> std::optional<Rc<Value>> {
                     Array copy = a;
-                    if (auto b = rhsValue->has<Array>()) {
-                        ranges::push(copy, *b);
+                    if (auto arr = rhsValue->has<Array>()) {
+                        ranges::push(copy, *arr);
                     }
                     else {
-                        copy.push_back(*rhsValue.get());
+                        copy.push_back(static_cast<Value>(b));
                     }
                     return Value::rc(copy);
                 },
-                [&](auto const&) -> std::optional<Rc<Value>> {
+                [&](auto const&, auto const&) -> std::optional<Rc<Value>> {
                     return std::nullopt;
                 },
-            }, lhsValue->value);
+            }, lhsValue->value, rhsValue->value);
             if (value) {
                 return Ok(value.value());
             }
@@ -624,28 +723,22 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) const {
 
         case Op::Sub: {
             auto value = std::visit(makeVisitor {
-                [&](IntLit const& a) -> std::optional<Rc<Value>> {
-                    if (auto b = rhsValue->has<IntLit>()) {
-                        return Value::rc(a - *b);
-                    }
-                    if (auto b = rhsValue->has<FloatLit>()) {
-                        return Value::rc(a - *b);
-                    }
+                [&](IntLit const& a, IntLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a - b);
+                },
+                [&](IntLit const& a, FloatLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a - b);
+                },
+                [&](FloatLit const& a, IntLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a - b);
+                },
+                [&](FloatLit const& a, FloatLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a - b);
+                },
+                [&](auto const&, auto const&) -> std::optional<Rc<Value>> {
                     return std::nullopt;
                 },
-                [&](FloatLit const& a) -> std::optional<Rc<Value>> {
-                    if (auto b = rhsValue->has<IntLit>()) {
-                        return Value::rc(a - *b);
-                    }
-                    if (auto b = rhsValue->has<FloatLit>()) {
-                        return Value::rc(a - *b);
-                    }
-                    return std::nullopt;
-                },
-                [&](auto const&) -> std::optional<Rc<Value>> {
-                    return std::nullopt;
-                },
-            }, lhsValue->value);
+            }, lhsValue->value, rhsValue->value);
             if (value) {
                 return Ok(value.value());
             }
@@ -655,24 +748,146 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) const {
             ));
         } break;
 
+        case Op::Mul: {
+            auto value = std::visit(makeVisitor {
+                [&](IntLit const& a, IntLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a * b);
+                },
+                [&](IntLit const& a, FloatLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a * b);
+                },
+                [&](FloatLit const& a, IntLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a * b);
+                },
+                [&](FloatLit const& a, FloatLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a * b);
+                },
+                [&](auto const&, auto const&) -> std::optional<Rc<Value>> {
+                    return std::nullopt;
+                },
+            }, lhsValue->value, rhsValue->value);
+            if (value) {
+                return Ok(value.value());
+            }
+            return Err(fmt::format(
+                "Cannot multiply {} and {}",
+                lhsValue->typeName(), rhsValue->typeName()
+            ));
+        } break;
+
+        case Op::Div: {
+            auto value = std::visit(makeVisitor {
+                [&](IntLit const& a, IntLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a / b);
+                },
+                [&](IntLit const& a, FloatLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a / b);
+                },
+                [&](FloatLit const& a, IntLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a / b);
+                },
+                [&](FloatLit const& a, FloatLit const& b) -> std::optional<Rc<Value>> {
+                    return Value::rc(a / b);
+                },
+                [&](auto const&, auto const&) -> std::optional<Rc<Value>> {
+                    return std::nullopt;
+                },
+            }, lhsValue->value, rhsValue->value);
+            if (value) {
+                return Ok(value.value());
+            }
+            return Err(fmt::format(
+                "Cannot divide {} and {}",
+                lhsValue->typeName(), rhsValue->typeName()
+            ));
+        } break;
+
+        case Op::Eq: {
+            if (!lhsValue->typeEq(rhsValue)) {
+                return Err(fmt::format(
+                    "Can't compare types {} and {}",
+                    lhsValue->typeName(), rhsValue->typeName()
+                ));
+            }
+            return Ok(Value::rc(lhsValue->value == rhsValue->value));
+        } break;
+
+        case Op::NotEq: {
+            if (!lhsValue->typeEq(rhsValue)) {
+                return Err(fmt::format(
+                    "Can't compare types {} and {}",
+                    lhsValue->typeName(), rhsValue->typeName()
+                ));
+            }
+            return Ok(Value::rc(lhsValue->value != rhsValue->value));
+        } break;
+
+        case Op::Less: {
+            if (!lhsValue->typeEq(rhsValue)) {
+                return Err(fmt::format(
+                    "Can't compare types {} and {}",
+                    lhsValue->typeName(), rhsValue->typeName()
+                ));
+            }
+            return Ok(Value::rc(lhsValue->value < rhsValue->value));
+        } break;
+
+        case Op::LessEq: {
+            if (!lhsValue->typeEq(rhsValue)) {
+                return Err(fmt::format(
+                    "Can't compare types {} and {}",
+                    lhsValue->typeName(), rhsValue->typeName()
+                ));
+            }
+            return Ok(Value::rc(lhsValue->value <= rhsValue->value));
+        } break;
+
+        case Op::More: {
+            if (!lhsValue->typeEq(rhsValue)) {
+                return Err(fmt::format(
+                    "Can't compare types {} and {}",
+                    lhsValue->typeName(), rhsValue->typeName()
+                ));
+            }
+            return Ok(Value::rc(lhsValue->value > rhsValue->value));
+        } break;
+
+        case Op::MoreEq: {
+            if (!lhsValue->typeEq(rhsValue)) {
+                return Err(fmt::format(
+                    "Can't compare types {} and {}",
+                    lhsValue->typeName(), rhsValue->typeName()
+                ));
+            }
+            return Ok(Value::rc(lhsValue->value >= rhsValue->value));
+        } break;
+
+        case Op::And: {
+            return Ok(Value::rc(lhsValue->truthy() && rhsValue->truthy()));
+        } break;
+
+        case Op::Or: {
+            return Ok(Value::rc(lhsValue->truthy() || rhsValue->truthy()));
+        } break;
+
         default: {
             return unimplemented<UnOpExpr>(op);
         } break;
     }
 }
 
-Result<CallExpr> CallExpr::pull(InputStream& stream) {
+Result<Rc<CallExpr>> CallExpr::pull(InputStream& stream) {
     Rollback rb(stream);
     GEODE_UNWRAP_INTO(auto target, Expr::pull(stream));
-    GEODE_UNWRAP(Token::pull<'('>(stream));
-    std::vector<Expr> args;
-    std::unordered_map<std::string, Expr> named;
+    GEODE_UNWRAP(Token::pull('(', stream));
+    std::vector<Rc<Expr>> args;
+    std::unordered_map<std::string, Rc<Expr>> named;
     while (true) {
         bool isNamed = false;
         Rollback namedrb(stream);
         // named args are in the form `<ident> = <expr>`
         if (auto ident = Token::pull<Ident>(stream)) {
-            if (auto op = Token::pull<Op::Eq>(stream)) {
+            if (Token::pull(Op::Eq, stream)) {
                 GEODE_UNWRAP_INTO(auto value, Expr::pull(stream));
                 if (named.count(ident.unwrap())) {
                     return Err(fmt::format(
@@ -690,72 +905,179 @@ Result<CallExpr> CallExpr::pull(InputStream& stream) {
             GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
             args.push_back(expr);
         }
-        if (!Token::pull<','>(stream)) {
-            break;
-        }
         // allow trailing comma
-        if (Token::peek<')'>(stream)) {
+        if (!Token::pull(',', stream) || Token::peek<')'>(stream)) {
             break;
         }
     }
-    GEODE_UNWRAP(Token::pull<')'>(stream));
+    GEODE_UNWRAP(Token::pull(')', stream));
     rb.commit();
-    return Ok(CallExpr {
-        .expr = target.rc(),
+    return make<CallExpr>({
+        .expr = target,
         .args = args,
         .named = named,
     });
 }
 
-Result<ForInExpr> ForInExpr::pull(InputStream& stream) {
+Result<Rc<Value>> CallExpr::eval(State& state) const {
+    GEODE_UNWRAP_INTO(auto val, expr->eval(state));
+    auto funp = std::get_if<Rc<const FunExpr>>(&val->value);
+    if (!funp) {
+        return Err("Attempted to call {} as a function", val->typeName());
+    }
+    auto fun = *funp;
+
+    std::unordered_map<std::string, Rc<Value>> res;
+    for (auto& [name, nexpr] : named) {
+        GEODE_UNWRAP_INTO(auto val, nexpr->eval(state));
+        res.insert({ name, val });
+    }
+
+    auto i = 0u;
+    for (auto& [name, _] : fun->params) {
+        if (args.size() > i) {
+            auto arg = args.at(i);
+            if (res.count(name)) {
+                return Err(fmt::format(
+                    "Argument '{}' passed multiple times",
+                    name
+                ));
+            }
+            GEODE_UNWRAP_INTO(auto val, arg->eval(state));
+            res.insert({ name, val });
+            i++;
+        }
+        else {
+            break;
+        }
+    }
+    if (args.size() != i) {
+        return Err("Function called with too many arguments");
+    }
+
+    // insert default values
+    for (auto& [name, def] : fun->params) {
+        if (!res.count(name)) {
+            if (!def) {
+                return Err(fmt::format("Missing required parameter '{}'", name));
+            }
+            else {
+                GEODE_UNWRAP_INTO(auto val, def.value()->eval(state));
+                res.insert({ name, val });
+            }
+        }
+    }
+
+    state.push();
+    for (auto& [p, value] : res) {
+        state.add(p, value);
+    }
+    GEODE_UNWRAP_INTO(auto ret, fun->body->eval(state));
+    state.drop();
+    return Ok(ret);
+}
+
+Result<Rc<ForInExpr>> ForInExpr::pull(InputStream& stream) {
     Rollback rb(stream);
-    GEODE_UNWRAP(Token::pull<Keyword::For>(stream));
+    GEODE_UNWRAP(Token::pull(Keyword::For, stream));
     GEODE_UNWRAP_INTO(auto ident, Token::pull<Ident>(stream));
-    GEODE_UNWRAP(Token::pull<Keyword::In>(stream));
+    GEODE_UNWRAP(Token::pull(Keyword::In, stream));
     GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
-    GEODE_UNWRAP(Token::pull<'{'>(stream));
-    GEODE_UNWRAP_INTO(auto body, ListExpr::pull(stream));
-    GEODE_UNWRAP(Token::pull<'}'>(stream));
+    GEODE_UNWRAP_INTO(auto body, ListExpr::pullBlock(stream));
     rb.commit();
-    return Ok(ForInExpr {
+    return make<ForInExpr>({
         .item = ident,
-        .expr = expr.rc(),
-        .body = Expr { .value = body }.rc(),
+        .expr = expr,
+        .body = body,
     });
 }
 
-Result<ListExpr> ListExpr::pull(InputStream& stream) {
+Result<Rc<ListExpr>> ListExpr::pull(InputStream& stream) {
     // handle just {}
-    if (Token::pull<'}'>(stream)) {
-        return Ok(ListExpr {
+    if (Token::pull('}', stream)) {
+        return make<ListExpr>({
             .exprs = {}
         });
     }
     Rollback rb(stream);
-    std::vector<Expr> list;
+    std::vector<Rc<Expr>> list;
     while (true) {
         GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
         list.push_back(expr);
         // allow any number of semicolons between expressions
-        while (Token::pull<';'>(stream)) {}
-        if (Token::pull<'}'>(stream) || Token::eof(stream)) {
+        while (Token::pull(';', stream)) {}
+        if (Token::pull('}', stream) || Token::eof(stream)) {
             break;
         }
     }
     rb.commit();
-    return Ok(ListExpr {
+    return make<ListExpr>({
         .exprs = list
     });
 }
 
-Result<Expr> Expr::pull(InputStream& stream) {
+Result<Rc<Expr>> ListExpr::pullBlock(InputStream& stream) {
+    Rollback rb(stream);
+    GEODE_UNWRAP(Token::pull('{', stream));
+    GEODE_UNWRAP_INTO(auto body, ListExpr::pull(stream));
+    GEODE_UNWRAP(Token::pull('}', stream));
+    rb.commit();
+    return make<Expr>({ .value = body });
+}
+
+Result<Rc<FunExpr>> FunExpr::pull(InputStream& stream) {
+    Rollback rb(stream);
+    GEODE_UNWRAP(Token::pull(Keyword::Function, stream));
+    GEODE_UNWRAP_INTO(auto ident, Token::pull<Ident>(stream));
+    GEODE_UNWRAP(Token::pull('(', stream));
+    std::vector<std::pair<Ident, std::optional<Rc<Expr>>>> params;
+    while (true) {
+        GEODE_UNWRAP_INTO(auto name, Token::pull<Ident>(stream));
+        if (Token::pull(Op::Eq, stream)) {
+            GEODE_UNWRAP_INTO(auto value, Expr::pull(stream));
+            params.push_back({ name, value });
+        }
+        else {
+            params.push_back({ name, std::nullopt });
+        }
+        if (!Token::pull(',', stream) || Token::peek<')'>(stream)) {
+            break;
+        }
+    }
+    GEODE_UNWRAP(Token::pull(')', stream));
+    GEODE_UNWRAP_INTO(auto body, ListExpr::pullBlock(stream));
+    rb.commit();
+    return make<FunExpr>({
+        .ident = ident,
+        .params = params,
+        .body = body,
+    });
+}
+
+Result<Rc<Value>> FunExpr::eval(State& state) const {
+    // added during preval
+    if (!state.entities.count(ident)) {
+        return internal<FunExpr>("Function not added during preval");
+    }
+    return Ok(state.get(ident));
+}
+
+Result<> FunExpr::preval(State& state) const {
+    if (state.entities.count(ident)) {
+        return Err(fmt::format("Function '{}' is already defined", ident));
+    }
+    state.add(ident, Value::rc(shared_from_this()));
+    return Ok();
+}
+
+Result<Rc<Expr>> Expr::pull(InputStream& stream) {
     return BinOpExpr::pull(stream);
 }
 
-Result<Expr> Expr::pullPrimary(InputStream& stream) {
+Result<Rc<Expr>> Expr::pullPrimary(InputStream& stream) {
 #define TRY_PULL(expr) \
     if (auto value = expr::pull(stream)) {\
-        return Ok(Expr { .value = value.unwrap() }); \
+        return make<Expr>({ .value = value.unwrap() }); \
     }
     // try first pulling an unary expr (which will pull the rest if succesful)
     TRY_PULL(UnOpExpr);
@@ -764,10 +1086,10 @@ Result<Expr> Expr::pullPrimary(InputStream& stream) {
     // then try pulling other stuff
     TRY_PULL(IfExpr);
     TRY_PULL(ForInExpr);
-    if (Token::pull<'{'>(stream)) {
+    if (Token::pull('{', stream)) {
         GEODE_UNWRAP_INTO(auto expr, ListExpr::pull(stream));
-        GEODE_UNWRAP(Token::pull<'}'>(stream));
-        return Ok(Expr { .value = expr });
+        GEODE_UNWRAP(Token::pull('}', stream));
+        return make<Expr>({ .value = expr });
     }
     TRY_PULL(LitExpr);
     TRY_PULL(IdentExpr);
@@ -782,11 +1104,45 @@ Result<Expr> Expr::pullPrimary(InputStream& stream) {
 Result<Rc<Value>> Expr::eval(State& state) const {
     return std::visit(makeVisitor {
         [&](auto const& expr) {
-            return expr.eval(state);
+            return expr->eval(state);
         },
     }, value);
 }
 
-Rc<Expr> Expr::rc() const {
-    return std::make_shared<Expr>(*this);
+Result<> Expr::preval(State& state) const {
+    return std::visit(makeVisitor {
+        [&](auto const& expr) {
+            return expr->preval(state);
+        },
+    }, value);
+}
+
+bool script::operator==(Array const& a, Array const b) {
+    if (a.size() != b.size()) return false;
+    for (auto i = 0u; i < a.size(); i++) {
+        if (a[i].value != b[i].value) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool script::operator!=(Array const& a, Array const b) {
+    return !(a == b);
+}
+
+bool script::operator<(Array const& a, Array const b) {
+    return false;
+}
+
+bool script::operator<=(Array const& a, Array const b) {
+    return true;
+}
+
+bool script::operator>(Array const& a, Array const b) {
+    return false;
+}
+
+bool script::operator>=(Array const& a, Array const b) {
+    return true;
 }
