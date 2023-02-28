@@ -2,6 +2,7 @@
 #include <Geode/utils/general.hpp>
 #include <Geode/utils/ranges.hpp>
 #include <Geode/utils/map.hpp>
+#include <Geode/loader/Log.hpp>
 
 using namespace script;
 
@@ -18,9 +19,23 @@ static impl::Failure<std::string> unimplemented(Op op) {
     return internal<T>(fmt::format("Unimplemented {}", tokenToString(op, true)));
 };
 
+template <class T, class... Args>
+Result<Rc<T>> make(Args&&... args) {
+    return Ok(std::make_shared<T>(std::forward<Args>(args)...));
+}
+
 template <class T>
 Result<Rc<T>> make(T value) {
     return Ok(std::make_shared<T>(value));
+}
+
+std::string getStmt(std::streampos start, InputStream& stream) {
+    auto to = stream.tellg();
+    stream.seekg(start);
+    std::string buf;
+    buf.reserve(to - start);
+    stream.read(buf.data(), to - start);
+    return buf;
 }
 
 static std::unordered_map<Keyword, std::string> KEYWORDS {
@@ -30,6 +45,9 @@ static std::unordered_map<Keyword, std::string> KEYWORDS {
     { Keyword::If,          "if" },
     { Keyword::Else,        "else" },
     { Keyword::Function,    "function" },
+    { Keyword::Return,      "return" },
+    { Keyword::Break,       "break" },
+    { Keyword::Continue,    "continue" },
     { Keyword::New,         "new" },
     { Keyword::True,        "true" },
     { Keyword::False,       "false" },
@@ -201,6 +219,11 @@ void Token::skip(InputStream& stream) {
 
 Result<Token> Token::pull(InputStream& stream) {
     skip(stream);
+
+    if (stream.eof()) {
+        return Err("Expected token, found end-of-file");
+    }
+    
     auto c = stream.peek();
 
     Rollback rb(stream);
@@ -217,7 +240,7 @@ Result<Token> Token::pull(InputStream& stream) {
     }
     
     // number literals
-    if (isdigit(c) || c == '.' || c == '+' || c == '-') {
+    if (isdigit(c) || c == '.') {
         // remember position, as "75.0" would first be parsed as int but we 
         // need to backtrack to parse as float instead if 
         auto pos = stream.tellg();
@@ -243,32 +266,27 @@ Result<Token> Token::pull(InputStream& stream) {
 
     // punctuation
     if (std::string("()[]{}:;,.").find_first_of(c) != std::string::npos) {
+        stream.get();
+        rb.commit();
         return Ok(Token(Punct(c)));
     }
 
     // other
+    // todo: add operator stuff and punctuation as delimiters
     std::string value;
-    stream >> value;
+    stream >> opValue;
 
     if (value == "true") {
+        rb.commit();
         return Ok(Token(Lit(true)));
     }
     if (value == "false") {
+        rb.commit();
         return Ok(Token(Lit(false)));
     }
     if (value == "null") {
+        rb.commit();
         return Ok(Token(Lit(NullLit())));
-    }
-
-    // operator
-    for (auto const& [op, va] : OPS) {
-        if (std::get<0>(va) == value) {
-            rb.commit();
-            return Ok(Token(op));
-        }
-    }
-    if (isOp(value)) {
-        return Err(fmt::format("Invalid operator '{}'", value));
     }
 
     // keyword
@@ -280,12 +298,30 @@ Result<Token> Token::pull(InputStream& stream) {
     }
 
     // identifier
-    if (isIdent(value)) {
+    if (isIdent(cutIdent(value, stream))) {
         rb.commit();
         return Ok(Token(value));
     }
+
+    rb.retry();
+
+    // other
+    // todo: just manually parse this one so i don't have to deal with specifying every possible delimiter
+    std::string opValue;
+    stream >> opValue;
+
+    // operator
+    for (auto const& [op, va] : OPS) {
+        if (std::get<0>(va) == opValue) {
+            rb.commit();
+            return Ok(Token(op));
+        }
+    }
+    if (isOp(opValue)) {
+        return Err(fmt::format("Invalid operator '{}'", opValue));
+    }
     
-    return Err(fmt::format("Invalid keyword or identifier '{}'", value));
+    return Err(fmt::format("Invalid keyword or identifier '{}'", opValue));
 }
 
 Result<> Token::pull(Op op, InputStream& stream) {
@@ -476,45 +512,20 @@ std::string Value::typeName() const {
     }, value);
 }
 
-void State::add(std::string const& name, Rc<Value> value) {
-    entities.insert({ name, { value, scope }});
-}
-
-Rc<Value> State::get(std::string const& name) {
-    return entities.at(name).first;
-}
-
-void State::push() {
-    scope += 1;
-}
-
-void State::drop() {
-    for (auto& [ent, val] : entities) {
-        if (val.second >= scope) {
-            entities.erase(ent);
-        }
-    }
-    if (scope) {
-        scope -= 1;
-    }
-    else {
-        throw std::runtime_error("Internal error: Base scope dropped");
-    }
-}
-
 Result<Rc<LitExpr>> LitExpr::pull(InputStream& stream) {
     // arrays
     Rollback rb(stream);
     if (Token::pull('[', stream)) {
         ArrLit arr;
         while (true) {
+            log::info("LitExpr::pull loop");
             GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
             arr.push_back(expr);
             if (!Token::pull(',', stream)) {
                 break;
             }
             // allow trailing comma
-            if (Token::peek<']'>(stream)) {
+            if (Token::peek(']', stream)) {
                 break;
             }
         }
@@ -531,7 +542,7 @@ Result<Rc<LitExpr>> LitExpr::pull(InputStream& stream) {
     });
 }
 
-Result<Rc<Value>> LitExpr::eval(State& state) const {
+Result<Rc<Value>> LitExpr::eval(State& state) {
     return std::visit(makeVisitor {
         [&](NullLit const&) -> Result<Rc<Value>> {
             return Ok(Value::rc(NullLit()));
@@ -553,11 +564,15 @@ Result<Rc<Value>> LitExpr::eval(State& state) const {
             value.reserve(arr.size());
             for (auto& expr : arr) {
                 GEODE_UNWRAP_INTO(auto val, expr->eval(state));
-                value.push_back(*val.get());
+                value.push_back(*val);
             }
             return Ok(Value::rc(value));
         },
     }, value);
+}
+
+std::string LitExpr::debug() const {
+    return fmt::format("LitExpr({})", tokenToString(value, true));
 }
 
 Result<Rc<IdentExpr>> IdentExpr::pull(InputStream& stream) {
@@ -567,11 +582,15 @@ Result<Rc<IdentExpr>> IdentExpr::pull(InputStream& stream) {
     });
 }
 
-Result<Rc<Value>> IdentExpr::eval(State& state) const {
-    if (!state.entities.count(ident)) {
+Result<Rc<Value>> IdentExpr::eval(State& state) {
+    if (!state.has(ident)) {
         state.add(ident, Value::rc(NullLit()));
     }
     return Ok(state.get(ident));
+}
+
+std::string IdentExpr::debug() const {
+    return fmt::format("IdentExpr({})", tokenToString(ident, true));
 }
 
 Result<Rc<UnOpExpr>> UnOpExpr::pull(InputStream& stream) {
@@ -588,7 +607,7 @@ Result<Rc<UnOpExpr>> UnOpExpr::pull(InputStream& stream) {
     });
 }
 
-Result<Rc<Value>> UnOpExpr::eval(State& state) const {
+Result<Rc<Value>> UnOpExpr::eval(State& state) {
     GEODE_UNWRAP_INTO(auto value, expr->eval(state));
     switch (op) {
         case Op::Not: {
@@ -627,9 +646,17 @@ Result<Rc<Value>> UnOpExpr::eval(State& state) const {
     }
 }
 
+std::string UnOpExpr::debug() const {
+    return fmt::format(
+        "UnOpExpr({}, {})",
+        expr->debug(), tokenToString(op, true)
+    );
+}
+
 Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, size_t p, Rc<Expr> lhs) {
     Rollback rb(stream);
     while (true) {
+        log::info("BinOpExpr::pull loop");
         if (!Token::peek<Op>(stream)) break;
 
         GEODE_UNWRAP_INTO(auto op, Token::pull<Op>(stream));
@@ -657,17 +684,20 @@ Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, size_t p, Rc<Expr> lhs) {
 }
 
 Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream) {
+    log::info("BinOpExpr::pull");
     Rollback rb(stream);
     GEODE_UNWRAP_INTO(auto lhs, Expr::pullPrimary(stream));
     if (Token::peek<Op>(stream)) {
+        log::info("pulling binop");
         rb.commit();
         return BinOpExpr::pull(stream, 0, lhs);
     }
+    log::info("no binop to pull");
     rb.commit();
     return Ok(lhs);
 }
 
-Result<Rc<Value>> BinOpExpr::eval(State& state) const {
+Result<Rc<Value>> BinOpExpr::eval(State& state) {
     GEODE_UNWRAP_INTO(auto lhsValue, lhs->eval(state));
     GEODE_UNWRAP_INTO(auto rhsValue, rhs->eval(state));
     switch (op) {
@@ -679,6 +709,7 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) const {
                 ));
             }
             lhsValue.swap(rhsValue);
+            return Ok(lhsValue);
         } break;
 
         case Op::Add: {
@@ -698,13 +729,13 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) const {
                 [&](StrLit const& a, StrLit const& b) -> std::optional<Rc<Value>> {
                     return Value::rc(a + b);
                 },
-                [&](Array const& a, auto const& b) -> std::optional<Rc<Value>> {
+                [&](Array const& a, auto const&) -> std::optional<Rc<Value>> {
                     Array copy = a;
                     if (auto arr = rhsValue->has<Array>()) {
                         ranges::push(copy, *arr);
                     }
                     else {
-                        copy.push_back(static_cast<Value>(b));
+                        copy.push_back(*rhsValue);
                     }
                     return Value::rc(copy);
                 },
@@ -876,10 +907,27 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) const {
     }
 }
 
+std::string BinOpExpr::debug() const {
+    return fmt::format(
+        "BinOpExpr({}, {}, {})",
+        lhs->debug(), rhs->debug(), tokenToString(op, true)
+    );
+}
+
 Result<Rc<CallExpr>> CallExpr::pull(InputStream& stream) {
+    log::info("CallExpr::pull");
     Rollback rb(stream);
-    GEODE_UNWRAP_INTO(auto target, Expr::pull(stream));
+    GEODE_UNWRAP_INTO(auto target, Expr::pullPrimaryNonCall(stream));
     GEODE_UNWRAP(Token::pull('(', stream));
+    // handle ()
+    if (Token::pull(')', stream)) {
+        rb.commit();
+        return make<CallExpr>({
+            .expr = target,
+            .args = {},
+            .named = {},
+        });
+    }
     std::vector<Rc<Expr>> args;
     std::unordered_map<std::string, Rc<Expr>> named;
     while (true) {
@@ -906,7 +954,7 @@ Result<Rc<CallExpr>> CallExpr::pull(InputStream& stream) {
             args.push_back(expr);
         }
         // allow trailing comma
-        if (!Token::pull(',', stream) || Token::peek<')'>(stream)) {
+        if (!Token::pull(',', stream) || Token::peek(')', stream)) {
             break;
         }
     }
@@ -919,7 +967,7 @@ Result<Rc<CallExpr>> CallExpr::pull(InputStream& stream) {
     });
 }
 
-Result<Rc<Value>> CallExpr::eval(State& state) const {
+Result<Rc<Value>> CallExpr::eval(State& state) {
     GEODE_UNWRAP_INTO(auto val, expr->eval(state));
     auto funp = std::get_if<Rc<const FunExpr>>(&val->value);
     if (!funp) {
@@ -968,13 +1016,39 @@ Result<Rc<Value>> CallExpr::eval(State& state) const {
         }
     }
 
-    state.push();
+    auto scope = state.scope();
     for (auto& [p, value] : res) {
         state.add(p, value);
     }
-    GEODE_UNWRAP_INTO(auto ret, fun->body->eval(state));
-    state.drop();
-    return Ok(ret);
+    try {
+        GEODE_UNWRAP_INTO(auto ret, fun->body->eval(state));
+        return Ok(ret);
+    }
+    catch(ReturnSignal& sig) {
+        return Ok(sig.value);
+    }
+}
+
+std::string CallExpr::debug() const {
+    std::string a;
+    bool first = true;
+    for (auto& arg : args) {
+        if (!first) {
+            a += ", ";
+        }
+        first = false;
+        a += arg->debug();
+    }
+    std::string n;
+    first = true;
+    for (auto& [na, va] : named) {
+        if (!first) {
+            n += ", ";
+        }
+        first = false;
+        n += fmt::format("Named({}, {})", na, va->debug());
+    }
+    return fmt::format("CallExpr({}, [{}], [{}])", expr->debug(), a, n);
 }
 
 Result<Rc<ForInExpr>> ForInExpr::pull(InputStream& stream) {
@@ -992,9 +1066,237 @@ Result<Rc<ForInExpr>> ForInExpr::pull(InputStream& stream) {
     });
 }
 
+Result<Rc<Value>> ForInExpr::eval(State& state) {
+    GEODE_UNWRAP_INTO(auto value, expr->eval(state));
+    auto arr = value->has<Array>();
+    if (!arr) {
+        return Err("Attempted to iterate {}, expected array", value->typeName());
+    }
+    // result of last iteration will be the return value
+    auto ret = Value::rc(NullLit());
+    for (auto value : *arr) {
+        auto scope = state.scope();
+        state.add(item, std::make_shared<Value>(value));
+        try {
+            GEODE_UNWRAP_INTO(ret, body->eval(state));
+        }
+        catch (ContinueSignal const&) {
+            continue;
+        }
+        catch (BreakSignal const&) {
+            break;
+        }
+    }
+    return Ok(ret);
+}
+
+std::string ForInExpr::debug() const {
+    return fmt::format(
+        "ForInExpr({}, {}, {})",
+        item, expr->debug(), body->debug()
+    );
+}
+
+Result<Rc<IfExpr>> IfExpr::pull(InputStream& stream) {
+    Rollback rb(stream);
+    GEODE_UNWRAP(Token::pull(Keyword::If, stream));
+    GEODE_UNWRAP_INTO(auto cond, Expr::pull(stream));
+    GEODE_UNWRAP_INTO(auto truthy, ListExpr::pullBlock(stream));
+    std::optional<Rc<Expr>> falsy;
+    if (Token::pull(Keyword::Else, stream)) {
+        // else if
+        if (Token::peek(Keyword::If, stream)) {
+            GEODE_UNWRAP_INTO(auto ifFalsy, IfExpr::pull(stream));
+            falsy = make<Expr>(ifFalsy).unwrap();
+        }
+        // otherwise expect a block
+        else {
+            GEODE_UNWRAP_INTO(falsy, ListExpr::pullBlock(stream));
+        }
+    }
+    return make<IfExpr>({
+        .cond = cond,
+        .truthy = truthy,
+        .falsy = falsy,
+    });
+}
+
+Result<Rc<Value>> IfExpr::eval(State& state) {
+    GEODE_UNWRAP_INTO(auto condVal, cond->eval(state));
+    if (condVal->truthy()) {
+        GEODE_UNWRAP_INTO(auto ret, truthy->eval(state));
+        return Ok(ret);
+    }
+    else if (falsy) {
+        GEODE_UNWRAP_INTO(auto ret, falsy.value()->eval(state));
+        return Ok(ret);
+    }
+    return Ok(Value::rc(NullLit()));
+}
+
+std::string IfExpr::debug() const {
+    if (falsy) {
+        return fmt::format(
+            "IfExpr({}, {}, {})",
+            cond->debug(), truthy->debug(), falsy.value()->debug()
+        );
+    }
+    else {
+        return fmt::format(
+            "IfExpr({}, {})",
+            cond->debug(), truthy->debug()
+        );
+    }
+}
+
+FunExpr::FunExpr(
+    Ident const& ident,
+    decltype(params) const& params,
+    Rc<Expr> const& body
+) : ident(ident), params(params), body(body) {}
+
+Result<Rc<FunExpr>> FunExpr::pull(InputStream& stream) {
+    Rollback rb(stream);
+    GEODE_UNWRAP(Token::pull(Keyword::Function, stream));
+    GEODE_UNWRAP_INTO(auto ident, Token::pull<Ident>(stream));
+    GEODE_UNWRAP(Token::pull('(', stream));
+    std::vector<std::pair<Ident, std::optional<Rc<Expr>>>> params;
+    while (true) {
+        log::info("FunExpr::pull loop");
+        GEODE_UNWRAP_INTO(auto name, Token::pull<Ident>(stream));
+        if (Token::pull(Op::Eq, stream)) {
+            GEODE_UNWRAP_INTO(auto value, Expr::pull(stream));
+            params.push_back({ name, value });
+        }
+        else {
+            params.push_back({ name, std::nullopt });
+        }
+        if (!Token::pull(',', stream) || Token::peek(')', stream)) {
+            break;
+        }
+    }
+    GEODE_UNWRAP(Token::pull(')', stream));
+    GEODE_UNWRAP_INTO(auto body, ListExpr::pullBlock(stream));
+    rb.commit();
+    return make<FunExpr>(ident, params, body);
+}
+
+Result<Rc<Value>> FunExpr::eval(State& state) {
+    GEODE_UNWRAP(this->add(state));
+    return Ok(state.get(ident));
+}
+
+Result<> FunExpr::add(State& state) {
+    if (!added) {
+        if (state.has(ident)) {
+            return Err(fmt::format("Function '{}' is already defined", ident));
+        }
+        state.add(ident, Value::rc(shared_from_this()));
+        added = true;
+    }
+    return Ok();
+}
+
+std::string FunExpr::debug() const {
+    std::string par;
+    bool first = true;
+    for (auto& [na, va] : params) {
+        if (!first) {
+            par += ", ";
+        }
+        first = false;
+        if (va) {
+            par += fmt::format("Param({}, {})", na, va.value()->debug());
+        }
+        else {
+            par += fmt::format("Param({})", na);
+        }
+    }
+    return fmt::format("FunExpr({}, [{}], {})", ident, par, body->debug());
+}
+
+Result<Rc<ReturnExpr>> ReturnExpr::pull(InputStream& stream) {
+    GEODE_UNWRAP(Token::pull(Keyword::Return, stream));
+    if (auto expr = Expr::pull(stream)) {
+        return make<ReturnExpr>({
+            .value = expr.unwrap(),
+        });
+    }
+    else {
+        return make<ReturnExpr>({
+            .value = std::nullopt,
+        });
+    }
+}
+
+Result<Rc<Value>> ReturnExpr::eval(State& state) {
+    if (value) {
+        GEODE_UNWRAP_INTO(auto val, value.value()->eval(state));
+        throw ReturnSignal(val);
+    }
+    else {
+        throw ReturnSignal(Value::rc(NullLit()));
+    }
+}
+
+std::string ReturnExpr::debug() const {
+    if (value) {
+        return fmt::format("ReturnExpr({})", value.value()->debug());
+    }
+    else {
+        return fmt::format("ReturnExpr(Null)");
+    }
+}
+
+Result<Rc<BreakExpr>> BreakExpr::pull(InputStream& stream) {
+    GEODE_UNWRAP(Token::pull(Keyword::Break, stream));
+    if (auto expr = Expr::pull(stream)) {
+        return make<BreakExpr>({
+            .value = expr.unwrap(),
+        });
+    }
+    else {
+        return make<BreakExpr>({
+            .value = std::nullopt,
+        });
+    }
+}
+
+Result<Rc<Value>> BreakExpr::eval(State& state) {
+    if (value) {
+        GEODE_UNWRAP_INTO(auto val, value.value()->eval(state));
+        throw BreakSignal(val);
+    }
+    else {
+        throw BreakSignal(Value::rc(NullLit()));
+    }
+}
+
+std::string BreakExpr::debug() const {
+    if (value) {
+        return fmt::format("BreakExpr({})", value.value()->debug());
+    }
+    else {
+        return fmt::format("BreakExpr(Null)");
+    }
+}
+
+Result<Rc<ContinueExpr>> ContinueExpr::pull(InputStream& stream) {
+    GEODE_UNWRAP(Token::pull(Keyword::Continue, stream));
+    return make<ContinueExpr>();
+}
+
+Result<Rc<Value>> ContinueExpr::eval(State& state) {
+    throw ContinueSignal();
+}
+
+std::string ContinueExpr::debug() const {
+    return "Continue()";
+}
+
 Result<Rc<ListExpr>> ListExpr::pull(InputStream& stream) {
     // handle just {}
-    if (Token::pull('}', stream)) {
+    if (Token::peek('}', stream)) {
         return make<ListExpr>({
             .exprs = {}
         });
@@ -1002,13 +1304,16 @@ Result<Rc<ListExpr>> ListExpr::pull(InputStream& stream) {
     Rollback rb(stream);
     std::vector<Rc<Expr>> list;
     while (true) {
+        log::info("ListExpr::pull loop");
         GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
         list.push_back(expr);
         // allow any number of semicolons between expressions
         while (Token::pull(';', stream)) {}
-        if (Token::pull('}', stream) || Token::eof(stream)) {
+        if (Token::peek('}', stream) || Token::eof(stream)) {
             break;
         }
+        log::info("Pulled {}", expr->debug());
+        log::info("Going for another loop at {}", stream.tellg());
     }
     rb.commit();
     return make<ListExpr>({
@@ -1025,83 +1330,87 @@ Result<Rc<Expr>> ListExpr::pullBlock(InputStream& stream) {
     return make<Expr>({ .value = body });
 }
 
-Result<Rc<FunExpr>> FunExpr::pull(InputStream& stream) {
-    Rollback rb(stream);
-    GEODE_UNWRAP(Token::pull(Keyword::Function, stream));
-    GEODE_UNWRAP_INTO(auto ident, Token::pull<Ident>(stream));
-    GEODE_UNWRAP(Token::pull('(', stream));
-    std::vector<std::pair<Ident, std::optional<Rc<Expr>>>> params;
-    while (true) {
-        GEODE_UNWRAP_INTO(auto name, Token::pull<Ident>(stream));
-        if (Token::pull(Op::Eq, stream)) {
-            GEODE_UNWRAP_INTO(auto value, Expr::pull(stream));
-            params.push_back({ name, value });
+Result<Rc<Value>> ListExpr::eval(State& state) {
+    Rc<Value> ret = Value::rc(NullLit());
+    for (auto& expr : exprs) {
+        try {
+            GEODE_UNWRAP_INTO(ret, expr->eval(state));
         }
-        else {
-            params.push_back({ name, std::nullopt });
-        }
-        if (!Token::pull(',', stream) || Token::peek<')'>(stream)) {
-            break;
+        catch (BreakSignal& sig) {
+            return Ok(sig.value);
         }
     }
-    GEODE_UNWRAP(Token::pull(')', stream));
-    GEODE_UNWRAP_INTO(auto body, ListExpr::pullBlock(stream));
-    rb.commit();
-    return make<FunExpr>({
-        .ident = ident,
-        .params = params,
-        .body = body,
-    });
+    return Ok(ret);
 }
 
-Result<Rc<Value>> FunExpr::eval(State& state) const {
-    // added during preval
-    if (!state.entities.count(ident)) {
-        return internal<FunExpr>("Function not added during preval");
+std::string ListExpr::debug() const {
+    std::string items;
+    bool first = true;
+    for (auto& expr : exprs) {
+        if (!first) {
+            items += ", ";
+        }
+        first = false;
+        items += expr->debug();
     }
-    return Ok(state.get(ident));
-}
-
-Result<> FunExpr::preval(State& state) const {
-    if (state.entities.count(ident)) {
-        return Err(fmt::format("Function '{}' is already defined", ident));
-    }
-    state.add(ident, Value::rc(shared_from_this()));
-    return Ok();
+    return fmt::format("ListExpr({})", items);
 }
 
 Result<Rc<Expr>> Expr::pull(InputStream& stream) {
+    log::info("Expr::pull");
     return BinOpExpr::pull(stream);
 }
 
-Result<Rc<Expr>> Expr::pullPrimary(InputStream& stream) {
 #define TRY_PULL(expr) \
     if (auto value = expr::pull(stream)) {\
         return make<Expr>({ .value = value.unwrap() }); \
     }
+
+Result<Rc<Expr>> Expr::pullPrimary(InputStream& stream) {
+    log::info("Expr::pullPrimary");
+    TRY_PULL(CallExpr);
+    return Expr::pullPrimaryNonCall(stream);
+}
+
+Result<Rc<Expr>> Expr::pullPrimaryNonCall(InputStream& stream) {
+    log::info("Expr::pullPrimaryNonCall");
+    // parenthesis
+    if (Token::pull('(', stream)) {
+        log::info("[ParenExpr]::pull");
+        GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
+        GEODE_UNWRAP(Token::pull(')', stream));
+        return Ok(expr);
+    }
+    log::info("not ParenExpr");
     // try first pulling an unary expr (which will pull the rest if succesful)
     TRY_PULL(UnOpExpr);
-    // then try pulling a call expr (which will pull the rest if succesful)
-    TRY_PULL(CallExpr);
+    log::info("not UnOpExpr");
     // then try pulling other stuff
     TRY_PULL(IfExpr);
+    log::info("not IfExpr");
     TRY_PULL(ForInExpr);
+    log::info("not ForInExpr");
     if (Token::pull('{', stream)) {
         GEODE_UNWRAP_INTO(auto expr, ListExpr::pull(stream));
         GEODE_UNWRAP(Token::pull('}', stream));
         return make<Expr>({ .value = expr });
     }
+    log::info("not ListExpr");
     TRY_PULL(LitExpr);
+    log::info("not LitExpr");
     TRY_PULL(IdentExpr);
+    log::info("not IdentExpr");
     if (auto token = Token::peek(stream)) {
+        log::info("nope at {}", stream.tellg());
         return Err("Expected expression, got '{}'", token.value().toString());
     }
     else {
-        return Err("Expected expression");
+        log::info("eof at {}", stream.tellg());
+        return Err("Expected expression, got EOF");
     }
 }
 
-Result<Rc<Value>> Expr::eval(State& state) const {
+Result<Rc<Value>> Expr::eval(State& state) {
     return std::visit(makeVisitor {
         [&](auto const& expr) {
             return expr->eval(state);
@@ -1109,10 +1418,10 @@ Result<Rc<Value>> Expr::eval(State& state) const {
     }, value);
 }
 
-Result<> Expr::preval(State& state) const {
+std::string Expr::debug() const {
     return std::visit(makeVisitor {
         [&](auto const& expr) {
-            return expr->preval(state);
+            return expr->debug();
         },
     }, value);
 }
@@ -1145,4 +1454,79 @@ bool script::operator>(Array const& a, Array const b) {
 
 bool script::operator>=(Array const& a, Array const b) {
     return true;
+}
+
+Scope::Scope(State& state) : state(state) {
+    state.push();
+}
+
+Scope::~Scope() {
+    state.pop();
+}
+
+void State::add(std::string const& name, Rc<Value> value) {
+    entities.back().insert({ name, value });
+}
+
+bool State::has(std::string const& name) const {
+    for (auto& ent : ranges::reverse(entities)) {
+        if (ent.count(name)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+Rc<Value> State::get(std::string const& name) {
+    for (auto& ent : ranges::reverse(entities)) {
+        if (ent.count(name)) {
+            return ent.at(name);
+        }
+    }
+    return Value::rc(NullLit());
+}
+
+Scope State::scope() {
+    return Scope(*this);
+}
+
+void State::push() {
+    entities.emplace_back();
+}
+
+void State::pop() {
+    entities.pop_back();
+    if (!entities.size()) {
+        throw std::runtime_error("Internal error: Base scope dropped");
+    }
+}
+
+Result<> State::run(ghc::filesystem::path const& path, bool debug) {
+    std::ifstream stream(path);
+    GEODE_UNWRAP(State::run(stream, debug));
+    return Ok();
+}
+
+Result<> State::run(std::string const& code, bool debug) {
+    std::stringstream stream(code);
+    GEODE_UNWRAP(State::run(stream, debug));
+    return Ok();
+}
+
+Result<> State::run(InputStream& stream, bool debug) {
+    try {
+        GEODE_UNWRAP_INTO(auto ast, ListExpr::pull(stream));
+        if (debug) {
+            log::info("AST: {}", ast->debug());
+        }
+        auto state = State();
+        GEODE_UNWRAP_INTO(auto val, ast->eval(state));
+        if (debug) {
+            log::info("Script evaluated to {}", val->toString(true));
+        }
+    }
+    catch (std::exception& err) {
+        return Err(err.what());
+    }
+    return Ok();
 }
