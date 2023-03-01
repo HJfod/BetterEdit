@@ -1,2 +1,10 @@
 
-a = b = c = 2 * 3 + 5
+function ball(a, b) {
+    a + b
+}
+
+a = ball(5, 6)
+
+print(a)
+
+alert("Hehe lois I added obnoxious JS alerts to Geometry Dash")

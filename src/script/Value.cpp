@@ -2,9 +2,8 @@
 #include "Parser.hpp"
 #include <Geode/utils/general.hpp>
 #include <Geode/utils/ranges.hpp>
-#include <Geode/utils/map.hpp>
-#include <Geode/utils/string.hpp>
 #include <Geode/loader/Log.hpp>
+#include <Geode/binding/FLAlertLayer.hpp>
 
 using namespace script;
 
@@ -172,7 +171,7 @@ Result<> State::run(InputStream& stream, bool debug) {
         resetExecutionCounter();
         GEODE_UNWRAP_INTO(auto ast, ListExpr::pull(stream));
         if (debug) {
-            log::info("AST: {}", prettify(ast->debug()));
+            log::info("AST: {}", ast->debug());
         }
         auto state = State();
         GEODE_UNWRAP_INTO(auto val, ast->eval(state));
@@ -194,6 +193,33 @@ State::State() {
             .value = make<CppExpr>({
                 .eval = [](State& state) -> Result<Rc<Value>> {
                     log::info("{}", state.get("msg")->toString());
+                    return Ok(state.get("msg"));
+                }
+            }).unwrap(),
+        }).unwrap(),
+        "/* built-in function */"
+    ).unwrap()));
+
+    this->add("alert", Value::rc(make<FunExpr>(
+        "alert",
+        decltype(FunExpr::params) {
+            { "msg", std::nullopt },
+            { "title", make<Expr>({
+                .value = make<LitExpr>({
+                    .value = NullLit(),
+                    .src = "/* built-in expr */",
+                }).unwrap()
+            }).unwrap() },
+        },
+        make<Expr>({
+            .value = make<CppExpr>({
+                .eval = [](State& state) -> Result<Rc<Value>> {
+                    auto title = state.get("title");
+                    FLAlertLayer::create(
+                        (title->isNull() ? "Script Alert" : title->toString()).c_str(),
+                        state.get("msg")->toString(),
+                        "OK"
+                    )->show();
                     return Ok(state.get("msg"));
                 }
             }).unwrap(),
