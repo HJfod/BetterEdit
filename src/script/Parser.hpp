@@ -36,8 +36,16 @@ namespace script {
                 this->ret();
             }
         }
-        void commit() {
+        std::string commit() {
             m_commit = true;
+            auto to = m_stream.tellg();
+            m_stream.seekg(m_pos);
+            std::string buf;
+            while (m_stream.tellg() != to && !m_stream.eof()) {
+                buf += m_stream.get();
+            }
+            m_stream.seekg(to);
+            return buf;
         }
         void ret() {
             if (!m_rolled) {
@@ -49,7 +57,7 @@ namespace script {
         void retry() {
             this->ret();
             m_rolled = false;
-            m_commit = false,
+            m_commit = false;
         }
     };
 
@@ -61,17 +69,21 @@ namespace script {
         True, False, Null,
     };
     enum class Op {
-        Assign, // a = b
+        Seq,    // a = b
+        AddSeq, // a += b
+        SubSeq, // a -= b
+        MulSeq, // a *= b
+        DivSeq, // a /= b
         Add,    // a + b or +a
         Sub,    // a - b or -a
         Mul,    // a * b
         Div,    // a / b
         Eq,     // a == b
-        NotEq,  // a != b
+        Neq,    // a != b
         Less,   // a < b
-        LessEq, // a <= b
+        Leq,    // a <= b
         More,   // a > b
-        MoreEq, // a >= b
+        Meq,    // a >= b
         Not,    // !a
         And,    // a && b
         Or,     // a || b
@@ -79,10 +91,9 @@ namespace script {
     using NullLit = std::monostate; // std::nullptr_t is not <=>!!!
     using BoolLit = bool;
     using StrLit = std::string;
-    using IntLit = int64_t;
-    using FloatLit = double;
+    using NumLit = double;
     using ArrLit = std::vector<Rc<Expr>>;
-    using Lit = std::variant<NullLit, BoolLit, StrLit, IntLit, FloatLit, ArrLit>;
+    using Lit = std::variant<NullLit, BoolLit, StrLit, NumLit, ArrLit>;
     using Ident = std::string;
     using Punct = char;
 
@@ -175,7 +186,9 @@ namespace script {
         static Result<> pull(char c, InputStream& stream);
     };
 
+    bool isIdentCh(char ch);
     bool isIdent(std::string const& ident);
+    bool isOpCh(char ch);
     bool isOp(std::string const& op);
     bool isUnOp(Op op);
 
@@ -183,7 +196,7 @@ namespace script {
     using Array = std::vector<Value>;
     struct Value {
         std::variant<
-            NullLit, BoolLit, IntLit, FloatLit, StrLit,
+            NullLit, BoolLit, NumLit, StrLit,
             Array, Ref<GameObject>, Rc<const FunExpr>
         > value;
 
@@ -231,6 +244,7 @@ namespace script {
 
     struct LitExpr {
         Lit value;
+        std::string src;
         static constexpr auto EXPR_NAME = "LitExpr";
         static Result<Rc<LitExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -238,6 +252,7 @@ namespace script {
     };
     struct IdentExpr {
         Ident ident;
+        std::string src;
         static constexpr auto EXPR_NAME = "IdentExpr";
         static Result<Rc<IdentExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -246,6 +261,7 @@ namespace script {
     struct UnOpExpr {
         Rc<Expr> expr;
         Op op;
+        std::string src;
         static constexpr auto EXPR_NAME = "UnOpExpr";
         static Result<Rc<UnOpExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -255,6 +271,7 @@ namespace script {
         Rc<Expr> lhs;
         Rc<Expr> rhs;
         Op op;
+        std::string src;
         static constexpr auto EXPR_NAME = "BinOpExpr";
         static Result<Rc<Expr>> pull(InputStream& stream, size_t p, Rc<Expr> lhs);
         static Result<Rc<Expr>> pull(InputStream& stream);
@@ -265,6 +282,7 @@ namespace script {
         Rc<Expr> expr;
         std::vector<Rc<Expr>> args;
         std::unordered_map<std::string, Rc<Expr>> named;
+        std::string src;
         static constexpr auto EXPR_NAME = "CallExpr";
         static Result<Rc<CallExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -274,6 +292,7 @@ namespace script {
         Ident item;
         Rc<Expr> expr;
         Rc<Expr> body;
+        std::string src;
         static constexpr auto EXPR_NAME = "ForInExpr";
         static Result<Rc<ForInExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -283,6 +302,7 @@ namespace script {
         Rc<Expr> cond;
         Rc<Expr> truthy;
         std::optional<Rc<Expr>> falsy;
+        std::string src;
         static constexpr auto EXPR_NAME = "IfExpr";
         static Result<Rc<IfExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -292,8 +312,9 @@ namespace script {
         Ident ident;
         std::vector<std::pair<Ident, std::optional<Rc<Expr>>>> params;
         Rc<Expr> body;
+        std::string src;
         bool added = false;
-        FunExpr(Ident const&, decltype(params) const&, Rc<Expr> const&);
+        FunExpr(Ident const&, decltype(params) const&, Rc<Expr> const&, std::string const&);
         static constexpr auto EXPR_NAME = "FunExpr";
         static Result<Rc<FunExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -302,6 +323,7 @@ namespace script {
     };
     struct ReturnExpr {
         std::optional<Rc<Expr>> value;
+        std::string src;
         static constexpr auto EXPR_NAME = "ReturnExpr";
         static Result<Rc<ReturnExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -309,12 +331,14 @@ namespace script {
     };
     struct BreakExpr {
         std::optional<Rc<Expr>> value;
+        std::string src;
         static constexpr auto EXPR_NAME = "BreakExpr";
         static Result<Rc<BreakExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
     };
     struct ContinueExpr {
+        std::string src;
         static constexpr auto EXPR_NAME = "ContinueExpr";
         static Result<Rc<ContinueExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -322,10 +346,17 @@ namespace script {
     };
     struct ListExpr {
         std::vector<Rc<Expr>> exprs;
+        std::string src;
         static constexpr auto EXPR_NAME = "ListExpr";
         static Result<Rc<Expr>> pullBlock(InputStream& stream);
         static Result<Rc<ListExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
+        std::string debug() const;
+    };
+    struct CppExpr {
+        std::function<Result<Rc<Value>>(State&)> eval;
+        std::string src = "/* built-in expr */";
+        static constexpr auto EXPR_NAME = "CppExpr";
         std::string debug() const;
     };
     struct Expr {
@@ -334,7 +365,8 @@ namespace script {
             Rc<UnOpExpr>, Rc<BinOpExpr>,
             Rc<CallExpr>, Rc<FunExpr>,
             Rc<ForInExpr>, Rc<IfExpr>,
-            Rc<ListExpr>
+            Rc<ReturnExpr>, Rc<BreakExpr>, Rc<ContinueExpr>,
+            Rc<ListExpr>, Rc<CppExpr>
         > value;
 
         static Result<Rc<Expr>> pullPrimaryNonCall(InputStream& stream);
@@ -342,6 +374,7 @@ namespace script {
         static Result<Rc<Expr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
+        std::string src() const;
     };
 
     bool operator==(Array const& a, Array const b);
@@ -365,7 +398,7 @@ namespace script {
         void push();
         void pop();
 
-        State() = default;
+        State();
 
     public:
         static Result<> run(ghc::filesystem::path const& path, bool debug = false);

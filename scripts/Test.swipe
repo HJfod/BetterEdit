@@ -1,1 +1,6 @@
-print()
+
+function sex(a == 7, b) {
+    a / b
+}
+
+print(sex(b = 2))
