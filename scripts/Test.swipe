@@ -1,9 +1,2 @@
 
-function sex(a = 7, b) {
-    a / b
-}
-
-b = 2
-b %= 5
-
-print(sex(b = b))
+a = b = c = 2 * 3 + 5

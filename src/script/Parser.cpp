@@ -7,19 +7,6 @@
 
 using namespace script;
 
-template <class T>
-static impl::Failure<std::string> internal(std::string const& msg) {
-    return Err(fmt::format(
-        "Internal error in {}: {}. Please report this bug to HJfod!",
-        T::EXPR_NAME, msg
-    ));
-}
-
-template <class T>
-static impl::Failure<std::string> unimplemented(Op op) {
-    return internal<T>(fmt::format("Unimplemented {}", tokenToString(op, true)));
-};
-
 // this does mean that you can't run scripts in multiple threads, but eh you 
 // couldn't do that anyway because of GameObject
 static size_t EXECUTION_DEPTH = 0;
@@ -35,6 +22,28 @@ static void checkInfiniteLoop() {
             EXECUTION_LIMIT
         ));
     }
+}
+
+static std::string prettify(std::string const& msg) {
+    std::string res = "";
+    size_t i = 0;
+    for (auto& c : msg) {
+        if (c == '(') {
+            i += 4;
+            res += "(\n" + std::string(i, ' ');
+        }
+        else if (c == ')') {
+            i -= 4;
+            res += "\n" + std::string(i, ' ') + ")";
+        }
+        else if (c == ',') {
+            res += ",\n" + std::string(i, ' ');
+        }
+        else {
+            res += c;
+        }
+    }
+    return res;
 }
 
 template <class T, class... Args>
@@ -415,6 +424,17 @@ size_t Token::prio(InputStream& stream) {
     return 0;
 }
 
+OpDir Token::dir(InputStream& stream) {
+    Rollback rb(stream);
+    auto token = Token::pull(stream);
+    if (token) {
+        if (auto op = std::get_if<Op>(&token.unwrap().value)) {
+            return std::get<2>(OPS.at(*op));
+        }
+    }
+    return OpDir::LTR;
+}
+
 bool Token::eof(InputStream& stream) {
     Token::skip(stream);
     return stream.eof();
@@ -643,7 +663,10 @@ Result<Rc<Value>> UnOpExpr::eval(State& state) {
         } break;
 
         default: {
-            return unimplemented<UnOpExpr>(op);
+            throw std::runtime_error(fmt::format(
+                "Internal error: Unimplemented unary operator {}",
+                tokenToString(op, true)
+            ));
         } break;
     }
 }
@@ -651,23 +674,28 @@ Result<Rc<Value>> UnOpExpr::eval(State& state) {
 std::string UnOpExpr::debug() const {
     return fmt::format(
         "UnOpExpr({}, {})",
-        expr->debug(), tokenToString(op, true)
+        tokenToString(op, true), expr->debug()
     );
 }
 
 Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, size_t p, Rc<Expr> lhs) {
     Rollback rb(stream);
     while (true) {
-        if (!Token::peek<Op>(stream)) break;
+        auto op = Token::peek<Op>(stream);
+        if (!op) break;
 
-        GEODE_UNWRAP_INTO(auto op, Token::pull<Op>(stream));
-        auto pop = std::get<1>(OPS.at(op));
+        auto pop = std::get<1>(OPS.at(op.value()));
         if (pop < p) {
             rb.commit();
             return Ok(lhs);
         }
+        // consume op
+        (void)Token::pull<Op>(stream);
         GEODE_UNWRAP_INTO(auto rhs, Expr::pullPrimary(stream));
 
+        if (Token::dir(stream) == OpDir::RTL) {
+            GEODE_UNWRAP_INTO(rhs, BinOpExpr::pull(stream, p, rhs));
+        }
         if (pop < Token::prio(stream)) {
             GEODE_UNWRAP_INTO(rhs, BinOpExpr::pull(stream, pop + 1, rhs));
         }
@@ -676,7 +704,7 @@ Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, size_t p, Rc<Expr> lhs) {
             .value = make<BinOpExpr>({
                 .lhs = lhs,
                 .rhs = rhs,
-                .op = op,
+                .op = op.value(),
                 .src = rb.commit(),
             }).unwrap()
         }).unwrap();
@@ -951,7 +979,10 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
         } break;
 
         default: {
-            return unimplemented<UnOpExpr>(op);
+            throw std::runtime_error(fmt::format(
+                "Internal error: Unimplemented binary operator {}",
+                tokenToString(op, true)
+            ));
         } break;
     }
 }
@@ -959,7 +990,7 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
 std::string BinOpExpr::debug() const {
     return fmt::format(
         "BinOpExpr({}, {}, {})",
-        lhs->debug(), rhs->debug(), tokenToString(op, true)
+        lhs->debug(), tokenToString(op, true), rhs->debug()
     );
 }
 
@@ -1605,7 +1636,7 @@ Result<> State::run(InputStream& stream, bool debug) {
         EXECUTION_DEPTH = 0;
         GEODE_UNWRAP_INTO(auto ast, ListExpr::pull(stream));
         if (debug) {
-            log::info("AST: {}", ast->debug());
+            log::info("AST: {}", prettify(ast->debug()));
         }
         auto state = State();
         GEODE_UNWRAP_INTO(auto val, ast->eval(state));

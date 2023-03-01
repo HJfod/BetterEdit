@@ -150,12 +150,18 @@ namespace script {
         static Result<Token> pull(InputStream& stream);
         static std::optional<Token> peek(InputStream& stream);
         static size_t prio(InputStream& stream);
+        static OpDir dir(InputStream& stream);
         static bool eof(InputStream& stream);
 
         template <TokenType T>
-        static bool peek(InputStream& stream) {
+        static std::optional<T> peek(InputStream& stream) {
             auto value = Token::peek(stream);
-            return value && std::holds_alternative<T>(value.value().value);
+            if (value) {
+                if (auto v = std::get_if<T>(&value.value().value)) {
+                    return *v;
+                }
+            }
+            return std::nullopt;
         }
 
         template <class T>
