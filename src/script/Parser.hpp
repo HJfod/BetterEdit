@@ -228,6 +228,7 @@ namespace script {
         bool typeEq(Rc<Value> other) const;
         std::string typeName() const;
         std::string toString(bool debug = false) const;
+        std::optional<Rc<Value>> member(std::string const& name);
     };
 
     // mfw when exceptions for control flow breaks
@@ -257,7 +258,6 @@ namespace script {
     struct LitExpr {
         Lit value;
         std::string src;
-        static constexpr auto EXPR_NAME = "LitExpr";
         static Result<Rc<LitExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
@@ -265,7 +265,6 @@ namespace script {
     struct IdentExpr {
         Ident ident;
         std::string src;
-        static constexpr auto EXPR_NAME = "IdentExpr";
         static Result<Rc<IdentExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
@@ -274,7 +273,6 @@ namespace script {
         Rc<Expr> expr;
         Op op;
         std::string src;
-        static constexpr auto EXPR_NAME = "UnOpExpr";
         static Result<Rc<UnOpExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
@@ -284,7 +282,6 @@ namespace script {
         Rc<Expr> rhs;
         Op op;
         std::string src;
-        static constexpr auto EXPR_NAME = "BinOpExpr";
         static Result<Rc<Expr>> pull(InputStream& stream, size_t p, Rc<Expr> lhs);
         static Result<Rc<Expr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -295,8 +292,23 @@ namespace script {
         std::vector<Rc<Expr>> args;
         std::unordered_map<std::string, Rc<Expr>> named;
         std::string src;
-        static constexpr auto EXPR_NAME = "CallExpr";
-        static Result<Rc<CallExpr>> pull(InputStream& stream);
+        static Result<Rc<CallExpr>> pull(Rc<Expr> before, InputStream& stream);
+        Result<Rc<Value>> eval(State& state);
+        std::string debug() const;
+    };
+    struct IndexExpr {
+        Rc<Expr> expr;
+        Rc<Expr> index;
+        std::string src;
+        static Result<Rc<IndexExpr>> pull(Rc<Expr> before, InputStream& stream);
+        Result<Rc<Value>> eval(State& state);
+        std::string debug() const;
+    };
+    struct MemberExpr {
+        Rc<Expr> expr;
+        Ident member;
+        std::string src;
+        static Result<Rc<MemberExpr>> pull(Rc<Expr> before, InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
     };
@@ -305,7 +317,6 @@ namespace script {
         Rc<Expr> expr;
         Rc<Expr> body;
         std::string src;
-        static constexpr auto EXPR_NAME = "ForInExpr";
         static Result<Rc<ForInExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
@@ -315,7 +326,6 @@ namespace script {
         Rc<Expr> truthy;
         std::optional<Rc<Expr>> falsy;
         std::string src;
-        static constexpr auto EXPR_NAME = "IfExpr";
         static Result<Rc<IfExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
@@ -327,7 +337,6 @@ namespace script {
         std::string src;
         bool added = false;
         FunExpr(Ident const&, decltype(params) const&, Rc<Expr> const&, std::string const&);
-        static constexpr auto EXPR_NAME = "FunExpr";
         static Result<Rc<FunExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         Result<> add(State& state);
@@ -336,7 +345,6 @@ namespace script {
     struct ReturnExpr {
         std::optional<Rc<Expr>> value;
         std::string src;
-        static constexpr auto EXPR_NAME = "ReturnExpr";
         static Result<Rc<ReturnExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
@@ -344,14 +352,12 @@ namespace script {
     struct BreakExpr {
         std::optional<Rc<Expr>> value;
         std::string src;
-        static constexpr auto EXPR_NAME = "BreakExpr";
         static Result<Rc<BreakExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
     };
     struct ContinueExpr {
         std::string src;
-        static constexpr auto EXPR_NAME = "ContinueExpr";
         static Result<Rc<ContinueExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
@@ -359,7 +365,6 @@ namespace script {
     struct ListExpr {
         std::vector<Rc<Expr>> exprs;
         std::string src;
-        static constexpr auto EXPR_NAME = "ListExpr";
         static Result<Rc<Expr>> pullBlock(InputStream& stream);
         static Result<Rc<ListExpr>> pull(InputStream& stream);
         Result<Rc<Value>> eval(State& state);
@@ -368,14 +373,13 @@ namespace script {
     struct CppExpr {
         std::function<Result<Rc<Value>>(State&)> eval;
         std::string src = "/* built-in expr */";
-        static constexpr auto EXPR_NAME = "CppExpr";
         std::string debug() const;
     };
     struct Expr {
         std::variant<
             Rc<LitExpr>, Rc<IdentExpr>,
             Rc<UnOpExpr>, Rc<BinOpExpr>,
-            Rc<CallExpr>, Rc<FunExpr>,
+            Rc<CallExpr>, Rc<FunExpr>, Rc<IndexExpr>, Rc<MemberExpr>,
             Rc<ForInExpr>, Rc<IfExpr>,
             Rc<ReturnExpr>, Rc<BreakExpr>, Rc<ContinueExpr>,
             Rc<ListExpr>, Rc<CppExpr>

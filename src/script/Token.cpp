@@ -187,8 +187,7 @@ Result<Token> Token::pull(InputStream& stream) {
     
     // number literals
     // todo: hex
-    if (isdigit(c) || c == '.') {
-        auto pos = stream.tellg();
+    if (isdigit(c)) {
         NumLit lit;
         stream >> lit;
         if (stream.fail()) {

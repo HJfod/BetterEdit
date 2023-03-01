@@ -4,8 +4,35 @@
 #include <Geode/utils/ranges.hpp>
 #include <Geode/loader/Log.hpp>
 #include <Geode/binding/FLAlertLayer.hpp>
+#include <Geode/binding/EditorUI.hpp>
+#include <random>
 
 using namespace script;
+
+static Rc<Value> builtinFun(
+    decltype(FunExpr::params) const& params,
+    std::function<Result<Rc<Value>>(State&)> fun
+) {
+    return Value::rc(make<FunExpr>(
+        "__builtin_fun",
+        params,
+        make<Expr>({
+            .value = make<CppExpr>({
+                .eval = fun
+            }).unwrap(),
+        }).unwrap(),
+        "/* built-in function */"
+    ).unwrap());
+}
+
+static Rc<Expr> builtinLit(Lit const& value) {
+    return make<Expr>({
+        .value = make<LitExpr>({
+            .value = value,
+            .src = "/* built-in expr */",
+        }).unwrap()
+    }).unwrap();
+}
 
 bool Value::isNull() const {
     return std::holds_alternative<NullLit>(value);
@@ -97,7 +124,7 @@ std::string Value::typeName() const {
         [&](StrLit const&) {
             return "string";
         },
-        [&](std::vector<Value> const&) {
+        [&](Array const&) {
             return "array";
         },
         [&](Ref<GameObject> const&) {
@@ -107,6 +134,100 @@ std::string Value::typeName() const {
             return "function";
         },
     }, value);
+}
+
+std::optional<Rc<Value>> Value::member(std::string const& name) {
+    return std::visit(makeVisitor {
+        [&](NullLit&) -> std::optional<Rc<Value>> {
+            return std::nullopt;
+        },
+        [&](BoolLit&) -> std::optional<Rc<Value>> {
+            return std::nullopt;
+        },
+        [&](NumLit&) -> std::optional<Rc<Value>> {
+            return std::nullopt;
+        },
+        [&](StrLit&) -> std::optional<Rc<Value>> {
+            return std::nullopt;
+        },
+        [&](Array&) -> std::optional<Rc<Value>> {
+            return std::nullopt;
+        },
+        [&](Ref<GameObject>& obj) -> std::optional<Rc<Value>> {
+            switch (hash(name.c_str())) {
+                case hash("deselect"): {
+                    return builtinFun(
+                        {}, [&obj](State& state) {
+                            EditorUI::get()->deselectObject(obj);
+                            obj->deselectObject();
+                            return Ok(Value::rc(NullLit()));
+                        }
+                    );
+                } break;
+
+                case hash("move"): {
+                    return builtinFun(
+                        {
+                            { "x", builtinLit(0.0) },
+                            { "y", builtinLit(0.0) },
+                        },
+                        [&obj](State& state) -> Result<Rc<Value>> {
+                            auto x = state.get("x")->has<NumLit>();
+                            if (!x) {
+                                return Err("x must be a number");
+                            }
+                            auto y = state.get("y")->has<NumLit>();
+                            if (!y) {
+                                return Err("y must be a number");
+                            }
+                            EditorUI::get()->moveObject(obj, CCPoint {
+                                static_cast<float>(*x),
+                                static_cast<float>(*y)
+                            });
+                            return Ok(Value::rc(NullLit()));
+                        }
+                    );
+                } break;
+
+                default: {
+                    return std::nullopt;
+                } break;
+            }
+        },
+        [&](Rc<const FunExpr>&) -> std::optional<Rc<Value>> {
+            return std::nullopt;
+        },
+    }, value);
+}
+
+bool script::operator==(Array const& a, Array const b) {
+    if (a.size() != b.size()) return false;
+    for (auto i = 0u; i < a.size(); i++) {
+        if (a[i].value != b[i].value) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool script::operator!=(Array const& a, Array const b) {
+    return !(a == b);
+}
+
+bool script::operator<(Array const& a, Array const b) {
+    return false;
+}
+
+bool script::operator<=(Array const& a, Array const b) {
+    return true;
+}
+
+bool script::operator>(Array const& a, Array const b) {
+    return false;
+}
+
+bool script::operator>=(Array const& a, Array const b) {
+    return true;
 }
 
 Scope::Scope(State& state) : state(state) {
@@ -186,23 +307,16 @@ Result<> State::run(InputStream& stream, bool debug) {
 }
 
 State::State() {
-    this->add("print", Value::rc(make<FunExpr>(
-        "print",
-        decltype(FunExpr::params) {{ "msg", std::nullopt }},
-        make<Expr>({
-            .value = make<CppExpr>({
-                .eval = [](State& state) -> Result<Rc<Value>> {
-                    log::info("{}", state.get("msg")->toString());
-                    return Ok(state.get("msg"));
-                }
-            }).unwrap(),
-        }).unwrap(),
-        "/* built-in function */"
-    ).unwrap()));
+    this->add("print", builtinFun(
+        {{ "msg", std::nullopt }},
+        [](State& state) -> Result<Rc<Value>> {
+            log::info("{}", state.get("msg")->toString());
+            return Ok(state.get("msg"));
+        }
+    ));
 
-    this->add("alert", Value::rc(make<FunExpr>(
-        "alert",
-        decltype(FunExpr::params) {
+    this->add("alert", builtinFun(
+        {
             { "msg", std::nullopt },
             { "title", make<Expr>({
                 .value = make<LitExpr>({
@@ -211,49 +325,45 @@ State::State() {
                 }).unwrap()
             }).unwrap() },
         },
-        make<Expr>({
-            .value = make<CppExpr>({
-                .eval = [](State& state) -> Result<Rc<Value>> {
-                    auto title = state.get("title");
-                    FLAlertLayer::create(
-                        (title->isNull() ? "Script Alert" : title->toString()).c_str(),
-                        state.get("msg")->toString(),
-                        "OK"
-                    )->show();
-                    return Ok(state.get("msg"));
-                }
-            }).unwrap(),
-        }).unwrap(),
-        "/* built-in function */"
-    ).unwrap()));
-}
-
-bool script::operator==(Array const& a, Array const b) {
-    if (a.size() != b.size()) return false;
-    for (auto i = 0u; i < a.size(); i++) {
-        if (a[i].value != b[i].value) {
-            return false;
+        [](State& state) -> Result<Rc<Value>> {
+            auto title = state.get("title");
+            FLAlertLayer::create(
+                (title->isNull() ? "Script Alert" : title->toString()).c_str(),
+                state.get("msg")->toString(),
+                "OK"
+            )->show();
+            return Ok(state.get("msg"));
         }
-    }
-    return true;
-}
+    ));
 
-bool script::operator!=(Array const& a, Array const b) {
-    return !(a == b);
-}
-
-bool script::operator<(Array const& a, Array const b) {
-    return false;
-}
-
-bool script::operator<=(Array const& a, Array const b) {
-    return true;
-}
-
-bool script::operator>(Array const& a, Array const b) {
-    return false;
-}
-
-bool script::operator>=(Array const& a, Array const b) {
-    return true;
+    this->add("getSelectedObjects", builtinFun(
+        {},
+        [](State& state) -> Result<Rc<Value>> {
+            auto ui = EditorUI::get();
+            if (ui->m_selectedObject) {
+                return Ok(Value::rc(Array { Value(ui->m_selectedObject) } ));
+            }
+            else if (ui->m_selectedObjects->count()) {
+                Array res;
+                res.reserve(ui->m_selectedObjects->count());
+                for (auto obj : CCArrayExt<GameObject>(ui->m_selectedObjects)) {
+                    res.push_back(Value(obj));
+                }
+                return Ok(Value::rc(res));
+            }
+            else {
+                return Ok(Value::rc(Array()));
+            }
+        }
+    ));
+    
+    this->add("random", builtinFun(
+        {},
+        [&](State& state) -> Result<Rc<Value>> {
+            static std::random_device rd;
+            static std::mt19937 gen(rd());
+            std::uniform_real_distribution<> dis(0.0, 1.0);
+            return Ok(Value::rc(dis(gen)));
+        }
+    ));
 }

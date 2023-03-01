@@ -1,10 +1,4 @@
 
-function ball(a, b) {
-    a + b
+for obj in getSelectedObjects() {
+    obj.move(30, 30)
 }
-
-a = ball(5, 6)
-
-print(a)
-
-alert("Hehe lois I added obnoxious JS alerts to Geometry Dash")
