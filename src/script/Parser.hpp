@@ -12,6 +12,10 @@
 USE_GEODE_NAMESPACE();
 
 namespace script {
+    void resetExecutionCounter();
+    void tickExecutionCounter();
+    std::string prettify(std::string const& debugMsg);
+
     using InputStream = std::istream;
     
     struct Expr;
@@ -418,4 +422,14 @@ namespace script {
         Rc<Value> get(std::string const& name);
         Scope scope();
     };
+    
+    template <class T, class... Args>
+    Result<Rc<T>> make(Args&&... args) {
+        return Ok(std::make_shared<T>(std::forward<Args>(args)...));
+    }
+
+    template <class T>
+    Result<Rc<T>> make(T value) {
+        return Ok(std::make_shared<T>(value));
+    }
 }
