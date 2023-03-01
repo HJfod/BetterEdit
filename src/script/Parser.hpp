@@ -74,10 +74,12 @@ namespace script {
         SubSeq, // a -= b
         MulSeq, // a *= b
         DivSeq, // a /= b
+        ModSeq, // a %= b
         Add,    // a + b or +a
         Sub,    // a - b or -a
         Mul,    // a * b
         Div,    // a / b
+        Mod,    // a % b
         Eq,     // a == b
         Neq,    // a != b
         Less,   // a < b

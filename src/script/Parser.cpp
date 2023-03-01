@@ -76,6 +76,7 @@ static std::unordered_map<Op, std::tuple<std::string, size_t, OpDir>> OPS {
     { Op::Not,      { "!",  7,  OpDir::RTL } },
     { Op::Mul,      { "*",  6,  OpDir::LTR } },
     { Op::Div,      { "/",  6,  OpDir::LTR } },
+    { Op::Mod,      { "%",  6,  OpDir::LTR } },
     { Op::Add,      { "+",  5,  OpDir::LTR } },
     { Op::Sub,      { "-",  5,  OpDir::LTR } },
     { Op::Eq,       { "==", 4,  OpDir::LTR } },
@@ -86,6 +87,7 @@ static std::unordered_map<Op, std::tuple<std::string, size_t, OpDir>> OPS {
     { Op::Meq,      { ">=", 4,  OpDir::LTR } },
     { Op::And,      { "&&", 3,  OpDir::LTR } },
     { Op::Or,       { "||", 2,  OpDir::LTR } },
+    { Op::ModSeq,   { "%=", 1,  OpDir::RTL } },
     { Op::DivSeq,   { "/=", 1,  OpDir::RTL } },
     { Op::MulSeq,   { "*=", 1,  OpDir::RTL } },
     { Op::SubSeq,   { "-=", 1,  OpDir::RTL } },
@@ -710,18 +712,102 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
         } break;
 
         case Op::AddSeq: {
-            
+            return std::visit(makeVisitor {
+                [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
+                    a += b;
+                    return Ok(Value::rc(a));
+                },
+                [&](StrLit& a, StrLit const& b) -> Result<Rc<Value>> {
+                    a += b;
+                    return Ok(Value::rc(a));
+                },
+                [&](Array& a, auto const&) -> Result<Rc<Value>> {
+                    if (auto arr = rhsValue->has<Array>()) {
+                        ranges::push(a, *arr);
+                    }
+                    else {
+                        a.push_back(*rhsValue);
+                    }
+                    return Ok(Value::rc(a));
+                },
+                [&](auto&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot add {} and {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
+                },
+            }, lhsValue->value, rhsValue->value);
+        } break;
+
+        case Op::SubSeq: {
+            return std::visit(makeVisitor {
+                [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
+                    a -= b;
+                    return Ok(Value::rc(a));
+                },
+                [&](auto&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot subtract {} and {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
+                },
+            }, lhsValue->value, rhsValue->value);
+        } break;
+
+        case Op::MulSeq: {
+            return std::visit(makeVisitor {
+                [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
+                    a *= b;
+                    return Ok(Value::rc(a));
+                },
+                [&](auto&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot multiply {} with {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
+                },
+            }, lhsValue->value, rhsValue->value);
+        } break;
+
+        case Op::DivSeq: {
+            return std::visit(makeVisitor {
+                [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
+                    a /= b;
+                    return Ok(Value::rc(a));
+                },
+                [&](auto&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot divide {} with {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
+                },
+            }, lhsValue->value, rhsValue->value);
+        } break;
+
+        case Op::ModSeq: {
+            return std::visit(makeVisitor {
+                [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
+                    a = remainder(a, b);
+                    return Ok(Value::rc(a));
+                },
+                [&](auto&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot divide {} with {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
+                },
+            }, lhsValue->value, rhsValue->value);
         } break;
 
         case Op::Add: {
-            auto value = std::visit(makeVisitor {
-                [&](NumLit const& a, NumLit const& b) -> std::optional<Rc<Value>> {
-                    return Value::rc(a + b);
+            return std::visit(makeVisitor {
+                [&](NumLit const& a, NumLit const& b) -> Result<Rc<Value>> {
+                    return Ok(Value::rc(a + b));
                 },
-                [&](StrLit const& a, StrLit const& b) -> std::optional<Rc<Value>> {
-                    return Value::rc(a + b);
+                [&](StrLit const& a, StrLit const& b) -> Result<Rc<Value>> {
+                    return Ok(Value::rc(a + b));
                 },
-                [&](Array const& a, auto const&) -> std::optional<Rc<Value>> {
+                [&](Array const& a, auto const&) -> Result<Rc<Value>> {
                     Array copy = a;
                     if (auto arr = rhsValue->has<Array>()) {
                         ranges::push(copy, *arr);
@@ -729,73 +815,71 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
                     else {
                         copy.push_back(*rhsValue);
                     }
-                    return Value::rc(copy);
+                    return Ok(Value::rc(copy));
                 },
-                [&](auto const&, auto const&) -> std::optional<Rc<Value>> {
-                    return std::nullopt;
+                [&](auto const&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot add {} and {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
                 },
             }, lhsValue->value, rhsValue->value);
-            if (value) {
-                return Ok(value.value());
-            }
-            return Err(fmt::format(
-                "Cannot add {} and {}",
-                lhsValue->typeName(), rhsValue->typeName()
-            ));
         } break;
 
         case Op::Sub: {
-            auto value = std::visit(makeVisitor {
-                [&](NumLit const& a, NumLit const& b) -> std::optional<Rc<Value>> {
-                    return Value::rc(a - b);
+            return std::visit(makeVisitor {
+                [&](NumLit const& a, NumLit const& b) -> Result<Rc<Value>> {
+                    return Ok(Value::rc(a - b));
                 },
-                [&](auto const&, auto const&) -> std::optional<Rc<Value>> {
-                    return std::nullopt;
+                [&](auto const&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot subtract {} and {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
                 },
             }, lhsValue->value, rhsValue->value);
-            if (value) {
-                return Ok(value.value());
-            }
-            return Err(fmt::format(
-                "Cannot subtract {} and {}",
-                lhsValue->typeName(), rhsValue->typeName()
-            ));
         } break;
 
         case Op::Mul: {
-            auto value = std::visit(makeVisitor {
-                [&](NumLit const& a, NumLit const& b) -> std::optional<Rc<Value>> {
-                    return Value::rc(a * b);
+            return std::visit(makeVisitor {
+                [&](NumLit const& a, NumLit const& b) -> Result<Rc<Value>> {
+                    return Ok(Value::rc(a * b));
                 },
-                [&](auto const&, auto const&) -> std::optional<Rc<Value>> {
-                    return std::nullopt;
+                [&](auto const&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot multiply {} with {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
                 },
             }, lhsValue->value, rhsValue->value);
-            if (value) {
-                return Ok(value.value());
-            }
-            return Err(fmt::format(
-                "Cannot multiply {} and {}",
-                lhsValue->typeName(), rhsValue->typeName()
-            ));
         } break;
 
         case Op::Div: {
-            auto value = std::visit(makeVisitor {
-                [&](NumLit const& a, NumLit const& b) -> std::optional<Rc<Value>> {
-                    return Value::rc(a / b);
+            return std::visit(makeVisitor {
+                [&](NumLit const& a, NumLit const& b) -> Result<Rc<Value>> {
+                    return Ok(Value::rc(a / b));
                 },
-                [&](auto const&, auto const&) -> std::optional<Rc<Value>> {
-                    return std::nullopt;
+                [&](auto const&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot divide {} with {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
                 },
             }, lhsValue->value, rhsValue->value);
-            if (value) {
-                return Ok(value.value());
-            }
-            return Err(fmt::format(
-                "Cannot divide {} and {}",
-                lhsValue->typeName(), rhsValue->typeName()
-            ));
+        } break;
+
+        case Op::Mod: {
+            return std::visit(makeVisitor {
+                [&](NumLit const& a, NumLit const& b) -> Result<Rc<Value>> {
+                    return Ok(Value::rc(remainder(a, b)));
+                },
+                [&](auto const&, auto const&) -> Result<Rc<Value>> {
+                    return Err(fmt::format(
+                        "Cannot divide {} with {}",
+                        lhsValue->typeName(), rhsValue->typeName()
+                    ));
+                },
+            }, lhsValue->value, rhsValue->value);
         } break;
 
         case Op::Eq: {
