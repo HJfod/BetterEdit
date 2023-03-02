@@ -13,7 +13,7 @@ class $modify(ScriptingUI, EditorUI) {
         
         auto menu = this->getChildByID("editor-buttons-menu");
         if (menu) {
-            for (auto& file : file::readDirectory("K:/GeodeSDK/HJ/BetterEdit/scripts")
+            for (auto& file : file::readDirectory("C:/Users/HJfod/Documents/github/GeodeSDK/BetterEdit/scripts")
                 .unwrapOr(std::vector<ghc::filesystem::path> {})
             ) {
                 auto button = CCMenuItemSpriteExtra::create(
@@ -36,9 +36,24 @@ class $modify(ScriptingUI, EditorUI) {
         auto path = ghc::filesystem::path(static_cast<CCString*>(
             static_cast<CCMenuItemSpriteExtra*>(sender)->getUserObject()
         )->getCString());
-        auto res = script::State::run(path, true);
+        auto res = script::State::parse(path, true);
         if (!res) {
-            log::error("Error running script {}: {}", path, res.unwrapErr());
+            log::error("Error parsing script {}: {}", path, res.unwrapErr());
+        }
+        auto state = res.unwrap();
+
+        if (state.attrs.parameters.size()) {
+            // todo: show input popup
+        }
+        else {
+            this->run(state, path);
         }
     }
+
+    void run(script::State& state, ghc::filesystem::path const& path) {
+        auto eval = state.run();
+        if (!eval) {
+            log::error("Error running script {}: {}", path, eval.unwrapErr());
+        }
+    } 
 };

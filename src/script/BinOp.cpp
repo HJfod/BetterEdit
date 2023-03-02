@@ -4,9 +4,10 @@
 
 using namespace script;
 
-Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, size_t p, Rc<Expr> lhs) {
+Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, Attrs& attrs, size_t p, Rc<Expr> lhs) {
     Rollback rb(stream);
     while (true) {
+        tickExecutionCounter();
         if (!Token::peek<Op>(stream)) break;
 
         auto pop = Token::prio(stream);
@@ -16,13 +17,13 @@ Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, size_t p, Rc<Expr> lhs) {
         }
         // consume op
         GEODE_UNWRAP_INTO(auto op, Token::pull<Op>(stream));
-        GEODE_UNWRAP_INTO(auto rhs, Expr::pullPrimary(stream));
+        GEODE_UNWRAP_INTO(auto rhs, Expr::pullPrimary(stream, attrs));
 
         if (Token::dir(stream) == OpDir::RTL) {
-            GEODE_UNWRAP_INTO(rhs, BinOpExpr::pull(stream, p, rhs));
+            GEODE_UNWRAP_INTO(rhs, BinOpExpr::pull(stream, attrs, p, rhs));
         }
         if (pop < Token::prio(stream)) {
-            GEODE_UNWRAP_INTO(rhs, BinOpExpr::pull(stream, pop + 1, rhs));
+            GEODE_UNWRAP_INTO(rhs, BinOpExpr::pull(stream, attrs, pop + 1, rhs));
         }
 
         lhs = make<Expr>({
@@ -38,12 +39,12 @@ Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, size_t p, Rc<Expr> lhs) {
     return Ok(lhs);
 }
 
-Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream) {
+Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
-    GEODE_UNWRAP_INTO(auto lhs, Expr::pullPrimary(stream));
+    GEODE_UNWRAP_INTO(auto lhs, Expr::pullPrimary(stream, attrs));
     if (Token::peek<Op>(stream)) {
         rb.commit();
-        return BinOpExpr::pull(stream, 0, lhs);
+        return BinOpExpr::pull(stream, attrs, 0, lhs);
     }
     rb.commit();
     return Ok(lhs);
@@ -60,18 +61,27 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
                     lhsValue->typeName(), rhsValue->typeName()
                 ));
             }
+            if (lhsValue->isConst) {
+                return Err("Can't assign to const\n * {} evaluated to const", lhs->src());
+            }
             lhsValue->value = rhsValue->value;
+            if (lhsValue->onChange) lhsValue->onChange(*lhsValue);
             return Ok(lhsValue);
         } break;
 
         case Op::AddSeq: {
+            if (lhsValue->isConst) {
+                return Err("Can't assign to const\n * {} evaluated to const", lhs->src());
+            }
             return std::visit(makeVisitor {
                 [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
                     a += b;
+                    if (lhsValue->onChange) lhsValue->onChange(*lhsValue);
                     return Ok(Value::rc(a));
                 },
                 [&](StrLit& a, StrLit const& b) -> Result<Rc<Value>> {
                     a += b;
+                    if (lhsValue->onChange) lhsValue->onChange(*lhsValue);
                     return Ok(Value::rc(a));
                 },
                 [&](Array& a, auto const&) -> Result<Rc<Value>> {
@@ -81,6 +91,7 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
                     else {
                         a.push_back(*rhsValue);
                     }
+                    if (lhsValue->onChange) lhsValue->onChange(*lhsValue);
                     return Ok(Value::rc(a));
                 },
                 [&](auto&, auto const&) -> Result<Rc<Value>> {
@@ -93,9 +104,13 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
         } break;
 
         case Op::SubSeq: {
+            if (lhsValue->isConst) {
+                return Err("Can't assign to const\n * {} evaluated to const", lhs->src());
+            }
             return std::visit(makeVisitor {
                 [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
                     a -= b;
+                    if (lhsValue->onChange) lhsValue->onChange(*lhsValue);
                     return Ok(Value::rc(a));
                 },
                 [&](auto&, auto const&) -> Result<Rc<Value>> {
@@ -108,9 +123,13 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
         } break;
 
         case Op::MulSeq: {
+            if (lhsValue->isConst) {
+                return Err("Can't assign to const\n * {} evaluated to const", lhs->src());
+            }
             return std::visit(makeVisitor {
                 [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
                     a *= b;
+                    if (lhsValue->onChange) lhsValue->onChange(*lhsValue);
                     return Ok(Value::rc(a));
                 },
                 [&](auto&, auto const&) -> Result<Rc<Value>> {
@@ -123,9 +142,13 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
         } break;
 
         case Op::DivSeq: {
+            if (lhsValue->isConst) {
+                return Err("Can't assign to const\n * {} evaluated to const", lhs->src());
+            }
             return std::visit(makeVisitor {
                 [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
                     a /= b;
+                    if (lhsValue->onChange) lhsValue->onChange(*lhsValue);
                     return Ok(Value::rc(a));
                 },
                 [&](auto&, auto const&) -> Result<Rc<Value>> {
@@ -138,9 +161,13 @@ Result<Rc<Value>> BinOpExpr::eval(State& state) {
         } break;
 
         case Op::ModSeq: {
+            if (lhsValue->isConst) {
+                return Err("Can't assign to const\n * {} evaluated to const", lhs->src());
+            }
             return std::visit(makeVisitor {
                 [&](NumLit& a, NumLit const& b) -> Result<Rc<Value>> {
                     a = remainder(a, b);
+                    if (lhsValue->onChange) lhsValue->onChange(*lhsValue);
                     return Ok(Value::rc(a));
                 },
                 [&](auto&, auto const&) -> Result<Rc<Value>> {

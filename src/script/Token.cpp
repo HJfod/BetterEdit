@@ -7,7 +7,7 @@ using namespace script;
 // this does mean that you can't run scripts in multiple threads, but eh you 
 // couldn't do that anyway because of GameObject
 static size_t EXECUTION_DEPTH = 0;
-static size_t EXECUTION_LIMIT = 0xfff;
+static size_t EXECUTION_LIMIT = 0xfffff;
 
 void script::resetExecutionCounter() {
     EXECUTION_DEPTH = 0;
@@ -58,9 +58,16 @@ static std::unordered_map<Keyword, std::string> KEYWORDS {
     { Keyword::Break,       "break" },
     { Keyword::Continue,    "continue" },
     { Keyword::New,         "new" },
+    { Keyword::Const,       "const" },
     { Keyword::True,        "true" },
     { Keyword::False,       "false" },
     { Keyword::Null,        "null" },
+};
+
+static std::unordered_map<AttrKw, std::string> ATTR_KEYWORDS {
+    { AttrKw::Version,      "version" },
+    { AttrKw::Input,        "input" },
+    { AttrKw::Strict,       "strict" },
 };
 
 static std::unordered_map<Op, std::tuple<std::string, size_t, OpDir>> OPS {
@@ -84,10 +91,11 @@ static std::unordered_map<Op, std::tuple<std::string, size_t, OpDir>> OPS {
     { Op::SubSeq,   { "-=", 1,  OpDir::RTL } },
     { Op::AddSeq,   { "+=", 1,  OpDir::RTL } },
     { Op::Seq,      { "=",  1,  OpDir::RTL } },
+    { Op::Arrow,    { "=>", 0,  OpDir::RTL } },
 };
 
-static std::string INVALID_IDENT_CHARS = ".,;(){}[]`\\´¨'\"";
-static std::string VALID_OP_CHARS = "=+-/*<>!#?&|%@:~^";
+static std::string INVALID_IDENT_CHARS = ".,;(){}[]@`\\´¨'\"";
+static std::string VALID_OP_CHARS = "=+-/*<>!#?&|%:~^";
 
 bool script::isIdentCh(char ch) {
     return
@@ -155,14 +163,42 @@ std::string Token::toString(bool debug) const {
 }
 
 void Token::skip(InputStream& stream) {
-    stream >> std::ws;
+    while (true) {
+        tickExecutionCounter();
+        stream >> std::ws;
+        if (stream.eof()) break;
+        // comments
+        auto pos = stream.tellg();
+        if (stream.get() == '/') {
+            if (stream.peek() == '/') {
+                while (!stream.fail() && stream.get() != '\n') {}
+            }
+            else if (stream.peek() == '*') {
+                while (!stream.fail() && (stream.get() != '*' || stream.peek() != '/')) {}
+                stream.get(); // get last /
+                // can't do while (get || get) because that causes an infinite 
+                // loop at **/
+            }
+            else {
+                stream.seekg(pos);
+                stream.clear();
+                break;
+            }
+        }
+        else {
+            stream.seekg(pos);
+            stream.clear();
+            break;
+        }
+    }
     // this tellg is needed for some reason. if you remove it, the parser can 
     // end up in an infinite loop at the end of a script. i don't know why
     stream.tellg();
 }
 
-Result<Token> Token::pull(InputStream& stream) {
-    skip(stream);
+Result<Token> Token::pull(InputStream& stream, bool attr) {
+    auto cpos = stream.tellg();
+    Token::skip(stream);
 
     tickExecutionCounter();
 
@@ -198,7 +234,7 @@ Result<Token> Token::pull(InputStream& stream) {
     }
 
     // punctuation
-    if (std::string("()[]{}:;,.").find_first_of(c) != std::string::npos) {
+    if (std::string("()[]{}:;,.@").find_first_of(c) != std::string::npos) {
         stream.get();
         rb.commit();
         return Ok(Token(Punct(c)));
@@ -230,6 +266,16 @@ Result<Token> Token::pull(InputStream& stream) {
         if (va == ident) {
             rb.commit();
             return Ok(Token(kw));
+        }
+    }
+
+    // attr keywords only in attr mode
+    if (attr) {
+        for (auto const& [kw, va] : ATTR_KEYWORDS) {
+            if (va == ident) {
+                rb.commit();
+                return Ok(Token(kw));
+            }
         }
     }
 
@@ -304,6 +350,27 @@ Result<> Token::pull(Keyword kw, InputStream& stream) {
     ));
 }
 
+Result<> Token::pull(AttrKw kw, InputStream& stream) {
+    Rollback rb(stream);
+    GEODE_UNWRAP_INTO(auto token, Token::pull(stream, true));
+    if (auto value = std::get_if<AttrKw>(&token.value)) {
+        if (*value == kw) {
+            rb.commit();
+            return Ok();
+        }
+        else {
+            return Err(fmt::format(
+                "Expected {}, got {}",
+                tokenToString(kw), tokenToString(*value)
+            ));
+        }
+    }
+    return Err(fmt::format(
+        "Expected {}, got '{}'",
+        tokenToString(kw), token.toString()
+    ));
+}
+
 Result<> Token::pull(char c, InputStream& stream) {
     Rollback rb(stream);
     GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
@@ -316,9 +383,23 @@ Result<> Token::pull(char c, InputStream& stream) {
     return Err("Expected '{}', got '{}'", c, token.toString());
 }
 
-std::optional<Token> Token::peek(InputStream& stream) {
+Result<> Token::pull(const char* chs, InputStream& stream) {
     Rollback rb(stream);
-    return Token::pull(stream).ok();
+    for (auto& c : std::string_view(chs)) {
+        GEODE_UNWRAP(Token::pull(c, stream).expect("{error}\n * While getting \"{}\"", chs));
+    }
+    rb.commit();
+    return Ok();
+}
+
+std::optional<Token> Token::peek(InputStream& stream, bool attr) {
+    Rollback rb(stream);
+    return Token::pull(stream, attr).ok();
+}
+
+bool Token::peek(const char* chs, InputStream& stream) {
+    Rollback rb(stream);
+    return Token::pull(chs, stream).isOk();
 }
 
 size_t Token::prio(InputStream& stream) {
@@ -354,6 +435,13 @@ std::string script::tokenToString(Keyword kw, bool debug) {
         return fmt::format("keyword({})", KEYWORDS.at(kw));
     }
     return KEYWORDS.at(kw);
+}
+
+std::string script::tokenToString(AttrKw kw, bool debug) {
+    if (debug) {
+        return fmt::format("attrkw({})", ATTR_KEYWORDS.at(kw));
+    }
+    return ATTR_KEYWORDS.at(kw);
 }
 
 std::string script::tokenToString(Ident ident, bool debug) {

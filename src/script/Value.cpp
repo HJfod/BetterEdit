@@ -25,7 +25,7 @@ static Rc<Value> builtinFun(
     ).unwrap());
 }
 
-static Rc<Expr> builtinLit(Lit const& value) {
+static Rc<Expr> builtinLitExpr(Lit const& value) {
     return make<Expr>({
         .value = make<LitExpr>({
             .value = value,
@@ -100,9 +100,9 @@ std::string Value::toString(bool debug) const {
         },
         [&](Rc<const FunExpr> const& fun) {
             if (debug) {
-                return fmt::format("function({})", fun->ident);
+                return fmt::format("function({})", fun->ident.value_or("anonymous"));
             }
-            return fun->ident;
+            return fun->ident.value_or("anonymous function");
         },
         [&](auto const& lit) {
             return tokenToString(static_cast<Lit>(lit), debug);
@@ -150,17 +150,70 @@ std::optional<Rc<Value>> Value::member(std::string const& name) {
         [&](StrLit&) -> std::optional<Rc<Value>> {
             return std::nullopt;
         },
-        [&](Array&) -> std::optional<Rc<Value>> {
-            return std::nullopt;
+        [&](Array& arr) -> std::optional<Rc<Value>> {
+            switch (hash(name.c_str())) {
+                case hash("count"): {
+                    return builtinFun(
+                        {}, [&arr](State& state) {
+                            return Ok(Value::rc(NumLit(arr.size())));
+                        }
+                    );
+                } break;
+
+                default: {
+                    return std::nullopt;
+                } break;
+            }
         },
         [&](Ref<GameObject>& obj) -> std::optional<Rc<Value>> {
             switch (hash(name.c_str())) {
+                case hash("x"): {
+                    return Value::rc(obj->getPositionX(), [&](Value& value) {
+                        if (auto num = value.has<NumLit>()) {
+                            auto x = obj->getPositionX();
+                            EditorUI::get()->moveObject(
+                                obj, CCPoint { static_cast<float>(*num - x), 0.f }
+                            );
+                        }
+                    });
+                } break;
+
+                case hash("y"): {
+                    return Value::rc(obj->getPositionY(), [&](Value& value) {
+                        if (auto num = value.has<NumLit>()) {
+                            auto x = obj->getPositionY();
+                            EditorUI::get()->moveObject(
+                                obj, CCPoint { 0.f, static_cast<float>(*num - x) }
+                            );
+                        }
+                    });
+                } break;
+                
+                case hash("select"): {
+                    return builtinFun(
+                        {{ "unique", builtinLitExpr(false) }},
+                        [&obj](State& state) {
+                            if (state.get("unique")->truthy()) {
+                                EditorUI::get()->selectObject(obj, false);
+                            }
+                            else {
+                                auto objs = EditorUI::get()->getSelectedObjects();
+                                objs->addObject(obj);
+                                EditorUI::get()->selectObjects(objs, false);
+                            }
+                            EditorUI::get()->updateButtons();
+                            return Ok(Value::rc(obj));
+                        }
+                    );
+                } break;
+                
                 case hash("deselect"): {
                     return builtinFun(
                         {}, [&obj](State& state) {
                             EditorUI::get()->deselectObject(obj);
                             obj->deselectObject();
-                            return Ok(Value::rc(NullLit()));
+                            EditorUI::get()->updateButtons();
+                            return Ok(Value::rc(obj));
                         }
                     );
                 } break;
@@ -168,8 +221,8 @@ std::optional<Rc<Value>> Value::member(std::string const& name) {
                 case hash("move"): {
                     return builtinFun(
                         {
-                            { "x", builtinLit(0.0) },
-                            { "y", builtinLit(0.0) },
+                            { "x", builtinLitExpr(0.0) },
+                            { "y", builtinLitExpr(0.0) },
                         },
                         [&obj](State& state) -> Result<Rc<Value>> {
                             auto x = state.get("x")->has<NumLit>();
@@ -184,7 +237,7 @@ std::optional<Rc<Value>> Value::member(std::string const& name) {
                                 static_cast<float>(*x),
                                 static_cast<float>(*y)
                             });
-                            return Ok(Value::rc(NullLit()));
+                            return Ok(Value::rc(obj));
                         }
                     );
                 } break;
@@ -242,7 +295,10 @@ void State::add(std::string const& name, Rc<Value> value) {
     entities.back().insert({ name, value });
 }
 
-bool State::has(std::string const& name) const {
+bool State::has(std::string const& name, bool top) const {
+    if (top) {
+        return entities.back().count(name);
+    }
     for (auto& ent : ranges::reverse(entities)) {
         if (ent.count(name)) {
             return true;
@@ -275,38 +331,55 @@ void State::pop() {
     }
 }
 
-Result<> State::run(ghc::filesystem::path const& path, bool debug) {
+Result<State> State::parse(ghc::filesystem::path const& path, bool debug) {
     std::ifstream stream(path, std::ios::binary);
-    GEODE_UNWRAP(State::run(stream, debug));
-    return Ok();
+    return State::parse(stream, debug);
 }
 
-Result<> State::run(std::string const& code, bool debug) {
+Result<State> State::parse(std::string const& code, bool debug) {
     std::stringstream stream(code);
-    GEODE_UNWRAP(State::run(stream, debug));
-    return Ok();
+    return State::parse(stream, debug);
 }
 
-Result<> State::run(InputStream& stream, bool debug) {
+Result<State> State::parse(InputStream& stream, bool debug) {
     try {
         resetExecutionCounter();
-        GEODE_UNWRAP_INTO(auto ast, ListExpr::pull(stream));
+        GEODE_UNWRAP_INTO(auto attrs, Attrs::pull(stream));
+
+        if (!attrs.version) {
+            log::warn("Script target version not specified");
+        }
+        else {
+            if (attrs.version > SCRIPT_VERSION) {
+                return Err("Script is written for a newer version of BetterEdit");
+            }
+        }
+
+        GEODE_UNWRAP_INTO(auto ast, ListExpr::pull(stream, attrs));
         if (debug) {
             log::info("AST: {}", ast->debug());
         }
-        auto state = State();
-        GEODE_UNWRAP_INTO(auto val, ast->eval(state));
-        if (debug) {
-            log::info("Script evaluated to {}", val->toString(true));
-        }
+
+        return Ok(State(attrs));
     }
     catch (std::exception& err) {
-        return Err(err.what());
+        return Err("Uncaught exception: {}", err.what());
     }
     return Ok();
 }
 
-State::State() {
+Result<Value> State::run() {
+    try {
+        GEODE_UNWRAP_INTO(auto val, ast->eval(state));
+        return Ok(*val);
+    }
+    catch (std::exception& err) {
+        return Err("Uncaught exception: {}", err.what());
+    }
+}
+
+State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
+    // lang
     this->add("print", builtinFun(
         {{ "msg", std::nullopt }},
         [](State& state) -> Result<Rc<Value>> {
@@ -314,16 +387,22 @@ State::State() {
             return Ok(state.get("msg"));
         }
     ));
-
+    this->add("assert", builtinFun(
+        {
+            { "expr", std::nullopt },
+            { "msg", builtinLitExpr("Assertion failed") }
+        },
+        [&](State& state) -> Result<Rc<Value>> {
+            if (!state.get("expr")->truthy()) {
+                return Err(state.get("msg")->toString());
+            }
+            return Ok(state.get("expr"));
+        }
+    ));
     this->add("alert", builtinFun(
         {
             { "msg", std::nullopt },
-            { "title", make<Expr>({
-                .value = make<LitExpr>({
-                    .value = NullLit(),
-                    .src = "/* built-in expr */",
-                }).unwrap()
-            }).unwrap() },
+            { "title", builtinLitExpr(NullLit()) },
         },
         [](State& state) -> Result<Rc<Value>> {
             auto title = state.get("title");
@@ -336,6 +415,7 @@ State::State() {
         }
     ));
 
+    // gd
     this->add("getSelectedObjects", builtinFun(
         {},
         [](State& state) -> Result<Rc<Value>> {
@@ -343,7 +423,7 @@ State::State() {
             if (ui->m_selectedObject) {
                 return Ok(Value::rc(Array { Value(ui->m_selectedObject) } ));
             }
-            else if (ui->m_selectedObjects->count()) {
+            else {
                 Array res;
                 res.reserve(ui->m_selectedObjects->count());
                 for (auto obj : CCArrayExt<GameObject>(ui->m_selectedObjects)) {
@@ -351,12 +431,29 @@ State::State() {
                 }
                 return Ok(Value::rc(res));
             }
-            else {
-                return Ok(Value::rc(Array()));
-            }
         }
     ));
-    
+    this->add("getAllObjects", builtinFun(
+        {},
+        [](State& state) -> Result<Rc<Value>> {
+            auto objs = EditorUI::get()->m_editorLayer->m_objects;
+            Array res;
+            res.reserve(objs->count());
+            for (auto obj : CCArrayExt<GameObject>(objs)) {
+                res.push_back(Value(obj));
+            }
+            return Ok(Value::rc(res));
+        }
+    ));
+    this->add("deselectAll", builtinFun(
+        {},
+        [](State& state) -> Result<Rc<Value>> {
+            EditorUI::get()->deselectAll();
+            return Ok(Value::rc(NullLit()));
+        }
+    ));
+
+    // math
     this->add("random", builtinFun(
         {},
         [&](State& state) -> Result<Rc<Value>> {
@@ -364,6 +461,39 @@ State::State() {
             static std::mt19937 gen(rd());
             std::uniform_real_distribution<> dis(0.0, 1.0);
             return Ok(Value::rc(dis(gen)));
+        }
+    ));
+    this->add("sin", builtinFun(
+        {{ "x", std::nullopt }},
+        [](State& state) -> Result<Rc<Value>> {
+            if (auto num = state.get("x")->has<NumLit>()) {
+                return Ok(Value::rc(sin(*num)));
+            }
+            else {
+                return Err("sin requires a number, got {}", state.get("x")->typeName());
+            }
+        }
+    ));
+    this->add("cos", builtinFun(
+        {{ "x", std::nullopt }},
+        [](State& state) -> Result<Rc<Value>> {
+            if (auto num = state.get("x")->has<NumLit>()) {
+                return Ok(Value::rc(cos(*num)));
+            }
+            else {
+                return Err("cos requires a number, got {}", state.get("x")->typeName());
+            }
+        }
+    ));
+    this->add("tan", builtinFun(
+        {{ "x", std::nullopt }},
+        [](State& state) -> Result<Rc<Value>> {
+            if (auto num = state.get("x")->has<NumLit>()) {
+                return Ok(Value::rc(tan(*num)));
+            }
+            else {
+                return Err("tan requires a number, got {}", state.get("x")->typeName());
+            }
         }
     ));
 }

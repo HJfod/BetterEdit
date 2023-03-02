@@ -1,4 +1,13 @@
 
-for obj in getSelectedObjects() {
-    obj.move(30, 30)
+@version 1.0
+@input number chance
+
+assert(0.0 <= chance && chance <= 1.0, "Chance must be between 0 and 1")
+
+deselectAll()
+objs = getAllObjects()
+for obj in objs {
+    if random() > chance {
+        obj.select()
+    }
 }

@@ -2,13 +2,13 @@
 
 using namespace script;
 
-Result<Rc<UnOpExpr>> UnOpExpr::pull(InputStream& stream) {
+Result<Rc<UnOpExpr>> UnOpExpr::pull(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP_INTO(auto op, Token::pull<Op>(stream));
     if (!isUnOp(op)) {
         return Err(fmt::format("Invalid unary operator '{}'", tokenToString(op)));
     }
-    GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
+    GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream, attrs));
     return make<UnOpExpr>({
         .expr = expr,
         .op = op,
@@ -59,7 +59,7 @@ std::string UnOpExpr::debug() const {
     );
 }
 
-Result<Rc<CallExpr>> CallExpr::pull(Rc<Expr> target, InputStream& stream) {
+Result<Rc<CallExpr>> CallExpr::pull(Rc<Expr> target, InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull('(', stream));
     // handle ()
@@ -74,12 +74,13 @@ Result<Rc<CallExpr>> CallExpr::pull(Rc<Expr> target, InputStream& stream) {
     std::vector<Rc<Expr>> args;
     std::unordered_map<std::string, Rc<Expr>> named;
     while (true) {
+        tickExecutionCounter();
         bool isNamed = false;
         Rollback namedrb(stream);
         // named args are in the form `<ident> = <expr>`
         if (auto ident = Token::pull<Ident>(stream)) {
             if (Token::pull(Op::Seq, stream)) {
-                GEODE_UNWRAP_INTO(auto value, Expr::pull(stream));
+                GEODE_UNWRAP_INTO(auto value, Expr::pull(stream, attrs));
                 if (named.count(ident.unwrap())) {
                     return Err(fmt::format(
                         "Named argument '{}' has already been passed",
@@ -93,7 +94,7 @@ Result<Rc<CallExpr>> CallExpr::pull(Rc<Expr> target, InputStream& stream) {
         }
         if (!isNamed) {
             namedrb.ret();
-            GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
+            GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream, attrs));
             args.push_back(expr);
         }
         namedrb.commit();
@@ -198,13 +199,13 @@ std::string CallExpr::debug() const {
     return fmt::format("CallExpr({}, args({}), named({}))", expr->debug(), a, n);
 }
 
-Result<Rc<IndexExpr>> IndexExpr::pull(Rc<Expr> target, InputStream& stream) {
+Result<Rc<IndexExpr>> IndexExpr::pull(Rc<Expr> target, InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull('[', stream));
     if (Token::peek(']', stream)) {
         return Err("Expected value for array index");
     }
-    GEODE_UNWRAP_INTO(auto index, Expr::pull(stream));
+    GEODE_UNWRAP_INTO(auto index, Expr::pull(stream, attrs));
     GEODE_UNWRAP(Token::pull(']', stream));
     return make<IndexExpr>({
         .expr = target,
@@ -245,7 +246,7 @@ std::string IndexExpr::debug() const {
     return fmt::format("IndexExpr({}, {})", expr->debug(), index->debug());
 }
 
-Result<Rc<MemberExpr>> MemberExpr::pull(Rc<Expr> before, InputStream& stream) {
+Result<Rc<MemberExpr>> MemberExpr::pull(Rc<Expr> before, InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull('.', stream));
     GEODE_UNWRAP_INTO(auto member, Token::pull<Ident>(stream));
@@ -269,3 +270,47 @@ std::string MemberExpr::debug() const {
     return fmt::format("MemberExpr({}, {})", expr->debug(), member);
 }
 
+Result<Rc<ForEachExpr>> ForEachExpr::pull(Rc<Expr> before, InputStream& stream, Attrs& attrs) {
+    Rollback rb(stream);
+    GEODE_UNWRAP(Token::pull("...", stream));
+
+    // pull an identifier but don't consume it
+    Rollback irb(stream);
+    GEODE_UNWRAP_INTO(auto member, Token::pull<Ident>(stream));
+    irb.ret();
+
+    GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream, attrs));
+
+    return make<ForEachExpr>({
+        .target = before,
+        .member = member,
+        .expr = expr,
+        .src = rb.commit(),
+    });
+}
+
+Result<Rc<Value>> ForEachExpr::eval(State& state) {
+    GEODE_UNWRAP_INTO(auto value, target->eval(state));
+    auto arr = value->has<Array>();
+    if (!arr) {
+        return Err(
+            "Cannot use foreach operator on {}, expected array",
+            value->typeName()
+        );
+    }
+    auto res = Value::rc(NullLit());
+    for (auto& val : *arr) {
+        auto mem = val.member(member);
+        if (!mem) {
+            return Err("{} has no member {}", val.typeName(), member);
+        }
+        auto _ = state.scope();
+        state.add(member, mem.value());
+        GEODE_UNWRAP_INTO(res, expr->eval(state));
+    }
+    return Ok(res);
+}
+
+std::string ForEachExpr::debug() const {
+    return fmt::format("ForEachExpr({}, {}, {})", target->debug(), member, expr->debug());
+}

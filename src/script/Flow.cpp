@@ -2,10 +2,10 @@
 
 using namespace script;
 
-Result<Rc<ReturnExpr>> ReturnExpr::pull(InputStream& stream) {
+Result<Rc<ReturnExpr>> ReturnExpr::pull(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull(Keyword::Return, stream));
-    if (auto expr = Expr::pull(stream)) {
+    if (auto expr = Expr::pull(stream, attrs)) {
         return make<ReturnExpr>({
             .value = expr.unwrap(),
             .src = rb.commit(),
@@ -38,10 +38,10 @@ std::string ReturnExpr::debug() const {
     }
 }
 
-Result<Rc<BreakExpr>> BreakExpr::pull(InputStream& stream) {
+Result<Rc<BreakExpr>> BreakExpr::pull(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull(Keyword::Break, stream));
-    if (auto expr = Expr::pull(stream)) {
+    if (auto expr = Expr::pull(stream, attrs)) {
         return make<BreakExpr>({
             .value = expr.unwrap(),
             .src = rb.commit(),
@@ -74,7 +74,7 @@ std::string BreakExpr::debug() const {
     }
 }
 
-Result<Rc<ContinueExpr>> ContinueExpr::pull(InputStream& stream) {
+Result<Rc<ContinueExpr>> ContinueExpr::pull(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull(Keyword::Continue, stream));
     return make<ContinueExpr>(rb.commit());
@@ -88,13 +88,13 @@ std::string ContinueExpr::debug() const {
     return "Continue()";
 }
 
-Result<Rc<ForInExpr>> ForInExpr::pull(InputStream& stream) {
+Result<Rc<ForInExpr>> ForInExpr::pull(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull(Keyword::For, stream));
     GEODE_UNWRAP_INTO(auto ident, Token::pull<Ident>(stream));
     GEODE_UNWRAP(Token::pull(Keyword::In, stream));
-    GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream));
-    GEODE_UNWRAP_INTO(auto body, ListExpr::pullBlock(stream));
+    GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream, attrs));
+    GEODE_UNWRAP_INTO(auto body, ListExpr::pullBlock(stream, attrs));
     return make<ForInExpr>({
         .item = ident,
         .expr = expr,
@@ -134,21 +134,21 @@ std::string ForInExpr::debug() const {
     );
 }
 
-Result<Rc<IfExpr>> IfExpr::pull(InputStream& stream) {
+Result<Rc<IfExpr>> IfExpr::pull(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull(Keyword::If, stream));
-    GEODE_UNWRAP_INTO(auto cond, Expr::pull(stream));
-    GEODE_UNWRAP_INTO(auto truthy, ListExpr::pullBlock(stream));
+    GEODE_UNWRAP_INTO(auto cond, Expr::pull(stream, attrs));
+    GEODE_UNWRAP_INTO(auto truthy, ListExpr::pullBlock(stream, attrs));
     std::optional<Rc<Expr>> falsy;
     if (Token::pull(Keyword::Else, stream)) {
         // else if
         if (Token::peek(Keyword::If, stream)) {
-            GEODE_UNWRAP_INTO(auto ifFalsy, IfExpr::pull(stream));
+            GEODE_UNWRAP_INTO(auto ifFalsy, IfExpr::pull(stream, attrs));
             falsy = make<Expr>(ifFalsy).unwrap();
         }
         // otherwise expect a block
         else {
-            GEODE_UNWRAP_INTO(falsy, ListExpr::pullBlock(stream));
+            GEODE_UNWRAP_INTO(falsy, ListExpr::pullBlock(stream, attrs));
         }
     }
     return make<IfExpr>({

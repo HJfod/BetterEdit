@@ -62,12 +62,20 @@
 					"match": "\\b(for|while|if|else|return|break|continue|new)\\b"
 				},
 				{
+					"name": "keyword.control.meta.swipe",
+					"match": "(@([a-zA-Z]+))\\b"
+				},
+				{
+					"name": "storage.type.swipe",
+					"match": "(?<=@input\\s+)(number|string)\\b"
+				},
+				{
 					"name": "keyword.other.swipe",
 					"match": "\\b(in)\\b"
 				},
 				{
-					"name": "keyword.swipe",
-					"match": "\\b(function)\\b"
+					"name": "storage.type.swipe",
+					"match": "\\b(const|function)\\b"
 				},
 				{
 					"name": "punctuation.swipe",
@@ -77,7 +85,7 @@
 		},
 		"operators": {
 			"name": "keyword.operator.swipe",
-			"match": "[\\+\\-\\*\\/=<>\\^\\|\\&\\!%]"
+			"match": "[\\+\\-\\*\\/=<>\\^\\|\\&\\!%~@]"
 		},
 		"strings": {
 			"patterns": [
