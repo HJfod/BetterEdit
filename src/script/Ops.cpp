@@ -59,16 +59,16 @@ std::string UnOpExpr::debug() const {
     );
 }
 
-Result<Rc<CallExpr>> CallExpr::pull(Rc<Expr> target, InputStream& stream, Attrs& attrs) {
+Result<Rc<CallExpr>> CallExpr::pull(Rc<Expr> before, InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull('(', stream));
     // handle ()
     if (Token::pull(')', stream)) {
         return make<CallExpr>({
-            .expr = target,
+            .expr = before,
             .args = {},
             .named = {},
-            .src = rb.commit(),
+            .src = before->src(true) + rb.commit(),
         });
     }
     std::vector<Rc<Expr>> args;
@@ -105,10 +105,10 @@ Result<Rc<CallExpr>> CallExpr::pull(Rc<Expr> target, InputStream& stream, Attrs&
     }
     GEODE_UNWRAP(Token::pull(')', stream));
     return make<CallExpr>({
-        .expr = target,
+        .expr = before,
         .args = args,
         .named = named,
-        .src = rb.commit(),
+        .src = before->src(true) + rb.commit(),
     });
 }
 
@@ -199,7 +199,7 @@ std::string CallExpr::debug() const {
     return fmt::format("CallExpr({}, args({}), named({}))", expr->debug(), a, n);
 }
 
-Result<Rc<IndexExpr>> IndexExpr::pull(Rc<Expr> target, InputStream& stream, Attrs& attrs) {
+Result<Rc<IndexExpr>> IndexExpr::pull(Rc<Expr> before, InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull('[', stream));
     if (Token::peek(']', stream)) {
@@ -208,9 +208,9 @@ Result<Rc<IndexExpr>> IndexExpr::pull(Rc<Expr> target, InputStream& stream, Attr
     GEODE_UNWRAP_INTO(auto index, Expr::pull(stream, attrs));
     GEODE_UNWRAP(Token::pull(']', stream));
     return make<IndexExpr>({
-        .expr = target,
+        .expr = before,
         .index = index,
-        .src = rb.commit(),
+        .src = before->src(true) + rb.commit(),
     });
 }
 
@@ -253,7 +253,7 @@ Result<Rc<MemberExpr>> MemberExpr::pull(Rc<Expr> before, InputStream& stream, At
     return make<MemberExpr>({
         .expr = before,
         .member = member,
-        .src = rb.commit(),
+        .src = before->src(true) + rb.commit(),
     });
 }
 
@@ -285,7 +285,7 @@ Result<Rc<ForEachExpr>> ForEachExpr::pull(Rc<Expr> before, InputStream& stream, 
         .target = before,
         .member = member,
         .expr = expr,
-        .src = rb.commit(),
+        .src = before->src(true) + rb.commit(),
     });
 }
 

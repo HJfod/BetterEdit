@@ -35,29 +35,7 @@ Result<Rc<LitExpr>> LitExpr::pull(InputStream& stream, Attrs& attrs) {
 }
 
 Result<Rc<Value>> LitExpr::eval(State& state) {
-    return std::visit(makeVisitor {
-        [&](NullLit const&) -> Result<Rc<Value>> {
-            return Ok(Value::rc(NullLit(), nullptr, true));
-        },
-        [&](BoolLit const& b) -> Result<Rc<Value>> {
-            return Ok(Value::rc(b, nullptr, true));
-        },
-        [&](NumLit const& num) -> Result<Rc<Value>> {
-            return Ok(Value::rc(num, nullptr, true));
-        },
-        [&](StrLit const& str) -> Result<Rc<Value>> {
-            return Ok(Value::rc(str, nullptr, true));
-        },
-        [&](ArrLit const& arr) -> Result<Rc<Value>> {
-            Array value;
-            value.reserve(arr.size());
-            for (auto& expr : arr) {
-                GEODE_UNWRAP_INTO(auto val, expr->eval(state));
-                value.push_back(*val);
-            }
-            return Ok(Value::rc(value, nullptr, true));
-        },
-    }, value);
+    return Value::lit(value, state);
 }
 
 std::string LitExpr::debug() const {
@@ -352,6 +330,7 @@ Result<Rc<Expr>> Expr::pullPrimaryNonCall(InputStream& stream, Attrs& attrs) {
     // if we pull a specific keyword, then it has to be that statement
     PULL_IF(Keyword::If, IfExpr);
     PULL_IF(Keyword::For, ForInExpr);
+    PULL_IF(Keyword::Try, TryExpr);
     PULL_IF(Keyword::Function, FunExpr);
     PULL_IF(Keyword::Return, ReturnExpr);
     PULL_IF(Keyword::Break, BreakExpr);
@@ -393,9 +372,12 @@ std::string Expr::debug() const {
     }, value);
 }
 
-std::string Expr::src() const {
+std::string Expr::src(bool raw) const {
     return std::visit(makeVisitor {
         [&](auto const& expr) {
+            if (raw) {
+                return expr->src;
+            }
             auto code = string::trim(expr->src);
             if (string::contains(code, '\n')) {
                 return fmt::format("```\n{}\n```", code);

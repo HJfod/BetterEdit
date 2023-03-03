@@ -1,13 +1,20 @@
 
 @version 1.0
-@input number chance
+@name "Select random objects"
+@input chance 0.5 "Chance"
+@input useAll true "Use all objects"
 
 assert(0.0 <= chance && chance <= 1.0, "Chance must be between 0 and 1")
 
-deselectAll()
-objs = getAllObjects()
+objs = if useAll {
+    deselectAll()
+    getAllObjects()
+}
+else {
+    getSelectedObjects()
+}
 for obj in objs {
-    if random() > chance {
+    if random() > 1 - chance {
         obj.select()
     }
 }

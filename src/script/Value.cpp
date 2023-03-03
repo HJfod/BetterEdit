@@ -137,6 +137,15 @@ std::string Value::typeName() const {
 }
 
 std::optional<Rc<Value>> Value::member(std::string const& name) {
+    // shared across all types
+    if (name == "toString") {
+        return builtinFun(
+            {{ "debug", builtinLitExpr(false) }},
+            [&](State& state) {
+                return Ok(Value::rc(this->toString(state.get("debug")->truthy())));
+            }
+        );
+    }
     return std::visit(makeVisitor {
         [&](NullLit&) -> std::optional<Rc<Value>> {
             return std::nullopt;
@@ -253,6 +262,32 @@ std::optional<Rc<Value>> Value::member(std::string const& name) {
     }, value);
 }
 
+Result<Rc<Value>> Value::lit(Lit const& value, State& state) {
+    return std::visit(makeVisitor {
+        [&](NullLit const&) -> Result<Rc<Value>> {
+            return Ok(Value::rc(NullLit(), nullptr, true));
+        },
+        [&](BoolLit const& b) -> Result<Rc<Value>> {
+            return Ok(Value::rc(b, nullptr, true));
+        },
+        [&](NumLit const& num) -> Result<Rc<Value>> {
+            return Ok(Value::rc(num, nullptr, true));
+        },
+        [&](StrLit const& str) -> Result<Rc<Value>> {
+            return Ok(Value::rc(str, nullptr, true));
+        },
+        [&](ArrLit const& arr) -> Result<Rc<Value>> {
+            Array value;
+            value.reserve(arr.size());
+            for (auto& expr : arr) {
+                GEODE_UNWRAP_INTO(auto val, expr->eval(state));
+                value.push_back(*val);
+            }
+            return Ok(Value::rc(value, nullptr, true));
+        },
+    }, value);
+}
+
 bool script::operator==(Array const& a, Array const b) {
     if (a.size() != b.size()) return false;
     for (auto i = 0u; i < a.size(); i++) {
@@ -331,17 +366,17 @@ void State::pop() {
     }
 }
 
-Result<State> State::parse(ghc::filesystem::path const& path, bool debug) {
+Result<Rc<State>> State::parse(ghc::filesystem::path const& path, bool debug) {
     std::ifstream stream(path, std::ios::binary);
     return State::parse(stream, debug);
 }
 
-Result<State> State::parse(std::string const& code, bool debug) {
+Result<Rc<State>> State::parse(std::string const& code, bool debug) {
     std::stringstream stream(code);
     return State::parse(stream, debug);
 }
 
-Result<State> State::parse(InputStream& stream, bool debug) {
+Result<Rc<State>> State::parse(InputStream& stream, bool debug) {
     try {
         resetExecutionCounter();
         GEODE_UNWRAP_INTO(auto attrs, Attrs::pull(stream));
@@ -360,17 +395,17 @@ Result<State> State::parse(InputStream& stream, bool debug) {
             log::info("AST: {}", ast->debug());
         }
 
-        return Ok(State(attrs));
+        // cant use make_shared because private ctor
+        return Ok(Rc<State>(new State(make<Expr>({ .value = ast }).unwrap(), attrs)));
     }
     catch (std::exception& err) {
         return Err("Uncaught exception: {}", err.what());
     }
-    return Ok();
 }
 
 Result<Value> State::run() {
     try {
-        GEODE_UNWRAP_INTO(auto val, ast->eval(state));
+        GEODE_UNWRAP_INTO(auto val, ast->eval(*this));
         return Ok(*val);
     }
     catch (std::exception& err) {
@@ -379,12 +414,25 @@ Result<Value> State::run() {
 }
 
 State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
+    for (auto& [var, def, _] : attrs.parameters) {
+        this->push();
+        auto val = Value::lit(def, *this).unwrap();
+        this->pop();
+        this->add(var, val);
+    }
+    
     // lang
     this->add("print", builtinFun(
         {{ "msg", std::nullopt }},
         [](State& state) -> Result<Rc<Value>> {
             log::info("{}", state.get("msg")->toString());
             return Ok(state.get("msg"));
+        }
+    ));
+    this->add("error", builtinFun(
+        {{ "msg", std::nullopt }},
+        [](State& state) -> Result<Rc<Value>> {
+            return Err(state.get("msg")->toString());
         }
     ));
     this->add("assert", builtinFun(

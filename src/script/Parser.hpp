@@ -23,6 +23,9 @@ namespace script {
     
     struct Expr;
     struct FunExpr;
+    struct State;
+    struct Scope;
+    struct Attrs;
 
     template <class T>
     using Rc = std::shared_ptr<T>;
@@ -70,13 +73,10 @@ namespace script {
 
     enum class Keyword {
         For, In, While,
-        If, Else,
+        If, Else, Try,
         Function, Return, Break, Continue,
         New, Const, 
         True, False, Null,
-    };
-    enum class AttrKw {
-        Version, Input, Strict, 
     };
     enum class Op {
         Seq,    // a = b
@@ -142,37 +142,31 @@ namespace script {
         static inline const char* TYPE_NAME = "punctuation";
     };
 
-    template <>
-    struct TokenTraits<AttrKw> {
-        static inline const char* TYPE_NAME = "attribute keyword";
-    };
-
     template <class T>
     concept TokenType = requires {
         TokenTraits<T>::TYPE_NAME;
     };
 
     std::string tokenToString(Keyword kw, bool debug = false);
-    std::string tokenToString(AttrKw kw, bool debug = false);
     std::string tokenToString(Ident ident, bool debug = false);
     std::string tokenToString(Lit lit, bool debug = false);
     std::string tokenToString(Op op, bool debug = false);
     std::string tokenToString(Punct punct, bool debug = false);
 
     struct Token {
-        std::variant<Keyword, Op, Lit, Punct, Ident, AttrKw> value;
+        std::variant<Keyword, Op, Lit, Punct, Ident> value;
 
         std::string toString(bool debug = false) const;
         static void skip(InputStream& stream);
-        static Result<Token> pull(InputStream& stream, bool attr = false);
-        static std::optional<Token> peek(InputStream& stream, bool attr = false);
+        static Result<Token> pull(InputStream& stream);
+        static std::optional<Token> peek(InputStream& stream);
         static size_t prio(InputStream& stream);
         static OpDir dir(InputStream& stream);
         static bool eof(InputStream& stream);
 
         template <TokenType T>
-        static std::optional<T> peek(InputStream& stream, bool attr = false) {
-            auto value = Token::peek(stream, attr);
+        static std::optional<T> peek(InputStream& stream) {
+            auto value = Token::peek(stream);
             if (value) {
                 if (auto v = std::get_if<T>(&value.value().value)) {
                     return *v;
@@ -186,16 +180,6 @@ namespace script {
             auto value = Token::peek(stream);
             if (value) {
                 if (auto pun = std::get_if<T>(&value.value().value)) {
-                    return *pun == c;
-                }
-            }
-            return false;
-        }
-        template <>
-        static bool peek(AttrKw c, InputStream& stream) {
-            auto value = Token::peek(stream, true);
-            if (value) {
-                if (auto pun = std::get_if<AttrKw>(&value.value().value)) {
                     return *pun == c;
                 }
             }
@@ -217,10 +201,27 @@ namespace script {
             ));
         }
 
-        static Result<> pull(Op op, InputStream& stream);
-        static Result<> pull(Keyword kw, InputStream& stream);
-        static Result<> pull(AttrKw kw, InputStream& stream);
-        static Result<> pull(char c, InputStream& stream);
+        template <TokenType T>
+        static Result<T> pull(T val, InputStream& stream) {
+            Rollback rb(stream);
+            GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
+            if (auto value = std::get_if<T>(&token.value)) {
+                if (*value == val) {
+                    rb.commit();
+                    return Ok(*value);
+                }
+                else {
+                    return Err(fmt::format(
+                        "Expected {}, got {}",
+                        tokenToString(val), tokenToString(*value)
+                    ));
+                }
+            }
+            return Err(fmt::format(
+                "Expected {}, got '{}'",
+                TokenTraits<T>::TYPE_NAME, token.toString()
+            ));
+        }
         static Result<> pull(const char* chs, InputStream& stream);
     };
 
@@ -254,6 +255,7 @@ namespace script {
         ) {
             return std::make_shared<Value>(value, onChange, isConst);
         }
+        static Result<Rc<Value>> lit(Lit const& value, State& state);
 
         template <class T>
         T* has() {
@@ -288,10 +290,6 @@ namespace script {
             return "Internal error - Continue signal not caught";
         }
     };
-
-    struct State;
-    struct Scope;
-    struct Attrs;
 
     struct LitExpr {
         Lit value;
@@ -385,6 +383,14 @@ namespace script {
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
     };
+    struct TryExpr {
+        Rc<Expr> expr;
+        std::optional<Rc<Expr>> faily;
+        std::string src;
+        static Result<Rc<TryExpr>> pull(InputStream& stream, Attrs& attrs);
+        Result<Rc<Value>> eval(State& state);
+        std::string debug() const;
+    };
     struct FunExpr : public std::enable_shared_from_this<FunExpr> {
         std::optional<Ident> ident;
         std::vector<std::pair<Ident, std::optional<Rc<Expr>>>> params;
@@ -438,7 +444,7 @@ namespace script {
             Rc<UnOpExpr>, Rc<BinOpExpr>,
             Rc<CallExpr>, Rc<FunExpr>,
             Rc<IndexExpr>, Rc<MemberExpr>, Rc<ForEachExpr>,
-            Rc<ForInExpr>, Rc<IfExpr>,
+            Rc<ForInExpr>, Rc<IfExpr>, Rc<TryExpr>,
             Rc<ReturnExpr>, Rc<BreakExpr>, Rc<ContinueExpr>,
             Rc<ListExpr>, Rc<CppExpr>
         > value;
@@ -448,7 +454,7 @@ namespace script {
         static Result<Rc<Expr>> pull(InputStream& stream, Attrs& attrs);
         Result<Rc<Value>> eval(State& state);
         std::string debug() const;
-        std::string src() const;
+        std::string src(bool raw = false) const;
     };
 
     struct VersionAttr {
@@ -457,11 +463,9 @@ namespace script {
         Result<> eval(Attrs& attrs);
     };
     struct InputAttr {
-        enum Type {
-            String,
-            Number,
-        } type;
         Ident ident;
+        Lit value;
+        StrLit title;
         static Result<InputAttr> pull(InputStream& stream);
         Result<> eval(Attrs& attrs);
     };
@@ -470,15 +474,21 @@ namespace script {
         static Result<StrictAttr> pull(InputStream& stream);
         Result<> eval(Attrs& attrs);
     };
+    struct TitleAttr {
+        std::string title;
+        static Result<TitleAttr> pull(InputStream& stream);
+        Result<> eval(Attrs& attrs);
+    };
     struct Attr {
-        std::variant<VersionAttr, InputAttr, StrictAttr> value;
+        std::variant<VersionAttr, InputAttr, StrictAttr, TitleAttr> value;
         static Result<Attr> pull(InputStream& stream);
         Result<> eval(Attrs& attrs);
     };
     struct Attrs {
         std::optional<VersionInfo> version;
-        std::vector<std::pair<InputAttr::Type, Ident>> parameters;
+        std::vector<std::tuple<Ident, Lit, StrLit>> parameters;
         bool strict = false;
+        std::optional<std::string> title;
         static Result<Attrs> pull(InputStream& stream);
     };
 
@@ -510,9 +520,9 @@ namespace script {
         State(Rc<Expr> ast, Attrs const& attrs);
 
     public:
-        static Result<State> parse(ghc::filesystem::path const& path, bool debug = false);
-        static Result<State> parse(std::string const& code, bool debug = false);
-        static Result<State> parse(InputStream& stream, bool debug = false);
+        static Result<Rc<State>> parse(ghc::filesystem::path const& path, bool debug = false);
+        static Result<Rc<State>> parse(std::string const& code, bool debug = false);
+        static Result<Rc<State>> parse(InputStream& stream, bool debug = false);
 
         Result<Value> run();
 

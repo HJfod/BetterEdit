@@ -59,7 +59,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.swipe",
-					"match": "\\b(for|while|if|else|return|break|continue|new)\\b"
+					"match": "\\b(for|while|if|else|try|return|break|continue|new)\\b"
 				},
 				{
 					"name": "keyword.control.meta.swipe",
@@ -67,7 +67,7 @@
 				},
 				{
 					"name": "storage.type.swipe",
-					"match": "(?<=@input\\s+)(number|string)\\b"
+					"match": "(?<=@input\\s+)(number|string|boolean)\\b"
 				},
 				{
 					"name": "keyword.other.swipe",

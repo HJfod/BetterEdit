@@ -31,7 +31,7 @@ Result<Rc<Expr>> BinOpExpr::pull(InputStream& stream, Attrs& attrs, size_t p, Rc
                 .lhs = lhs,
                 .rhs = rhs,
                 .op = op,
-                .src = rb.commit(),
+                .src = lhs->src(true) + rb.commit(),
             }).unwrap()
         }).unwrap();
     }

@@ -3,7 +3,7 @@
 using namespace script;
 
 Result<VersionAttr> VersionAttr::pull(InputStream& stream) {
-    GEODE_UNWRAP(Token::pull(AttrKw::Version, stream));
+    GEODE_UNWRAP(Token::pull(Ident("version"), stream));
     GEODE_UNWRAP_INTO(auto num, Token::pull<Lit>(stream));
 
     if (!std::holds_alternative<NumLit>(num)) {
@@ -32,37 +32,32 @@ Result<> VersionAttr::eval(Attrs& attrs) {
 }
 
 Result<InputAttr> InputAttr::pull(InputStream& stream) {
-    GEODE_UNWRAP(Token::pull(AttrKw::Input, stream));
-    GEODE_UNWRAP_INTO(auto ty, Token::pull<Ident>(stream));
-    decltype(type) type;
-    if (ty == "number") {
-        type = Number;
-    }
-    else if (ty == "string") {
-        type = String;
-    }
-    else {
-        return Err("Unknown input type {}, known types are number and string", ty);
-    }
+    GEODE_UNWRAP(Token::pull(Ident("input"), stream));
     GEODE_UNWRAP_INTO(auto ident, Token::pull<Ident>(stream));
+    GEODE_UNWRAP_INTO(auto value, Token::pull<Lit>(stream));
+    GEODE_UNWRAP_INTO(auto title, Token::pull<Lit>(stream));
+    if (!std::holds_alternative<StrLit>(title)) {
+        return Err("Input name must be a string");
+    }
     return Ok(InputAttr {
-        .type = type,
         .ident = ident,
+        .value = value,
+        .title = tokenToString(title),
     });
 }
 
 Result<> InputAttr::eval(Attrs& attrs) {
-    for (auto& [_, na] : attrs.parameters) {
+    for (auto& [na, _, __] : attrs.parameters) {
         if (na == ident) {
             return Err("Input parameter '{}' already defined", ident);
         }
     }
-    attrs.parameters.emplace_back(type, ident);
+    attrs.parameters.emplace_back(ident, value, title);
     return Ok();
 }
 
 Result<StrictAttr> StrictAttr::pull(InputStream& stream) {
-    GEODE_UNWRAP(Token::pull(AttrKw::Version, stream));
+    GEODE_UNWRAP(Token::pull(Ident("strict"), stream));
     GEODE_UNWRAP_INTO(auto val, Token::pull<Lit>(stream));
     if (!std::holds_alternative<BoolLit>(val)) {
         return Err("Strict attribute value is not boolean");
@@ -77,8 +72,21 @@ Result<> StrictAttr::eval(Attrs& attrs) {
     return Ok();
 }
 
+Result<TitleAttr> TitleAttr::pull(InputStream& stream) {
+    GEODE_UNWRAP(Token::pull(Ident("name"), stream));
+    GEODE_UNWRAP_INTO(auto val, Token::pull<Lit>(stream));
+    return Ok(TitleAttr {
+        .title = tokenToString(val, false),
+    });
+}
+
+Result<> TitleAttr::eval(Attrs& attrs) {
+    attrs.title = title;
+    return Ok();
+}
+
 #define PULL_ATTR(kw, ty) \
-    if (Token::peek(AttrKw::kw, stream)) {\
+    if (Token::peek(Ident(kw), stream)) {\
         GEODE_UNWRAP_INTO(auto attr, ty::pull(stream)); \
         rb.commit();\
         return Ok(Attr { .value = attr });\
@@ -89,9 +97,10 @@ Result<Attr> Attr::pull(InputStream& stream) {
     if (!Token::pull('@', stream)) {
         return Err("Attributes must begin with '@'");
     }
-    PULL_ATTR(Version, VersionAttr);
-    PULL_ATTR(Input,   InputAttr);
-    PULL_ATTR(Strict,  StrictAttr);
+    PULL_ATTR("version", VersionAttr);
+    PULL_ATTR("input",   InputAttr);
+    PULL_ATTR("strict",  StrictAttr);
+    PULL_ATTR("name",    TitleAttr);
     if (auto token = Token::pull(stream)) {
         return Err("Expected attribute, got '{}'", token.value().toString());
     }
@@ -108,10 +117,15 @@ Result<> Attr::eval(Attrs& attrs) {
 
 Result<Attrs> Attrs::pull(InputStream& stream) {
     auto attrs = Attrs();
+    bool first = true;
     while (Token::peek('@', stream)) {
         tickExecutionCounter();
         GEODE_UNWRAP_INTO(auto attr, Attr::pull(stream));
+        if (first && !std::holds_alternative<VersionAttr>(attr.value)) {
+            return Err("First attribute must be a version attribute");
+        }
         GEODE_UNWRAP(attr.eval(attrs));
+        first = false;
     }
     return Ok(attrs);
 }

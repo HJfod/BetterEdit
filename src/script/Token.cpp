@@ -53,6 +53,7 @@ static std::unordered_map<Keyword, std::string> KEYWORDS {
     { Keyword::In,          "in" },
     { Keyword::If,          "if" },
     { Keyword::Else,        "else" },
+    { Keyword::Try,         "try" },
     { Keyword::Function,    "function" },
     { Keyword::Return,      "return" },
     { Keyword::Break,       "break" },
@@ -62,12 +63,6 @@ static std::unordered_map<Keyword, std::string> KEYWORDS {
     { Keyword::True,        "true" },
     { Keyword::False,       "false" },
     { Keyword::Null,        "null" },
-};
-
-static std::unordered_map<AttrKw, std::string> ATTR_KEYWORDS {
-    { AttrKw::Version,      "version" },
-    { AttrKw::Input,        "input" },
-    { AttrKw::Strict,       "strict" },
 };
 
 static std::unordered_map<Op, std::tuple<std::string, size_t, OpDir>> OPS {
@@ -196,7 +191,7 @@ void Token::skip(InputStream& stream) {
     stream.tellg();
 }
 
-Result<Token> Token::pull(InputStream& stream, bool attr) {
+Result<Token> Token::pull(InputStream& stream) {
     auto cpos = stream.tellg();
     Token::skip(stream);
 
@@ -269,16 +264,6 @@ Result<Token> Token::pull(InputStream& stream, bool attr) {
         }
     }
 
-    // attr keywords only in attr mode
-    if (attr) {
-        for (auto const& [kw, va] : ATTR_KEYWORDS) {
-            if (va == ident) {
-                rb.commit();
-                return Ok(Token(kw));
-            }
-        }
-    }
-
     // identifier
     if (isIdent(ident)) {
         rb.commit();
@@ -308,81 +293,6 @@ Result<Token> Token::pull(InputStream& stream, bool attr) {
     return Err(fmt::format("Invalid keyword or identifier '{}'", maybeOp));
 }
 
-Result<> Token::pull(Op op, InputStream& stream) {
-    Rollback rb(stream);
-    GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
-    if (auto value = std::get_if<Op>(&token.value)) {
-        if (*value == op) {
-            rb.commit();
-            return Ok();
-        }
-        else {
-            return Err(fmt::format(
-                "Expected {}, got {}",
-                tokenToString(op), tokenToString(*value)
-            ));
-        }
-    }
-    return Err(fmt::format(
-        "Expected {}, got '{}'",
-        tokenToString(op), token.toString()
-    ));
-}
-
-Result<> Token::pull(Keyword kw, InputStream& stream) {
-    Rollback rb(stream);
-    GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
-    if (auto value = std::get_if<Keyword>(&token.value)) {
-        if (*value == kw) {
-            rb.commit();
-            return Ok();
-        }
-        else {
-            return Err(fmt::format(
-                "Expected {}, got {}",
-                tokenToString(kw), tokenToString(*value)
-            ));
-        }
-    }
-    return Err(fmt::format(
-        "Expected {}, got '{}'",
-        tokenToString(kw), token.toString()
-    ));
-}
-
-Result<> Token::pull(AttrKw kw, InputStream& stream) {
-    Rollback rb(stream);
-    GEODE_UNWRAP_INTO(auto token, Token::pull(stream, true));
-    if (auto value = std::get_if<AttrKw>(&token.value)) {
-        if (*value == kw) {
-            rb.commit();
-            return Ok();
-        }
-        else {
-            return Err(fmt::format(
-                "Expected {}, got {}",
-                tokenToString(kw), tokenToString(*value)
-            ));
-        }
-    }
-    return Err(fmt::format(
-        "Expected {}, got '{}'",
-        tokenToString(kw), token.toString()
-    ));
-}
-
-Result<> Token::pull(char c, InputStream& stream) {
-    Rollback rb(stream);
-    GEODE_UNWRAP_INTO(auto token, Token::pull(stream));
-    if (auto value = std::get_if<Punct>(&token.value)) {
-        if (*value == c) {
-            rb.commit();
-            return Ok();
-        }
-    }
-    return Err("Expected '{}', got '{}'", c, token.toString());
-}
-
 Result<> Token::pull(const char* chs, InputStream& stream) {
     Rollback rb(stream);
     for (auto& c : std::string_view(chs)) {
@@ -392,9 +302,9 @@ Result<> Token::pull(const char* chs, InputStream& stream) {
     return Ok();
 }
 
-std::optional<Token> Token::peek(InputStream& stream, bool attr) {
+std::optional<Token> Token::peek(InputStream& stream) {
     Rollback rb(stream);
-    return Token::pull(stream, attr).ok();
+    return Token::pull(stream).ok();
 }
 
 bool Token::peek(const char* chs, InputStream& stream) {
@@ -437,13 +347,6 @@ std::string script::tokenToString(Keyword kw, bool debug) {
     return KEYWORDS.at(kw);
 }
 
-std::string script::tokenToString(AttrKw kw, bool debug) {
-    if (debug) {
-        return fmt::format("attrkw({})", ATTR_KEYWORDS.at(kw));
-    }
-    return ATTR_KEYWORDS.at(kw);
-}
-
 std::string script::tokenToString(Ident ident, bool debug) {
     if (debug) {
         return fmt::format("identifier({:?})", ident);
@@ -472,7 +375,7 @@ std::string script::tokenToString(Lit lit, bool debug) {
             if (debug) {
                 return fmt::format("number({})", num);
             }
-            return std::to_string(num);
+            return geode::utils::numToString(num);
         },
         [&](ArrLit const& arr) -> std::string {
             std::string res = "[";

@@ -141,15 +141,8 @@ Result<Rc<IfExpr>> IfExpr::pull(InputStream& stream, Attrs& attrs) {
     GEODE_UNWRAP_INTO(auto truthy, ListExpr::pullBlock(stream, attrs));
     std::optional<Rc<Expr>> falsy;
     if (Token::pull(Keyword::Else, stream)) {
-        // else if
-        if (Token::peek(Keyword::If, stream)) {
-            GEODE_UNWRAP_INTO(auto ifFalsy, IfExpr::pull(stream, attrs));
-            falsy = make<Expr>(ifFalsy).unwrap();
-        }
-        // otherwise expect a block
-        else {
-            GEODE_UNWRAP_INTO(falsy, ListExpr::pullBlock(stream, attrs));
-        }
+        // no block required
+        GEODE_UNWRAP_INTO(falsy, Expr::pull(stream, attrs));
     }
     return make<IfExpr>({
         .cond = cond,
@@ -186,5 +179,47 @@ std::string IfExpr::debug() const {
             "IfExpr({}, {})",
             cond->debug(), truthy->debug()
         );
+    }
+}
+
+Result<Rc<TryExpr>> TryExpr::pull(InputStream& stream, Attrs& attrs) {
+    Rollback rb(stream);
+    GEODE_UNWRAP(Token::pull(Keyword::Try, stream));
+    GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream, attrs));
+    std::optional<Rc<Expr>> faily;
+    if (Token::pull(Keyword::Else, stream)) {
+        GEODE_UNWRAP_INTO(faily, Expr::pull(stream, attrs));
+    }
+    return make<TryExpr>({
+        .expr = expr,
+        .faily = faily,
+        .src = rb.commit(),
+    });
+}
+
+Result<Rc<Value>> TryExpr::eval(State& state) {
+    auto res = expr->eval(state);
+    if (res) {
+        return Ok(res.unwrap());
+    } else {
+        if (faily) {
+            GEODE_UNWRAP_INTO(auto el, faily.value()->eval(state));
+            return Ok(el);
+        }
+        else {
+            return Ok(Value::rc(NullLit()));
+        }
+    }
+}
+
+std::string TryExpr::debug() const {
+    if (faily) {
+        return fmt::format(
+            "TryExpr({}, {})",
+            expr->debug(), faily.value()->debug()
+        );
+    }
+    else {
+        return fmt::format("TryExpr({})", expr->debug());
     }
 }
