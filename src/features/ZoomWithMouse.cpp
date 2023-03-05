@@ -34,6 +34,7 @@ class $modify(EditorUI) {
 
             this->updateZoom(zoom);
 
+        #ifdef GEODE_IS_WINDOWS
             // move screen toward mouse
             if (Mod::get()->getSettingValue<bool>("mouse-move-on-zoom")) {
                 auto winSize = CCDirector::get()->getWinSize();
@@ -41,7 +42,6 @@ class $modify(EditorUI) {
 
                 auto ratioW = winSize.width  / winSizePx.size.width;
                 auto ratioH = winSize.height / winSizePx.size.height;
-
                 auto mpos = CCDirector::get()->getOpenGLView()->getMousePosition();
 
                 // the mouse position is stored from the top-.left while cocos 
@@ -64,6 +64,7 @@ class $modify(EditorUI) {
                 );
                 this->constrainGameLayerPosition();
             }
+        #endif
 
             // ground width is not automatically updated
             m_editorLayer->m_groundLayer->updateGroundWidth();
