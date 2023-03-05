@@ -1,0 +1,135 @@
+name: Build Geode Mod
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+
+env:
+  GEODE_SDK: ${{ github.workspace }}/sdk
+  GEODE_VERSION: v1.0.0-beta.8
+  CLI_VERSION: v1.4.1
+  MOD_NAME: BetterEdit
+  MOD_ID: hjfod.betteredit
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - name: "Windows"
+          bin_folder: "windows"
+          os: windows-2019
+          extra_flags: '-T host=x64 -A win32'
+          out_paths:  './build/Release/*.dll'
+          platform_suffix: 'win'
+          
+        - name: "macOS"
+          bin_folder: "macos"
+          os: macos-latest
+          extra_flags: ""
+          out_paths: './build/*.dylib'
+          platform_suffix: 'mac'
+          
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        repository: geode-sdk/geode
+        # ref: v0.4.8
+        path: ${{ env.GEODE_SDK }}
+     
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x86
+      
+    - name: Download Geode SDK binaries
+      run: |
+        cd ${{ github.workspace }}/sdk
+        mkdir bin
+        mkdir bin/nightly
+        cd bin/nightly
+        curl -L https://github.com/geode-sdk/geode/releases/download/${{ env.GEODE_VERSION }}/geode-${{ env.GEODE_VERSION }}-${{ matrix.config.platform_suffix }}.zip -o geode-sdk.zip
+        tar -xf geode-sdk.zip
+      
+    - name: Configure CMake
+      run: |
+        cd ${{ github.workspace }}
+        cmake -B build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1
+    
+    - name: Build
+      run: |
+        cd ${{ github.workspace }}/build
+        cmake --build . --config Release
+    
+    - uses: actions/upload-artifact@v3
+      with:
+        name: "build-${{ matrix.config.bin_folder }}"
+        path: "${{ matrix.config.out_paths }}"
+        
+        
+  package:
+    name: "Package both builds"
+    # would use linux but theres no cli build for it
+    runs-on: windows-2019
+    needs: ['build']
+    
+    steps:          
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      
+      - name: Download and Unzip CLI
+        run: |
+          curl -L https://github.com/geode-sdk/cli/releases/download/${{ env.CLI_VERSION }}/geode-cli-${{ env.CLI_VERSION }}-win.zip -o geode-cli.zip
+          tar -xf geode-cli.zip
+        
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-windows
+          
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-macos
+          
+      - name: Display structure of downloaded files
+        run: ls -R
+      
+      - name: Merge
+        shell: bash
+        run: |
+          mv $MOD_NAME.dll $MOD_ID.dll
+          mv lib$MOD_NAME.dylib $MOD_ID.dylib
+          ./geode.exe package new . --binary $MOD_ID.dll --binary $MOD_ID.dylib --output $MOD_NAME.geode
+         
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Build Output
+          path: "${{ env.MOD_NAME }}.geode"
+          
+      - uses: geekyeggo/delete-artifact@v2
+        with:
+            name: build-windows
+            failOnError: false
+          
+      - uses: geekyeggo/delete-artifact@v2
+        with:
+            name: build-macos
+            failOnError: false
+
+      - name: Update release
+        uses: IsaacShelton/update-existing-release@v1.3.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "${{ env.MOD_NAME }}.geode"
+          release: v5 Alpha
+          prerelease: true
