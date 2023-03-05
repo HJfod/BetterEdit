@@ -77,7 +77,9 @@ std::string BreakExpr::debug() const {
 Result<Rc<ContinueExpr>> ContinueExpr::pull(InputStream& stream) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull(Keyword::Continue, stream));
-    return make<ContinueExpr>(rb.commit());
+    return make<ContinueExpr>({
+        .src = rb.commit()
+    });
 }
 
 Result<Rc<Value>> ContinueExpr::eval(State& state) {
@@ -144,7 +146,7 @@ Result<Rc<IfExpr>> IfExpr::pull(InputStream& stream) {
         // else if
         if (Token::peek(Keyword::If, stream)) {
             GEODE_UNWRAP_INTO(auto ifFalsy, IfExpr::pull(stream));
-            falsy = make<Expr>(ifFalsy).unwrap();
+            falsy = make<Expr>({ .value = ifFalsy }).unwrap();
         }
         // otherwise expect a block
         else {
