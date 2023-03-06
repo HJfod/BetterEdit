@@ -105,26 +105,45 @@ Result<Rc<ForInExpr>> ForInExpr::pull(InputStream& stream, Attrs& attrs) {
 
 Result<Rc<Value>> ForInExpr::eval(State& state) {
     GEODE_UNWRAP_INTO(auto value, expr->eval(state));
-    auto arr = value->has<Array>();
-    if (!arr) {
+    if (auto arr = value->has<Array>()) {
+        // result of last iteration will be the return value
+        auto ret = Value::rc(NullLit());
+        for (auto value : *arr) {
+            auto scope = state.scope();
+            state.add(item, std::make_shared<Value>(value));
+            try {
+                GEODE_UNWRAP_INTO(ret, body->eval(state));
+            }
+            catch (ContinueSignal const&) {
+                continue;
+            }
+            catch (BreakSignal const&) {
+                break;
+            }
+        }
+        return Ok(ret);
+    }
+    else if (auto num = value->has<NumLit>()) {
+        // result of last iteration will be the return value
+        auto ret = Value::rc(NullLit());
+        for (size_t i = 0; i < static_cast<size_t>(*num); i++) {
+            auto scope = state.scope();
+            state.add(item, std::make_shared<Value>(NumLit(i)));
+            try {
+                GEODE_UNWRAP_INTO(ret, body->eval(state));
+            }
+            catch (ContinueSignal const&) {
+                continue;
+            }
+            catch (BreakSignal const&) {
+                break;
+            }
+        }
+        return Ok(ret);
+    }
+    else {
         return Err("Attempted to iterate {}, expected array", value->typeName());
     }
-    // result of last iteration will be the return value
-    auto ret = Value::rc(NullLit());
-    for (auto value : *arr) {
-        auto scope = state.scope();
-        state.add(item, std::make_shared<Value>(value));
-        try {
-            GEODE_UNWRAP_INTO(ret, body->eval(state));
-        }
-        catch (ContinueSignal const&) {
-            continue;
-        }
-        catch (BreakSignal const&) {
-            break;
-        }
-    }
-    return Ok(ret);
 }
 
 std::string ForInExpr::debug() const {

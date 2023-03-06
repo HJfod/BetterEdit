@@ -97,6 +97,11 @@ yourFun = (a, b) => a + b
 herFun = x => x * 2
 ```
 
+Function arguments can either be passed as positional arguments, or named arguments:
+```js
+
+```
+
 Functions can be passed as arguments to other functions:
 ```js
 function invoke(fun) {
@@ -105,6 +110,43 @@ function invoke(fun) {
 
 invoke(print)
 invoke(x => error(x))
+```
+
+## Dictionaries
+
+Dictionaries can be defined using the familiar `{}` syntax:
+```js
+dict = {
+    key: 5,
+    other: "value"
+}
+```
+
+Unlike JavaScript, the keys of a dictionary must be identifiers, and not string literals. This means that an object with a key such as `"contains spaces"` is not valid in Swipe.
+
+Note that in other languages, dictionaries are also often called objects, but since "object" in Swipe is already reserved for referring to a game object in the editor, they are instead called dictionaries.
+
+## Objects
+
+Objects, in other words level objects in the editor, can be accessed and manipulated through various built-in functions and methods:
+```js
+// Get selected objects as an array
+objs = getSelectedObjects()
+```
+
+A new object can be created using the `create` function:
+```js
+obj = create(1, x = 60, y = 60)
+```
+
+The first argument of `create` is the object ID. You can find a list of all object IDs by running the following script, which adds all of them in a line into the current level:
+```rust
+x = 60
+for i in 2000 {
+    create(914, x = x, y = 300, text = i)
+    try create(i, x = x, y = 240)
+    x += 60
+}
 ```
 
 ## Statements & expressions

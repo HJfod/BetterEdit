@@ -129,26 +129,50 @@ Result<Rc<Value>> CallExpr::eval(State& state) {
         res.insert({ name, val });
     }
 
-    auto i = 0u;
-    for (auto& [name, _] : fun->params) {
-        if (args.size() > i) {
-            auto arg = args.at(i);
-            if (res.count(name)) {
-                return Err(fmt::format(
-                    "Argument '{}' passed multiple times",
-                    name
-                ));
+    if (fun->variadic) {
+        auto i = 0u;
+        for (auto& arg : args) {
+            if (i < fun->params.size()) {
+                auto name = fun->params.at(i).first;
+                auto arg = args.at(i);
+                if (res.count(name)) {
+                    return Err(fmt::format(
+                        "Argument '{}' passed multiple times",
+                        name
+                    ));
+                }
+                GEODE_UNWRAP_INTO(auto val, arg->eval(state));
+                res.insert({ name, val });
             }
-            GEODE_UNWRAP_INTO(auto val, arg->eval(state));
-            res.insert({ name, val });
-            i++;
-        }
-        else {
-            break;
+            else {
+                GEODE_UNWRAP_INTO(auto val, arg->eval(state));
+                res.insert({ fmt::format("argument{}", i - fun->params.size()), val });
+            }
+            i += 1;
         }
     }
-    if (args.size() != i) {
-        return Err("Function called with too many arguments");
+    else {
+        auto i = 0u;
+        for (auto& [name, _] : fun->params) {
+            if (args.size() > i) {
+                auto arg = args.at(i);
+                if (res.count(name)) {
+                    return Err(fmt::format(
+                        "Argument '{}' passed multiple times",
+                        name
+                    ));
+                }
+                GEODE_UNWRAP_INTO(auto val, arg->eval(state));
+                res.insert({ name, val });
+                i++;
+            }
+            else {
+                break;
+            }
+        }
+        if (args.size() != i) {
+            return Err("Function called with too many arguments");
+        }
     }
 
     // insert default values

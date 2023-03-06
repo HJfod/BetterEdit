@@ -91,6 +91,7 @@ static std::unordered_map<Op, std::tuple<std::string, size_t, OpDir>> OPS {
 
 static std::string INVALID_IDENT_CHARS = ".,;(){}[]@`\\´¨'\"";
 static std::string VALID_OP_CHARS = "=+-/*<>!#?&|%:~^";
+static std::unordered_set<std::string> SPECIAL_IDENTS { "this" };
 
 bool script::isIdentCh(char ch) {
     return
@@ -124,6 +125,23 @@ bool script::isIdent(std::string const& ident) {
     }
     // otherwise fine ig
     return true;
+}
+
+bool script::isSpecialIdent(std::string const& ident) {
+    // every ident starting with "argument" is reserved for variadic functions
+    return ident.starts_with("argument") || SPECIAL_IDENTS.count(ident);
+}
+
+std::optional<size_t> script::getVarArgIdentNum(std::string const& ident) {
+    if (!ident.starts_with("argument")) {
+        return std::nullopt;
+    }
+    try {
+        return std::stoul(ident.substr(strlen("argument")));
+    }
+    catch(...) {
+        return std::nullopt;
+    }
 }
 
 bool script::isOpCh(char ch) {
@@ -389,10 +407,39 @@ std::string script::tokenToString(Lit lit, bool debug) {
                     res += tokenToString(lit->get()->value, debug);
                 }
                 else {
-                    res += "Expr";
+                    if (debug) {
+                        res += expr->debug();
+                    }
+                    else {
+                        res += "...";
+                    }
                 }
             }
             res += "]";
+            return res;
+        },
+        [&](ObjLit const& obj) -> std::string {
+            std::string res = "{ ";
+            bool first = true;
+            for (auto& [k, v] : obj) {
+                if (!first) {
+                    res += ", ";
+                }
+                first = false;
+                res += k + " = ";
+                if (auto lit = std::get_if<Rc<LitExpr>>(&v->value)) {
+                    res += tokenToString(lit->get()->value, debug);
+                }
+                else {
+                    if (debug) {
+                        res += v->debug();
+                    }
+                    else {
+                        res += "...";
+                    }
+                }
+            }
+            res += " }";
             return res;
         },
     }, lit);

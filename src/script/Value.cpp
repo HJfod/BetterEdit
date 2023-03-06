@@ -6,16 +6,18 @@
 #include <Geode/binding/FLAlertLayer.hpp>
 #include <Geode/binding/EditorUI.hpp>
 #include <random>
+#include <fmt/args.h>
 
 using namespace script;
 
 static Rc<Value> builtinFun(
-    decltype(FunExpr::params) const& params,
+    decltype(FunExpr::params) const& params, bool variadic,
     std::function<Result<Rc<Value>>(State&)> fun
 ) {
     return Value::rc(make<FunExpr>(
         "__builtin_fun",
         params,
+        variadic,
         make<Expr>({
             .value = make<CppExpr>({
                 .eval = fun
@@ -23,6 +25,13 @@ static Rc<Value> builtinFun(
         }).unwrap(),
         "/* built-in function */"
     ).unwrap());
+}
+
+static Rc<Value> builtinFun(
+    decltype(FunExpr::params) const& params,
+    std::function<Result<Rc<Value>>(State&)> fun
+) {
+    return builtinFun(params, false, fun);
 }
 
 static Rc<Expr> builtinLitExpr(Lit const& value) {
@@ -59,6 +68,9 @@ bool Value::truthy() const {
             return true;
         },
         [&](Rc<const FunExpr> const&) {
+            return true;
+        },
+        [&](Object const&) {
             return true;
         },
     }, value);
@@ -104,6 +116,19 @@ std::string Value::toString(bool debug) const {
             }
             return fun->ident.value_or("anonymous function");
         },
+        [&](Object const& obj) {
+            std::string res = debug ? "dict(" : "{";
+            bool first = true;
+            for (auto& [key, value] : obj) {
+                if (!first) {
+                    res += ", ";
+                }
+                first = false;
+                res += key + ": " + value.toString(debug);
+            }
+            res += debug ? ")" : "}";
+            return res;
+        },
         [&](auto const& lit) {
             return tokenToString(static_cast<Lit>(lit), debug);
         },
@@ -126,6 +151,9 @@ std::string Value::typeName() const {
         },
         [&](Array const&) {
             return "array";
+        },
+        [&](Object const&) {
+            return "dictionary";
         },
         [&](Ref<GameObject> const&) {
             return "object";
@@ -174,6 +202,12 @@ std::optional<Rc<Value>> Value::member(std::string const& name) {
                 } break;
             }
         },
+        [&](Object& obj) -> std::optional<Rc<Value>> {
+            if (obj.count(name)) {
+                return Value::rc(obj.at(name));
+            }
+            return std::nullopt;
+        },
         [&](Ref<GameObject>& obj) -> std::optional<Rc<Value>> {
             switch (hash(name.c_str())) {
                 case hash("x"): {
@@ -190,10 +224,20 @@ std::optional<Rc<Value>> Value::member(std::string const& name) {
                 case hash("y"): {
                     return Value::rc(obj->getPositionY(), [&](Value& value) {
                         if (auto num = value.has<NumLit>()) {
-                            auto x = obj->getPositionY();
+                            auto y = obj->getPositionY();
                             EditorUI::get()->moveObject(
-                                obj, CCPoint { 0.f, static_cast<float>(*num - x) }
+                                obj, CCPoint { 0.f, static_cast<float>(*num - y) }
                             );
+                        }
+                    });
+                } break;
+
+                case hash("rotation"): {
+                    return Value::rc(obj->getRotation(), [&](Value& value) {
+                        if (auto num = value.has<NumLit>()) {
+                            auto rot = static_cast<float>(*num);
+                            obj->setRotation(rot);
+                            obj->m_rotation = rot;
                         }
                     });
                 } break;
@@ -203,12 +247,12 @@ std::optional<Rc<Value>> Value::member(std::string const& name) {
                         {{ "unique", builtinLitExpr(false) }},
                         [&obj](State& state) {
                             if (state.get("unique")->truthy()) {
-                                EditorUI::get()->selectObject(obj, false);
+                                EditorUI::get()->selectObject(obj, true);
                             }
                             else {
                                 auto objs = EditorUI::get()->getSelectedObjects();
                                 objs->addObject(obj);
-                                EditorUI::get()->selectObjects(objs, false);
+                                EditorUI::get()->selectObjects(objs, true);
                             }
                             EditorUI::get()->updateButtons();
                             return Ok(Value::rc(obj));
@@ -285,6 +329,14 @@ Result<Rc<Value>> Value::lit(Lit const& value, State& state) {
             }
             return Ok(Value::rc(value, nullptr, true));
         },
+        [&](ObjLit const& obj) -> Result<Rc<Value>> {
+            Object object;
+            for (auto& [k, expr] : obj) {
+                GEODE_UNWRAP_INTO(auto val, expr->eval(state));
+                object[k] = *val;
+            }
+            return Ok(Value::rc(object, nullptr, true));
+        },
     }, value);
 }
 
@@ -315,6 +367,39 @@ bool script::operator>(Array const& a, Array const b) {
 }
 
 bool script::operator>=(Array const& a, Array const b) {
+    return true;
+}
+
+bool script::operator==(Object const& a, Object const b) {
+    if (a.size() != b.size()) return false;
+    for (auto const& [k, v] : a) {
+        if (!b.count(k) || v.value != b.at(k).value) {
+            return false;
+        }
+    }
+    // no need to check if all keys of b exist in a, since we know both a and b 
+    // are the same size and all of the keys of a exist in b and since two sets 
+    // A and B are equal if A is a subset of B and the same size of B
+    return true;
+}
+
+bool script::operator!=(Object const& a, Object const b) {
+    return !(a == b);
+}
+
+bool script::operator<(Object const& a, Object const b) {
+    return false;
+}
+
+bool script::operator<=(Object const& a, Object const b) {
+    return true;
+}
+
+bool script::operator>(Object const& a, Object const b) {
+    return false;
+}
+
+bool script::operator>=(Object const& a, Object const b) {
     return true;
 }
 
@@ -353,6 +438,10 @@ Rc<Value> State::get(std::string const& name) {
 
 Scope State::scope() {
     return Scope(*this);
+}
+
+State::Entities& State::top() {
+    return entities.back();
 }
 
 void State::push() {
@@ -423,10 +512,34 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
     
     // lang
     this->add("print", builtinFun(
-        {{ "msg", std::nullopt }},
+        {{ "fmt", std::nullopt }},
+        true,
         [](State& state) -> Result<Rc<Value>> {
-            log::info("{}", state.get("msg")->toString());
-            return Ok(state.get("msg"));
+            fmt::dynamic_format_arg_store<fmt::format_context> store;
+            std::vector<Rc<Value>> dyn;
+            dyn.reserve(state.top().size());
+            for (auto& [na, va] : state.top()) {
+                if (na == "fmt") continue;
+                if (auto ix = getVarArgIdentNum(na)) {
+                    dyn[ix.value()] = va;
+                }
+                else {
+                    store.push_back(fmt::arg(na.c_str(), va->toString()));
+                }
+            }
+            for (auto& v : dyn) {
+                store.push_back(v->toString());
+            }
+            try {
+                // formatting manually to catch errors
+                auto res = fmt::vformat(state.get("msg")->toString(), store);
+                log::info("{}", res);
+                return Ok(Value::rc(res));
+            }
+            catch(std::exception& e) {
+                log::error("Invalid format: {}", e);
+                return Ok(Value::rc(NullLit()));
+            }
         }
     ));
     this->add("error", builtinFun(
@@ -464,6 +577,34 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
     ));
 
     // gd
+    this->add("create", builtinFun(
+        {
+            { "id", std::nullopt },
+            { "x", builtinLitExpr(NullLit()) },
+            { "y", builtinLitExpr(NullLit()) },
+            { "undo", builtinLitExpr(true) },
+        },
+        true,
+        [](State& state) -> Result<Rc<Value>> {
+            auto winSize = CCDirector::get()->getWinSize();
+            auto id = state.get("id")->has<NumLit>();
+            if (!id) return Err("Object ID must be a number");
+
+            auto pos = LevelEditorLayer::get()->m_objectLayer->convertToWorldSpace(winSize / 2);
+            if (auto x = state.get("x")->has<NumLit>()) {
+                pos.x = *x;
+            }
+            if (auto y = state.get("y")->has<NumLit>()) {
+                pos.y = *y;
+            }
+            auto obj = LevelEditorLayer::get()->createObject(
+                static_cast<int>(*id),
+                pos, state.get("undo")->truthy()
+            );
+            EditorUI::get()->updateButtons();
+            return Ok(Value::rc(obj));
+        }
+    ));
     this->add("getSelectedObjects", builtinFun(
         {},
         [](State& state) -> Result<Rc<Value>> {
@@ -498,6 +639,17 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
         [](State& state) -> Result<Rc<Value>> {
             EditorUI::get()->deselectAll();
             return Ok(Value::rc(NullLit()));
+        }
+    ));
+    this->add("getViewCenter", builtinFun(
+        {},
+        [](State& state) -> Result<Rc<Value>> {
+            auto pos = LevelEditorLayer::get()->m_objectLayer
+                ->convertToNodeSpace(CCDirector::get()->getWinSize() / 2);
+            return Ok(Value::rc(Object {
+                { "x", Value(pos.x) },
+                { "y", Value(pos.y) },
+            }));
         }
     ));
 

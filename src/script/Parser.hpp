@@ -106,7 +106,8 @@ namespace script {
     using StrLit = std::string;
     using NumLit = double;
     using ArrLit = std::vector<Rc<Expr>>;
-    using Lit = std::variant<NullLit, BoolLit, StrLit, NumLit, ArrLit>;
+    using ObjLit = std::unordered_map<std::string, Rc<Expr>>;
+    using Lit = std::variant<NullLit, BoolLit, StrLit, NumLit, ArrLit, ObjLit>;
     using Ident = std::string;
     using Punct = char;
 
@@ -227,16 +228,19 @@ namespace script {
 
     bool isIdentCh(char ch);
     bool isIdent(std::string const& ident);
+    bool isSpecialIdent(std::string const& ident);
     bool isOpCh(char ch);
     bool isOp(std::string const& op);
     bool isUnOp(Op op);
+    std::optional<size_t> getVarArgIdentNum(std::string const& ident);
 
     struct Value;
     using Array = std::vector<Value>;
+    using Object = std::unordered_map<std::string, Value>;
     struct Value {
         std::variant<
             NullLit, BoolLit, NumLit, StrLit,
-            Array, Ref<GameObject>, Rc<const FunExpr>
+            Array, Object, Ref<GameObject>, Rc<const FunExpr>
         > value;
         std::function<void(Value&)> onChange = nullptr;
         bool isConst = false;
@@ -245,8 +249,7 @@ namespace script {
             decltype(Value::value) const& value,
             decltype(onChange) onChange = nullptr,
             bool isConst = false
-        )
-          : value(value), onChange(onChange), isConst(isConst) {}
+        ) : value(value), onChange(onChange), isConst(isConst) {}
 
         static Rc<Value> rc(
             decltype(Value::value) const& value,
@@ -254,6 +257,10 @@ namespace script {
             bool isConst = false
         ) {
             return std::make_shared<Value>(value, onChange, isConst);
+        }
+
+        static Rc<Value> rc(Value const& value) {
+            return std::make_shared<Value>(value);
         }
         static Result<Rc<Value>> lit(Lit const& value, State& state);
 
@@ -394,11 +401,12 @@ namespace script {
     struct FunExpr : public std::enable_shared_from_this<FunExpr> {
         std::optional<Ident> ident;
         std::vector<std::pair<Ident, std::optional<Rc<Expr>>>> params;
+        bool variadic;
         Rc<Expr> body;
         std::string src;
         bool added = false;
-        FunExpr(std::optional<Ident> const&, decltype(params) const&, Rc<Expr> const&, std::string const&);
-        static Result<decltype(params)> pullParams(InputStream& stream, Attrs& attrs);
+        FunExpr(std::optional<Ident> const&, decltype(params) const&, bool, Rc<Expr> const&, std::string const&);
+        static Result<std::pair<decltype(params), bool>> pullParams(InputStream& stream, Attrs& attrs);
         static Result<Rc<FunExpr>> pullArrow(InputStream& stream, Attrs& attrs);
         static Result<Rc<FunExpr>> pull(InputStream& stream, Attrs& attrs);
         Result<Rc<Value>> eval(State& state);
@@ -499,6 +507,13 @@ namespace script {
     bool operator>(Array const& a, Array const b);
     bool operator>=(Array const& a, Array const b);
 
+    bool operator==(Object const& a, Object const b);
+    bool operator!=(Object const& a, Object const b);
+    bool operator<(Object const& a, Object const b);
+    bool operator<=(Object const& a, Object const b);
+    bool operator>(Object const& a, Object const b);
+    bool operator>=(Object const& a, Object const b);
+
     struct Scope final {
         State& state;
         Scope(State& state);
@@ -507,9 +522,10 @@ namespace script {
     class State final {
     public:
         Attrs attrs;
+        using Entities = std::unordered_map<std::string, Rc<Value>>;
 
     private:
-        std::vector<std::unordered_map<std::string, Rc<Value>>> entities = {{}};
+        std::vector<Entities> entities = {{}};
         Rc<Expr> ast;
         
         friend struct Scope;
@@ -530,6 +546,7 @@ namespace script {
         bool has(std::string const& name, bool top = false) const;
         Rc<Value> get(std::string const& name);
         Scope scope();
+        Entities& top();
     };
     
     template <class T, class... Args>

@@ -53,6 +53,9 @@ Result<Rc<IdentExpr>> IdentExpr::pull(InputStream& stream, Attrs& attrs) {
 
 Result<Rc<Value>> IdentExpr::eval(State& state) {
     if (!state.has(ident)) {
+        if (isSpecialIdent(ident)) {
+            return Err("Identifier '{}' is not valid in this context", ident);
+        }
         state.add(ident, Value::rc(NullLit()));
     }
     return Ok(state.get(ident));
@@ -79,6 +82,9 @@ Result<Rc<Value>> ConstExpr::eval(State& state) {
     if (state.has(ident, true)) {
         return Err("Variable {} already exists in this scope", ident);
     }
+    if (isSpecialIdent(ident)) {
+        return Err("Identifier '{}' may not be declared manually", ident);
+    }
     GEODE_UNWRAP_INTO(auto val, value->eval(state));
     auto newVal = Value::rc(NullLit(), nullptr, true);
     newVal->value = val->value;
@@ -93,40 +99,50 @@ std::string ConstExpr::debug() const {
 FunExpr::FunExpr(
     std::optional<Ident> const& ident,
     decltype(params) const& params,
+    bool variadic,
     Rc<Expr> const& body,
     std::string const& src
-) : ident(ident), params(params), body(body), src(src) {}
+) : ident(ident), params(params), variadic(variadic), body(body), src(src) {}
 
-Result<decltype(FunExpr::params)> FunExpr::pullParams(InputStream& stream, Attrs& attrs) {
+Result<std::pair<decltype(FunExpr::params), bool>> FunExpr::pullParams(InputStream& stream, Attrs& attrs) {
     GEODE_UNWRAP(Token::pull('(', stream));
     decltype(FunExpr::params) params;
+    bool variadic = false;
     while (true) {
         tickExecutionCounter();
-        GEODE_UNWRAP_INTO(auto name, Token::pull<Ident>(stream));
-        if (Token::pull(Op::Seq, stream)) {
-            GEODE_UNWRAP_INTO(auto value, Expr::pull(stream, attrs));
-            params.push_back({ name, value });
+        if (Token::pull("...", stream)) {
+            if (variadic) {
+                return Err("Function already declared as variadic");
+            }
+            variadic = true;
         }
         else {
-            params.push_back({ name, std::nullopt });
+            GEODE_UNWRAP_INTO(auto name, Token::pull<Ident>(stream));
+            if (Token::pull(Op::Seq, stream)) {
+                GEODE_UNWRAP_INTO(auto value, Expr::pull(stream, attrs));
+                params.push_back({ name, value });
+            }
+            else {
+                params.push_back({ name, std::nullopt });
+            }
         }
         if (!Token::pull(',', stream) || Token::peek(')', stream)) {
             break;
         }
     }
     GEODE_UNWRAP(Token::pull(')', stream));
-    return Ok(params);
+    return Ok(std::pair { params, variadic });
 }
 
 Result<Rc<FunExpr>> FunExpr::pullArrow(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
-    decltype(params) params;
+    std::pair<decltype(params), bool> params;
     if (Token::peek('(', stream)) {
         GEODE_UNWRAP_INTO(params, FunExpr::pullParams(stream, attrs));
     }
     else {
         GEODE_UNWRAP_INTO(auto x, Token::pull<Ident>(stream));
-        params.push_back({ x, std::nullopt });
+        params.first.push_back({ x, std::nullopt });
     }
     GEODE_UNWRAP(Token::pull(Op::Arrow, stream));
     Rc<Expr> body;
@@ -136,7 +152,7 @@ Result<Rc<FunExpr>> FunExpr::pullArrow(InputStream& stream, Attrs& attrs) {
     else {
         GEODE_UNWRAP_INTO(body, Expr::pull(stream, attrs));
     }
-    return make<FunExpr>(std::nullopt, params, body, rb.commit());
+    return make<FunExpr>(std::nullopt, params.first, params.second, body, rb.commit());
 }
 
 Result<Rc<FunExpr>> FunExpr::pull(InputStream& stream, Attrs& attrs) {
@@ -148,7 +164,7 @@ Result<Rc<FunExpr>> FunExpr::pull(InputStream& stream, Attrs& attrs) {
     }
     GEODE_UNWRAP_INTO(auto params, FunExpr::pullParams(stream, attrs));
     GEODE_UNWRAP_INTO(auto body, ListExpr::pullBlock(stream, attrs));
-    return make<FunExpr>(ident, params, body, rb.commit());
+    return make<FunExpr>(ident, params.first, params.second, body, rb.commit());
 }
 
 Result<Rc<Value>> FunExpr::eval(State& state) {
