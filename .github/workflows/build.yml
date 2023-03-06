@@ -8,8 +8,8 @@ on:
 
 env:
   GEODE_SDK: ${{ github.workspace }}/sdk
-  GEODE_VERSION: v1.0.0-beta.8
-  CLI_VERSION: v1.4.1
+  GEODE_VERSION: v1.0.0-beta.9
+  CLI_VERSION: v2.0.0
   MOD_NAME: BetterEdit
   MOD_ID: hjfod.betteredit
 
