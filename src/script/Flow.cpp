@@ -77,7 +77,9 @@ std::string BreakExpr::debug() const {
 Result<Rc<ContinueExpr>> ContinueExpr::pull(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
     GEODE_UNWRAP(Token::pull(Keyword::Continue, stream));
-    return make<ContinueExpr>(rb.commit());
+    return make<ContinueExpr>({
+        .src = rb.commit()
+    });
 }
 
 Result<Rc<Value>> ContinueExpr::eval(State& state) {
