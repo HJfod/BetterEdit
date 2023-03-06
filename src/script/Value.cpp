@@ -333,7 +333,7 @@ Result<Rc<Value>> Value::lit(Lit const& value, State& state) {
             Object object;
             for (auto& [k, expr] : obj) {
                 GEODE_UNWRAP_INTO(auto val, expr->eval(state));
-                object[k] = *val;
+                object.insert({ k, *val });
             }
             return Ok(Value::rc(object, nullptr, true));
         },
@@ -537,7 +537,7 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
                 return Ok(Value::rc(res));
             }
             catch(std::exception& e) {
-                log::error("Invalid format: {}", e);
+                log::error("Invalid format: {}", e.what());
                 return Ok(Value::rc(NullLit()));
             }
         }
