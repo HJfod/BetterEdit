@@ -1,13 +1,14 @@
 
 @version 1.0
 @name "Circle Tool"
-@input r 1.0 "Radius"
+@input r 5.0 "Radius"
 @input id 1 "Object ID"
 @input count 40 "Object count"
 
+r *= 30.0
 pos = getViewCenter()
 a = 0
 for i in count {
-    obj = create(id, x = pos.x + cos(a) * r, y = pos.y + sin(a) * r, rotation = a)
+    create(id, x = pos.x + cos(a) * r, y = pos.y + sin(a) * r, rotation = 360 - a)
     a += 360 / count
 }

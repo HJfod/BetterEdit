@@ -124,15 +124,21 @@ Result<Rc<Value>> CallExpr::eval(State& state) {
     auto fun = *funp;
 
     std::unordered_map<std::string, Rc<Value>> res;
+    Dict namedArgs;
     for (auto& [name, nexpr] : named) {
         GEODE_UNWRAP_INTO(auto val, nexpr->eval(state));
         res.insert({ name, val });
+        if (fun->variadic) {
+            namedArgs.insert({ name, *val });
+        }
+    }
+    if (fun->variadic) {
+        res.insert({ "namedArguments", Value::rc(namedArgs) });
     }
 
     if (fun->variadic) {
         auto i = 0u;
         Array positional;
-        Array named;
         for (auto& arg : args) {
             if (i < fun->params.size()) {
                 auto name = fun->params.at(i).first;
@@ -145,7 +151,6 @@ Result<Rc<Value>> CallExpr::eval(State& state) {
                 }
                 GEODE_UNWRAP_INTO(auto val, arg->eval(state));
                 res.insert({ name, val });
-                named.push_back(*val);
             }
             else {
                 GEODE_UNWRAP_INTO(auto val, arg->eval(state));
@@ -155,7 +160,6 @@ Result<Rc<Value>> CallExpr::eval(State& state) {
             i += 1;
         }
         res.insert({ fun->variadic.value(), Value::rc(positional) });
-        res.insert({ "namedArguments", Value::rc(named) });
     }
     else {
         auto i = 0u;
@@ -265,22 +269,23 @@ Result<Rc<Value>> IndexExpr::eval(State& state) {
         }
         return Ok(Rc<Value>(new Value(arr.at(ix))));
     }
-    else if (auto robj = value->has<Object>()) {
+    else if (value->has<Dict>() || value->has<Ref<GameObject>>()) {
         auto rix = ixval->has<StrLit>();
         if (!rix) {
             return Err(
-                "Attempted to index object with a non-string\n * {} evaluated into {}",
+                "Attempted to index dictionary or object with a non-string\n * {} evaluated into {}",
                 index->src(), ixval->typeName()
             );
         }
-        if (!robj->count(*rix)) {
-            return Err("Object has no member '{}'", *rix);
+        auto mem = value->member(*rix);
+        if (!mem) {
+            return Err("Dictionary or object has no member '{}'", *rix);
         }
-        return Ok(Rc<Value>(new Value(robj->at(*rix))));
+        return Ok(*mem);
     }
     else {
         return Err(
-            "Attempted to index into a non array or object\n * {} evaluated into {}", 
+            "Attempted to index into a non array, dictionary or object\n * {} evaluated into {}", 
             expr->src(), value->typeName()
         );
     }

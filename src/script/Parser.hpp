@@ -252,11 +252,11 @@ namespace script {
 
     struct Value;
     using Array = std::vector<Value>;
-    using Object = std::unordered_map<std::string, Value>;
+    using Dict = std::unordered_map<std::string, Value>;
     struct Value {
         std::variant<
             NullLit, BoolLit, NumLit, StrLit,
-            Array, Object, Ref<GameObject>, Rc<const FunExpr>
+            Array, Dict, Ref<GameObject>, Rc<const FunExpr>
         > value;
         std::function<void(Value&)> onChange = nullptr;
         bool isConst = false;
@@ -523,12 +523,12 @@ namespace script {
     bool operator>(Array const& a, Array const b);
     bool operator>=(Array const& a, Array const b);
 
-    bool operator==(Object const& a, Object const b);
-    bool operator!=(Object const& a, Object const b);
-    bool operator<(Object const& a, Object const b);
-    bool operator<=(Object const& a, Object const b);
-    bool operator>(Object const& a, Object const b);
-    bool operator>=(Object const& a, Object const b);
+    bool operator==(Dict const& a, Dict const b);
+    bool operator!=(Dict const& a, Dict const b);
+    bool operator<(Dict const& a, Dict const b);
+    bool operator<=(Dict const& a, Dict const b);
+    bool operator>(Dict const& a, Dict const b);
+    bool operator>=(Dict const& a, Dict const b);
 
     struct Scope final {
         State& state;

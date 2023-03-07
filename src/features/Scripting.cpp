@@ -198,7 +198,8 @@ class $modify(ScriptingUI, EditorUI) {
         
         auto menu = this->getChildByID("editor-buttons-menu");
         if (menu) {
-            for (auto& file : file::readDirectory("C:/Users/HJfod/Documents/github/GeodeSDK/BetterEdit/scripts")
+            // C:/Users/HJfod/Documents/github/GeodeSDK/BetterEdit/scripts
+            for (auto& file : file::readDirectory("K:/GeodeSDK/HJ/BetterEdit/scripts")
                 .unwrapOr(std::vector<ghc::filesystem::path> {})
             ) {
                 auto button = CCMenuItemSpriteExtra::create(

@@ -125,7 +125,7 @@ Result<Rc<Value>> ForInExpr::eval(State& state) {
         }
         return Ok(ret);
     }
-    else if (auto obj = value->has<Object>()) {
+    else if (auto obj = value->has<Dict>()) {
         // result of last iteration will be the return value
         auto ret = Value::rc(NullLit());
         for (auto& [na, _] : *obj) {

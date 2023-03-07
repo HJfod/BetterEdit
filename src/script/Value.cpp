@@ -5,6 +5,7 @@
 #include <Geode/loader/Log.hpp>
 #include <Geode/binding/FLAlertLayer.hpp>
 #include <Geode/binding/EditorUI.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
 #include <random>
 #include <fmt/args.h>
 
@@ -84,7 +85,7 @@ bool Value::truthy() const {
         [&](Rc<const FunExpr> const&) {
             return true;
         },
-        [&](Object const&) {
+        [&](Dict const&) {
             return true;
         },
     }, value);
@@ -130,7 +131,7 @@ std::string Value::toString(bool debug) const {
             }
             return fun->ident.value_or("anonymous function");
         },
-        [&](Object const& obj) {
+        [&](Dict const& obj) {
             std::string res = debug ? "dict(" : "{";
             bool first = true;
             for (auto& [key, value] : obj) {
@@ -166,7 +167,7 @@ std::string Value::typeName() const {
         [&](Array const&) {
             return "array";
         },
-        [&](Object const&) {
+        [&](Dict const&) {
             return "dictionary";
         },
         [&](Ref<GameObject> const&) {
@@ -216,7 +217,7 @@ std::optional<Rc<Value>> Value::member(std::string const& name) {
                 } break;
             }
         },
-        [&](Object& obj) -> std::optional<Rc<Value>> {
+        [&](Dict& obj) -> std::optional<Rc<Value>> {
             if (obj.count(name)) {
                 return Value::rc(obj.at(name));
             }
@@ -344,7 +345,7 @@ Result<Rc<Value>> Value::lit(Lit const& value, State& state) {
             return Ok(Value::rc(value, nullptr, true));
         },
         [&](ObjLit const& obj) -> Result<Rc<Value>> {
-            Object object;
+            Dict object;
             for (auto& [k, expr] : obj) {
                 GEODE_UNWRAP_INTO(auto val, expr->eval(state));
                 object.insert({ k, *val });
@@ -384,7 +385,7 @@ bool script::operator>=(Array const& a, Array const b) {
     return true;
 }
 
-bool script::operator==(Object const& a, Object const b) {
+bool script::operator==(Dict const& a, Dict const b) {
     if (a.size() != b.size()) return false;
     for (auto const& [k, v] : a) {
         if (!b.count(k) || v.value != b.at(k).value) {
@@ -397,23 +398,23 @@ bool script::operator==(Object const& a, Object const b) {
     return true;
 }
 
-bool script::operator!=(Object const& a, Object const b) {
+bool script::operator!=(Dict const& a, Dict const b) {
     return !(a == b);
 }
 
-bool script::operator<(Object const& a, Object const b) {
+bool script::operator<(Dict const& a, Dict const b) {
     return false;
 }
 
-bool script::operator<=(Object const& a, Object const b) {
+bool script::operator<=(Dict const& a, Dict const b) {
     return true;
 }
 
-bool script::operator>(Object const& a, Object const b) {
+bool script::operator>(Dict const& a, Dict const b) {
     return false;
 }
 
-bool script::operator>=(Object const& a, Object const b) {
+bool script::operator>=(Dict const& a, Dict const b) {
     return true;
 }
 
@@ -530,41 +531,25 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
         this->push();
         auto val = Value::lit(def, *this).unwrap();
         this->pop();
+        val->isConst = false;
         this->add(var, val);
     }
     
     // lang
     this->add("print", builtinFun(
-        {{ "fmt", std::nullopt }},
+        {},
         "args",
         [](State& state) -> Result<Rc<Value>> {
-            fmt::dynamic_format_arg_store<fmt::format_context> store;
-            std::vector<Rc<Value>> dyn;
-            dyn.reserve(state.top().size());
             auto args = state.get("args")->has<Array>();
             if (!args) {
                 return Err("Internal Error: args was {}", state.get("args")->typeName());
             }
-            auto named = state.get("namedArguments")->has<Object>();
-            if (!named) {
-                return Err("Internal Error: namedArguments was {}", state.get("namedArguments")->typeName());
+            std::string res = "";
+            for (auto& arg : *args) {
+                res += arg.toString();
             }
-            for (auto& va : *args) {
-                store.push_back(va.toString());
-            }
-            for (auto& [na, va] : *named) {
-                store.push_back(fmt::arg(na.c_str(), va.toString()));
-            }
-            try {
-                // formatting manually to catch errors
-                auto res = fmt::vformat(state.get("msg")->toString(), store);
-                log::info("{}", res);
-                return Ok(Value::rc(res));
-            }
-            catch(std::exception& e) {
-                log::error("Invalid format: {}", e.what());
-                return Ok(Value::rc(NullLit()));
-            }
+            log::info("{}", res);
+            return Ok(Value::rc(res));
         }
     ));
     this->add("error", builtinFun(
@@ -672,7 +657,7 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
         [](State& state) -> Result<Rc<Value>> {
             auto pos = LevelEditorLayer::get()->m_objectLayer
                 ->convertToNodeSpace(CCDirector::get()->getWinSize() / 2);
-            return Ok(Value::rc(Object {
+            return Ok(Value::rc(Dict {
                 { "x", Value(pos.x) },
                 { "y", Value(pos.y) },
             }));
@@ -693,7 +678,7 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
         {{ "x", std::nullopt }},
         [](State& state) -> Result<Rc<Value>> {
             if (auto num = state.get("x")->has<NumLit>()) {
-                return Ok(Value::rc(sin(*num)));
+                return Ok(Value::rc(sin(*num * 180.f / M_PI)));
             }
             else {
                 return Err("sin requires a number, got {}", state.get("x")->typeName());
@@ -704,7 +689,7 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
         {{ "x", std::nullopt }},
         [](State& state) -> Result<Rc<Value>> {
             if (auto num = state.get("x")->has<NumLit>()) {
-                return Ok(Value::rc(cos(*num)));
+                return Ok(Value::rc(cos(*num * 180.f / M_PI)));
             }
             else {
                 return Err("cos requires a number, got {}", state.get("x")->typeName());
@@ -715,11 +700,14 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
         {{ "x", std::nullopt }},
         [](State& state) -> Result<Rc<Value>> {
             if (auto num = state.get("x")->has<NumLit>()) {
-                return Ok(Value::rc(tan(*num)));
+                return Ok(Value::rc(tan(*num * 180.f / M_PI)));
             }
             else {
                 return Err("tan requires a number, got {}", state.get("x")->typeName());
             }
         }
     ));
+
+    // constants
+    this->add("pi", Value::rc(M_PI));
 }
