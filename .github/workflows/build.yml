@@ -127,9 +127,10 @@ jobs:
             failOnError: false
 
       - name: Update release
-        uses: IsaacShelton/update-existing-release@v1.3.1
+        uses: IsaacShelton/update-existing-release@v1.3.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "${{ env.MOD_NAME }}.geode"
-          release: v5 Alpha
+          tag: v5.0.0-alpha
           prerelease: true
+          replace: true
