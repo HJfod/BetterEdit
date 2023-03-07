@@ -65,7 +65,11 @@ protected:
         content->setContentSize(contentSize);
         content->setAnchorPoint({ .5f, .5f });
 
-        for (auto& [var, def, title] : state->attrs.parameters) {
+        for (auto& param : state->attrs.parameters) {
+            // apple clang just straight up doesn't work with auto& [var, def, title]
+            auto& var = std::get<0>(param);
+            auto& def = std::get<1>(param);
+            auto& title = std::get<2>(param);
             auto menu = CCMenu::create();
             menu->setContentSize({ contentSize.width / 2, 50 });
             menu->ignoreAnchorPointForPosition(false);
