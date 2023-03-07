@@ -163,7 +163,7 @@ namespace script {
         template <class T>
         Token(T&& value) : value(std::forward<T>(value)) {}
         Token(decltype(Token::value) const& value) : value(value) {}
-        Token(decltype(Token::value)&& value) : value(std::forward<T>(value)) {}
+        Token(decltype(Token::value)&& value) : value(std::forward<decltype(Token::value)>(value)) {}
 
         std::string toString(bool debug = false) const;
         static void skip(InputStream& stream);
