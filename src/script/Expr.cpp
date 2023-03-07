@@ -13,17 +13,54 @@ Result<Rc<LitExpr>> LitExpr::pull(InputStream& stream, Attrs& attrs) {
             tickExecutionCounter();
             GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream, attrs));
             arr.push_back(expr);
-            if (!Token::pull(',', stream)) {
-                break;
-            }
             // allow trailing comma
-            if (Token::peek(']', stream)) {
+            if (!Token::pull(',', stream) || Token::peek(']', stream)) {
                 break;
             }
         }
         GEODE_UNWRAP(Token::pull(']', stream));
         return make<LitExpr>({
             .value = arr,
+            .src = rb.commit(),
+        });
+    }
+    if (Token::pull('{', stream)) {
+        if (Token::pull('}', stream)) {
+            return make<LitExpr>({
+                .value = ObjLit(),
+                .src = rb.commit(),
+            });
+        }
+        ObjLit obj;
+        while (true) {
+            tickExecutionCounter();
+            GEODE_UNWRAP_INTO(auto ident, Token::pull<Ident>(stream));
+            // if this is just an ident, treat it as `ident = ident`
+            if (Token::peek(',', stream)) {
+                obj.insert({
+                    ident,
+                    make<Expr>({
+                        .value = make<IdentExpr>({
+                            .ident = ident,
+                            .src = ident,
+                        }).unwrap()
+                    }).unwrap()
+                });
+            }
+            // otherwise expect `ident: value`
+            else {
+                GEODE_UNWRAP(Token::pull(':', stream));
+                GEODE_UNWRAP_INTO(auto expr, Expr::pull(stream, attrs));
+                obj.insert({ ident, expr });
+            }
+            // allow trailing comma
+            if (!Token::pull(',', stream) || Token::peek('}', stream)) {
+                break;
+            }
+        }
+        GEODE_UNWRAP(Token::pull('}', stream));
+        return make<LitExpr>({
+            .value = obj,
             .src = rb.commit(),
         });
     }
@@ -352,7 +389,11 @@ Result<Rc<Expr>> Expr::pullPrimaryNonCall(InputStream& stream, Attrs& attrs) {
     PULL_IF(Keyword::Break, BreakExpr);
     PULL_IF(Keyword::Continue, ContinueExpr);
     PULL_IF(Keyword::Const, ConstExpr);
-    if (Token::pull('{', stream)) {
+    if (Token::peek('{', stream)) {
+        // try object literal first
+        TRY_PULL(LitExpr);
+        // then list expr
+        GEODE_UNWRAP(Token::pull('}', stream));
         GEODE_UNWRAP_INTO(auto expr, ListExpr::pull(stream, attrs));
         GEODE_UNWRAP(Token::pull('}', stream));
         rb.commit();

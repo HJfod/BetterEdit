@@ -426,7 +426,7 @@ std::string script::tokenToString(Lit lit, bool debug) {
                     res += ", ";
                 }
                 first = false;
-                res += k + " = ";
+                res += k + ": ";
                 if (auto lit = std::get_if<Rc<LitExpr>>(&v->value)) {
                     res += tokenToString(lit->get()->value, debug);
                 }
