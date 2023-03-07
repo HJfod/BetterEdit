@@ -417,12 +417,12 @@ namespace script {
     struct FunExpr : public std::enable_shared_from_this<FunExpr> {
         std::optional<Ident> ident;
         std::vector<std::pair<Ident, std::optional<Rc<Expr>>>> params;
-        bool variadic;
+        std::optional<Ident> variadic;
         Rc<Expr> body;
         std::string src;
         bool added = false;
-        FunExpr(std::optional<Ident> const&, decltype(params) const&, bool, Rc<Expr> const&, std::string const&);
-        static Result<std::pair<decltype(params), bool>> pullParams(InputStream& stream, Attrs& attrs);
+        FunExpr(std::optional<Ident> const&, decltype(params) const&, std::optional<Ident>, Rc<Expr> const&, std::string const&);
+        static Result<std::pair<decltype(params), std::optional<Ident>>> pullParams(InputStream& stream, Attrs& attrs);
         static Result<Rc<FunExpr>> pullArrow(InputStream& stream, Attrs& attrs);
         static Result<Rc<FunExpr>> pull(InputStream& stream, Attrs& attrs);
         Result<Rc<Value>> eval(State& state);

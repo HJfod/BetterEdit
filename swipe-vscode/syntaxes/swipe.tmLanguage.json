@@ -114,6 +114,10 @@
 				},
 				{
 					"name": "constant.language.swipe",
+					"match": "\\b((argument[0-9]*)|arguments|namedArguments|this)\\b"
+				},
+				{
+					"name": "constant.language.swipe",
 					"match": "\\b(true|false|null)\\b"
 				}
 			]

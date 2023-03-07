@@ -131,6 +131,8 @@ Result<Rc<Value>> CallExpr::eval(State& state) {
 
     if (fun->variadic) {
         auto i = 0u;
+        Array positional;
+        Array named;
         for (auto& arg : args) {
             if (i < fun->params.size()) {
                 auto name = fun->params.at(i).first;
@@ -143,13 +145,17 @@ Result<Rc<Value>> CallExpr::eval(State& state) {
                 }
                 GEODE_UNWRAP_INTO(auto val, arg->eval(state));
                 res.insert({ name, val });
+                named.push_back(*val);
             }
             else {
                 GEODE_UNWRAP_INTO(auto val, arg->eval(state));
                 res.insert({ fmt::format("argument{}", i - fun->params.size()), val });
+                positional.push_back(*val);
             }
             i += 1;
         }
+        res.insert({ fun->variadic.value(), Value::rc(positional) });
+        res.insert({ "namedArguments", Value::rc(named) });
     }
     else {
         auto i = 0u;
@@ -241,29 +247,43 @@ Result<Rc<IndexExpr>> IndexExpr::pull(Rc<Expr> before, InputStream& stream, Attr
 Result<Rc<Value>> IndexExpr::eval(State& state) {
     GEODE_UNWRAP_INTO(auto value, expr->eval(state));
     GEODE_UNWRAP_INTO(auto ixval, index->eval(state));
-    auto rarr = value->has<Array>();
-    if (!rarr) {
+    if (auto rarr = value->has<Array>()) {
+        auto arr = *rarr;
+        auto rix = ixval->has<NumLit>();
+        if (!rix) {
+            return Err(
+                "Attempted to index array with a non-number\n * {} evaluated into {}",
+                index->src(), ixval->typeName()
+            );
+        }
+        if (*rix < 0.0) {
+            return Err("Index is negative ({})", *rix);
+        }
+        auto ix = static_cast<size_t>(round(*rix));
+        if (ix >= arr.size()) {
+            return Err("Index is past array bounds ({} >= {})", ix, arr.size());
+        }
+        return Ok(Rc<Value>(new Value(arr.at(ix))));
+    }
+    else if (auto robj = value->has<Object>()) {
+        auto rix = ixval->has<StrLit>();
+        if (!rix) {
+            return Err(
+                "Attempted to index object with a non-string\n * {} evaluated into {}",
+                index->src(), ixval->typeName()
+            );
+        }
+        if (!robj->count(*rix)) {
+            return Err("Object has no member '{}'", *rix);
+        }
+        return Ok(Rc<Value>(new Value(robj->at(*rix))));
+    }
+    else {
         return Err(
-            "Attempted to index into a non-array\n * {} evaluated into {}", 
+            "Attempted to index into a non array or object\n * {} evaluated into {}", 
             expr->src(), value->typeName()
         );
     }
-    auto arr = *rarr;
-    auto rix = ixval->has<NumLit>();
-    if (!rix) {
-        return Err(
-            "Attempted to index with a non-number\n * {} evaluated into {}",
-            index->src(), ixval->typeName()
-        );
-    }
-    if (*rix < 0.0) {
-        return Err("Index is negative ({})", *rix);
-    }
-    auto ix = static_cast<size_t>(round(*rix));
-    if (ix >= arr.size()) {
-        return Err("Index is past array bounds ({} >= {})", ix, arr.size());
-    }
-    return Ok(Rc<Value>(new Value(arr.at(ix))));
 }
 
 std::string IndexExpr::debug() const {

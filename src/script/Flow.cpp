@@ -110,9 +110,27 @@ Result<Rc<Value>> ForInExpr::eval(State& state) {
     if (auto arr = value->has<Array>()) {
         // result of last iteration will be the return value
         auto ret = Value::rc(NullLit());
-        for (auto value : *arr) {
+        for (auto& value : *arr) {
             auto scope = state.scope();
             state.add(item, std::make_shared<Value>(value));
+            try {
+                GEODE_UNWRAP_INTO(ret, body->eval(state));
+            }
+            catch (ContinueSignal const&) {
+                continue;
+            }
+            catch (BreakSignal const&) {
+                break;
+            }
+        }
+        return Ok(ret);
+    }
+    else if (auto obj = value->has<Object>()) {
+        // result of last iteration will be the return value
+        auto ret = Value::rc(NullLit());
+        for (auto& [na, _] : *obj) {
+            auto scope = state.scope();
+            state.add(item, Value::rc(na));
             try {
                 GEODE_UNWRAP_INTO(ret, body->eval(state));
             }

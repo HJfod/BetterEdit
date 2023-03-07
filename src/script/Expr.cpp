@@ -136,26 +136,32 @@ std::string ConstExpr::debug() const {
 FunExpr::FunExpr(
     std::optional<Ident> const& ident,
     decltype(params) const& params,
-    bool variadic,
+    std::optional<Ident> variadic,
     Rc<Expr> const& body,
     std::string const& src
 ) : ident(ident), params(params), variadic(variadic), body(body), src(src) {}
 
-Result<std::pair<decltype(FunExpr::params), bool>> FunExpr::pullParams(InputStream& stream, Attrs& attrs) {
+Result<std::pair<decltype(FunExpr::params), std::optional<Ident>>> FunExpr::pullParams(InputStream& stream, Attrs& attrs) {
     GEODE_UNWRAP(Token::pull('(', stream));
     decltype(FunExpr::params) params;
-    bool variadic = false;
+    std::optional<Ident> variadic = std::nullopt;
     while (true) {
         tickExecutionCounter();
         if (Token::pull("...", stream)) {
             if (variadic) {
                 return Err("Function already declared as variadic");
             }
-            variadic = true;
+            variadic = "arguments";
         }
         else {
             GEODE_UNWRAP_INTO(auto name, Token::pull<Ident>(stream));
-            if (Token::pull(Op::Seq, stream)) {
+            if (Token::pull("...", stream)) {
+                if (variadic) {
+                    return Err("Function already declared as variadic");
+                }
+                variadic = name;
+            }
+            else if (Token::pull(Op::Seq, stream)) {
                 GEODE_UNWRAP_INTO(auto value, Expr::pull(stream, attrs));
                 params.push_back({ name, value });
             }
@@ -173,7 +179,7 @@ Result<std::pair<decltype(FunExpr::params), bool>> FunExpr::pullParams(InputStre
 
 Result<Rc<FunExpr>> FunExpr::pullArrow(InputStream& stream, Attrs& attrs) {
     Rollback rb(stream);
-    std::pair<decltype(params), bool> params;
+    std::pair<decltype(params), std::optional<Ident>> params;
     if (Token::peek('(', stream)) {
         GEODE_UNWRAP_INTO(params, FunExpr::pullParams(stream, attrs));
     }

@@ -11,7 +11,8 @@
 using namespace script;
 
 static Rc<Value> builtinFun(
-    decltype(FunExpr::params) const& params, bool variadic,
+    decltype(FunExpr::params) const& params,
+    std::optional<Ident> variadic,
     std::function<Result<Rc<Value>>(State&)> fun
 ) {
     return Value::rc(make<FunExpr>(
@@ -31,7 +32,20 @@ static Rc<Value> builtinFun(
     decltype(FunExpr::params) const& params,
     std::function<Result<Rc<Value>>(State&)> fun
 ) {
-    return builtinFun(params, false, fun);
+    return builtinFun(params, std::nullopt, fun);
+}
+
+static Rc<Value> builtinFun(const char* code) {
+    std::stringstream str(code);
+    Attrs attrs;
+    auto res = FunExpr::pull(str, attrs);
+    if (!res) {
+        throw std::runtime_error(fmt::format(
+            "Unable to parse built-in function code ```{}```: {}",
+            code, res.unwrapErr()
+        ));
+    }
+    return Value::rc(res.unwrap());
 }
 
 static Rc<Expr> builtinLitExpr(Lit const& value) {
@@ -502,6 +516,15 @@ Result<Value> State::run() {
     }
 }
 
+static const char* CREATE_FUN = R"(
+function create(id, x, y, ...) {
+    obj = __create(id, x, y);
+    for arg in namedArguments {
+        obj[arg] = namedArguments[arg];
+    }
+}
+)";
+
 State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
     for (auto& [var, def, _] : attrs.parameters) {
         this->push();
@@ -513,22 +536,24 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
     // lang
     this->add("print", builtinFun(
         {{ "fmt", std::nullopt }},
-        true,
+        "args",
         [](State& state) -> Result<Rc<Value>> {
             fmt::dynamic_format_arg_store<fmt::format_context> store;
             std::vector<Rc<Value>> dyn;
             dyn.reserve(state.top().size());
-            for (auto& [na, va] : state.top()) {
-                if (na == "fmt") continue;
-                if (auto ix = getVarArgIdentNum(na)) {
-                    dyn[ix.value()] = va;
-                }
-                else {
-                    store.push_back(fmt::arg(na.c_str(), va->toString()));
-                }
+            auto args = state.get("args")->has<Array>();
+            if (!args) {
+                return Err("Internal Error: args was {}", state.get("args")->typeName());
             }
-            for (auto& v : dyn) {
-                store.push_back(v->toString());
+            auto named = state.get("namedArguments")->has<Object>();
+            if (!named) {
+                return Err("Internal Error: namedArguments was {}", state.get("namedArguments")->typeName());
+            }
+            for (auto& va : *args) {
+                store.push_back(va.toString());
+            }
+            for (auto& [na, va] : *named) {
+                store.push_back(fmt::arg(na.c_str(), va.toString()));
             }
             try {
                 // formatting manually to catch errors
@@ -577,14 +602,14 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
     ));
 
     // gd
-    this->add("create", builtinFun(
+    this->add("__create", builtinFun(
         {
             { "id", std::nullopt },
             { "x", builtinLitExpr(NullLit()) },
             { "y", builtinLitExpr(NullLit()) },
             { "undo", builtinLitExpr(true) },
         },
-        true,
+        "arguments",
         [](State& state) -> Result<Rc<Value>> {
             auto winSize = CCDirector::get()->getWinSize();
             auto id = state.get("id")->has<NumLit>();
@@ -605,6 +630,7 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
             return Ok(Value::rc(obj));
         }
     ));
+    this->add("create", builtinFun(CREATE_FUN));
     this->add("getSelectedObjects", builtinFun(
         {},
         [](State& state) -> Result<Rc<Value>> {
