@@ -157,6 +157,12 @@ namespace script {
     struct Token {
         std::variant<Keyword, Op, Lit, Punct, Ident> value;
 
+        Token() = default;
+        template <class T>
+        Token(T const& value) : value(value) {}
+        template <class T>
+        Token(T&& value) : value(std::forward<T>(value)) {}
+
         std::string toString(bool debug = false) const;
         static void skip(InputStream& stream);
         static Result<Token> pull(InputStream& stream);
