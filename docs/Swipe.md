@@ -173,6 +173,41 @@ x = {}
 assert(x == null)
 ```
 
+## Returning
+
+You can return from a function using the familiar `return` keyword:
+```js
+function addTwo(a, b) {
+    return a + b
+}
+```
+
+By default, a list expression always evaluates to the last expression in the list, so you can also omit the `return` keyword if the last expression is what you want to return:
+```js
+function addTwo(a, b) {
+    a + b
+}
+```
+
+Note that unlike Rust, where inserting a semicolon at the end of that statement would make the function return nothing, in Swipe semicolons serve no semantic purpose and even the following returns the result of `a + b` as its value:
+```js
+function addTwo(a, b) {
+    a + b;
+}
+```
+
+You can also use the `break` keyword to return from a block:
+```rust
+function some() {
+    a = {
+        b = 5
+        b += 2
+        break b
+    }
+    return a
+}
+```
+
 ## Comments
 
 Line comments in Swipe are declared with `//` and block comments with `/*`:

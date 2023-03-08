@@ -119,8 +119,8 @@ Result<Rc<Value>> ForInExpr::eval(State& state) {
             catch (ContinueSignal const&) {
                 continue;
             }
-            catch (BreakSignal const&) {
-                break;
+            catch (BreakSignal const& sig) {
+                return Ok(sig.value);
             }
         }
         return Ok(ret);
@@ -137,8 +137,8 @@ Result<Rc<Value>> ForInExpr::eval(State& state) {
             catch (ContinueSignal const&) {
                 continue;
             }
-            catch (BreakSignal const&) {
-                break;
+            catch (BreakSignal const& sig) {
+                return Ok(sig.value);
             }
         }
         return Ok(ret);
@@ -155,8 +155,8 @@ Result<Rc<Value>> ForInExpr::eval(State& state) {
             catch (ContinueSignal const&) {
                 continue;
             }
-            catch (BreakSignal const&) {
-                break;
+            catch (BreakSignal const& sig) {
+                return Ok(sig.value);
             }
         }
         return Ok(ret);
