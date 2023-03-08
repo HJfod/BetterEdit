@@ -507,6 +507,10 @@ Result<Rc<State>> State::parse(InputStream& stream, bool debug) {
     }
 }
 
+void State::setLogger(std::function<void(std::string const&)> logger) {
+    this->logger = logger;
+}
+
 Result<Value> State::run() {
     try {
         GEODE_UNWRAP_INTO(auto val, ast->eval(*this));
@@ -515,6 +519,15 @@ Result<Value> State::run() {
     catch (std::exception& err) {
         return Err("Uncaught exception: {}", err.what());
     }
+}
+
+std::string State::name(ghc::filesystem::path const& path) {
+    if (auto state = State::parse(path)) {
+        if (auto name = state.unwrap()->attrs.title) {
+            return name.value();
+        }
+    }
+    return path.filename().generic_string();
 }
 
 static const char* CREATE_FUN = R"(
@@ -548,7 +561,12 @@ State::State(Rc<Expr> ast, Attrs const& attrs) : ast(ast), attrs(attrs) {
             for (auto& arg : *args) {
                 res += arg.toString();
             }
-            log::info("{}", res);
+            if (state.logger) {
+                state.logger(fmt::format("{}", res));
+            }
+            else {
+                log::info("{}", res);
+            }
             return Ok(Value::rc(res));
         }
     ));

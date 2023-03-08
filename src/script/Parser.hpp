@@ -543,6 +543,7 @@ namespace script {
     private:
         std::vector<Entities> entities = {{}};
         Rc<Expr> ast;
+        std::function<void(std::string const&)> logger;
         
         friend struct Scope;
 
@@ -555,6 +556,8 @@ namespace script {
         static Result<Rc<State>> parse(ghc::filesystem::path const& path, bool debug = false);
         static Result<Rc<State>> parse(std::string const& code, bool debug = false);
         static Result<Rc<State>> parse(InputStream& stream, bool debug = false);
+        static std::string name(ghc::filesystem::path const& path);
+        void setLogger(std::function<void(std::string const&)> logger);
 
         Result<Value> run();
 

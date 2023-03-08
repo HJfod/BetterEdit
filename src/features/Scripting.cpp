@@ -4,7 +4,14 @@
 #include <Geode/ui/Notification.hpp>
 #include <Geode/ui/InputNode.hpp>
 #include <Geode/ui/ScrollLayer.hpp>
+#include <Geode/ui/Popup.hpp>
+#include <Geode/ui/General.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
+#include <Geode/binding/TextInputDelegate.hpp>
+#include <Geode/binding/GameToolbox.hpp>
+#include <Geode/binding/CCMenuItemToggler.hpp>
+#include <Geode/binding/ButtonSprite.hpp>
+#include <Geode/binding/TextArea.hpp>
 #include <script/Parser.hpp>
 
 USE_GEODE_NAMESPACE();
@@ -18,9 +25,32 @@ using script::BoolLit;
 
 class ScriptingUI;
 
-class ScriptInputPopup : public Popup<Rc<State>, ScriptingUI*>, TextInputDelegate {
+static std::vector<std::pair<std::string, bool>> SCRIPT_LOGS = {};
+
+static void scriptLog(std::string const& msg, bool error) {
+    SCRIPT_LOGS.emplace_back(msg, error);
+    if (error) {
+        log::error("{}", msg);
+    }
+    else {
+        log::info("{}", msg);
+    }
+}
+
+static void runScript(Rc<State> state) {
+    state->setLogger([](auto const& msg) { scriptLog(msg, false); });
+    auto eval = state->run();
+    if (!eval) {
+        scriptLog(fmt::format("Error running script: {}", eval.unwrapErr()), true);
+        Notification::create(
+            "Error running script",
+            NotificationIcon::Error
+        )->show();
+    }
+}
+
+class ScriptInputPopup : public Popup<Rc<State>>, TextInputDelegate {
 protected:
-    ScriptingUI* m_ui;
     Rc<State> m_state;
 
     static const char* placeholderForType(Lit const& lit) {
@@ -51,8 +81,7 @@ protected:
         }, lit);
     }
 
-    bool setup(Rc<State> state, ScriptingUI* ui) override {
-        m_ui = ui;
+    bool setup(Rc<State> state) override {
         m_state = state;
         m_noElasticity = true;
 
@@ -163,7 +192,14 @@ protected:
         }, var->value);
     }
 
-    void onRun(CCObject*);
+    void onRun(CCObject*) {
+        this->run();
+    }
+
+    void run() {
+        this->onClose(nullptr);
+        runScript(m_state);
+    } 
 
     static CCSize sizeForInputs(size_t count) {
         if (count < 2) {
@@ -179,10 +215,10 @@ protected:
     }
 
 public:
-    static ScriptInputPopup* create(Rc<State> state, ScriptingUI* ui) {
+    static ScriptInputPopup* create(Rc<State> state) {
         auto size = sizeForInputs(state->attrs.parameters.size());
         auto ret = new ScriptInputPopup();
-        if (ret && ret->init(size.width, size.height, state, ui)) {
+        if (ret && ret->init(size.width, size.height, state)) {
             ret->autorelease();
             return ret;
         }
@@ -191,15 +227,182 @@ public:
     }
 };
 
-static std::vector<ghc::filesystem::path> readDirs(std::vector<ghc::filesystem::path> const& dirs) {
-    std::vector<ghc::filesystem::path> res;
-    for (auto& dir : dirs) {
-        ranges::push(res, file::readDirectory(dir)
-            .unwrapOr(std::vector<ghc::filesystem::path> {})
+class ScriptsPopup : public Popup<> {
+protected:
+    ScrollLayer* m_list;
+    CCNode* m_listBorders;
+
+    bool setup() override {
+        m_noElasticity = true;
+
+        this->setTitle("Run Script");
+
+        auto winSize = CCDirector::get()->getWinSize();
+
+        auto listSize = CCSize { 360.f, 200.f };
+        m_list = ScrollLayer::create(listSize);
+        bool hasBG = true;
+        for (auto& script : scripts()) {
+            auto menuSize = CCSize { listSize.width, 35.f };
+            auto menu = CCMenu::create();
+            menu->ignoreAnchorPointForPosition(false);
+            menu->setContentSize({ listSize.width, menuSize.height });
+            if (hasBG) {
+                auto bg = CCLayerColor::create({ 0, 0, 0, 95 }, listSize.width, menuSize.height);
+                menu->addChild(bg);
+            }
+            hasBG ^= 1;
+
+            auto label = CCLabelBMFont::create(State::name(script).c_str(), "bigFont.fnt");
+            label->setAnchorPoint({ .0f, .5f });
+            label->setPosition(15.f, menuSize.height / 2);
+            label->limitLabelWidth(260.f, .5f, .1f);
+            menu->addChild(label);
+
+            auto runSpr = EditorButtonSprite::createWithSpriteFrameName("run-script.png"_spr, .7f);
+            runSpr->setScale(.85f);
+            auto runBtn = CCMenuItemSpriteExtra::create(
+                runSpr, this, menu_selector(ScriptsPopup::onRun)
+            );
+            runBtn->setAttribute("script-path"_spr, script);
+            runBtn->setPosition(listSize.width - menuSize.height / 2 - 5.f, menuSize.height / 2);
+            menu->addChild(runBtn);
+
+            m_list->m_contentLayer->addChild(menu);
+        }
+        m_list->m_contentLayer->setLayout(
+            ColumnLayout::create()
+                ->setGap(0.f)
+                ->setAxisReverse(true)
         );
+        m_list->setPosition(winSize / 2 - listSize / 2 - CCPoint { 0.f, 10.f });
+        this->addChild(m_list);
+
+        m_listBorders = CCNode::create();
+        addListBorders(m_listBorders, winSize / 2 - CCPoint { 0.f, 10.f }, listSize);
+        this->addChild(m_listBorders);
+
+        auto logsBtnOnSpr = ButtonSprite::create(
+            "Logs", "bigFont.fnt", "GJ_button_02.png", .6f
+        );
+        logsBtnOnSpr->setScale(.6f);
+
+        auto logsBtnOffSpr = ButtonSprite::create(
+            "Logs", "bigFont.fnt", "GJ_button_05.png", .6f
+        );
+        logsBtnOffSpr->setScale(.6f);
+
+        auto logsBtn = CCMenuItemToggler::create(
+            logsBtnOffSpr, logsBtnOnSpr,
+            this, menu_selector(ScriptsPopup::onViewLogs)
+        );
+        logsBtn->setPosition(m_size.width / 2 - 40.f, m_size.height / 2 - 25.f);
+        m_buttonMenu->addChild(logsBtn);
+
+        return true;
     }
-    return res;
-}
+
+    void onViewLogs(CCObject* sender) {
+        if (!static_cast<CCMenuItemToggler*>(sender)->isToggled()) {
+            m_list->setVisible(false);
+
+            auto winSize = CCDirector::get()->getWinSize();
+
+            auto listSize = CCSize { 360.f, 200.f };
+            auto list = ScrollLayer::create(listSize);
+            bool hasBG = true;
+            for (auto& log : SCRIPT_LOGS) {
+                auto menuSize = CCSize { listSize.width, 35.f };
+                auto menu = CCMenu::create();
+                menu->ignoreAnchorPointForPosition(false);
+                menu->setContentSize({ listSize.width, menuSize.height });
+                if (hasBG || log.second) {
+                    auto bg = CCLayerColor::create(
+                        (log.second ? ccColor4B { 255, 0, 0, 95 } : ccColor4B { 0, 0, 0, 95 }),
+                        listSize.width, menuSize.height
+                    );
+                    menu->addChild(bg);
+                }
+                hasBG ^= 1;
+
+                auto label = TextArea::create(
+                    log.first, "chatFont.fnt", 1.f, listSize.width - 30.f, { .5f, .5f }, 20.f, true
+                );
+                label->setPosition(menuSize / 2);
+                limitNodeSize(label, menuSize, 1.f, .1f);
+                menu->addChild(label);
+
+                list->m_contentLayer->addChild(menu);
+            }
+            list->m_contentLayer->setLayout(
+                ColumnLayout::create()
+                    ->setGap(0.f)
+                    ->setAxisReverse(true)
+            );
+            list->setPosition(winSize / 2 - listSize / 2 - CCPoint { 0.f, 10.f });
+            this->addChild(list);
+        }
+        else {
+            m_list->setVisible(true);
+        }
+    }
+
+    void onRun(CCObject* sender) {
+        auto path = static_cast<CCMenuItemSpriteExtra*>(sender)
+            ->template getAttribute<ghc::filesystem::path>("script-path"_spr);
+        if (!path) return;
+
+        this->onClose(nullptr);
+
+        auto res = script::State::parse(path.value(), true);
+        if (!res) {
+            scriptLog(fmt::format(
+                "Error parsing script {}: {}",
+                path.value().generic_string(), res.unwrapErr()
+            ), true);
+            Notification::create(
+                "Error parsing script",
+                NotificationIcon::Error
+            )->show();
+            return;
+        }
+        auto state = res.unwrap();
+        if (state->attrs.parameters.size()) {
+            ScriptInputPopup::create(state)->show();
+        }
+        else {
+            runScript(state);
+        }
+    }
+
+public:
+    static ScriptsPopup* create() {
+        auto ret = new ScriptsPopup;
+        if (ret && ret->init(400.f, 280.f)) {
+            ret->autorelease();
+            return ret;
+        }
+        CC_SAFE_DELETE(ret);
+        return nullptr;
+    }
+
+    static std::vector<ghc::filesystem::path> scripts() {
+        std::vector<ghc::filesystem::path> res;
+        for (auto& dir : {
+            Mod::get()->getResourcesDir(),
+            Mod::get()->getConfigDir() / "scripts"
+        }) {
+            if (auto files = file::readDirectory(dir)) {
+                for (auto& file : files.unwrap()) {
+                    if (file.extension() == ".swipe") {
+                        res.push_back(file);
+                    }
+                }
+            }
+        }
+        return res;
+    }
+};
 
 class $modify(ScriptingUI, EditorUI) {
     bool init(LevelEditorLayer* lel) {
@@ -208,66 +411,22 @@ class $modify(ScriptingUI, EditorUI) {
         
         auto menu = this->getChildByID("editor-buttons-menu");
         if (menu) {
-            for (auto& file : readDirs({
-                Mod::get()->getResourcesDir(),
-                Mod::get()->getConfigDir() / "scripts"
-            })) {
-                if (file.extension() == ".swipe") {
-                    auto spr = EditorButtonSprite::create(
-                        CCLabelBMFont::create(file.filename().string().c_str(), "bigFont.fnt"),
-                        EditorBaseColor::Orange
-                    );
-                    auto button = CCMenuItemSpriteExtra::create(
-                        spr, this, menu_selector(ScriptingUI::onScript)
-                    );
-                    button->setSizeMult(1.2f);
-                    button->setContentSize({ 40.f, 40.f });
-                    button->setUserObject(CCString::create(file.string()));
-                    menu->addChild(button);
-                    menu->updateLayout();
-                }
-            }
+            auto spr = EditorButtonSprite::createWithSpriteFrameName(
+                "run-script.png"_spr, .7f, EditorBaseColor::Orange
+            );
+            auto button = CCMenuItemSpriteExtra::create(
+                spr, this, menu_selector(ScriptingUI::onScripts)
+            );
+            button->setSizeMult(1.2f);
+            button->setContentSize({ 40.f, 40.f });
+            menu->addChild(button);
+            menu->updateLayout();
         }
 
         return true;
     }
 
-    void onScript(CCObject* sender) {
-        auto path = ghc::filesystem::path(static_cast<CCString*>(
-            static_cast<CCMenuItemSpriteExtra*>(sender)->getUserObject()
-        )->getCString());
-        auto res = script::State::parse(path, true);
-        if (!res) {
-            log::error("Error parsing script {}: {}", path, res.unwrapErr());
-            Notification::create(
-                "Error parsing script",
-                NotificationIcon::Error
-            )->show();
-            return;
-        }
-        auto state = res.unwrap();
-
-        if (state->attrs.parameters.size()) {
-            ScriptInputPopup::create(state, this)->show();
-        }
-        else {
-            this->run(state);
-        }
+    void onScripts(CCObject*) {
+        ScriptsPopup::create()->show();
     }
-
-    void run(Rc<State> state) {
-        auto eval = state->run();
-        if (!eval) {
-            log::error("Error running script: {}", eval.unwrapErr());
-            Notification::create(
-                "Error running script",
-                NotificationIcon::Error
-            )->show();
-        }
-    } 
 };
-
-void ScriptInputPopup::onRun(CCObject*) {
-    m_ui->run(m_state);
-    this->onClose(nullptr);
-}
