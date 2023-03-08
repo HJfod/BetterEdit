@@ -191,6 +191,16 @@ public:
     }
 };
 
+static std::vector<ghc::filesystem::path> readDirs(std::vector<ghc::filesystem::path> const& dirs) {
+    std::vector<ghc::filesystem::path> res;
+    for (auto& dir : dirs) {
+        ranges::push(res, file::readDirectory(dir)
+            .unwrapOr(std::vector<ghc::filesystem::path> {})
+        );
+    }
+    return res;
+}
+
 class $modify(ScriptingUI, EditorUI) {
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
@@ -198,10 +208,10 @@ class $modify(ScriptingUI, EditorUI) {
         
         auto menu = this->getChildByID("editor-buttons-menu");
         if (menu) {
-            // C:/Users/HJfod/Documents/github/GeodeSDK/BetterEdit/scripts
-            for (auto& file : file::readDirectory("K:/GeodeSDK/HJ/BetterEdit/scripts")
-                .unwrapOr(std::vector<ghc::filesystem::path> {})
-            ) {
+            for (auto& file : readDirs({
+                Mod::get()->getResourcesDir(),
+                Mod::get()->getConfigDir() / "scripts"
+            })) {
                 auto button = CCMenuItemSpriteExtra::create(
                     EditorButtonSprite::create(
                         CCLabelBMFont::create(file.filename().string().c_str(), "bigFont.fnt"),

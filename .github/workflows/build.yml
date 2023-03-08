@@ -131,6 +131,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: "${{ env.MOD_NAME }}.geode"
-          name: "Alpha"
+          release: "Alpha"
           prerelease: true
           replace: true
