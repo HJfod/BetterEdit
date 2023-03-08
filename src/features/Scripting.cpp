@@ -212,16 +212,20 @@ class $modify(ScriptingUI, EditorUI) {
                 Mod::get()->getResourcesDir(),
                 Mod::get()->getConfigDir() / "scripts"
             })) {
-                auto button = CCMenuItemSpriteExtra::create(
-                    EditorButtonSprite::create(
+                if (file.extension() == ".swipe") {
+                    auto spr = EditorButtonSprite::create(
                         CCLabelBMFont::create(file.filename().string().c_str(), "bigFont.fnt"),
                         EditorBaseColor::Orange
-                    ),
-                    this, menu_selector(ScriptingUI::onScript)
-                );
-                button->setUserObject(CCString::create(file.string()));
-                menu->addChild(button);
-                menu->updateLayout();
+                    );
+                    auto button = CCMenuItemSpriteExtra::create(
+                        spr, this, menu_selector(ScriptingUI::onScript)
+                    );
+                    button->setSizeMult(1.2f);
+                    button->setContentSize({ 40.f, 40.f });
+                    button->setUserObject(CCString::create(file.string()));
+                    menu->addChild(button);
+                    menu->updateLayout();
+                }
             }
         }
 
