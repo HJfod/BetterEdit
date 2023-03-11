@@ -1,3 +1,3 @@
 #include <Geode/DefaultInclude.hpp>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;

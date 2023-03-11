@@ -10,7 +10,7 @@
 #include <Geode/utils/VersionInfo.hpp>
 #include <fmt/format.h>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 namespace script {
     static VersionInfo SCRIPT_VERSION = { 1, 0, 0 };

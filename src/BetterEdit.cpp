@@ -1,7 +1,7 @@
 #include "BetterEdit.hpp"
 #include <Geode/Loader.hpp>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 std::unordered_map<uintptr_t, Patch*> PATCHES;
 

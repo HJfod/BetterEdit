@@ -4,7 +4,7 @@
 #include <Geode/loader/Event.hpp>
 #include <Geode/utils/cocos.hpp>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 struct ObjectEvent {
     Ref<GameObject> obj;

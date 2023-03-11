@@ -67,10 +67,10 @@ struct Bubble {
         if (s_current == this) {
             s_current = nullptr;
             if (events.size() > 1) {
-                EditorEvent(MultiObjectEvent(std::move(events))).post();
+                post(MultiObjectEvent(std::move(events)));
             }
             else if (events.size() == 1) {
-                EditorEvent(events.front()).post();
+                post(events.front());
             }
         }
     }
@@ -85,7 +85,14 @@ struct Bubble {
             s_current->events.emplace_back(std::forward<Args>(args)...);
         }
         else {
-            EditorEvent(T(std::forward<Args>(args)...)).post();
+            post(T(std::forward<Args>(args)...));
+        }
+    }
+private:
+    template <class T>
+    static void post(T&& t) {
+        if (EditorUI::get()) {
+            EditorEvent(t).post();
         }
     }
 };

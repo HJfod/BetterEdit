@@ -7,7 +7,7 @@
 #include <Geode/binding/GameObject.hpp>
 #include <Geode/utils/cocos.hpp>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 class $modify(EditorUI) {
     void updateSlider() {

@@ -14,7 +14,7 @@
 #include <Geode/binding/TextArea.hpp>
 #include <script/Parser.hpp>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 using script::Rc;
 using script::State;

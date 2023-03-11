@@ -9,7 +9,7 @@
 #undef min
 #undef max
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 struct FromLevelStart {};
 struct DefaultBehaviour {};
