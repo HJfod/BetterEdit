@@ -71,8 +71,8 @@ struct $modify(EditorUI) {
 
     void updateModeSprites() {
         this->updateModeSprite(m_buildModeBtn, 2, "tab-create.png"_spr);
-        this->updateModeSprite(m_deleteModeBtn, 1, "tab-edit.png"_spr);
-        this->updateModeSprite(m_editModeBtn, 3, "tab-delete.png"_spr);
+        this->updateModeSprite(m_deleteModeBtn, 1, "tab-delete.png"_spr);
+        this->updateModeSprite(m_editModeBtn, 3, "tab-edit.png"_spr);
         this->updateModeSprite(m_fields->m_viewModeBtn, 4, "tab-view.png"_spr);
     }
 };
