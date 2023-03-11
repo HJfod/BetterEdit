@@ -6,6 +6,7 @@ project(BetterEdit VERSION 4.6.0)
 
 file(GLOB SOURCES
 	src/features/*.cpp
+	src/tracking/*.cpp
 	src/script/*.cpp
 	src/*.cpp
 )
