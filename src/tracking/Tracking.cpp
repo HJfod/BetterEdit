@@ -47,10 +47,9 @@ struct BlockAll {
 
 template <class T>
 struct Bubble {
-    T event;
+    std::vector<T> events;
     static inline Bubble<T>* s_current = nullptr;
-    template <class... Args>
-    Bubble(Args&&... args) : event({}, std::forward<Args>(args)...) {
+    Bubble() {
         if (!s_current) {
             s_current = this;
         }
@@ -58,7 +57,12 @@ struct Bubble {
     ~Bubble() {
         if (s_current == this) {
             s_current = nullptr;
-            post(std::move(event));
+            if (events.size() > 1) {
+                post(MultiObjectEvent(std::move(events)));
+            }
+            else if (events.size() == 1) {
+                post(events.front());
+            }
         }
     }
     void cancel() {
@@ -69,10 +73,10 @@ struct Bubble {
     template <class... Args>
     static void push(Args&&... args) {
         if (s_current) {
-            s_current->event.objs.emplace_back(std::forward<Args>(args)...);
+            s_current->events.emplace_back(std::forward<Args>(args)...);
         }
         else {
-            post(T({{ std::forward<Args>(args)... }}));
+            post(T(std::forward<Args>(args)...));
         }
     }
 private:
@@ -88,152 +92,168 @@ std::unique_ptr<EditorEvent> EditorEvent::unique() const {
     return std::unique_ptr<EditorEvent>(this->clone());
 }
 
-ObjectPlacedEvent::ObjectPlacedEvent(ObjRefTuples<CCPoint> const& objs)
-  : objs(objs) {}
+ObjectEvent::ObjectEvent(Ref<GameObject> obj)
+  : obj(obj) {}
+
+ObjectPlacedEvent::ObjectPlacedEvent(Ref<GameObject> obj, CCPoint const& pos)
+  : ObjectEvent(obj), pos(pos) {}
 
 std::string ObjectPlacedEvent::toDiffString() const {
-    return fmt::format("add {}", ::toDiffString(objs));
+    return fmt::format("add {}, {}, {}", obj->m_objectID, pos.x, pos.y);
 }
 
 EditorEvent* ObjectPlacedEvent::clone() const {
-    return new ObjectPlacedEvent(objs);
+    return new ObjectPlacedEvent(obj, pos);
 }
 
 void ObjectPlacedEvent::undo() const {
     auto _ = BlockAll();
-    for (auto& [obj, _] : objs) {
-        LevelEditorLayer::get()->removeObjectFromSection(obj);
-        LevelEditorLayer::get()->removeSpecial(obj);
-        EditorUI::get()->deselectObject(obj);
-    }
+    LevelEditorLayer::get()->removeObjectFromSection(obj);
+    LevelEditorLayer::get()->removeSpecial(obj);
+    EditorUI::get()->deselectObject(obj);
 }
 
 void ObjectPlacedEvent::redo() const {
     auto _ = BlockAll();
-    for (auto& [obj, pos] : objs) {
-        LevelEditorLayer::get()->addToSection(obj);
-        LevelEditorLayer::get()->addSpecial(obj);
-        EditorUI::get()->moveObject(obj, pos);
-    }
+    LevelEditorLayer::get()->addToSection(obj);
+    LevelEditorLayer::get()->addSpecial(obj);
+    EditorUI::get()->moveObject(obj, pos);
 }
 
-ObjectRemovedEvent::ObjectRemovedEvent(ObjRefs const& objs)
-  : objs(objs) {}
+ObjectRemovedEvent::ObjectRemovedEvent(Ref<GameObject> obj)
+  : ObjectEvent(obj) {}
 
 std::string ObjectRemovedEvent::toDiffString() const {
-    return fmt::format("rem {}", ::toDiffString(objs));
+    return fmt::format("rem {}", ::toDiffString(obj));
 }
 
 EditorEvent* ObjectRemovedEvent::clone() const {
-    return new ObjectRemovedEvent(objs);
+    return new ObjectRemovedEvent(obj);
 }
 
 void ObjectRemovedEvent::undo() const {
     auto _ = BlockAll();
-    for (auto& obj : objs) {
-        LevelEditorLayer::get()->addToSection(obj);
-        LevelEditorLayer::get()->addSpecial(obj);
-    }
+    LevelEditorLayer::get()->addToSection(obj);
+    LevelEditorLayer::get()->addSpecial(obj);
 }
 
 void ObjectRemovedEvent::redo() const {
     auto _ = BlockAll();
-    for (auto& obj : objs) {
-        LevelEditorLayer::get()->removeObjectFromSection(obj);
-        LevelEditorLayer::get()->removeSpecial(obj);
-        EditorUI::get()->deselectObject(obj);
-    }
+    LevelEditorLayer::get()->removeObjectFromSection(obj);
+    LevelEditorLayer::get()->removeSpecial(obj);
+    EditorUI::get()->deselectObject(obj);
 }
 
-ObjectMovedEvent::ObjectMovedEvent(ObjRefTuples<CCPoint, CCPoint> const& objs)
-  : objs(objs) {}
+ObjectTransformedEvent::ObjectTransformedEvent(
+    Ref<GameObject> obj,
+    Transform<CCPoint> const& pos,
+    OptTransform<float> const& scale,
+    OptTransform<float> const& angle,
+    OptTransform<bool> const& flipX,
+    OptTransform<bool> const& flipY
+) : ObjectEvent(obj),
+    pos(pos),
+    scale(scale),
+    angle(angle),
+    flipX(flipX),
+    flipY(flipY) {}
 
-std::string ObjectMovedEvent::toDiffString() const {
-    return fmt::format("mov {}", ::toDiffString(objs));
+ObjectTransformedEvent ObjectTransformedEvent::moved(
+    Ref<GameObject> obj, Transform<CCPoint> const& pos
+) {
+    return ObjectTransformedEvent(obj, pos, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
 }
 
-EditorEvent* ObjectMovedEvent::clone() const {
-    return new ObjectMovedEvent(objs);
+ObjectTransformedEvent ObjectTransformedEvent::scaled(
+    Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> const& scale
+) {
+    return ObjectTransformedEvent(obj, pos, scale, std::nullopt, std::nullopt, std::nullopt);
 }
 
-void ObjectMovedEvent::undo() const {
-    auto _ = BlockAll();
-    for (auto& [obj, from, _] : objs) {
-        EditorUI::get()->moveObject(obj, from);
-    }
+ObjectTransformedEvent ObjectTransformedEvent::rotated(
+    Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> const& angle
+) {
+    return ObjectTransformedEvent(obj, pos, std::nullopt, angle, std::nullopt, std::nullopt);
 }
 
-void ObjectMovedEvent::redo() const {
-    auto _ = BlockAll();
-    for (auto& [obj, _, to] : objs) {
-        EditorUI::get()->moveObject(obj, to);
-    }
+ObjectTransformedEvent ObjectTransformedEvent::flippedX(
+    Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip
+) {
+    return ObjectTransformedEvent(obj, pos, std::nullopt, std::nullopt, flip, std::nullopt);
 }
 
-ObjectRotatedEvent::ObjectRotatedEvent(ObjRefs const& objs, float from, float to)
-  : objs(objs), from(from), to(to) {}
-
-std::string ObjectRotatedEvent::toDiffString() const {
-    return fmt::format("rot {}, {}, {}", ::toDiffString(objs), from, to);
+ObjectTransformedEvent ObjectTransformedEvent::flippedY(
+    Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip
+) {
+    return ObjectTransformedEvent(obj, pos, std::nullopt, std::nullopt, std::nullopt, flip);
 }
 
-EditorEvent* ObjectRotatedEvent::clone() const {
-    return new ObjectRotatedEvent(objs, from, to);
+std::string ObjectTransformedEvent::toDiffString() const {
+    return fmt::format(
+        "trf {}, {}, {}, {}, {}, {}",
+        ::toDiffString(obj),
+        ::toDiffString(pos),
+        ::toDiffString(scale),
+        ::toDiffString(angle),
+        ::toDiffString(flipX),
+        ::toDiffString(flipY)
+    );
 }
 
-ObjectScaledEvent::ObjectScaledEvent(ObjRefs const& objs, float from, float to)
-  : objs(objs), from(from), to(to) {}
-
-std::string ObjectScaledEvent::toDiffString() const {
-    return fmt::format("scl {}, {}, {}", ::toDiffString(objs), from, to);
+EditorEvent* ObjectTransformedEvent::clone() const {
+    return new ObjectTransformedEvent(obj, pos, scale, angle, flipX, flipY);
 }
 
-EditorEvent* ObjectScaledEvent::clone() const {
-    return new ObjectScaledEvent(objs, from, to);
+void ObjectTransformedEvent::undo() const {
 }
 
-ObjectFlippedXEvent::ObjectFlippedXEvent(ObjRefTuples<bool> const& objs)
-  : objs(objs) {}
-
-std::string ObjectFlippedXEvent::toDiffString() const {
-    return fmt::format("flx {}", ::toDiffString(objs));
+void ObjectTransformedEvent::redo() const {
 }
 
-EditorEvent* ObjectFlippedXEvent::clone() const {
-    return new ObjectFlippedXEvent(objs);
-}
-
-ObjectFlippedYEvent::ObjectFlippedYEvent(ObjRefTuples<bool> const& objs)
-  : objs(objs) {}
-
-std::string ObjectFlippedYEvent::toDiffString() const {
-    return fmt::format("fly {}", ::toDiffString(objs));
-}
-
-EditorEvent* ObjectFlippedYEvent::clone() const {
-    return new ObjectFlippedYEvent(objs);
-}
-
-ObjectSelectedEvent::ObjectSelectedEvent(ObjRefs const& objs)
-  : objs(objs) {}
+ObjectSelectedEvent::ObjectSelectedEvent(Ref<GameObject> obj)
+  : ObjectEvent(obj) {}
 
 std::string ObjectSelectedEvent::toDiffString() const {
-    return fmt::format("sel {}", ::toDiffString(objs));
+    return fmt::format("sel {}", ::toDiffString(obj));
 }
 
 EditorEvent* ObjectSelectedEvent::clone() const {
-    return new ObjectSelectedEvent(objs);
+    return new ObjectSelectedEvent(obj);
 }
 
-ObjectDeselectedEvent::ObjectDeselectedEvent(ObjRefs const& objs)
-  : objs(objs) {}
+void ObjectSelectedEvent::undo() const {
+    auto _ = BlockAll();
+    EditorUI::get()->deselectObject(obj);
+}
+
+void ObjectSelectedEvent::redo() const {
+    auto _ = BlockAll();
+    auto arr = EditorUI::get()->getSelectedObjects();
+    arr->addObject(obj);
+    EditorUI::get()->selectObjects(arr, false);
+}
+
+ObjectDeselectedEvent::ObjectDeselectedEvent(Ref<GameObject> obj)
+  : ObjectEvent(obj) {}
 
 std::string ObjectDeselectedEvent::toDiffString() const {
-    return fmt::format("dsl {}", ::toDiffString(objs));
+    return fmt::format("dsl {}", ::toDiffString(obj));
 }
 
 EditorEvent* ObjectDeselectedEvent::clone() const {
-    return new ObjectDeselectedEvent(objs);
+    return new ObjectDeselectedEvent(obj);
+}
+
+void ObjectDeselectedEvent::undo() const {
+    auto _ = BlockAll();
+    auto arr = EditorUI::get()->getSelectedObjects();
+    arr->addObject(obj);
+    EditorUI::get()->selectObjects(arr, false);
+}
+
+void ObjectDeselectedEvent::redo() const {
+    auto _ = BlockAll();
+    EditorUI::get()->deselectObject(obj);
 }
 
 ListenerResult EditorFilter::handle(utils::MiniFunction<Callback> fn, EditorEvent* event) {
@@ -269,11 +289,13 @@ class $modify(EditorUI) {
     void moveObject(GameObject* obj, CCPoint to) {
         auto from = obj->getPosition();
         EditorUI::moveObject(obj, to);
-        Bubble<ObjectMovedEvent>::push(obj, from, to);
+        Bubble<ObjectTransformedEvent>::push(ObjectTransformedEvent::moved(
+            obj, { from, to }
+        ));
     }
 
     void moveObjectCall(EditCommand command) {
-        auto bubble = Bubble<ObjectMovedEvent>();
+        auto bubble = Bubble<ObjectTransformedEvent>();
         EditorUI::moveObjectCall(command);
     }
 
@@ -288,35 +310,65 @@ class $modify(EditorUI) {
     }
 
     void scaleObjects(CCArray* objs, float scale, CCPoint center) {
-        auto bubble = Bubble<ObjectScaledEvent>();
+        auto bubble = Bubble<ObjectTransformedEvent>();
+        std::vector<std::tuple<GameObject*, CCPoint, float>> scales;
         for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            Bubble<ObjectScaledEvent>::push(obj, scale);
+            scales.push_back({ obj, obj->getPosition(), obj->m_scale });
         }
-        EditorUI::scaleObjects(objs, scale, center);
+        {
+            auto _ = BlockAll();
+            EditorUI::scaleObjects(objs, scale, center);
+        }
+        for (auto& [obj, pos, from] : scales) {
+            Bubble<ObjectTransformedEvent>::push(ObjectTransformedEvent::scaled(
+                obj, { pos, obj->getPosition() }, { from, obj->m_scale }
+            ));
+        }
     }
 
     void rotateObjects(CCArray* objs, float angle, CCPoint center) {
-        auto bubble = Bubble<ObjectRotatedEvent>();
+        std::vector<std::tuple<GameObject*, CCPoint, float>> angles;
         for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            Bubble<ObjectRotatedEvent>::push(obj, angle);
+            angles.push_back({ obj, obj->getPosition(), obj->m_rotation });
         }
-        EditorUI::rotateObjects(objs, angle, center);
+        {
+            auto _ = BlockAll();
+            EditorUI::rotateObjects(objs, angle, center);
+        }
+        auto bubble = Bubble<ObjectTransformedEvent>();
+        for (auto& [obj, pos, from] : angles) {
+            Bubble<ObjectTransformedEvent>::push(ObjectTransformedEvent::rotated(
+                obj, { pos, obj->getPosition() }, { from, obj->m_rotation }
+            ));
+        }
     }
 
     void flipObjectsX(CCArray* objs) {
-        auto bubble = Bubble<ObjectFlippedXEvent>();
+        auto bubble = Bubble<ObjectTransformedEvent>();
+        std::vector<std::tuple<GameObject*, CCPoint, bool>> flips;
         for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            Bubble<ObjectFlippedXEvent>::push(obj, !obj->isFlipX());
+            flips.push_back({ obj, obj->getPosition(), obj->m_isFlippedX });
         }
         EditorUI::flipObjectsX(objs);
+        for (auto& [obj, pos, from] : flips) {
+            Bubble<ObjectTransformedEvent>::push(ObjectTransformedEvent::flippedX(
+                obj, { pos, obj->getPosition() }, { from, obj->m_isFlippedX }
+            ));
+        }
     }
 
     void flipObjectsY(CCArray* objs) {
-        auto bubble = Bubble<ObjectFlippedYEvent>();
+        auto bubble = Bubble<ObjectTransformedEvent>();
+        std::vector<std::tuple<GameObject*, CCPoint, bool>> flips;
         for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            Bubble<ObjectFlippedYEvent>::push(obj, !obj->isFlipY());
+            flips.push_back({ obj, obj->getPosition(), obj->m_isFlippedY });
         }
         EditorUI::flipObjectsY(objs);
+        for (auto& [obj, pos, from] : flips) {
+            Bubble<ObjectTransformedEvent>::push(ObjectTransformedEvent::flippedY(
+                obj, { pos, obj->getPosition() }, { from, obj->m_isFlippedY }
+            ));
+        }
     }
 };
 

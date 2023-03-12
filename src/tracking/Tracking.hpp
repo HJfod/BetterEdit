@@ -7,22 +7,33 @@
 
 using namespace geode::prelude;
 
-struct EditorEvent : public Event {
-    virtual std::string toDiffString() const = 0;
-    virtual void undo() const = 0;
-    virtual void redo() const = 0;
-    virtual EditorEvent* clone() const = 0;
-    std::unique_ptr<EditorEvent> unique() const;
-};
-
 using ObjRefs = std::vector<Ref<GameObject>>;
 template <class... T>
 using ObjRefTuples = std::vector<std::tuple<Ref<GameObject>, T...>>;
+
+template <class T>
+struct Transform {
+    T from, to;
+    Transform(T const& from, T const& to) : from(from), to(to) {}
+};
+
+template <class T>
+using OptTransform = std::optional<Transform<T>>;
 
 std::string toDiffString(Ref<GameObject> obj);
 std::string toDiffString(CCPoint const& point);
 std::string toDiffString(float value);
 std::string toDiffString(bool value);
+
+template <class T>
+std::string toDiffString(Transform<T> const& value) {
+    return toDiffString(value.from) + "," + toDiffString(value.to);
+}
+
+template <class T>
+std::string toDiffString(OptTransform<T> const& value) {
+    return value ? toDiffString(value.value()) : "_";
+}
 
 template <class... T, std::size_t... Is>
 std::string toDiffString(std::tuple<T...> const& tuple, std::index_sequence<Is...>) {
@@ -50,87 +61,120 @@ std::string toDiffString(std::vector<T> const& objs) {
     return res;
 }
 
-struct ObjectPlacedEvent : public EditorEvent {
-    ObjRefTuples<CCPoint> objs;
-    ObjectPlacedEvent(ObjRefTuples<CCPoint> const& objs);
+struct EditorEvent : public Event {
+    virtual std::string toDiffString() const = 0;
+    virtual void undo() const = 0;
+    virtual void redo() const = 0;
+    virtual EditorEvent* clone() const = 0;
+    std::unique_ptr<EditorEvent> unique() const;
+};
+
+struct ObjectEvent : public EditorEvent {
+    Ref<GameObject> obj;
+    ObjectEvent(Ref<GameObject> obj);
+};
+
+struct ObjectPlacedEvent : public ObjectEvent {
+    CCPoint pos;
+    ObjectPlacedEvent(Ref<GameObject> obj, CCPoint const& pos);
     std::string toDiffString() const override;
     EditorEvent* clone() const override;
     void undo() const override;
     void redo() const override;
 };
 
-struct ObjectRemovedEvent : public EditorEvent {
-    ObjRefs objs;
-    ObjectRemovedEvent(ObjRefs const& objs);
+struct ObjectRemovedEvent : public ObjectEvent {
+    ObjectRemovedEvent(Ref<GameObject> obj);
     std::string toDiffString() const override;
     EditorEvent* clone() const override;
     void undo() const override;
     void redo() const override;
 };
 
-struct ObjectMovedEvent : public EditorEvent {
-    ObjRefTuples<CCPoint, CCPoint> objs;
-    ObjectMovedEvent(ObjRefTuples<CCPoint, CCPoint> const& objs);
+struct ObjectTransformedEvent : public ObjectEvent {
+    Transform<CCPoint> pos;
+    OptTransform<float> scale;
+    OptTransform<float> angle;
+    OptTransform<bool> flipX;
+    OptTransform<bool> flipY;
+    ObjectTransformedEvent(
+        Ref<GameObject> obj,
+        Transform<CCPoint> const& pos,
+        OptTransform<float> const& scale,
+        OptTransform<float> const& angle,
+        OptTransform<bool> const& flipX,
+        OptTransform<bool> const& flipY
+    );
+    static ObjectTransformedEvent moved(
+        Ref<GameObject> obj, Transform<CCPoint> const& pos
+    );
+    static ObjectTransformedEvent scaled(
+        Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> const& scale
+    );
+    static ObjectTransformedEvent rotated(
+        Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> const& angle
+    );
+    static ObjectTransformedEvent flippedX(
+        Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip
+    );
+    static ObjectTransformedEvent flippedY(
+        Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip
+    );
     std::string toDiffString() const override;
     EditorEvent* clone() const override;
     void undo() const override;
     void redo() const override;
 };
 
-struct ObjectRotatedEvent : public EditorEvent {
-    ObjRefs objs;
-    float from, to;
-    ObjectRotatedEvent(ObjRefs const& objs, float from, float to);
+struct ObjectSelectedEvent : public ObjectEvent {
+    ObjectSelectedEvent(Ref<GameObject> obj);
     std::string toDiffString() const override;
     EditorEvent* clone() const override;
     void undo() const override;
     void redo() const override;
 };
 
-struct ObjectScaledEvent : public EditorEvent {
-    ObjRefs objs;
-    float from, to;
-    ObjectScaledEvent(ObjRefs const& objs, float from, float to);
+struct ObjectDeselectedEvent : public ObjectEvent {
+    ObjectDeselectedEvent(Ref<GameObject> obj);
     std::string toDiffString() const override;
     EditorEvent* clone() const override;
     void undo() const override;
     void redo() const override;
 };
 
-struct ObjectFlippedXEvent : public EditorEvent {
-    ObjRefTuples<bool> objs;
-    ObjectFlippedXEvent(ObjRefTuples<bool> const& objs);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
+template <class Ev>
+    requires std::is_base_of_v<ObjectEvent, Ev>
+struct MultiObjectEvent : public EditorEvent {
+    std::vector<Ev> events;
+    MultiObjectEvent(std::vector<Ev> const& events) : events(events) {}
+    std::string toDiffString() const override {
+        std::string res = "";
+        bool first = true;
+        for (auto& ev : events) {
+            if (!first) {
+                res += "\n";
+            }
+            first = false;
+            res += ev.toDiffString();
+        }
+        return res;
+    }
 
-struct ObjectFlippedYEvent : public EditorEvent {
-    ObjRefTuples<bool> objs;
-    ObjectFlippedYEvent(ObjRefTuples<bool> const& objs);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
+    EditorEvent* clone() const override {
+        return new MultiObjectEvent(events);
+    }
 
-struct ObjectSelectedEvent : public EditorEvent {
-    ObjRefs objs;
-    ObjectSelectedEvent(ObjRefs const& objs);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
+    void undo() const override {
+        for (auto& ev : events) {
+            ev.undo();
+        }
+    }
 
-struct ObjectDeselectedEvent : public EditorEvent {
-    ObjRefs objs;
-    ObjectDeselectedEvent(ObjRefs const& objs);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
+    void redo() const override {
+        for (auto& ev : events) {
+            ev.redo();
+        }
+    }
 };
 
 struct EditorFilter : public EventFilter<EditorEvent> {

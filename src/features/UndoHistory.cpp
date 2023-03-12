@@ -1,5 +1,6 @@
 #include "UndoHistory.hpp"
 #include <Geode/modify/LevelEditorLayer.hpp>
+#include <Geode/binding/GJGameLevel.hpp>
 
 void History::onEvent(EditorEvent* ev) {
     log::info("{}", ev->toDiffString());
