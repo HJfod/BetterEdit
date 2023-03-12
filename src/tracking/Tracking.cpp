@@ -47,9 +47,10 @@ struct BlockAll {
 
 template <class T>
 struct Bubble {
-    std::vector<T> events;
+    T event;
     static inline Bubble<T>* s_current = nullptr;
-    Bubble() {
+    template <class... Args>
+    Bubble(Args&&... args) : event({}, std::forward<Args>(args)...) {
         if (!s_current) {
             s_current = this;
         }
@@ -57,12 +58,7 @@ struct Bubble {
     ~Bubble() {
         if (s_current == this) {
             s_current = nullptr;
-            if (events.size() > 1) {
-                post(MultiObjectEvent(std::move(events)));
-            }
-            else if (events.size() == 1) {
-                post(events.front());
-            }
+            post(std::move(event));
         }
     }
     void cancel() {
@@ -73,10 +69,10 @@ struct Bubble {
     template <class... Args>
     static void push(Args&&... args) {
         if (s_current) {
-            s_current->events.emplace_back(std::forward<Args>(args)...);
+            s_current->event.objs.emplace_back(std::forward<Args>(args)...);
         }
         else {
-            post(T(std::forward<Args>(args)...));
+            post(T({{ std::forward<Args>(args)... }}));
         }
     }
 private:
@@ -178,66 +174,66 @@ ObjectRotatedEvent::ObjectRotatedEvent(ObjRefs const& objs, float from, float to
   : objs(objs), from(from), to(to) {}
 
 std::string ObjectRotatedEvent::toDiffString() const {
-    return fmt::format("rot {}, {}, {}", objectHash(obj), from, to);
+    return fmt::format("rot {}, {}, {}", ::toDiffString(objs), from, to);
 }
 
 EditorEvent* ObjectRotatedEvent::clone() const {
-    return new ObjectRotatedEvent(obj, from, to);
+    return new ObjectRotatedEvent(objs, from, to);
 }
 
-ObjectScaledEvent::ObjectScaledEvent(Ref<GameObject> obj, float from, float to)
-  : ObjectEvent(obj), from(from), to(to) {}
+ObjectScaledEvent::ObjectScaledEvent(ObjRefs const& objs, float from, float to)
+  : objs(objs), from(from), to(to) {}
 
 std::string ObjectScaledEvent::toDiffString() const {
-    return fmt::format("scl {}, {}, {}", objectHash(obj), from, to);
+    return fmt::format("scl {}, {}, {}", ::toDiffString(objs), from, to);
 }
 
 EditorEvent* ObjectScaledEvent::clone() const {
-    return new ObjectScaledEvent(obj, from, to);
+    return new ObjectScaledEvent(objs, from, to);
 }
 
-ObjectFlippedXEvent::ObjectFlippedXEvent(Ref<GameObject> obj, bool flipped)
-  : ObjectEvent(obj), flipped(flipped) {}
+ObjectFlippedXEvent::ObjectFlippedXEvent(ObjRefTuples<bool> const& objs)
+  : objs(objs) {}
 
 std::string ObjectFlippedXEvent::toDiffString() const {
-    return fmt::format("flx {}, {}", objectHash(obj), flipped);
+    return fmt::format("flx {}", ::toDiffString(objs));
 }
 
 EditorEvent* ObjectFlippedXEvent::clone() const {
-    return new ObjectFlippedXEvent(obj, flipped);
+    return new ObjectFlippedXEvent(objs);
 }
 
-ObjectFlippedYEvent::ObjectFlippedYEvent(Ref<GameObject> obj, bool flipped)
-  : ObjectEvent(obj), flipped(flipped) {}
+ObjectFlippedYEvent::ObjectFlippedYEvent(ObjRefTuples<bool> const& objs)
+  : objs(objs) {}
 
 std::string ObjectFlippedYEvent::toDiffString() const {
-    return fmt::format("fly {}, {}", objectHash(obj), flipped);
+    return fmt::format("fly {}", ::toDiffString(objs));
 }
 
 EditorEvent* ObjectFlippedYEvent::clone() const {
-    return new ObjectFlippedYEvent(obj, flipped);
+    return new ObjectFlippedYEvent(objs);
 }
 
-ObjectSelectedEvent::ObjectSelectedEvent(Ref<GameObject> obj)
-  : ObjectEvent(obj) {}
+ObjectSelectedEvent::ObjectSelectedEvent(ObjRefs const& objs)
+  : objs(objs) {}
 
 std::string ObjectSelectedEvent::toDiffString() const {
-    return fmt::format("sel {}", objectHash(obj));
+    return fmt::format("sel {}", ::toDiffString(objs));
 }
 
 EditorEvent* ObjectSelectedEvent::clone() const {
-    return new ObjectSelectedEvent(obj);
+    return new ObjectSelectedEvent(objs);
 }
 
-ObjectDeselectedEvent::ObjectDeselectedEvent(Ref<GameObject> obj)
-  : ObjectEvent(obj) {}
+ObjectDeselectedEvent::ObjectDeselectedEvent(ObjRefs const& objs)
+  : objs(objs) {}
 
 std::string ObjectDeselectedEvent::toDiffString() const {
-    return fmt::format("dsl {}", objectHash(obj));
+    return fmt::format("dsl {}", ::toDiffString(objs));
 }
 
 EditorEvent* ObjectDeselectedEvent::clone() const {
-    return new ObjectDeselectedEvent(obj);
+    return new ObjectDeselectedEvent(objs);
 }
 
 ListenerResult EditorFilter::handle(utils::MiniFunction<Callback> fn, EditorEvent* event) {
@@ -271,8 +267,9 @@ class $modify(LevelEditorLayer) {
 
 class $modify(EditorUI) {
     void moveObject(GameObject* obj, CCPoint to) {
+        auto from = obj->getPosition();
         EditorUI::moveObject(obj, to);
-        Bubble<ObjectMovedEvent>::push(obj, to);
+        Bubble<ObjectMovedEvent>::push(obj, from, to);
     }
 
     void moveObjectCall(EditCommand command) {
