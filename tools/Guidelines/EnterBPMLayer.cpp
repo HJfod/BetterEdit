@@ -72,7 +72,7 @@ void EnterBPMLayer::onCreate(CCObject*) {
     
     if (m_pOffsetInput->getString() && strlen(m_pOffsetInput->getString()))
         try {
-            std::stof(m_pOffsetInput->getString());
+            offset = std::stof(m_pOffsetInput->getString());
         } catch (...) {}
 
     std::vector<char> pattern {};
