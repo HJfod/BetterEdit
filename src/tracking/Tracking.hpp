@@ -3,10 +3,9 @@
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/loader/Event.hpp>
 #include <Geode/utils/cocos.hpp>
+#include <Geode/binding/GameObject.hpp>
 
 using namespace geode::prelude;
-
-std::string objectHash(GameObject* obj);
 
 struct EditorEvent : public Event {
     virtual std::string toDiffString() const = 0;
@@ -16,122 +15,122 @@ struct EditorEvent : public Event {
     std::unique_ptr<EditorEvent> unique() const;
 };
 
-struct ObjectEvent : public EditorEvent {
-    Ref<GameObject> obj;
-    ObjectEvent(Ref<GameObject> obj);
-};
+using ObjRefs = std::vector<Ref<GameObject>>;
+template <class... T>
+using ObjRefTuples = std::vector<std::tuple<Ref<GameObject>, T...>>;
 
-struct ObjectPlacedEvent : public ObjectEvent {
-    CCPoint pos;
-    ObjectPlacedEvent(Ref<GameObject> obj, CCPoint const& pos);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
+std::string toDiffString(Ref<GameObject> obj);
+std::string toDiffString(CCPoint const& point);
+std::string toDiffString(float value);
+std::string toDiffString(bool value);
 
-struct ObjectRemovedEvent : public ObjectEvent {
-    ObjectRemovedEvent(Ref<GameObject> obj);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
+template <class... T, std::size_t... Is>
+std::string toDiffString(std::tuple<T...> const& tuple, std::index_sequence<Is...>) {
+    std::string ret = "";
+    ((ret += (Is == 0 ? "" : ",") + toDiffString(std::get<Is>(tuple))), ...);
+    return ret;
+}
 
-struct ObjectMovedEvent : public ObjectEvent {
-    CCPoint pos;
-    ObjectMovedEvent(Ref<GameObject> obj, CCPoint const& pos);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
+template <class... T>
+std::string toDiffString(std::tuple<T...> const& tuple) {
+    return toDiffString(tuple, std::index_sequence_for<T...> {});
+}
 
-struct ObjectRotatedEvent : public ObjectEvent {
-    float angle;
-    ObjectRotatedEvent(Ref<GameObject> obj, float angle);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-struct ObjectScaledEvent : public ObjectEvent {
-    float scale;
-    ObjectScaledEvent(Ref<GameObject> obj, float scale);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-struct ObjectFlippedXEvent : public ObjectEvent {
-    bool flipped;
-    ObjectFlippedXEvent(Ref<GameObject> obj, bool flipped);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-struct ObjectFlippedYEvent : public ObjectEvent {
-    bool flipped;
-    ObjectFlippedYEvent(Ref<GameObject> obj, bool flipped);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-struct ObjectSelectedEvent : public ObjectEvent {
-    ObjectSelectedEvent(Ref<GameObject> obj);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-struct ObjectDeselectedEvent : public ObjectEvent {
-    ObjectDeselectedEvent(Ref<GameObject> obj);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-template <class Ev>
-    requires std::is_base_of_v<ObjectEvent, Ev>
-struct MultiObjectEvent : public EditorEvent {
-    std::vector<Ev> events;
-    MultiObjectEvent(std::vector<Ev> const& events) : events(events) {}
-    std::string toDiffString() const override {
-        std::string res = "";
-        bool first = true;
-        for (auto& ev : events) {
-            if (!first) {
-                res += "\n";
-            }
-            first = false;
-            res += ev.toDiffString();
+template <class T>
+std::string toDiffString(std::vector<T> const& objs) {
+    std::string res = "";
+    bool first = true;
+    for (auto& obj : objs) {
+        if (!first) {
+            res += ";";
         }
-        return res;
+        first = false;
+        res += toDiffString(obj);
     }
+    return res;
+}
 
-    EditorEvent* clone() const override {
-        return new MultiObjectEvent(events);
-    }
+struct ObjectPlacedEvent : public EditorEvent {
+    ObjRefTuples<CCPoint> objs;
+    ObjectPlacedEvent(ObjRefTuples<CCPoint> const& objs);
+    std::string toDiffString() const override;
+    EditorEvent* clone() const override;
+    void undo() const override;
+    void redo() const override;
+};
 
-    void undo() const override {
-        for (auto& ev : events) {
-            ev.undo();
-        }
-    }
+struct ObjectRemovedEvent : public EditorEvent {
+    ObjRefs objs;
+    ObjectRemovedEvent(ObjRefs const& objs);
+    std::string toDiffString() const override;
+    EditorEvent* clone() const override;
+    void undo() const override;
+    void redo() const override;
+};
 
-    void redo() const override {
-        for (auto& ev : events) {
-            ev.redo();
-        }
-    }
+struct ObjectMovedEvent : public EditorEvent {
+    ObjRefTuples<CCPoint, CCPoint> objs;
+    ObjectMovedEvent(ObjRefTuples<CCPoint, CCPoint> const& objs);
+    std::string toDiffString() const override;
+    EditorEvent* clone() const override;
+    void undo() const override;
+    void redo() const override;
+};
+
+struct ObjectRotatedEvent : public EditorEvent {
+    ObjRefs objs;
+    float from, to;
+    ObjectRotatedEvent(ObjRefs const& objs, float from, float to);
+    std::string toDiffString() const override;
+    EditorEvent* clone() const override;
+    void undo() const override;
+    void redo() const override;
+};
+
+struct ObjectScaledEvent : public EditorEvent {
+    ObjRefs objs;
+    float from, to;
+    ObjectScaledEvent(ObjRefs const& objs, float from, float to);
+    std::string toDiffString() const override;
+    EditorEvent* clone() const override;
+    void undo() const override;
+    void redo() const override;
+};
+
+struct ObjectFlippedXEvent : public EditorEvent {
+    ObjRefTuples<bool> objs;
+    ObjectFlippedXEvent(ObjRefTuples<bool> const& objs);
+    std::string toDiffString() const override;
+    EditorEvent* clone() const override;
+    void undo() const override;
+    void redo() const override;
+};
+
+struct ObjectFlippedYEvent : public EditorEvent {
+    ObjRefTuples<bool> objs;
+    ObjectFlippedYEvent(ObjRefTuples<bool> const& objs);
+    std::string toDiffString() const override;
+    EditorEvent* clone() const override;
+    void undo() const override;
+    void redo() const override;
+};
+
+struct ObjectSelectedEvent : public EditorEvent {
+    ObjRefs objs;
+    ObjectSelectedEvent(ObjRefs const& objs);
+    std::string toDiffString() const override;
+    EditorEvent* clone() const override;
+    void undo() const override;
+    void redo() const override;
+};
+
+struct ObjectDeselectedEvent : public EditorEvent {
+    ObjRefs objs;
+    ObjectDeselectedEvent(ObjRefs const& objs);
+    std::string toDiffString() const override;
+    EditorEvent* clone() const override;
+    void undo() const override;
+    void redo() const override;
 };
 
 struct EditorFilter : public EventFilter<EditorEvent> {
