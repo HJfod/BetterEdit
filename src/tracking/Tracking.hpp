@@ -22,8 +22,12 @@ using OptTransform = std::optional<Transform<T>>;
 
 std::string toDiffString(Ref<GameObject> obj);
 std::string toDiffString(CCPoint const& point);
-std::string toDiffString(float value);
 std::string toDiffString(bool value);
+
+template <class T>
+std::string toDiffString(T const& value) {
+    return fmt::format("{}", value);
+}
 
 template <class T>
 std::string toDiffString(Transform<T> const& value) {
@@ -61,98 +65,166 @@ std::string toDiffString(std::vector<T> const& objs) {
     return res;
 }
 
-struct EditorEvent : public Event {
+template <class... Args, std::size_t... Is>
+std::string fmtDiffStringImpl(std::string_view const& str, Args&&... args, std::index_sequence<Is...>) {
+    std::string ret { str };
+    ret.push_back(' ');
+    ((ret += (Is == 0 ? "" : ":") + toDiffString(args)), ...);
+    return ret;
+}
+
+template <class... Args>
+std::string fmtDiffString(std::string_view const& str, Args&&... args) {
+    return fmtDiffStringImpl<Args...>(str, std::forward<Args>(args)..., std::index_sequence_for<Args...> {});
+}
+
+struct EditorEventData {
     virtual std::string toDiffString() const = 0;
     virtual void undo() const = 0;
     virtual void redo() const = 0;
-    virtual EditorEvent* clone() const = 0;
+    virtual EditorEventData* clone() const = 0;
+};
+
+struct ObjEventData : public EditorEventData {
+    Ref<GameObject> obj;
+    ObjEventData(Ref<GameObject> obj);
+};
+
+struct ObjPlaced : public ObjEventData {
+    CCPoint pos;
+    inline ObjPlaced(Ref<GameObject> obj, CCPoint const& pos)
+      : ObjEventData(obj), pos(pos) {}
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "add-obj.png"_spr;
+    static inline auto DESC_FMT = "Added {}";
+};
+
+struct ObjRemoved : public ObjEventData {
+    inline ObjRemoved(Ref<GameObject> obj)
+      : ObjEventData(obj) {}
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "rem-obj.png"_spr;
+    static inline auto DESC_FMT = "Removed {}";
+};
+
+struct ObjMoved : public ObjEventData {
+    Transform<CCPoint> pos;
+    inline ObjMoved(Ref<GameObject> obj, Transform<CCPoint> const& pos)
+      : ObjEventData(obj), pos(pos) {}
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "move-obj.png"_spr;
+    static inline auto DESC_FMT = "Moved {}";
+};
+
+struct ObjRotated : public ObjEventData {
+    Transform<CCPoint> pos;
+    Transform<float> angle;
+    inline ObjRotated(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> angle)
+      : ObjEventData(obj), pos(pos), angle(angle) {}
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "rot-obj.png"_spr;
+    static inline auto DESC_FMT = "Rotated {}";
+};
+
+struct ObjScaled : public ObjEventData {
+    Transform<CCPoint> pos;
+    Transform<float> scale;
+    inline ObjScaled(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> scale)
+      : ObjEventData(obj), pos(pos), scale(scale) {}
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "scale-obj.png"_spr;
+    static inline auto DESC_FMT = "Scaled {}";
+};
+
+struct ObjFlipX : public ObjEventData {
+    Transform<CCPoint> pos;
+    Transform<bool> flip;
+    inline ObjFlipX(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> flip)
+      : ObjEventData(obj), pos(pos), flip(flip) {}
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "flipx-obj.png"_spr;
+    static inline auto DESC_FMT = "Flipped {} on the X-axis";
+};
+
+struct ObjFlipY : public ObjEventData {
+    Transform<CCPoint> pos;
+    Transform<bool> flip;
+    inline ObjFlipY(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> flip)
+      : ObjEventData(obj), pos(pos), flip(flip) {}
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "flipy-obj.png"_spr;
+    static inline auto DESC_FMT = "Flipped {} on the Y-axis";
+};
+
+struct ObjSelected : public ObjEventData {
+    inline ObjSelected(Ref<GameObject> obj)
+      : ObjEventData(obj) {}
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "sel-obj.png"_spr;
+    static inline auto DESC_FMT = "Selected {}";
+};
+
+struct ObjDeselected : public ObjEventData {
+    inline ObjDeselected(Ref<GameObject> obj)
+      : ObjEventData(obj) {}
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "desel-obj.png"_spr;
+    static inline auto DESC_FMT = "Deselected {}";
+};
+
+struct EditorEvent : public Event, public EditorEventData {
+    virtual std::string desc() const = 0;
+    virtual const char* icon() const = 0;
     std::unique_ptr<EditorEvent> unique() const;
 };
 
-struct ObjectEvent : public EditorEvent {
-    Ref<GameObject> obj;
-    ObjectEvent(Ref<GameObject> obj);
-};
-
-struct ObjectPlacedEvent : public ObjectEvent {
-    CCPoint pos;
-    ObjectPlacedEvent(Ref<GameObject> obj, CCPoint const& pos);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-struct ObjectRemovedEvent : public ObjectEvent {
-    ObjectRemovedEvent(Ref<GameObject> obj);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-struct ObjectTransformedEvent : public ObjectEvent {
-    Transform<CCPoint> pos;
-    OptTransform<float> scale;
-    OptTransform<float> angle;
-    OptTransform<bool> flipX;
-    OptTransform<bool> flipY;
-    ObjectTransformedEvent(
-        Ref<GameObject> obj,
-        Transform<CCPoint> const& pos,
-        OptTransform<float> const& scale,
-        OptTransform<float> const& angle,
-        OptTransform<bool> const& flipX,
-        OptTransform<bool> const& flipY
-    );
-    static ObjectTransformedEvent moved(
-        Ref<GameObject> obj, Transform<CCPoint> const& pos
-    );
-    static ObjectTransformedEvent scaled(
-        Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> const& scale
-    );
-    static ObjectTransformedEvent rotated(
-        Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> const& angle
-    );
-    static ObjectTransformedEvent flippedX(
-        Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip
-    );
-    static ObjectTransformedEvent flippedY(
-        Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip
-    );
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-struct ObjectSelectedEvent : public ObjectEvent {
-    ObjectSelectedEvent(Ref<GameObject> obj);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
-struct ObjectDeselectedEvent : public ObjectEvent {
-    ObjectDeselectedEvent(Ref<GameObject> obj);
-    std::string toDiffString() const override;
-    EditorEvent* clone() const override;
-    void undo() const override;
-    void redo() const override;
-};
-
 template <class Ev>
-    requires std::is_base_of_v<ObjectEvent, Ev>
-struct MultiObjectEvent : public EditorEvent {
+    requires std::is_base_of_v<ObjEventData, Ev>
+struct MultiObjEvent : public EditorEvent {
     std::vector<Ev> events;
-    MultiObjectEvent(std::vector<Ev> const& events) : events(events) {}
+    MultiObjEvent(std::vector<Ev> const& events) : events(events) {}
     std::string toDiffString() const override {
         std::string res = "";
         bool first = true;
         for (auto& ev : events) {
             if (!first) {
-                res += "\n";
+                res += "&";
             }
             first = false;
             res += ev.toDiffString();
@@ -160,8 +232,8 @@ struct MultiObjectEvent : public EditorEvent {
         return res;
     }
 
-    EditorEvent* clone() const override {
-        return new MultiObjectEvent(events);
+    EditorEventData* clone() const override {
+        return new MultiObjEvent(events);
     }
 
     void undo() const override {
@@ -174,6 +246,19 @@ struct MultiObjectEvent : public EditorEvent {
         for (auto& ev : events) {
             ev.redo();
         }
+    }
+
+    const char* icon() const override {
+        return Ev::ICON_NAME;
+    }
+
+    std::string desc() const override {
+        return fmt::format(
+            fmt::runtime(Ev::DESC_FMT),
+            (events.size() == 1 ?
+                "Object" :
+                fmt::format("{} Objects", events.size()))
+        );
     }
 };
 

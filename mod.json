@@ -24,6 +24,12 @@
 			"default": true,
 			"name": "Show Percentage",
 			"description": "When enabled, flashes the current percentage in the position slider when you move around the editor"
+		},
+		"enable-new-undo": {
+			"type": "bool",
+			"default": true,
+			"name": "Better Undo",
+			"description": "When enabled, allows undoing any action taken in the editor, like modifying object colors"
 		}
 	},
 	"resources": {
