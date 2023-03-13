@@ -159,7 +159,7 @@ struct ObjScaled : public ObjEventData {
 struct ObjFlipX : public ObjEventData {
     Transform<CCPoint> pos;
     Transform<bool> flip;
-    inline ObjFlipX(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> flip)
+    inline ObjFlipX(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip)
       : ObjEventData(obj), pos(pos), flip(flip) {}
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
@@ -173,7 +173,7 @@ struct ObjFlipX : public ObjEventData {
 struct ObjFlipY : public ObjEventData {
     Transform<CCPoint> pos;
     Transform<bool> flip;
-    inline ObjFlipY(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> flip)
+    inline ObjFlipY(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip)
       : ObjEventData(obj), pos(pos), flip(flip) {}
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
@@ -182,6 +182,21 @@ struct ObjFlipY : public ObjEventData {
 
     static inline auto ICON_NAME = "flipy-obj.png"_spr;
     static inline auto DESC_FMT = "Flipped {} on the Y-axis";
+};
+
+struct ObjColored : public ObjEventData {
+    Transform<int> color1;
+    Transform<int> color2;
+    inline ObjColored(Ref<GameObject> obj, Transform<int> const& color1, Transform<int> const& color2)
+      : ObjEventData(obj), color1(color1), color2(color2) {}
+
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "color-obj.png"_spr;
+    static inline auto DESC_FMT = "Colored {}";
 };
 
 struct ObjSelected : public ObjEventData {

@@ -2,6 +2,8 @@
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/modify/GameObject.hpp>
+#include <Geode/modify/CustomizeObjectLayer.hpp>
+#include <Geode/binding/GJSpriteColor.hpp>
 
 #define BLOCKED_CALL(...) \
     {\
@@ -267,6 +269,34 @@ void ObjFlipY::redo() const {
     EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
 }
 
+// ObjColored
+
+std::string ObjColored::toDiffString() const {
+    return fmtDiffString("col", obj, color1, color2);
+}
+
+EditorEventData* ObjColored::clone() const {
+    return new ObjColored(obj, color1, color2);
+}
+
+void ObjColored::undo() const {
+    if (obj->m_baseColor) {
+        obj->m_baseColor->m_colorID = color1.from;
+    }
+    if (obj->m_detailColor) {
+        obj->m_detailColor->m_colorID = color2.from;
+    }
+}
+
+void ObjColored::redo() const {
+    if (obj->m_baseColor) {
+        obj->m_baseColor->m_colorID = color1.to;
+    }
+    if (obj->m_detailColor) {
+        obj->m_detailColor->m_colorID = color2.to;
+    }
+}
+
 // ObjSelected
 
 std::string ObjSelected::toDiffString() const {
@@ -437,3 +467,16 @@ class $modify(GameObject) {
         Bubble<ObjDeselected>::push(this);
     }
 };
+
+// todo
+// class $modify(CustomizeObjectLayer) {
+//     void onClose(CCObject* sender) {
+//         if (m_targetObject) {
+//             Bubble<ObjColored>::push(m_targetObject, m_targetObject->);
+//         }
+//         else if (m_targetObjects) {
+
+//         }
+//         CustomizeObjectLayer::onClose(sender);
+//     }
+// };
