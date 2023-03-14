@@ -1,17 +1,14 @@
 #include "Tracking.hpp"
-#include <Geode/modify/LevelEditorLayer.hpp>
-#include <Geode/modify/EditorUI.hpp>
-#include <Geode/modify/GameObject.hpp>
-#include <Geode/modify/EffectGameObject.hpp>
-#include <Geode/modify/CustomizeObjectLayer.hpp>
-#include <Geode/modify/HSVWidgetPopup.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/binding/EditorUI.hpp>
+#include <Geode/binding/GameObject.hpp>
+#include <Geode/binding/EffectGameObject.hpp>
+#include <Geode/binding/CustomizeObjectLayer.hpp>
+#include <Geode/binding/HSVWidgetPopup.hpp>
 #include <Geode/binding/GJSpriteColor.hpp>
-
-#define BLOCKED_CALL(...) \
-    {\
-        auto block = BlockAll();\
-        __VA_ARGS__;\
-    }
+#include <Geode/binding/GJEffectManager.hpp>
+#include <Geode/binding/ColorAction.hpp>
+#include <Geode/utils/cocos.hpp>
 
 std::string toDiffString(Ref<GameObject> obj) {
     return fmt::format(
@@ -38,67 +35,58 @@ std::string toDiffString(ccHSVValue const& value) {
     );
 }
 
+std::string toDiffString(ccColor3B const& value) {
+    return fmt::format("({},{},{})", value.r, value.g, value.b);
+}
+
+std::string toDiffString(ccColor4B const& value) {
+    return fmt::format("({},{},{},{})", value.r, value.g, value.b, value.a);
+}
+
+std::string toDiffString(ColorState const& value) {
+    return fmt::format(
+        "{},{},{},{},{},{}",
+        toDiffString(value.color), value.opacity, value.blending,
+        value.playerColor, value.copyColorID, toDiffString(value.copyHSV)
+    );
+}
+
 std::string toDiffString(bool value) {
     return value ? "t" : "f";
 }
 
-struct BlockAll {
-    static inline BlockAll* s_current = nullptr;
-    static bool blocked() {
-        return s_current;
-    }
-    BlockAll() {
-        if (!s_current) {
-            s_current = this;
-        }
-    }
-    ~BlockAll() {
-        if (s_current == this) {
-            s_current = nullptr;
-        }
-    }
-};
+ColorState ColorState::from(ColorAction* action) {
+    return ColorState {
+        .color = action->m_color,
+        .opacity = action->m_opacity,
+        .blending = action->m_blending,
+        .playerColor = action->m_playerColor,
+        .copyColorID = action->m_copyID,
+        .copyHSV = action->m_copyHSV,
+    };
+}
 
-template <class T>
-struct Bubble {
-    std::vector<T> events;
-    static inline Bubble<T>* s_current = nullptr;
-    Bubble() {
-        if (!s_current) {
-            s_current = this;
-        }
-    }
-    ~Bubble() {
-        if (s_current == this) {
-            s_current = nullptr;
-            if (events.size()) {
-                post(MultiObjEvent(std::move(events)));
-            }
-        }
-    }
-    void cancel() {
-        if (s_current == this) {
-            s_current = nullptr;
-        }
-    }
-    template <class... Args>
-    static void push(Args&&... args) {
-        if (BlockAll::blocked()) return;
-        if (s_current) {
-            s_current->events.emplace_back(std::forward<Args>(args)...);
-        }
-        else {
-            post(MultiObjEvent<T>({ T(std::forward<Args>(args)...) }));
-        }
-    }
-private:
-    template <class T>
-    static void post(T&& t) {
-        if (EditorUI::get() && !BlockAll::blocked()) {
-            t.post();
-        }
-    }
-};
+void ColorState::to(ColorAction* action) const {
+    action->m_color = color;
+    action->m_opacity = opacity;
+    action->m_blending = blending;
+    action->m_playerColor = playerColor;
+    action->m_copyID = copyColorID;
+    action->m_copyHSV = copyHSV;
+}
+
+bool ColorState::operator==(ColorState const& other) const {
+    return color == other.color &&
+        opacity == other.opacity &&
+        blending == other.blending &&
+        playerColor == other.playerColor &&
+        copyColorID == other.copyColorID &&
+        copyHSV == other.copyHSV;
+}
+
+bool ColorState::operator!=(ColorState const& other) const {
+    return !(*this == other);
+}
 
 std::unique_ptr<EditorEvent> EditorEvent::unique() const {
     return std::unique_ptr<EditorEvent>(static_cast<EditorEvent*>(this->clone()));
@@ -115,6 +103,22 @@ std::string ObjPlaced::toDiffString() const {
 
 EditorEventData* ObjPlaced::clone() const {
     return new ObjPlaced(obj, pos);
+}
+
+bool BlockAll::blocked() {
+    return s_current;
+}
+
+BlockAll::BlockAll() {
+    if (!s_current) {
+        s_current = this;
+    }
+}
+
+BlockAll::~BlockAll() {
+    if (s_current == this) {
+        s_current = nullptr;
+    }
 }
 
 void ObjPlaced::undo() const {
@@ -367,205 +371,35 @@ void ObjDeselected::redo() const {
     EditorUI::get()->deselectObject(obj);
 }
 
+std::string ColorChannelEvent::toDiffString() const {
+    return fmtDiffString("chn", channel, state);
+}
+
+EditorEventData* ColorChannelEvent::clone() const {
+    return new ColorChannelEvent(channel, state);
+}
+
+void ColorChannelEvent::undo() const {
+    if (auto action = LevelEditorLayer::get()->m_effectManager->getColorAction(channel)) {
+        state.from.to(action);
+    }
+}
+
+void ColorChannelEvent::redo() const {
+    if (auto action = LevelEditorLayer::get()->m_effectManager->getColorAction(channel)) {
+        state.to.to(action);
+    }
+}
+
+const char* ColorChannelEvent::icon() const {
+    return "color.png"_spr;
+}
+
+std::string ColorChannelEvent::desc() const {
+    return fmt::format("Channel {} Changed", channel);
+}
+
 ListenerResult EditorFilter::handle(utils::MiniFunction<Callback> fn, EditorEvent* event) {
     fn(event);
     return ListenerResult::Propagate;
 }
-
-class $modify(LevelEditorLayer) {
-    void addSpecial(GameObject* obj) {
-        BLOCKED_CALL(LevelEditorLayer::addSpecial(obj));
-        Bubble<ObjPlaced>::push(obj, obj->getPosition());
-    }
-
-    CCArray* createObjectsFromString(gd::string str, bool undo) {
-        auto bubble = Bubble<ObjPlaced>();
-        return LevelEditorLayer::createObjectsFromString(str, undo);
-    }
-
-    void createObjectsFromSetup(gd::string str) {
-        auto bubble = Bubble<ObjPlaced>();
-        LevelEditorLayer::createObjectsFromSetup(str);
-        bubble.cancel();
-    }
-
-    void removeSpecial(GameObject* obj) {
-        BLOCKED_CALL(LevelEditorLayer::removeSpecial(obj));
-        Bubble<ObjRemoved>::push(obj);
-    }
-};
-
-class $modify(EditorUI) {
-    void moveObject(GameObject* obj, CCPoint to) {
-        auto from = obj->getPosition();
-        BLOCKED_CALL(EditorUI::moveObject(obj, to));
-        Bubble<ObjMoved>::push(obj, Transform<CCPoint> { from, from + to });
-    }
-
-    void moveObjectCall(EditCommand command) {
-        auto bubble = Bubble<ObjMoved>();
-        EditorUI::moveObjectCall(command);
-    }
-
-    void deselectAll() {
-        auto bubble = Bubble<ObjDeselected>();
-        EditorUI::deselectAll();
-    }
-
-    void selectObjects(CCArray* objs, bool filter) {
-        auto bubble = Bubble<ObjSelected>();
-        EditorUI::selectObjects(objs, filter);
-    }
-
-    void scaleObjects(CCArray* objs, float scale, CCPoint center) {
-        std::vector<std::tuple<GameObject*, CCPoint, float>> scales;
-        for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            scales.push_back({ obj, obj->getPosition(), obj->m_scale });
-        }
-        BLOCKED_CALL(EditorUI::scaleObjects(objs, scale, center));
-        auto bubble = Bubble<ObjScaled>();
-        for (auto& [obj, pos, from] : scales) {
-            Bubble<ObjScaled>::push(
-                obj,
-                Transform<CCPoint> { pos, obj->getPosition() },
-                Transform<float> { from, obj->m_scale }
-            );
-        }
-    }
-
-    void rotateObjects(CCArray* objs, float angle, CCPoint center) {
-        std::vector<std::tuple<GameObject*, CCPoint, float>> angles;
-        for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            angles.push_back({ obj, obj->getPosition(), obj->m_rotation });
-        }
-        BLOCKED_CALL(EditorUI::rotateObjects(objs, angle, center));
-        auto bubble = Bubble<ObjRotated>();
-        for (auto& [obj, pos, from] : angles) {
-            Bubble<ObjRotated>::push(
-                obj,
-                Transform<CCPoint> { pos, obj->getPosition() },
-                Transform<float> { from, obj->m_rotation }
-            );
-        }
-    }
-
-    void flipObjectsX(CCArray* objs) {
-        std::vector<std::tuple<GameObject*, CCPoint, bool>> flips;
-        for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            flips.push_back({ obj, obj->getPosition(), obj->m_isFlippedX });
-        }
-        BLOCKED_CALL(EditorUI::flipObjectsX(objs));
-        auto bubble = Bubble<ObjFlipX>();
-        for (auto& [obj, pos, from] : flips) {
-            Bubble<ObjFlipX>::push(
-                obj,
-                Transform<CCPoint> { pos, obj->getPosition() },
-                Transform<bool> { from, obj->m_isFlippedX }
-            );
-        }
-    }
-
-    void flipObjectsY(CCArray* objs) {
-        std::vector<std::tuple<GameObject*, CCPoint, bool>> flips;
-        for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            flips.push_back({ obj, obj->getPosition(), obj->m_isFlippedY });
-        }
-        BLOCKED_CALL(EditorUI::flipObjectsY(objs));
-        auto bubble = Bubble<ObjFlipY>();
-        for (auto& [obj, pos, from] : flips) {
-            Bubble<ObjFlipY>::push(
-                obj,
-                Transform<CCPoint> { pos, obj->getPosition() },
-                Transform<bool> { from, obj->m_isFlippedY }
-            );
-        }
-    }
-};
-
-class $modify(GameObject) {
-    void selectObject(ccColor3B color) {
-        GameObject::selectObject(color);
-        Bubble<ObjSelected>::push(this);
-    }
-
-    void deselectObject() {
-        GameObject::deselectObject();
-        Bubble<ObjDeselected>::push(this);
-    }
-};
-
-class $modify(CustomizeObjectLayer) {
-    std::vector<ccHSVValue> hsv;
-
-    GJSpriteColor* colorFor(GameObject* obj) {
-        if (m_selectedMode == 1) {
-            return obj->m_baseColor;
-        }
-        else if (m_selectedMode == 2) {
-            return obj->m_detailColor;
-        }
-        return nullptr;
-    }
-
-    void updateSelected(int channelID) {
-        std::vector<int> oldTargetIDs;
-        if (m_targetObject) {
-            oldTargetIDs.push_back(colorFor(m_targetObject)->m_colorID);
-        }
-        else for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
-            oldTargetIDs.push_back(colorFor(node)->m_colorID);
-        }
-        CustomizeObjectLayer::updateSelected(channelID);
-        if (m_targetObject) {
-            Bubble<ObjColored>::push(
-                m_targetObject, m_selectedMode == 2,
-                Transform<int> { oldTargetIDs.at(0), colorFor(m_targetObject)->m_colorID }
-            );
-        }
-        else {
-            auto bubble = Bubble<ObjColored>();
-            size_t i = 0;
-            for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
-                Bubble<ObjColored>::push(
-                    node, m_selectedMode == 2,
-                    Transform<int> { oldTargetIDs.at(i), colorFor(node)->m_colorID }
-                );
-                i += 1;
-            }
-        }
-    }
-
-    void onHSV(CCObject* sender) {
-        if (m_targetObject) {
-            m_fields->hsv = { colorFor(m_targetObject)->m_hsv };
-        }
-        else {
-            m_fields->hsv.clear();
-            for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
-                m_fields->hsv.push_back(colorFor(node)->m_hsv);
-            }
-        }
-        CustomizeObjectLayer::onHSV(sender);
-    }
-
-    void hsvPopupClosed(HSVWidgetPopup* popup, ccHSVValue value) {
-        CustomizeObjectLayer::hsvPopupClosed(popup, value);
-        if (m_targetObject) {
-            Bubble<ObjHSVChanged>::push(
-                m_targetObject, m_selectedMode == 2,
-                Transform { m_fields->hsv.front(), colorFor(m_targetObject)->m_hsv }
-            );
-        }
-        else {
-            auto bubble = Bubble<ObjHSVChanged>();
-            size_t i = 0;
-            for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
-                Bubble<ObjHSVChanged>::push(
-                    m_targetObject, m_selectedMode == 2,
-                    Transform { m_fields->hsv.at(i), colorFor(m_targetObject)->m_hsv }
-                );
-                i += 1;
-            }
-        }
-    }
-};

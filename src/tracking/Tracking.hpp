@@ -2,6 +2,7 @@
 
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/loader/Event.hpp>
+#include <Geode/loader/Mod.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <Geode/binding/GameObject.hpp>
 
@@ -20,10 +21,22 @@ struct Transform {
 template <class T>
 using OptTransform = std::optional<Transform<T>>;
 
+struct ColorState;
+
+struct BlockAll {
+    static inline BlockAll* s_current = nullptr;
+    static bool blocked();
+    BlockAll();
+    ~BlockAll();
+};
+
 std::string toDiffString(Ref<GameObject> obj);
 std::string toDiffString(CCPoint const& point);
 std::string toDiffString(bool value);
 std::string toDiffString(ccHSVValue const& value);
+std::string toDiffString(ccColor3B const& value);
+std::string toDiffString(ccColor4B const& value);
+std::string toDiffString(ColorState const& value);
 
 template <class T>
 std::string toDiffString(T const& value) {
@@ -249,6 +262,36 @@ struct EditorEvent : public Event, public EditorEventData {
     virtual std::string desc() const = 0;
     virtual const char* icon() const = 0;
     std::unique_ptr<EditorEvent> unique() const;
+};
+
+struct ColorState {
+    ccColor3B color;
+    float opacity;
+    bool blending;
+    int playerColor;
+    int copyColorID;
+    ccHSVValue copyHSV;
+
+    static ColorState from(ColorAction* action);
+    void to(ColorAction* action) const;
+    bool operator==(ColorState const& other) const;
+    bool operator!=(ColorState const& other) const;
+};
+
+struct ColorChannelEvent : public EditorEvent {
+    int channel;
+    Transform<ColorState> state;
+
+    inline ColorChannelEvent(int channel, Transform<ColorState> const& state)
+      : channel(channel), state(state) {}
+    
+    std::string toDiffString() const override;
+    void undo() const override;
+    void redo() const override;
+    EditorEventData* clone() const override;
+
+    const char* icon() const override;
+    std::string desc() const override;
 };
 
 template <class Ev>
