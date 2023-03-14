@@ -3,6 +3,8 @@
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
+#include <Geode/binding/EditButtonBar.hpp>
+#include <Geode/utils/cocos.hpp>
 
 using namespace geode::prelude;
 
@@ -13,6 +15,18 @@ struct $modify(EditorUI) {
         if (!EditorUI::init(lel))
             return false;
         
+        auto winSize = CCDirector::get()->getWinSize();
+        
+        // make a bit space for new style menu since the old one is a tiny bit cramped
+        if (auto side = getChildOfType<CCSprite>(this, 1)) {
+            side->setPositionX(96.f);
+        }
+        for (auto& child : CCArrayExt<CCNode>(m_pChildren)) {
+            if (auto bar = typeinfo_cast<EditButtonBar*>(child)) {
+                bar->setPositionX(bar->getPositionX() + 5.f);
+            }
+        }
+
         if (auto menu = this->getChildByID("toolbar-categories-menu")) {
             m_fields->m_viewModeBtn = CCMenuItemSpriteExtra::create(
                 CCNode::create(), this, menu_selector(EditorUI::toggleMode)
@@ -21,14 +35,10 @@ struct $modify(EditorUI) {
             m_fields->m_viewModeBtn->setTag(4);
             menu->addChild(m_fields->m_viewModeBtn);
 
-            this->swapChildIndices(
-                menu->getChildByID("delete-button"),
-                menu->getChildByID("edit-button")
-            );
-
             this->updateModeSprites();
 
             menu->setContentSize({ 90.f, 90.f });
+            menu->setPositionX(47.f);
             menu->setLayout(RowLayout::create()
                 ->setCrossAxisOverflow(false)
                 ->setGrowCrossAxis(true)
