@@ -2,7 +2,9 @@
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/modify/GameObject.hpp>
+#include <Geode/modify/EffectGameObject.hpp>
 #include <Geode/modify/CustomizeObjectLayer.hpp>
+#include <Geode/modify/HSVWidgetPopup.hpp>
 #include <Geode/binding/GJSpriteColor.hpp>
 
 #define BLOCKED_CALL(...) \
@@ -26,6 +28,14 @@ std::string toDiffString(Ref<GameObject> obj) {
 
 std::string toDiffString(CCPoint const& point) {
     return fmt::format("({},{})", point.x, point.y);
+}
+
+std::string toDiffString(ccHSVValue const& value) {
+    return fmt::format(
+        "({},{},{},{},{})",
+        value.h, value.s, value.v,
+        value.absoluteSaturation, value.absoluteBrightness
+    );
 }
 
 std::string toDiffString(bool value) {
@@ -272,28 +282,44 @@ void ObjFlipY::redo() const {
 // ObjColored
 
 std::string ObjColored::toDiffString() const {
-    return fmtDiffString("col", obj, color1, color2);
+    return fmtDiffString("col", obj, detail, channel);
 }
 
 EditorEventData* ObjColored::clone() const {
-    return new ObjColored(obj, color1, color2);
+    return new ObjColored(obj, detail, channel);
 }
 
 void ObjColored::undo() const {
-    if (obj->m_baseColor) {
-        obj->m_baseColor->m_colorID = color1.from;
-    }
-    if (obj->m_detailColor) {
-        obj->m_detailColor->m_colorID = color2.from;
+    if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
+        color->m_colorID = channel.from;
     }
 }
 
 void ObjColored::redo() const {
-    if (obj->m_baseColor) {
-        obj->m_baseColor->m_colorID = color1.to;
+    if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
+        color->m_colorID = channel.to;
     }
-    if (obj->m_detailColor) {
-        obj->m_detailColor->m_colorID = color2.to;
+}
+
+// ObjHSVChanged
+
+std::string ObjHSVChanged::toDiffString() const {
+    return fmtDiffString("hsv", obj, detail, hsv);
+}
+
+EditorEventData* ObjHSVChanged::clone() const {
+    return new ObjHSVChanged(obj, detail, hsv);
+}
+
+void ObjHSVChanged::undo() const {
+    if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
+        color->m_hsv = hsv.from;
+    }
+}
+
+void ObjHSVChanged::redo() const {
+    if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
+        color->m_hsv = hsv.to;
     }
 }
 
@@ -468,15 +494,78 @@ class $modify(GameObject) {
     }
 };
 
-// todo
-// class $modify(CustomizeObjectLayer) {
-//     void onClose(CCObject* sender) {
-//         if (m_targetObject) {
-//             Bubble<ObjColored>::push(m_targetObject, m_targetObject->);
-//         }
-//         else if (m_targetObjects) {
+class $modify(CustomizeObjectLayer) {
+    std::vector<ccHSVValue> hsv;
 
-//         }
-//         CustomizeObjectLayer::onClose(sender);
-//     }
-// };
+    GJSpriteColor* colorFor(GameObject* obj) {
+        if (m_selectedMode == 1) {
+            return obj->m_baseColor;
+        }
+        else if (m_selectedMode == 2) {
+            return obj->m_detailColor;
+        }
+        return nullptr;
+    }
+
+    void updateSelected(int channelID) {
+        std::vector<int> oldTargetIDs;
+        if (m_targetObject) {
+            oldTargetIDs.push_back(colorFor(m_targetObject)->m_colorID);
+        }
+        else for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
+            oldTargetIDs.push_back(colorFor(node)->m_colorID);
+        }
+        CustomizeObjectLayer::updateSelected(channelID);
+        if (m_targetObject) {
+            Bubble<ObjColored>::push(
+                m_targetObject, m_selectedMode == 2,
+                Transform<int> { oldTargetIDs.at(0), colorFor(m_targetObject)->m_colorID }
+            );
+        }
+        else {
+            auto bubble = Bubble<ObjColored>();
+            size_t i = 0;
+            for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
+                Bubble<ObjColored>::push(
+                    node, m_selectedMode == 2,
+                    Transform<int> { oldTargetIDs.at(i), colorFor(node)->m_colorID }
+                );
+                i += 1;
+            }
+        }
+    }
+
+    void onHSV(CCObject* sender) {
+        if (m_targetObject) {
+            m_fields->hsv = { colorFor(m_targetObject)->m_hsv };
+        }
+        else {
+            m_fields->hsv.clear();
+            for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
+                m_fields->hsv.push_back(colorFor(node)->m_hsv);
+            }
+        }
+        CustomizeObjectLayer::onHSV(sender);
+    }
+
+    void hsvPopupClosed(HSVWidgetPopup* popup, ccHSVValue value) {
+        CustomizeObjectLayer::hsvPopupClosed(popup, value);
+        if (m_targetObject) {
+            Bubble<ObjHSVChanged>::push(
+                m_targetObject, m_selectedMode == 2,
+                Transform { m_fields->hsv.front(), colorFor(m_targetObject)->m_hsv }
+            );
+        }
+        else {
+            auto bubble = Bubble<ObjHSVChanged>();
+            size_t i = 0;
+            for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
+                Bubble<ObjHSVChanged>::push(
+                    m_targetObject, m_selectedMode == 2,
+                    Transform { m_fields->hsv.at(i), colorFor(m_targetObject)->m_hsv }
+                );
+                i += 1;
+            }
+        }
+    }
+};

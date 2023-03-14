@@ -23,6 +23,7 @@ using OptTransform = std::optional<Transform<T>>;
 std::string toDiffString(Ref<GameObject> obj);
 std::string toDiffString(CCPoint const& point);
 std::string toDiffString(bool value);
+std::string toDiffString(ccHSVValue const& value);
 
 template <class T>
 std::string toDiffString(T const& value) {
@@ -185,10 +186,15 @@ struct ObjFlipY : public ObjEventData {
 };
 
 struct ObjColored : public ObjEventData {
-    Transform<int> color1;
-    Transform<int> color2;
-    inline ObjColored(Ref<GameObject> obj, Transform<int> const& color1, Transform<int> const& color2)
-      : ObjEventData(obj), color1(color1), color2(color2) {}
+    bool detail;
+    Transform<int> channel;
+    inline ObjColored(
+        Ref<GameObject> obj,
+        bool detail,
+        Transform<int> const& channel
+    ) : ObjEventData(obj),
+        channel(channel),
+        detail(detail) {}
 
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
@@ -197,6 +203,22 @@ struct ObjColored : public ObjEventData {
 
     static inline auto ICON_NAME = "color-obj.png"_spr;
     static inline auto DESC_FMT = "Colored {}";
+};
+
+struct ObjHSVChanged : public ObjEventData {
+    bool detail;
+    Transform<ccHSVValue> hsv;
+
+    inline ObjHSVChanged(Ref<GameObject> obj, bool detail, Transform<ccHSVValue> hsv)
+      : ObjEventData(obj), detail(detail), hsv(hsv) {}
+
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "color-obj.png"_spr;
+    static inline auto DESC_FMT = "Changed HSV for {}";
 };
 
 struct ObjSelected : public ObjEventData {
