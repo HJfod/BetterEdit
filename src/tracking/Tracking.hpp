@@ -113,7 +113,7 @@ struct ObjPlaced : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "add-obj.png"_spr;
+    static inline auto ICON_NAME = "plus.png"_spr;
     static inline auto DESC_FMT = "Added {}";
 };
 
@@ -125,7 +125,7 @@ struct ObjRemoved : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "rem-obj.png"_spr;
+    static inline auto ICON_NAME = "neg.png"_spr;
     static inline auto DESC_FMT = "Removed {}";
 };
 
@@ -138,7 +138,7 @@ struct ObjMoved : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "move-obj.png"_spr;
+    static inline auto ICON_NAME = "move.png"_spr;
     static inline auto DESC_FMT = "Moved {}";
 };
 
@@ -152,7 +152,7 @@ struct ObjRotated : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "rot-obj.png"_spr;
+    static inline auto ICON_NAME = "edit_ccwBtn_001.png";
     static inline auto DESC_FMT = "Rotated {}";
 };
 
@@ -166,7 +166,7 @@ struct ObjScaled : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "scale-obj.png"_spr;
+    static inline auto ICON_NAME = "scale.png"_spr;
     static inline auto DESC_FMT = "Scaled {}";
 };
 
@@ -180,7 +180,7 @@ struct ObjFlipX : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "flipx-obj.png"_spr;
+    static inline auto ICON_NAME = "edit_flipXBtn_001.png";
     static inline auto DESC_FMT = "Flipped {} on the X-axis";
 };
 
@@ -194,7 +194,7 @@ struct ObjFlipY : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "flipy-obj.png"_spr;
+    static inline auto ICON_NAME = "edit_flipYBtn_001.png";
     static inline auto DESC_FMT = "Flipped {} on the Y-axis";
 };
 
@@ -214,7 +214,7 @@ struct ObjColored : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "color-obj.png"_spr;
+    static inline auto ICON_NAME = "color.png"_spr;
     static inline auto DESC_FMT = "Colored {}";
 };
 
@@ -230,7 +230,7 @@ struct ObjHSVChanged : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "color-obj.png"_spr;
+    static inline auto ICON_NAME = "color.png"_spr;
     static inline auto DESC_FMT = "Changed HSV for {}";
 };
 
@@ -242,7 +242,7 @@ struct ObjSelected : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "sel-obj.png"_spr;
+    static inline auto ICON_NAME = "select.png"_spr;
     static inline auto DESC_FMT = "Selected {}";
 };
 
@@ -254,13 +254,13 @@ struct ObjDeselected : public ObjEventData {
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "desel-obj.png"_spr;
+    static inline auto ICON_NAME = "deselect.png"_spr;
     static inline auto DESC_FMT = "Deselected {}";
 };
 
 struct EditorEvent : public Event, public EditorEventData {
     virtual std::string desc() const = 0;
-    virtual const char* icon() const = 0;
+    virtual CCNode* icon() const = 0;
     std::unique_ptr<EditorEvent> unique() const;
 };
 
@@ -290,7 +290,7 @@ struct ColorChannelEvent : public EditorEvent {
     void redo() const override;
     EditorEventData* clone() const override;
 
-    const char* icon() const override;
+    CCNode* icon() const override;
     std::string desc() const override;
 };
 
@@ -328,8 +328,13 @@ struct MultiObjEvent : public EditorEvent {
         }
     }
 
-    const char* icon() const override {
-        return Ev::ICON_NAME;
+    CCNode* icon() const override {
+        auto base = CCSprite::createWithSpriteFrameName("square_01_001.png");
+        auto top = CCSprite::createWithSpriteFrameName(Ev::ICON_NAME);
+        top->setPosition({ base->getContentSize().width - 5.f, 5.f });
+        base->addChild(top);
+        base->setScale(.5f);
+        return base;
     }
 
     std::string desc() const override {

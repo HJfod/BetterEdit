@@ -7,8 +7,10 @@
 #include <Geode/binding/HSVWidgetPopup.hpp>
 #include <Geode/binding/GJSpriteColor.hpp>
 #include <Geode/binding/GJEffectManager.hpp>
+#include <Geode/binding/LevelSettingsObject.hpp>
 #include <Geode/binding/ColorAction.hpp>
 #include <Geode/utils/cocos.hpp>
+#include <Geode/loader/Log.hpp>
 
 std::string toDiffString(Ref<GameObject> obj) {
     return fmt::format(
@@ -68,6 +70,8 @@ ColorState ColorState::from(ColorAction* action) {
 
 void ColorState::to(ColorAction* action) const {
     action->m_color = color;
+    action->m_fromColor = color;
+    action->m_targetColor = color;
     action->m_opacity = opacity;
     action->m_blending = blending;
     action->m_playerColor = playerColor;
@@ -380,19 +384,19 @@ EditorEventData* ColorChannelEvent::clone() const {
 }
 
 void ColorChannelEvent::undo() const {
-    if (auto action = LevelEditorLayer::get()->m_effectManager->getColorAction(channel)) {
+    if (auto action = GJEffectManager::fromLevelSetting()->getColorAction(channel)) {
         state.from.to(action);
     }
 }
 
 void ColorChannelEvent::redo() const {
-    if (auto action = LevelEditorLayer::get()->m_effectManager->getColorAction(channel)) {
+    if (auto action = GJEffectManager::fromLevelSetting()->getColorAction(channel)) {
         state.to.to(action);
     }
 }
 
-const char* ColorChannelEvent::icon() const {
-    return "color.png"_spr;
+CCNode* ColorChannelEvent::icon() const {
+    return CCSprite::createWithSpriteFrameName("color.png"_spr);
 }
 
 std::string ColorChannelEvent::desc() const {

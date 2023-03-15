@@ -2,12 +2,19 @@
 
 #include "../tracking/Tracking.hpp"
 #include <Geode/ui/Popup.hpp>
+#include <Geode/loader/Event.hpp>
 
 class History;
 
 class HistoryPopup : public Popup<History*> {
 protected:
+    History* m_history;
+    std::vector<CCMenu*> m_items;
+
     bool setup(History* history);
+    void updateState();
+    void onUndoTill(CCObject* sender);
+    void onRedoTill(CCObject* sender);
 
 public:
     static HistoryPopup* create(History* history);
@@ -22,6 +29,8 @@ protected:
 
     void onEvent(EditorEvent* ev);
 
+    EditorEvent* current();
+
 public:
     static History* create(GJGameLevel* level);
     static History* get(LevelEditorLayer* lel);
@@ -30,8 +39,10 @@ public:
     size_t getUndoneCount() const;
     size_t getRedoneCount() const;
 
-    void undo();
-    void redo();
+    void undo(size_t count = 1);
+    void undoTo(EditorEvent* event);
+    void redo(size_t count = 1);
+    void redoTo(EditorEvent* event);
     bool canUndo() const;
     bool canRedo() const;
 };

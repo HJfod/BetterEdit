@@ -274,6 +274,7 @@ struct $modify(ColorSelectPopup) {
         ColorSelectPopup::closeColorSelect(sender);
         if (m_colorAction) {
             auto state = ColorState::from(m_colorAction);
+            log::info("m_colorAction: {}", m_colorAction);
             if (m_fields->state != state) {
                 ColorChannelEvent(
                     m_colorAction->m_colorID,

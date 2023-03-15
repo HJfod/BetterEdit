@@ -12,42 +12,63 @@
 
 bool HistoryPopup::setup(History* history) {
     m_noElasticity = true;
+    m_history = history;
 
     this->setTitle("History");
 
     auto winSize = CCDirector::get()->getWinSize();
-    auto scrollSize = CCSize { 320.f, 220.f };
-    auto scroll = ScrollLayer::create(scrollSize);
-    scroll->setPosition(winSize / 2 - scrollSize / 2);
 
-    size_t i = 0;
+    auto scrollPos = CCPoint(winSize / 2) - CCPoint { 0.f, 10.f };
+    auto scrollSize = CCSize { 346.f, 220.f };
+    auto scroll = ScrollLayer::create(scrollSize);
+    scroll->setPosition(scrollPos - scrollSize / 2);
+
+    float height = 0;
     for (auto& ev : history->getEvents()) {
         auto menu = CCMenu::create();
         menu->setContentSize({ scrollSize.width, 30.f });
         menu->ignoreAnchorPointForPosition(false);
 
-        auto icon = CCSprite::createWithSpriteFrameName(ev->icon());
-        icon->setPosition({ 15.f, 15.f });
+        auto icon = ev->icon();
+        icon->setPosition({ 20.f, 15.f });
         menu->addChild(icon);
 
         auto desc = CCLabelBMFont::create(ev->desc().c_str(), "bigFont.fnt");
         desc->limitLabelWidth(scrollSize.width - 80.f, .5f, .1f);
         desc->setAnchorPoint({ .0f, .5f });
         desc->setPosition(40.f, 15.f);
+        desc->setID("name");
         menu->addChild(desc);
 
-        if (i > history->getRedoneCount() - 1) {
-            desc->setColor({ 155, 155, 155 });
-        }
+        auto undoBtnSpr = CCSprite::createWithSpriteFrameName("GJ_undoBtn_001.png");
+        undoBtnSpr->setScale(.4f);
+        auto undoBtn = CCMenuItemSpriteExtra::create(
+            undoBtnSpr, this, menu_selector(HistoryPopup::onUndoTill)
+        );
+        undoBtn->setPosition(scrollSize.width - 20.f, 15.f);
+        undoBtn->setUserData(ev);
+        undoBtn->setID("undo-button");
+        menu->addChild(undoBtn);
 
         auto border = CCLayerColor::create({ 0, 0, 0, 100 }, scrollSize.width, 1);
         menu->addChild(border);
 
         scroll->m_contentLayer->addChild(menu);
+        height += 30.f;
 
-        i++;
+        m_items.push_back(menu);
     }
 
+    this->updateState();
+
+    if (height < scrollSize.height) {
+        height = scrollSize.height;
+    }
+
+    scroll->m_contentLayer->setContentSize({
+        scroll->m_contentLayer->getContentSize().width,
+        height
+    });
     scroll->m_contentLayer->setLayout(
         ColumnLayout::create()
             ->setAxisAlignment(AxisAlignment::End)
@@ -56,14 +77,28 @@ bool HistoryPopup::setup(History* history) {
     );
     m_mainLayer->addChild(scroll);
 
-    addListBorders(m_mainLayer, winSize / 2, scrollSize);
+    addListBorders(m_mainLayer, scrollPos, scrollSize);
 
     return true;
 }
 
+void HistoryPopup::onUndoTill(CCObject* sender) {
+    m_history->undoTo(static_cast<EditorEvent*>(
+        static_cast<CCNode*>(sender)->getUserData()
+    ));
+    this->updateState();
+}
+
+void HistoryPopup::onRedoTill(CCObject* sender) {
+    m_history->redoTo(static_cast<EditorEvent*>(
+        static_cast<CCNode*>(sender)->getUserData()
+    ));
+    this->updateState();
+}
+
 HistoryPopup* HistoryPopup::create(History* history) {
     auto ret = new HistoryPopup;
-    if (ret && ret->init(348.f, 280.f, history)) {
+    if (ret && ret->init(360.f, 280.f, history)) {
         ret->autorelease();
         return ret;
     }
@@ -98,17 +133,39 @@ size_t History::getUndoneCount() const {
     return m_undone;
 }
 
-void History::undo() {
-    if (m_undone < m_events.size()) {
-        m_events.at(m_events.size() - m_undone - 1)->undo();
+EditorEvent* History::current() {
+    return m_events.at(m_events.size() - m_undone - 1).get();
+}
+
+void History::undo(size_t count) {
+    while (count--) {
+        if (m_undone < m_events.size()) {
+            this->current()->undo();
+            m_undone += 1;
+        } else break;
+    }
+}
+
+void History::undoTo(EditorEvent* event) {
+    while (m_undone < m_events.size() && this->current() != event) {
+        this->current()->undo();
         m_undone += 1;
     }
 }
 
-void History::redo() {
-    if (m_undone > 0) {
+void History::redo(size_t count) {
+    while (count--) {
+        if (m_undone > 0) {
+            m_undone -= 1;
+            this->current()->redo();
+        } else break;
+    }
+}
+
+void History::redoTo(EditorEvent* event) {
+    while (m_undone > 0 && this->current() != event) {
         m_undone -= 1;
-        m_events.at(m_events.size() - m_undone - 1)->redo();
+        this->current()->redo();
     }
 }
 
@@ -224,3 +281,24 @@ struct $modify(HistoryUI, EditorUI) {
         this->updateUIAfterAction();
     }
 };
+
+void HistoryPopup::updateState() {
+    size_t i = 0;
+    for (auto& item : m_items) {
+        auto redoable = (i > m_history->getRedoneCount() - 1);
+        static_cast<CCLabelBMFont*>(item->getChildByID("name"))->setColor(
+            redoable ? ccColor3B { 155, 155, 155 } : ccColor3B { 255, 255, 255 }
+        );
+        auto undoBtn = static_cast<CCMenuItemSpriteExtra*>(item->getChildByID("undo-button"));
+        static_cast<CCSprite*>(undoBtn->getNormalImage())
+            ->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName(
+                redoable ? "GJ_redoBtn_001.png" : "GJ_undoBtn_001.png"
+            ));
+        undoBtn->setTarget(this, redoable ?
+            menu_selector(HistoryPopup::onRedoTill) :
+            menu_selector(HistoryPopup::onUndoTill)
+        );
+        i += 1;
+    }
+    static_cast<HistoryUI*>(EditorUI::get())->updateUIAfterAction();
+}
