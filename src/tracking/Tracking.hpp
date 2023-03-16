@@ -49,6 +49,7 @@ std::string toDiffString(ccHSVValue const& value);
 std::string toDiffString(ccColor3B const& value);
 std::string toDiffString(ccColor4B const& value);
 std::string toDiffString(ColorState const& value);
+std::string toDiffString(std::vector<int> const& value);
 
 template <class T>
 std::string toDiffString(T const& value) {
@@ -244,6 +245,48 @@ struct ObjHSVChanged : public ObjEventData {
 
     static inline auto ICON_NAME = "color.png"_spr;
     static inline auto DESC_FMT = "Changed HSV for {}";
+};
+
+struct ObjColorPasted : public ObjEventData {
+    Transform<int> baseChannel;
+    Transform<ccHSVValue> baseHSV;
+    Transform<int> detailChannel;
+    Transform<ccHSVValue> detailHSV;
+
+    inline ObjColorPasted(
+        Ref<GameObject> obj,
+        Transform<int> const& baseChannel,
+        Transform<ccHSVValue> const& baseHSV,
+        Transform<int> const& detailChannel,
+        Transform<ccHSVValue> const& detailHSV
+    ) : ObjEventData(obj),
+        baseChannel(baseChannel), baseHSV(baseHSV),
+        detailChannel(detailChannel), detailHSV(detailHSV) {}
+
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "color.png"_spr;
+    static inline auto DESC_FMT = "Pasted Color to {}";
+};
+
+struct ObjGroupsChanged : public ObjEventData {
+    Transform<std::vector<int>> groups;
+
+    inline ObjGroupsChanged(
+        Ref<GameObject> obj,
+        Transform<std::vector<int>> const& groups
+    ) : ObjEventData(obj), groups(groups) {}
+
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+
+    static inline auto ICON_NAME = "color.png"_spr;
+    static inline auto DESC_FMT = "Changed {} Groups";
 };
 
 struct ObjSelected : public ObjEventData {

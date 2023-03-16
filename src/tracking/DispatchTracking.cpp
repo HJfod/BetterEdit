@@ -112,30 +112,28 @@ class $modify(LevelEditorLayer) {
             }
         }
         LevelEditorLayer::pasteColorState(target, targets);
-        auto bubble0 = Bubble<ObjColored>();
-        auto bubble1 = Bubble<ObjHSVChanged>();
+        auto bubble = Bubble<ObjColorPasted>();
         size_t i = 0;
         for (auto& target : CCArrayExt<GameObject>(allTargets)) {
-            if (target->m_baseColor) {
-                Bubble<ObjColored>::push(
-                    target, false,
-                    Transform { oldBases.at(i).first, target->m_baseColor->m_colorID }
-                );
-                Bubble<ObjHSVChanged>::push(
-                    target, false,
-                    Transform { oldBases.at(i).second, target->m_baseColor->m_hsv }
-                );
-            }
-            if (target->m_detailColor) {
-                Bubble<ObjColored>::push(
-                    target, true,
-                    Transform { oldDetails.at(i).first, target->m_detailColor->m_colorID }
-                );
-                Bubble<ObjHSVChanged>::push(
-                    target, true,
-                    Transform { oldDetails.at(i).second, target->m_detailColor->m_hsv }
-                );
-            }
+            Bubble<ObjColorPasted>::push(
+                target,
+                Transform {
+                    oldBases.at(i).first,
+                    (target->m_baseColor ? target->m_baseColor->m_colorID : 0)
+                },
+                Transform {
+                    oldBases.at(i).second,
+                    (target->m_baseColor ? target->m_baseColor->m_hsv : ccHSVValue())
+                },
+                Transform {
+                    oldDetails.at(i).first,
+                    (target->m_detailColor ? target->m_detailColor->m_colorID : 0)
+                },
+                Transform {
+                    oldDetails.at(i).second,
+                    (target->m_detailColor ? target->m_detailColor->m_hsv : ccHSVValue())
+                }
+            );
             i += 1;
         }
     }
@@ -331,6 +329,40 @@ class $modify(GameObject) {
     void deselectObject() {
         GameObject::deselectObject();
         Bubble<ObjDeselected>::push(this);
+    }
+
+    void removeFromGroup(int group) {
+        std::vector<int> before;
+        if (m_groups) {
+            for (short i = 0; i < m_groupCount; i++) {
+                before.push_back(m_groups->at(i));
+            }
+        }
+        GameObject::removeFromGroup(group);
+        std::vector<int> now;
+        if (m_groups) {
+            for (short i = 0; i < m_groupCount; i++) {
+                now.push_back(m_groups->at(i));
+            }
+        }
+        Bubble<ObjGroupsChanged>::push(this, Transform { before, now });
+    }
+
+    void addToGroup(int group) {
+        std::vector<int> before;
+        if (m_groups) {
+            for (short i = 0; i < m_groupCount; i++) {
+                before.push_back(m_groups->at(i));
+            }
+        }
+        GameObject::addToGroup(group);
+        std::vector<int> now;
+        if (m_groups) {
+            for (short i = 0; i < m_groupCount; i++) {
+                now.push_back(m_groups->at(i));
+            }
+        }
+        Bubble<ObjGroupsChanged>::push(this, Transform { before, now });
     }
 };
 

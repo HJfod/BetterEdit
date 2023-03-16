@@ -53,6 +53,14 @@ std::string toDiffString(ColorState const& value) {
     );
 }
 
+std::string toDiffString(std::vector<int> const& value) {
+    std::string res = "[";
+    for (auto& c : value) {
+        res += std::to_string(c) + ",";
+    }
+    return res + "]";
+}
+
 std::string toDiffString(bool value) {
     return value ? "t" : "f";
 }
@@ -333,6 +341,66 @@ void ObjHSVChanged::redo() const {
         color->m_hsv = hsv.to;
     }
     obj->m_shouldUpdateColorSprite = true;
+}
+
+// ObjColorPasted
+
+std::string ObjColorPasted::toDiffString() const {
+    return fmtDiffString("cps", obj, baseChannel, baseHSV, detailChannel, detailHSV);
+}
+
+EditorEventData* ObjColorPasted::clone() const {
+    return new ObjColorPasted(obj, baseChannel, baseHSV, detailChannel, detailHSV);
+}
+
+void ObjColorPasted::undo() const {
+    if (obj->m_baseColor) {
+        obj->m_baseColor->m_colorID = baseChannel.from;
+        obj->m_baseColor->m_hsv = baseHSV.from;
+    }
+    if (obj->m_detailColor) {
+        obj->m_detailColor->m_colorID = detailChannel.from;
+        obj->m_detailColor->m_hsv = detailHSV.from;
+    }
+    obj->m_shouldUpdateColorSprite = true;
+}
+
+void ObjColorPasted::redo() const {
+    if (obj->m_baseColor) {
+        obj->m_baseColor->m_colorID = baseChannel.to;
+        obj->m_baseColor->m_hsv = baseHSV.to;
+    }
+    if (obj->m_detailColor) {
+        obj->m_detailColor->m_colorID = detailChannel.to;
+        obj->m_detailColor->m_hsv = detailHSV.to;
+    }
+    obj->m_shouldUpdateColorSprite = true;
+}
+
+// bjGroupsChanged
+
+std::string ObjGroupsChanged::toDiffString() const {
+    return fmtDiffString("grp", obj, groups);
+}
+
+EditorEventData* ObjGroupsChanged::clone() const {
+    return new ObjGroupsChanged(obj, groups);
+}
+
+void ObjGroupsChanged::undo() const {
+    auto _ = BlockAll();
+    obj->m_groupCount = 0;
+    for (auto& group : groups.from) {
+        obj->addToGroup(group);
+    }
+}
+
+void ObjGroupsChanged::redo() const {
+    auto _ = BlockAll();
+    obj->m_groupCount = 0;
+    for (auto& group : groups.to) {
+        obj->addToGroup(group);
+    }
 }
 
 // ObjSelected
