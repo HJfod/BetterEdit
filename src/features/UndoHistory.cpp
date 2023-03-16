@@ -283,9 +283,9 @@ struct $modify(HistoryUI, EditorUI) {
 };
 
 void HistoryPopup::updateState() {
-    size_t i = 0;
+    size_t i = 1;
     for (auto& item : m_items) {
-        auto redoable = (i > m_history->getRedoneCount() - 1);
+        auto redoable = i > m_history->getRedoneCount();
         static_cast<CCLabelBMFont*>(item->getChildByID("name"))->setColor(
             redoable ? ccColor3B { 155, 155, 155 } : ccColor3B { 255, 255, 255 }
         );
