@@ -35,6 +35,23 @@ struct ColorState {
     bool operator!=(ColorState const& other) const;
 };
 
+struct ObjState {
+    std::vector<short> groups;
+    int editorLayer1;
+    int editorLayer2;
+    int zOrder;
+    ZLayer zLayer;
+    bool dontFade;
+    bool dontEnter;
+    bool groupParent;
+    bool highDetail;
+
+    static ObjState from(GameObject* obj);
+    void to(GameObject* obj) const;
+    bool operator==(ObjState const& other) const;
+    bool operator!=(ObjState const& other) const;
+};
+
 struct BlockAll {
     static inline BlockAll* s_current = nullptr;
     static bool blocked();
@@ -45,11 +62,13 @@ struct BlockAll {
 std::string toDiffString(Ref<GameObject> obj);
 std::string toDiffString(CCPoint const& point);
 std::string toDiffString(bool value);
+std::string toDiffString(ZLayer const& value);
 std::string toDiffString(ccHSVValue const& value);
 std::string toDiffString(ccColor3B const& value);
 std::string toDiffString(ccColor4B const& value);
 std::string toDiffString(ColorState const& value);
-std::string toDiffString(std::vector<int> const& value);
+std::string toDiffString(ObjState const& value);
+std::string toDiffString(std::vector<short> const& value);
 
 template <class T>
 std::string toDiffString(T const& value) {
@@ -272,21 +291,19 @@ struct ObjColorPasted : public ObjEventData {
     static inline auto DESC_FMT = "Pasted Color to {}";
 };
 
-struct ObjGroupsChanged : public ObjEventData {
-    Transform<std::vector<int>> groups;
+struct ObjPropsChanged : public ObjEventData {
+    Transform<ObjState> state;
 
-    inline ObjGroupsChanged(
-        Ref<GameObject> obj,
-        Transform<std::vector<int>> const& groups
-    ) : ObjEventData(obj), groups(groups) {}
+    inline ObjPropsChanged(Ref<GameObject> obj, Transform<ObjState> const& state)
+      : ObjEventData(obj), state(state) {}
 
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
 
-    static inline auto ICON_NAME = "color.png"_spr;
-    static inline auto DESC_FMT = "Changed {} Groups";
+    static inline auto ICON_NAME = "GJ_hammerIcon_001.png";
+    static inline auto DESC_FMT = "Changed {} Properties";
 };
 
 struct ObjSelected : public ObjEventData {

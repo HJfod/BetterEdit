@@ -7,6 +7,7 @@
 #include <Geode/modify/CustomizeObjectLayer.hpp>
 #include <Geode/modify/HSVWidgetPopup.hpp>
 #include <Geode/modify/ColorSelectPopup.hpp>
+#include <Geode/modify/SetGroupIDLayer.hpp>
 #include <Geode/binding/GJSpriteColor.hpp>
 #include <Geode/binding/GJEffectManager.hpp>
 #include <Geode/binding/ColorAction.hpp>
@@ -332,37 +333,17 @@ class $modify(GameObject) {
     }
 
     void removeFromGroup(int group) {
-        std::vector<int> before;
-        if (m_groups) {
-            for (short i = 0; i < m_groupCount; i++) {
-                before.push_back(m_groups->at(i));
-            }
-        }
+        auto before = ObjState::from(this);
         GameObject::removeFromGroup(group);
-        std::vector<int> now;
-        if (m_groups) {
-            for (short i = 0; i < m_groupCount; i++) {
-                now.push_back(m_groups->at(i));
-            }
-        }
-        Bubble<ObjGroupsChanged>::push(this, Transform { before, now });
+        auto now = ObjState::from(this);
+        Bubble<ObjPropsChanged>::push(this, Transform { before, now });
     }
 
     void addToGroup(int group) {
-        std::vector<int> before;
-        if (m_groups) {
-            for (short i = 0; i < m_groupCount; i++) {
-                before.push_back(m_groups->at(i));
-            }
-        }
+        auto before = ObjState::from(this);
         GameObject::addToGroup(group);
-        std::vector<int> now;
-        if (m_groups) {
-            for (short i = 0; i < m_groupCount; i++) {
-                now.push_back(m_groups->at(i));
-            }
-        }
-        Bubble<ObjGroupsChanged>::push(this, Transform { before, now });
+        auto now = ObjState::from(this);
+        Bubble<ObjPropsChanged>::push(this, Transform { before, now });
     }
 };
 
@@ -460,12 +441,59 @@ struct $modify(ColorSelectPopup) {
         ColorSelectPopup::closeColorSelect(sender);
         if (m_colorAction) {
             auto state = ColorState::from(m_colorAction);
-            log::info("m_colorAction: {}", m_colorAction);
             if (m_fields->state != state) {
                 ColorChannelEvent(
                     m_colorAction->m_colorID,
                     Transform { m_fields->state, state }
                 ).post();
+            }
+        }
+    }
+};
+
+class $modify(SetGroupIDLayer) {
+    std::vector<ObjState> states;
+
+    bool init(GameObject* obj, CCArray* objs) {
+        if (!SetGroupIDLayer::init(obj, objs))
+            return false;
+        
+        if (obj) {
+            m_fields->states = { ObjState::from(obj) }; 
+        }
+        else for (auto& obj : CCArrayExt<GameObject>(objs)) {
+            m_fields->states.push_back(ObjState::from(obj));
+        }
+
+        return true;
+    }
+
+    void onAddGroup(CCObject* sender) {
+        BLOCKED_CALL(SetGroupIDLayer::onAddGroup(sender));
+    }
+
+    void onClose(CCObject* sender) {
+        SetGroupIDLayer::onClose(sender);
+        auto bubble = Bubble<ObjPropsChanged>();
+        if (m_targetObject) {
+            auto state = ObjState::from(m_targetObject);
+            if (m_fields->states.at(0) != state) {
+                Bubble<ObjPropsChanged>::push(
+                    m_targetObject,
+                    Transform { m_fields->states.at(0), state }
+                );
+            }
+        }
+        else {
+            size_t i = 0;
+            for (auto& obj : CCArrayExt<GameObject>(m_targetObjects)) {
+                auto state = ObjState::from(obj);
+                if (m_fields->states.at(i) != state) {
+                    Bubble<ObjPropsChanged>::push(
+                        obj, Transform { m_fields->states.at(i), state }
+                    );
+                }
+                i += 1;
             }
         }
     }

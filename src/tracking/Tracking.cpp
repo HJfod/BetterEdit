@@ -53,7 +53,16 @@ std::string toDiffString(ColorState const& value) {
     );
 }
 
-std::string toDiffString(std::vector<int> const& value) {
+std::string toDiffString(ObjState const& value) {
+    return fmt::format(
+        "{},{},{},{},{},{},{},{},{}",
+        toDiffString(value.groups), value.editorLayer1, value.editorLayer2, value.zOrder, 
+        toDiffString(value.zLayer), value.dontFade, value.dontEnter, value.groupParent,
+        value.highDetail
+    );
+}
+
+std::string toDiffString(std::vector<short> const& value) {
     std::string res = "[";
     for (auto& c : value) {
         res += std::to_string(c) + ",";
@@ -63,6 +72,10 @@ std::string toDiffString(std::vector<int> const& value) {
 
 std::string toDiffString(bool value) {
     return value ? "t" : "f";
+}
+
+std::string toDiffString(ZLayer const& value) {
+    return std::to_string(static_cast<int>(value));
 }
 
 ColorState ColorState::from(ColorAction* action) {
@@ -95,6 +108,52 @@ bool ColorState::operator==(ColorState const& other) const {
 }
 
 bool ColorState::operator!=(ColorState const& other) const {
+    return !(*this == other);
+}
+
+ObjState ObjState::from(GameObject* obj) {
+    return ObjState {
+        .groups = obj->getGroupIDs(),
+        .editorLayer1 = obj->m_editorLayer,
+        .editorLayer2 = obj->m_editorLayer2,
+        .zOrder = obj->m_gameZOrder,
+        .zLayer = obj->m_zLayer,
+        .dontFade = obj->m_isDontFade,
+        .dontEnter = obj->m_isDontEnter,
+        .groupParent = obj->m_isGroupParent,
+        .highDetail = obj->m_highDetail,
+    };
+}
+
+void ObjState::to(GameObject* obj) const {
+    auto _ = BlockAll();
+    obj->m_groupCount = 0;
+    for (auto& group : this->groups) {
+        obj->addToGroup(group);
+    }
+    obj->m_editorLayer = this->editorLayer1;
+    obj->m_editorLayer2 = this->editorLayer2;
+    obj->m_gameZOrder = this->zOrder;
+    obj->m_zLayer = this->zLayer;
+    obj->m_isDontFade = this->dontFade;
+    obj->m_isDontEnter = this->dontEnter;
+    obj->m_isGroupParent = this->groupParent;
+    obj->m_highDetail = this->highDetail;
+}
+
+bool ObjState::operator==(ObjState const& other) const {
+    return groups == other.groups &&
+        editorLayer1 == other.editorLayer1 &&
+        editorLayer2 == other.editorLayer2 &&
+        zOrder == other.zOrder &&
+        zLayer == other.zLayer &&
+        dontFade == other.dontFade && 
+        dontEnter == other.dontEnter && 
+        groupParent == other.groupParent && 
+        highDetail == other.highDetail;
+}
+
+bool ObjState::operator!=(ObjState const& other) const {
     return !(*this == other);
 }
 
@@ -379,28 +438,22 @@ void ObjColorPasted::redo() const {
 
 // bjGroupsChanged
 
-std::string ObjGroupsChanged::toDiffString() const {
-    return fmtDiffString("grp", obj, groups);
+std::string ObjPropsChanged::toDiffString() const {
+    return fmtDiffString("grp", obj, state);
 }
 
-EditorEventData* ObjGroupsChanged::clone() const {
-    return new ObjGroupsChanged(obj, groups);
+EditorEventData* ObjPropsChanged::clone() const {
+    return new ObjPropsChanged(obj, state);
 }
 
-void ObjGroupsChanged::undo() const {
+void ObjPropsChanged::undo() const {
     auto _ = BlockAll();
-    obj->m_groupCount = 0;
-    for (auto& group : groups.from) {
-        obj->addToGroup(group);
-    }
+    state.from.to(obj);
 }
 
-void ObjGroupsChanged::redo() const {
+void ObjPropsChanged::redo() const {
     auto _ = BlockAll();
-    obj->m_groupCount = 0;
-    for (auto& group : groups.to) {
-        obj->addToGroup(group);
-    }
+    state.to.to(obj);
 }
 
 // ObjSelected
