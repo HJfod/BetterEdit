@@ -70,8 +70,6 @@ ColorState ColorState::from(ColorAction* action) {
 
 void ColorState::to(ColorAction* action) const {
     action->m_color = color;
-    action->m_fromColor = color;
-    action->m_targetColor = color;
     action->m_opacity = opacity;
     action->m_blending = blending;
     action->m_playerColor = playerColor;
@@ -130,6 +128,7 @@ void ObjPlaced::undo() const {
     LevelEditorLayer::get()->removeObjectFromSection(obj);
     LevelEditorLayer::get()->removeSpecial(obj);
     EditorUI::get()->deselectObject(obj);
+    obj->deactivateObject(true);
 }
 
 void ObjPlaced::redo() const {
@@ -161,6 +160,7 @@ void ObjRemoved::redo() const {
     LevelEditorLayer::get()->removeObjectFromSection(obj);
     LevelEditorLayer::get()->removeSpecial(obj);
     EditorUI::get()->deselectObject(obj);
+    obj->deactivateObject(true);
 }
 
 // ObjMoved
@@ -196,7 +196,7 @@ EditorEventData* ObjRotated::clone() const {
 void ObjRotated::undo() const {
     auto _ = BlockAll();
     EditorUI::get()->rotateObjects(
-        CCArray::createWithObject(obj), angle.from, obj->getPosition()
+        CCArray::createWithObject(obj), angle.from - obj->getRotation(), obj->getPosition()
     );
     EditorUI::get()->moveObject(obj, pos.from - obj->getPosition());
 }
@@ -204,7 +204,7 @@ void ObjRotated::undo() const {
 void ObjRotated::redo() const {
     auto _ = BlockAll();
     EditorUI::get()->rotateObjects(
-        CCArray::createWithObject(obj), angle.to, obj->getPosition()
+        CCArray::createWithObject(obj), angle.to - obj->getRotation(), obj->getPosition()
     );
     EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
 }

@@ -93,6 +93,55 @@ class $modify(EditorUI) {
         EditorUI::moveObjectCall(command);
     }
 
+    void transformObjectCall(EditCommand command) {
+        auto bubble0 = Bubble<ObjFlipX>();
+        auto bubble1 = Bubble<ObjFlipY>();
+        auto bubble2 = Bubble<ObjRotated>();
+        auto bubble3 = Bubble<ObjScaled>();
+        EditorUI::transformObjectCall(command);
+    }
+
+    void transformObject(GameObject* obj, EditCommand command, bool snap) {
+        switch (command) {
+            case EditCommand::RotateCCW:  case EditCommand::RotateCCW45:
+            case EditCommand::RotateCW:   case EditCommand::RotateCW45:
+            case EditCommand::RotateSnap: case EditCommand::RotateFree: {
+                auto prevAngle = obj->getRotation();
+                auto prevPos = obj->getPosition();
+                BLOCKED_CALL(EditorUI::transformObject(obj, command, snap));
+                Bubble<ObjRotated>::push(
+                    obj,
+                    Transform { prevPos, obj->getPosition() },
+                    Transform { prevAngle, obj->getRotation() }
+                );
+            } break;
+
+            case EditCommand::FlipX: {
+                auto prevPos = obj->getPosition();
+                BLOCKED_CALL(EditorUI::transformObject(obj, command, snap));
+                Bubble<ObjFlipX>::push(
+                    obj,
+                    Transform { prevPos, obj->getPosition() },
+                    Transform { false, true }
+                );
+            } break;
+
+            case EditCommand::FlipY: {
+                auto prevPos = obj->getPosition();
+                BLOCKED_CALL(EditorUI::transformObject(obj, command, snap));
+                Bubble<ObjFlipY>::push(
+                    obj,
+                    Transform { prevPos, obj->getPosition() },
+                    Transform { false, true }
+                );
+            } break;
+
+            default: {
+                EditorUI::transformObject(obj, command, snap);
+            } break;
+        }
+    }
+
     void deselectAll() {
         auto bubble = Bubble<ObjDeselected>();
         EditorUI::deselectAll();
@@ -138,7 +187,7 @@ class $modify(EditorUI) {
     void flipObjectsX(CCArray* objs) {
         std::vector<std::tuple<GameObject*, CCPoint, bool>> flips;
         for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            flips.push_back({ obj, obj->getPosition(), obj->m_isFlippedX });
+            flips.push_back({ obj, obj->getPosition(), false });
         }
         BLOCKED_CALL(EditorUI::flipObjectsX(objs));
         auto bubble = Bubble<ObjFlipX>();
@@ -146,7 +195,7 @@ class $modify(EditorUI) {
             Bubble<ObjFlipX>::push(
                 obj,
                 Transform<CCPoint> { pos, obj->getPosition() },
-                Transform<bool> { from, obj->m_isFlippedX }
+                Transform<bool> { from, true }
             );
         }
     }
@@ -154,7 +203,7 @@ class $modify(EditorUI) {
     void flipObjectsY(CCArray* objs) {
         std::vector<std::tuple<GameObject*, CCPoint, bool>> flips;
         for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            flips.push_back({ obj, obj->getPosition(), obj->m_isFlippedY });
+            flips.push_back({ obj, obj->getPosition(), false });
         }
         BLOCKED_CALL(EditorUI::flipObjectsY(objs));
         auto bubble = Bubble<ObjFlipY>();
@@ -162,7 +211,7 @@ class $modify(EditorUI) {
             Bubble<ObjFlipY>::push(
                 obj,
                 Transform<CCPoint> { pos, obj->getPosition() },
-                Transform<bool> { from, obj->m_isFlippedY }
+                Transform<bool> { from, true }
             );
         }
     }
