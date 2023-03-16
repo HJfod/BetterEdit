@@ -21,7 +21,19 @@ struct Transform {
 template <class T>
 using OptTransform = std::optional<Transform<T>>;
 
-struct ColorState;
+struct ColorState {
+    ccColor3B color;
+    float opacity;
+    bool blending;
+    int playerColor;
+    int copyColorID;
+    ccHSVValue copyHSV;
+
+    static ColorState from(ColorAction* action);
+    void to(ColorAction* action) const;
+    bool operator==(ColorState const& other) const;
+    bool operator!=(ColorState const& other) const;
+};
 
 struct BlockAll {
     static inline BlockAll* s_current = nullptr;
@@ -262,20 +274,6 @@ struct EditorEvent : public Event, public EditorEventData {
     virtual std::string desc() const = 0;
     virtual CCNode* icon() const = 0;
     std::unique_ptr<EditorEvent> unique() const;
-};
-
-struct ColorState {
-    ccColor3B color;
-    float opacity;
-    bool blending;
-    int playerColor;
-    int copyColorID;
-    ccHSVValue copyHSV;
-
-    static ColorState from(ColorAction* action);
-    void to(ColorAction* action) const;
-    bool operator==(ColorState const& other) const;
-    bool operator!=(ColorState const& other) const;
 };
 
 struct ColorChannelEvent : public EditorEvent {

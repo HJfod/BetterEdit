@@ -79,9 +79,71 @@ class $modify(LevelEditorLayer) {
         BLOCKED_CALL(LevelEditorLayer::removeSpecial(obj));
         Bubble<ObjRemoved>::push(obj);
     }
+
+    void pasteAtributeState(GameObject* target, CCArray* targets) {
+        LevelEditorLayer::pasteAtributeState(target, targets);
+    }
+
+    void pasteColorState(GameObject* target, CCArray* targets) {
+        std::vector<std::pair<int, ccHSVValue>> oldBases;
+        std::vector<std::pair<int, ccHSVValue>> oldDetails;
+        auto allTargets = targets ? targets->shallowCopy() : CCArray::create();
+        if (target) {
+            allTargets->addObject(target);
+        }
+        for (auto& target : CCArrayExt<GameObject>(allTargets)) {
+            if (target->m_baseColor) {
+                oldBases.emplace_back(
+                    target->m_baseColor->m_colorID,
+                    target->m_baseColor->m_hsv
+                );
+            }
+            else {
+                oldBases.emplace_back();
+            }
+            if (target->m_detailColor) {
+                oldDetails.emplace_back(
+                    target->m_detailColor->m_colorID,
+                    target->m_detailColor->m_hsv
+                );
+            }
+            else {
+                oldDetails.emplace_back();
+            }
+        }
+        LevelEditorLayer::pasteColorState(target, targets);
+        auto bubble0 = Bubble<ObjColored>();
+        auto bubble1 = Bubble<ObjHSVChanged>();
+        size_t i = 0;
+        for (auto& target : CCArrayExt<GameObject>(allTargets)) {
+            if (target->m_baseColor) {
+                Bubble<ObjColored>::push(
+                    target, false,
+                    Transform { oldBases.at(i).first, target->m_baseColor->m_colorID }
+                );
+                Bubble<ObjHSVChanged>::push(
+                    target, false,
+                    Transform { oldBases.at(i).second, target->m_baseColor->m_hsv }
+                );
+            }
+            if (target->m_detailColor) {
+                Bubble<ObjColored>::push(
+                    target, true,
+                    Transform { oldDetails.at(i).first, target->m_detailColor->m_colorID }
+                );
+                Bubble<ObjHSVChanged>::push(
+                    target, true,
+                    Transform { oldDetails.at(i).second, target->m_detailColor->m_hsv }
+                );
+            }
+            i += 1;
+        }
+    }
 };
 
 class $modify(EditorUI) {
+    std::vector<std::pair<CCPoint, float>> originalScales;
+
     void moveObject(GameObject* obj, CCPoint to) {
         auto from = obj->getPosition();
         BLOCKED_CALL(EditorUI::moveObject(obj, to));
@@ -150,6 +212,49 @@ class $modify(EditorUI) {
     void selectObjects(CCArray* objs, bool filter) {
         auto bubble = Bubble<ObjSelected>();
         EditorUI::selectObjects(objs, filter);
+    }
+
+    void scaleChangeBegin() {
+        if (m_selectedObject) {
+            m_fields->originalScales = {{
+                m_selectedObject->getPosition(),
+                m_selectedObject->getScale()
+            }};
+        }
+        else {
+            m_fields->originalScales = {};
+            for (auto& obj : CCArrayExt<GameObject>(m_selectedObjects)) {
+                m_fields->originalScales.emplace_back(obj->getPosition(), obj->getScale());
+            }
+        }
+        BLOCKED_CALL(EditorUI::scaleChangeBegin());
+    }
+
+    void scaleChanged(float scale) {
+        BLOCKED_CALL(EditorUI::scaleChanged(scale));
+    }
+
+    void scaleChangeEnded() {
+        BLOCKED_CALL(EditorUI::scaleChangeEnded());
+        if (m_selectedObject) {
+            Bubble<ObjScaled>::push(
+                m_selectedObject,
+                Transform { m_fields->originalScales.at(0).first, m_selectedObject->getPosition() },
+                Transform { m_fields->originalScales.at(0).second, m_selectedObject->getScale() }
+            );
+        }
+        else {
+            auto bubble = Bubble<ObjScaled>();
+            size_t i = 0;
+            for (auto& obj : CCArrayExt<GameObject>(m_selectedObjects)) {
+                Bubble<ObjScaled>::push(
+                    obj,
+                    Transform { m_fields->originalScales.at(i).first, obj->getPosition() },
+                    Transform { m_fields->originalScales.at(i).second, obj->getScale() }
+                );
+                i += 1;
+            }
+        }
     }
 
     void scaleObjects(CCArray* objs, float scale, CCPoint center) {

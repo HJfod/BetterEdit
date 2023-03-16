@@ -301,12 +301,14 @@ void ObjColored::undo() const {
     if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
         color->m_colorID = channel.from;
     }
+    obj->m_shouldUpdateColorSprite = true;
 }
 
 void ObjColored::redo() const {
     if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
         color->m_colorID = channel.to;
     }
+    obj->m_shouldUpdateColorSprite = true;
 }
 
 // ObjHSVChanged
@@ -323,12 +325,14 @@ void ObjHSVChanged::undo() const {
     if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
         color->m_hsv = hsv.from;
     }
+    obj->m_shouldUpdateColorSprite = true;
 }
 
 void ObjHSVChanged::redo() const {
     if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
         color->m_hsv = hsv.to;
     }
+    obj->m_shouldUpdateColorSprite = true;
 }
 
 // ObjSelected

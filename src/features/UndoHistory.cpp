@@ -10,6 +10,87 @@
 #include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/ui/General.hpp>
 
+struct $modify(HistoryUI, EditorUI) {
+    bool init(LevelEditorLayer* lel) {
+        if (!EditorUI::init(lel))
+            return false;
+        
+        if (auto menu = this->getChildByID("undo-menu")) {
+            menu->addChild(CCMenuItemSpriteExtra::create(
+                CCSprite::createWithSpriteFrameName("btn_chatHistory_001.png"),
+                this, menu_selector(HistoryUI::onHistory)
+            ));
+            menu->updateLayout();
+        }
+
+        return true;
+    }
+
+    void onHistory(CCObject*) {
+        if (auto history = History::get(m_editorLayer)) {
+            HistoryPopup::create(history)->show();
+        }
+    }
+
+    void updateUIAfterAction() {
+        this->updateButtons();
+        if (m_rotationControl->isVisible()) {
+            this->activateRotationControl(nullptr);
+        }
+        this->tryUpdateTimeMarkers();
+        this->updateSpecialUIElements();
+    }
+
+    void updateButtons() {
+        EditorUI::updateButtons();
+        if (Mod::get()->getSettingValue<bool>("enable-new-undo")) {
+            if (auto history = History::get(m_editorLayer)) {
+                if (history->canUndo()) {
+                    m_undoBtn->setColor({ 255, 255, 255 });
+                    m_undoBtn->setOpacity(255);
+                    m_undoBtn->setEnabled(true);
+                }
+                else {
+                    m_undoBtn->setColor({ 166, 166, 166 });
+                    m_undoBtn->setOpacity(175);
+                    m_undoBtn->setEnabled(false);
+                }
+
+                if (history->canRedo()) {
+                    m_redoBtn->setColor({ 255, 255, 255 });
+                    m_redoBtn->setOpacity(255);
+                    m_redoBtn->setEnabled(true);
+                }
+                else {
+                    m_redoBtn->setColor({ 166, 166, 166 });
+                    m_redoBtn->setOpacity(175);
+                    m_redoBtn->setEnabled(false);
+                }
+            }
+        }
+    }
+
+    void undoLastAction(CCObject* sender) {
+        if (!Mod::get()->getSettingValue<bool>("enable-new-undo")) {
+            return EditorUI::undoLastAction(sender);
+        }
+        if (auto history = History::get(m_editorLayer)) {
+            history->undo();
+        }
+        this->updateUIAfterAction();
+    }
+
+    void redoLastAction(CCObject* sender) {
+        if (!Mod::get()->getSettingValue<bool>("enable-new-undo")) {
+            return EditorUI::redoLastAction(sender);
+        }
+        if (auto history = History::get(m_editorLayer)) {
+            history->redo();
+        }
+        this->updateUIAfterAction();
+    }
+};
+
 bool HistoryPopup::setup(History* history) {
     m_noElasticity = true;
     m_history = history;
@@ -80,6 +161,27 @@ bool HistoryPopup::setup(History* history) {
     addListBorders(m_mainLayer, scrollPos, scrollSize);
 
     return true;
+}
+
+void HistoryPopup::updateState() {
+    size_t i = 1;
+    for (auto& item : m_items) {
+        auto redoable = i > m_history->getRedoneCount();
+        static_cast<CCLabelBMFont*>(item->getChildByID("name"))->setColor(
+            redoable ? ccColor3B { 155, 155, 155 } : ccColor3B { 255, 255, 255 }
+        );
+        auto undoBtn = static_cast<CCMenuItemSpriteExtra*>(item->getChildByID("undo-button"));
+        static_cast<CCSprite*>(undoBtn->getNormalImage())
+            ->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName(
+                redoable ? "GJ_redoBtn_001.png" : "GJ_undoBtn_001.png"
+            ));
+        undoBtn->setTarget(this, redoable ?
+            menu_selector(HistoryPopup::onRedoTill) :
+            menu_selector(HistoryPopup::onUndoTill)
+        );
+        i += 1;
+    }
+    static_cast<HistoryUI*>(EditorUI::get())->updateUIAfterAction();
 }
 
 void HistoryPopup::onUndoTill(CCObject* sender) {
@@ -199,106 +301,4 @@ struct $modify(HistoryLayer, LevelEditorLayer) {
 
 History* History::get(LevelEditorLayer* lel) {
     return static_cast<HistoryLayer*>(lel)->m_fields->history;
-}
-
-struct $modify(HistoryUI, EditorUI) {
-    bool init(LevelEditorLayer* lel) {
-        if (!EditorUI::init(lel))
-            return false;
-        
-        if (auto menu = this->getChildByID("undo-menu")) {
-            menu->addChild(CCMenuItemSpriteExtra::create(
-                CCSprite::createWithSpriteFrameName("btn_chatHistory_001.png"),
-                this, menu_selector(HistoryUI::onHistory)
-            ));
-            menu->updateLayout();
-        }
-
-        return true;
-    }
-
-    void onHistory(CCObject*) {
-        if (auto history = History::get(m_editorLayer)) {
-            HistoryPopup::create(history)->show();
-        }
-    }
-
-    void updateUIAfterAction() {
-        this->updateButtons();
-        if (m_rotationControl->isVisible()) {
-            this->activateRotationControl(nullptr);
-        }
-        this->tryUpdateTimeMarkers();
-        this->updateSpecialUIElements();
-    }
-
-    void updateButtons() {
-        EditorUI::updateButtons();
-        if (Mod::get()->getSettingValue<bool>("enable-new-undo")) {
-            if (auto history = History::get(m_editorLayer)) {
-                if (history->canUndo()) {
-                    m_undoBtn->setColor({ 255, 255, 255 });
-                    m_undoBtn->setOpacity(255);
-                    m_undoBtn->setEnabled(true);
-                }
-                else {
-                    m_undoBtn->setColor({ 166, 166, 166 });
-                    m_undoBtn->setOpacity(175);
-                    m_undoBtn->setEnabled(false);
-                }
-
-                if (history->canRedo()) {
-                    m_redoBtn->setColor({ 255, 255, 255 });
-                    m_redoBtn->setOpacity(255);
-                    m_redoBtn->setEnabled(true);
-                }
-                else {
-                    m_redoBtn->setColor({ 166, 166, 166 });
-                    m_redoBtn->setOpacity(175);
-                    m_redoBtn->setEnabled(false);
-                }
-            }
-        }
-    }
-
-    void undoLastAction(CCObject* sender) {
-        if (!Mod::get()->getSettingValue<bool>("enable-new-undo")) {
-            return EditorUI::undoLastAction(sender);
-        }
-        if (auto history = History::get(m_editorLayer)) {
-            history->undo();
-        }
-        this->updateUIAfterAction();
-    }
-
-    void redoLastAction(CCObject* sender) {
-        if (!Mod::get()->getSettingValue<bool>("enable-new-undo")) {
-            return EditorUI::redoLastAction(sender);
-        }
-        if (auto history = History::get(m_editorLayer)) {
-            history->redo();
-        }
-        this->updateUIAfterAction();
-    }
-};
-
-void HistoryPopup::updateState() {
-    size_t i = 1;
-    for (auto& item : m_items) {
-        auto redoable = i > m_history->getRedoneCount();
-        static_cast<CCLabelBMFont*>(item->getChildByID("name"))->setColor(
-            redoable ? ccColor3B { 155, 155, 155 } : ccColor3B { 255, 255, 255 }
-        );
-        auto undoBtn = static_cast<CCMenuItemSpriteExtra*>(item->getChildByID("undo-button"));
-        static_cast<CCSprite*>(undoBtn->getNormalImage())
-            ->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName(
-                redoable ? "GJ_redoBtn_001.png" : "GJ_undoBtn_001.png"
-            ));
-        undoBtn->setTarget(this, redoable ?
-            menu_selector(HistoryPopup::onRedoTill) :
-            menu_selector(HistoryPopup::onUndoTill)
-        );
-        i += 1;
-    }
-    static_cast<HistoryUI*>(EditorUI::get())->updateUIAfterAction();
 }
