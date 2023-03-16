@@ -121,8 +121,11 @@ bool HistoryPopup::setup(History* history) {
         desc->setID("name");
         menu->addChild(desc);
 
-        auto undoBtnSpr = CCSprite::createWithSpriteFrameName("GJ_undoBtn_001.png");
-        undoBtnSpr->setScale(.4f);
+        auto undoBtnSpr = ButtonSprite::create(
+            CCSprite::createWithSpriteFrameName("undo.png"_spr),
+            0, false, 32.f, "GJ_button_01.png", .9f
+        );
+        undoBtnSpr->setScale(.525f);
         auto undoBtn = CCMenuItemSpriteExtra::create(
             undoBtnSpr, this, menu_selector(HistoryPopup::onUndoTill)
         );
@@ -171,10 +174,11 @@ void HistoryPopup::updateState() {
             redoable ? ccColor3B { 155, 155, 155 } : ccColor3B { 255, 255, 255 }
         );
         auto undoBtn = static_cast<CCMenuItemSpriteExtra*>(item->getChildByID("undo-button"));
-        static_cast<CCSprite*>(undoBtn->getNormalImage())
-            ->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName(
-                redoable ? "GJ_redoBtn_001.png" : "GJ_undoBtn_001.png"
-            ));
+        
+        auto bspr = static_cast<ButtonSprite*>(undoBtn->getNormalImage());
+        bspr->m_subSprite->setFlipX(redoable);
+        bspr->updateBGImage(redoable ? "GJ_button_02.png" : "GJ_button_01.png");
+        
         undoBtn->setTarget(this, redoable ?
             menu_selector(HistoryPopup::onRedoTill) :
             menu_selector(HistoryPopup::onUndoTill)
@@ -236,7 +240,10 @@ size_t History::getUndoneCount() const {
 }
 
 EditorEvent* History::current() {
-    return m_events.at(m_events.size() - m_undone - 1).get();
+    if (m_undone < m_events.size()) {
+        return m_events.at(m_events.size() - m_undone - 1).get();
+    }
+    return nullptr;
 }
 
 void History::undo(size_t count) {
@@ -249,18 +256,20 @@ void History::undo(size_t count) {
 }
 
 void History::undoTo(EditorEvent* event) {
-    while (m_undone < m_events.size() && this->current() != event) {
-        this->current()->undo();
+    while (m_undone < m_events.size()) {
+        auto c = this->current();
+        c->undo();
         m_undone += 1;
+        if (c == event) {
+            break;
+        }
     }
 }
 
 void History::redo(size_t count) {
-    while (count--) {
-        if (m_undone > 0) {
-            m_undone -= 1;
-            this->current()->redo();
-        } else break;
+    while (count-- && m_undone > 0) {
+        m_undone -= 1;
+        this->current()->redo();
     }
 }
 
