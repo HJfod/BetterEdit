@@ -9,6 +9,7 @@
 #include <Geode/loader/SettingEvent.hpp>
 #include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/ui/General.hpp>
+#include <other/AutoGrowingLayout.hpp>
 
 struct $modify(HistoryUI, EditorUI) {
     bool init(LevelEditorLayer* lel) {
@@ -104,7 +105,6 @@ bool HistoryPopup::setup(History* history) {
     auto scroll = ScrollLayer::create(scrollSize);
     scroll->setPosition(scrollPos - scrollSize / 2);
 
-    float height = 0;
     for (auto& ev : history->getEvents()) {
         auto menu = CCMenu::create();
         menu->setContentSize({ scrollSize.width, 30.f });
@@ -115,7 +115,7 @@ bool HistoryPopup::setup(History* history) {
         menu->addChild(icon);
 
         auto desc = CCLabelBMFont::create(ev->desc().c_str(), "bigFont.fnt");
-        desc->limitLabelWidth(scrollSize.width - 80.f, .5f, .1f);
+        desc->limitLabelWidth(scrollSize.width - 120.f, .5f, .1f);
         desc->setAnchorPoint({ .0f, .5f });
         desc->setPosition(40.f, 15.f);
         desc->setID("name");
@@ -134,27 +134,28 @@ bool HistoryPopup::setup(History* history) {
         undoBtn->setID("undo-button");
         menu->addChild(undoBtn);
 
+        auto detailsBtnSpr = CCSprite::createWithSpriteFrameName("edit_downBtn_001.png");
+        detailsBtnSpr->setScale(.725f);
+        auto detailsBtn = CCMenuItemSpriteExtra::create(
+            detailsBtnSpr, this, nullptr
+        );
+        detailsBtn->setPosition(scrollSize.width - 45.f, 15.f);
+        detailsBtn->setUserData(ev);
+        detailsBtn->setID("details-button");
+        menu->addChild(detailsBtn);
+
         auto border = CCLayerColor::create({ 0, 0, 0, 100 }, scrollSize.width, 1);
         menu->addChild(border);
 
         scroll->m_contentLayer->addChild(menu);
-        height += 30.f;
 
         m_items.push_back(menu);
     }
 
     this->updateState();
 
-    if (height < scrollSize.height) {
-        height = scrollSize.height;
-    }
-
-    scroll->m_contentLayer->setContentSize({
-        scroll->m_contentLayer->getContentSize().width,
-        height
-    });
     scroll->m_contentLayer->setLayout(
-        ColumnLayout::create()
+        AutoGrowingLayout::create(scrollSize.height)
             ->setAxisAlignment(AxisAlignment::End)
             ->setAxisReverse(true)
             ->setGap(0)

@@ -8,6 +8,7 @@ file(GLOB SOURCES
 	src/features/*.cpp
 	src/tracking/*.cpp
 	src/script/*.cpp
+	src/other/*.cpp
 	src/*.cpp
 )
 

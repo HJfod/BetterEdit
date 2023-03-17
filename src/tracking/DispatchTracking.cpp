@@ -18,6 +18,15 @@
         __VA_ARGS__;\
     }
 
+static CCArrayExt<GameObject> iterTargets(GameObject* target, CCArray* targets) {
+    if (target) {
+        return CCArrayExt<GameObject>(CCArray::createWithObject(target));
+    }
+    else {
+        return targets;
+    }
+}
+
 template <class T>
 struct Bubble {
     std::vector<T> events;
@@ -82,17 +91,22 @@ class $modify(LevelEditorLayer) {
     }
 
     void pasteAtributeState(GameObject* target, CCArray* targets) {
+        std::vector<ObjState> states;
+        for (auto& obj : iterTargets(target, targets)) {
+            states.push_back(ObjState::from(target));
+        }
         LevelEditorLayer::pasteAtributeState(target, targets);
+        size_t i = 0;
+        auto bubble = Bubble<ObjPropsChanged>();
+        for (auto& obj : iterTargets(target, targets)) {
+            Bubble<ObjPropsChanged>::push(obj, Transform { states.at(i++), ObjState::from(obj) });
+        }
     }
 
     void pasteColorState(GameObject* target, CCArray* targets) {
         std::vector<std::pair<int, ccHSVValue>> oldBases;
         std::vector<std::pair<int, ccHSVValue>> oldDetails;
-        auto allTargets = targets ? targets->shallowCopy() : CCArray::create();
-        if (target) {
-            allTargets->addObject(target);
-        }
-        for (auto& target : CCArrayExt<GameObject>(allTargets)) {
+        for (auto& obj : iterTargets(target, targets)) {
             if (target->m_baseColor) {
                 oldBases.emplace_back(
                     target->m_baseColor->m_colorID,
@@ -115,24 +129,24 @@ class $modify(LevelEditorLayer) {
         LevelEditorLayer::pasteColorState(target, targets);
         auto bubble = Bubble<ObjColorPasted>();
         size_t i = 0;
-        for (auto& target : CCArrayExt<GameObject>(allTargets)) {
+        for (auto& obj : iterTargets(target, targets)) {
             Bubble<ObjColorPasted>::push(
-                target,
+                obj,
                 Transform {
                     oldBases.at(i).first,
-                    (target->m_baseColor ? target->m_baseColor->m_colorID : 0)
+                    (obj->m_baseColor ? obj->m_baseColor->m_colorID : 0)
                 },
                 Transform {
                     oldBases.at(i).second,
-                    (target->m_baseColor ? target->m_baseColor->m_hsv : ccHSVValue())
+                    (obj->m_baseColor ? obj->m_baseColor->m_hsv : ccHSVValue())
                 },
                 Transform {
                     oldDetails.at(i).first,
-                    (target->m_detailColor ? target->m_detailColor->m_colorID : 0)
+                    (obj->m_detailColor ? obj->m_detailColor->m_colorID : 0)
                 },
                 Transform {
                     oldDetails.at(i).second,
-                    (target->m_detailColor ? target->m_detailColor->m_hsv : ccHSVValue())
+                    (obj->m_detailColor ? obj->m_detailColor->m_hsv : ccHSVValue())
                 }
             );
             i += 1;
@@ -214,17 +228,9 @@ class $modify(EditorUI) {
     }
 
     void scaleChangeBegin() {
-        if (m_selectedObject) {
-            m_fields->originalScales = {{
-                m_selectedObject->getPosition(),
-                m_selectedObject->getScale()
-            }};
-        }
-        else {
-            m_fields->originalScales = {};
-            for (auto& obj : CCArrayExt<GameObject>(m_selectedObjects)) {
-                m_fields->originalScales.emplace_back(obj->getPosition(), obj->getScale());
-            }
+        m_fields->originalScales = {};
+        for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
+            m_fields->originalScales.emplace_back(obj->getPosition(), obj->getScale());
         }
         BLOCKED_CALL(EditorUI::scaleChangeBegin());
     }
@@ -235,24 +241,15 @@ class $modify(EditorUI) {
 
     void scaleChangeEnded() {
         BLOCKED_CALL(EditorUI::scaleChangeEnded());
-        if (m_selectedObject) {
+        size_t i = 0;
+        auto bubble = Bubble<ObjScaled>();
+        for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
             Bubble<ObjScaled>::push(
-                m_selectedObject,
-                Transform { m_fields->originalScales.at(0).first, m_selectedObject->getPosition() },
-                Transform { m_fields->originalScales.at(0).second, m_selectedObject->getScale() }
+                obj,
+                Transform { m_fields->originalScales.at(i).first, obj->getPosition() },
+                Transform { m_fields->originalScales.at(i).second, obj->getScale() }
             );
-        }
-        else {
-            auto bubble = Bubble<ObjScaled>();
-            size_t i = 0;
-            for (auto& obj : CCArrayExt<GameObject>(m_selectedObjects)) {
-                Bubble<ObjScaled>::push(
-                    obj,
-                    Transform { m_fields->originalScales.at(i).first, obj->getPosition() },
-                    Transform { m_fields->originalScales.at(i).second, obj->getScale() }
-                );
-                i += 1;
-            }
+            i += 1;
         }
     }
 
@@ -362,63 +359,37 @@ class $modify(CustomizeObjectLayer) {
 
     void updateSelected(int channelID) {
         std::vector<int> oldTargetIDs;
-        if (m_targetObject) {
-            oldTargetIDs.push_back(colorFor(m_targetObject)->m_colorID);
-        }
-        else for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
-            oldTargetIDs.push_back(colorFor(node)->m_colorID);
+        for (auto obj : iterTargets(m_targetObject, m_targetObjects)) {
+            oldTargetIDs.push_back(colorFor(obj)->m_colorID);
         }
         CustomizeObjectLayer::updateSelected(channelID);
-        if (m_targetObject) {
+        auto bubble = Bubble<ObjColored>();
+        size_t i = 0;
+        for (auto obj : iterTargets(m_targetObject, m_targetObjects)) {
             Bubble<ObjColored>::push(
-                m_targetObject, m_selectedMode == 2,
-                Transform<int> { oldTargetIDs.at(0), colorFor(m_targetObject)->m_colorID }
+                obj, m_selectedMode == 2,
+                Transform<int> { oldTargetIDs.at(i++), colorFor(obj)->m_colorID }
             );
-        }
-        else {
-            auto bubble = Bubble<ObjColored>();
-            size_t i = 0;
-            for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
-                Bubble<ObjColored>::push(
-                    node, m_selectedMode == 2,
-                    Transform<int> { oldTargetIDs.at(i), colorFor(node)->m_colorID }
-                );
-                i += 1;
-            }
         }
     }
 
     void onHSV(CCObject* sender) {
-        if (m_targetObject) {
-            m_fields->hsv = { colorFor(m_targetObject)->m_hsv };
-        }
-        else {
-            m_fields->hsv.clear();
-            for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
-                m_fields->hsv.push_back(colorFor(node)->m_hsv);
-            }
+        m_fields->hsv.clear();
+        for (auto obj : iterTargets(m_targetObject, m_targetObjects)) {
+            m_fields->hsv.push_back(colorFor(obj)->m_hsv);
         }
         CustomizeObjectLayer::onHSV(sender);
     }
 
     void hsvPopupClosed(HSVWidgetPopup* popup, ccHSVValue value) {
         CustomizeObjectLayer::hsvPopupClosed(popup, value);
-        if (m_targetObject) {
+        auto bubble = Bubble<ObjHSVChanged>();
+        size_t i = 0;
+        for (auto obj : iterTargets(m_targetObject, m_targetObjects)) {
             Bubble<ObjHSVChanged>::push(
-                m_targetObject, m_selectedMode == 2,
-                Transform { m_fields->hsv.front(), colorFor(m_targetObject)->m_hsv }
+                obj, m_selectedMode == 2,
+                Transform { m_fields->hsv.at(i++), colorFor(obj)->m_hsv }
             );
-        }
-        else {
-            auto bubble = Bubble<ObjHSVChanged>();
-            size_t i = 0;
-            for (auto node : CCArrayExt<GameObject>(m_targetObjects)) {
-                Bubble<ObjHSVChanged>::push(
-                    m_targetObject, m_selectedMode == 2,
-                    Transform { m_fields->hsv.at(i), colorFor(m_targetObject)->m_hsv }
-                );
-                i += 1;
-            }
         }
     }
 };
@@ -475,26 +446,15 @@ class $modify(SetGroupIDLayer) {
     void onClose(CCObject* sender) {
         SetGroupIDLayer::onClose(sender);
         auto bubble = Bubble<ObjPropsChanged>();
-        if (m_targetObject) {
-            auto state = ObjState::from(m_targetObject);
-            if (m_fields->states.at(0) != state) {
+        size_t i = 0;
+        for (auto obj : iterTargets(m_targetObject, m_targetObjects)) {
+            auto state = ObjState::from(obj);
+            if (m_fields->states.at(i) != state) {
                 Bubble<ObjPropsChanged>::push(
-                    m_targetObject,
-                    Transform { m_fields->states.at(0), state }
+                    obj, Transform { m_fields->states.at(i), state }
                 );
             }
-        }
-        else {
-            size_t i = 0;
-            for (auto& obj : CCArrayExt<GameObject>(m_targetObjects)) {
-                auto state = ObjState::from(obj);
-                if (m_fields->states.at(i) != state) {
-                    Bubble<ObjPropsChanged>::push(
-                        obj, Transform { m_fields->states.at(i), state }
-                    );
-                }
-                i += 1;
-            }
+            i += 1;
         }
     }
 };
