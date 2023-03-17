@@ -60,8 +60,8 @@ struct Bubble {
         }
     }
 private:
-    template <class T>
-    static void post(T&& t) {
+    template <class E>
+    static void post(E&& t) {
         if (EditorUI::get() && !BlockAll::blocked()) {
             t.post();
         }
