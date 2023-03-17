@@ -5,19 +5,43 @@
 #include <Geode/loader/Event.hpp>
 
 class History;
+class HistoryPopup;
+
+class HistoryNode : public CCMenu {
+protected:
+    HistoryPopup* m_popup;
+    EditorEvent* m_event;
+    CCNode* m_icon;
+    CCLabelBMFont* m_title;
+    CCMenuItemSpriteExtra* m_undoBtn;
+    CCMenuItemSpriteExtra* m_detailsBtn;
+    float m_detailsOpen = 0.f;
+
+    bool init(HistoryPopup* popup, EditorEvent* event, float width);
+
+    void onUndoTill(CCObject*);
+    void onRedoTill(CCObject*);
+    void onDetails(CCObject*);
+    
+public:
+    static HistoryNode* create(HistoryPopup* popup, EditorEvent* event, float width);
+
+    void updateState(bool redoable);
+};
 
 class HistoryPopup : public Popup<History*> {
 protected:
     History* m_history;
-    std::vector<CCMenu*> m_items;
+    std::vector<HistoryNode*> m_items;
+    ScrollLayer* m_scroll;
 
     bool setup(History* history);
-    void updateState();
-    void onUndoTill(CCObject* sender);
-    void onRedoTill(CCObject* sender);
-
+    
 public:
     static HistoryPopup* create(History* history);
+
+    void updateState();
+    History* getHistory() const;
 };
 
 class History : public CCObject {
