@@ -12,10 +12,11 @@ protected:
     HistoryPopup* m_popup;
     EditorEvent* m_event;
     CCLayerColor* m_topBG;
+    CCLabelBMFont* m_name;
     CCMenu* m_topMenu;
     CCMenu* m_bottomMenu;
     CCMenuItemSpriteExtra* m_undoBtn;
-    CCMenuItemSpriteExtra* m_detailsBtn;
+    CCMenuItemSpriteExtra* m_detailsBtn = nullptr;
     float m_detailsOpen = 0.f;
 
     bool init(HistoryPopup* popup, EditorEvent* event, float width);
@@ -37,6 +38,8 @@ protected:
     ScrollLayer* m_scroll;
 
     bool setup(History* history);
+
+    void onClear(CCObject*);
     
 public:
     static HistoryPopup* create(History* history);
@@ -70,4 +73,6 @@ public:
     void redoTo(EditorEvent* event);
     bool canUndo() const;
     bool canRedo() const;
+
+    void clear();
 };

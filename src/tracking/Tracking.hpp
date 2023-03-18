@@ -124,12 +124,19 @@ std::string fmtDiffString(std::string_view const& str, Args&&... args) {
     return fmtDiffStringImpl<Args...>(str, std::forward<Args>(args)..., std::index_sequence_for<Args...> {});
 }
 
+struct Detail {
+    std::string info;
+    std::optional<std::string> icon;
+
+    bool operator==(Detail const& other) const;
+};
+
 struct EditorEventData {
     virtual std::string toDiffString() const = 0;
     virtual void undo() const = 0;
     virtual void redo() const = 0;
     virtual EditorEventData* clone() const = 0;
-    virtual std::vector<std::string> details() const = 0;
+    virtual std::vector<Detail> details() const = 0;
 };
 
 struct ObjEventData : public EditorEventData {
@@ -145,7 +152,7 @@ struct ObjPlaced : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "plus.png"_spr;
     static inline auto DESC_FMT = "Added {}";
@@ -158,7 +165,7 @@ struct ObjRemoved : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "neg.png"_spr;
     static inline auto DESC_FMT = "Removed {}";
@@ -172,7 +179,7 @@ struct ObjMoved : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "move.png"_spr;
     static inline auto DESC_FMT = "Moved {}";
@@ -187,7 +194,7 @@ struct ObjRotated : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "edit_ccwBtn_001.png";
     static inline auto DESC_FMT = "Rotated {}";
@@ -202,7 +209,7 @@ struct ObjScaled : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "scale.png"_spr;
     static inline auto DESC_FMT = "Scaled {}";
@@ -217,7 +224,7 @@ struct ObjFlipX : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "edit_flipXBtn_001.png";
     static inline auto DESC_FMT = "Flipped {} on the X-axis";
@@ -232,7 +239,7 @@ struct ObjFlipY : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "edit_flipYBtn_001.png";
     static inline auto DESC_FMT = "Flipped {} on the Y-axis";
@@ -253,7 +260,7 @@ struct ObjColored : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "color.png"_spr;
     static inline auto DESC_FMT = "Colored {}";
@@ -270,7 +277,7 @@ struct ObjHSVChanged : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "color.png"_spr;
     static inline auto DESC_FMT = "Changed HSV for {}";
@@ -296,7 +303,7 @@ struct ObjColorPasted : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "color.png"_spr;
     static inline auto DESC_FMT = "Pasted Color to {}";
@@ -312,7 +319,7 @@ struct ObjPropsChanged : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "GJ_hammerIcon_001.png";
     static inline auto DESC_FMT = "Changed {} Properties";
@@ -325,7 +332,7 @@ struct ObjSelected : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "select.png"_spr;
     static inline auto DESC_FMT = "Selected {}";
@@ -338,7 +345,7 @@ struct ObjDeselected : public ObjEventData {
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
-    std::vector<std::string> details() const override;
+    std::vector<Detail> details() const override;
 
     static inline auto ICON_NAME = "deselect.png"_spr;
     static inline auto DESC_FMT = "Deselected {}";
@@ -361,6 +368,7 @@ struct ColorChannelEvent : public EditorEvent {
     void undo() const override;
     void redo() const override;
     EditorEventData* clone() const override;
+    std::vector<Detail> details() const override;
 
     CCNode* icon() const override;
     std::string desc() const override;
@@ -398,6 +406,18 @@ struct MultiObjEvent : public EditorEvent {
         for (auto& ev : events) {
             ev.redo();
         }
+    }
+
+    std::vector<Detail> details() const override {
+        std::vector<Detail> res;
+        for (auto& ev : events) {
+            for (auto& detail : ev.details()) {
+                if (!ranges::contains(res, detail)) {
+                    res.push_back(detail);
+                }
+            }
+        }
+        return res;
     }
 
     CCNode* icon() const override {

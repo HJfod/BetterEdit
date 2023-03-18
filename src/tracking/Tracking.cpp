@@ -11,7 +11,7 @@
 #include <Geode/binding/ColorAction.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <Geode/loader/Log.hpp>
-#include <ui/Tag.hpp>
+#include <other/Utils.hpp>
 
 std::string toDiffString(Ref<GameObject> obj) {
     return fmt::format(
@@ -93,6 +93,10 @@ BlockAll::~BlockAll() {
     if (s_current == this) {
         s_current = nullptr;
     }
+}
+
+bool Detail::operator==(Detail const& other) const {
+    return info == other.info && icon == other.icon;
 }
 
 ColorState ColorState::from(ColorAction* action) {
@@ -207,8 +211,8 @@ void ObjPlaced::redo() const {
     EditorUI::get()->selectObject(obj, true);
 }
 
-std::vector<std::string> ObjPlaced::details() const {
-    return { fmt::format("ID {}", obj->m_objectID) };
+std::vector<Detail> ObjPlaced::details() const {
+    return {{ .info = fmt::format("ID {}", obj->m_objectID) }};
 }
 
 // ObjRemoved
@@ -235,8 +239,8 @@ void ObjRemoved::redo() const {
     obj->deactivateObject(true);
 }
 
-std::vector<std::string> ObjRemoved::details() const {
-    return { fmt::format("At {}, {}", obj->getPositionX(), obj->getPositionY()) };
+std::vector<Detail> ObjRemoved::details() const {
+    return {};
 }
 
 // ObjMoved
@@ -259,8 +263,23 @@ void ObjMoved::redo() const {
     EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
 }
 
-std::vector<std::string> ObjMoved::details() const {
-    return { fmt::format("By {}, {}", pos.to.x - pos.from.x, pos.to.y - pos.from.y) };
+std::vector<Detail> ObjMoved::details() const {
+    std::vector<Detail> res;
+    auto dx = pos.to.x - pos.from.x;
+    auto dy = pos.to.y - pos.from.y;
+    if (dx != 0.f) {
+        res.push_back({
+            .info = numToString(std::fabsf(dx)),
+            .icon = dx > 0.f ? "edit_rightBtn2_001.png" : "edit_leftBtn2_001.png"
+        });
+    }
+    if (dy != 0.f) {
+        res.push_back({
+            .info = numToString(std::fabsf(dy)),
+            .icon = dy > 0.f ? "edit_upBtn2_001.png" : "edit_downBtn2_001.png"
+        });
+    }
+    return res;
 }
 
 // ObjRotated
@@ -289,6 +308,14 @@ void ObjRotated::redo() const {
     EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
 }
 
+std::vector<Detail> ObjRotated::details() const {
+    auto delta = angle.to - angle.from;
+    return {{
+        .info = fmt::format("{}°", std::fabsf(delta)),
+        .icon = delta > 0.f ? "edit_cwBtn_001.png" : "edit_ccwBtn_001.png"
+    }};
+}
+
 // ObjScaled
 
 std::string ObjScaled::toDiffString() const {
@@ -313,6 +340,13 @@ void ObjScaled::redo() const {
         CCArray::createWithObject(obj), scale.to, obj->getPosition()
     );
     EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
+}
+
+std::vector<Detail> ObjScaled::details() const {
+    return {{
+        .info = fmt::format("{}x", scale.to),
+        .icon = "scale"_spr
+    }};
 }
 
 // ObjFlipX
@@ -341,6 +375,10 @@ void ObjFlipX::redo() const {
     EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
 }
 
+std::vector<Detail> ObjFlipX::details() const {
+    return {};
+}
+
 // ObjFlipY
 
 std::string ObjFlipY::toDiffString() const {
@@ -367,6 +405,10 @@ void ObjFlipY::redo() const {
     EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
 }
 
+std::vector<Detail> ObjFlipY::details() const {
+    return {};
+}
+
 // ObjColored
 
 std::string ObjColored::toDiffString() const {
@@ -391,6 +433,10 @@ void ObjColored::redo() const {
     obj->m_shouldUpdateColorSprite = true;
 }
 
+std::vector<Detail> ObjColored::details() const {
+    return {};
+}
+
 // ObjHSVChanged
 
 std::string ObjHSVChanged::toDiffString() const {
@@ -413,6 +459,10 @@ void ObjHSVChanged::redo() const {
         color->m_hsv = hsv.to;
     }
     obj->m_shouldUpdateColorSprite = true;
+}
+
+std::vector<Detail> ObjHSVChanged::details() const {
+    return {};
 }
 
 // ObjColorPasted
@@ -449,10 +499,14 @@ void ObjColorPasted::redo() const {
     obj->m_shouldUpdateColorSprite = true;
 }
 
-// bjGroupsChanged
+std::vector<Detail> ObjColorPasted::details() const {
+    return {};
+}
+
+// ObjPropsChanged
 
 std::string ObjPropsChanged::toDiffString() const {
-    return fmtDiffString("grp", obj, state);
+    return fmtDiffString("prp", obj, state);
 }
 
 EditorEventData* ObjPropsChanged::clone() const {
@@ -467,6 +521,55 @@ void ObjPropsChanged::undo() const {
 void ObjPropsChanged::redo() const {
     auto _ = BlockAll();
     state.to.to(obj);
+}
+
+std::vector<Detail> ObjPropsChanged::details() const {
+    std::vector<Detail> res;
+    if (state.from.groups != state.to.groups) {
+        std::string info = "Groups ";
+        bool first = true;
+        for (auto& grp : state.to.groups) {
+            if (!first) {
+                info += ", ";
+            }
+            first = false;
+            info += std::to_string(grp);
+        }
+        res.push_back({ .info = info });
+    }
+    if (state.from.editorLayer1 != state.to.editorLayer1) {
+        res.push_back({
+            .info = fmt::format("Layer 1 to {}", state.to.editorLayer1)
+        });
+    }
+    if (state.from.editorLayer2 != state.to.editorLayer2) {
+        res.push_back({
+            .info = fmt::format("Layer 2 to {}", state.to.editorLayer2)
+        });
+    }
+    if (state.from.zOrder != state.to.zOrder) {
+        res.push_back({
+            .info = fmt::format("Z Order to {}", state.to.zOrder)
+        });
+    }
+    if (state.from.zLayer != state.to.zLayer) {
+        res.push_back({
+            .info = fmt::format("Z Layer to {}", zLayerToString(state.to.zLayer))
+        });
+    }
+    if (state.to.dontEnter) {
+        res.push_back({ .info = "Don't Enter" });
+    }
+    if (state.to.dontFade) {
+        res.push_back({ .info = "Don't Fade" });
+    }
+    if (state.to.groupParent) {
+        res.push_back({ .info = "Group Parent" });
+    }
+    if (state.to.highDetail) {
+        res.push_back({ .info = "High Detail" });
+    }
+    return res;
 }
 
 // ObjSelected
@@ -491,6 +594,10 @@ void ObjSelected::redo() const {
     EditorUI::get()->selectObjects(arr, false);
 }
 
+std::vector<Detail> ObjSelected::details() const {
+    return {};
+}
+
 // ObjDeselected
 
 std::string ObjDeselected::toDiffString() const {
@@ -513,6 +620,12 @@ void ObjDeselected::redo() const {
     EditorUI::get()->deselectObject(obj);
 }
 
+std::vector<Detail> ObjDeselected::details() const {
+    return {};
+}
+
+// ColorChannelEvent
+
 std::string ColorChannelEvent::toDiffString() const {
     return fmtDiffString("chn", channel, state);
 }
@@ -531,6 +644,10 @@ void ColorChannelEvent::redo() const {
     if (auto action = GJEffectManager::fromLevelSetting()->getColorAction(channel)) {
         state.to.to(action);
     }
+}
+
+std::vector<Detail> ColorChannelEvent::details() const {
+    return {};
 }
 
 CCNode* ColorChannelEvent::icon() const {

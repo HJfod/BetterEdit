@@ -1,25 +1,45 @@
 #include "Tag.hpp"
 
-bool Tag::init(std::string const& text) {
+bool Tag::init(std::string const& text, std::optional<std::string> const& icon) {
     if (!CCNode::init())
         return false;
 
-    auto bg = CCSprite::createWithSpriteFrameName("border-square.png"_spr);
+    auto bg = CCScale9Sprite::createWithSpriteFrameName("border-square.png"_spr);
+    this->addChild(bg);
+
+    float width = 5.f;
+    float height = 18.f;
+
+    if (icon) {
+        auto spr = CCSprite::createWithSpriteFrameName(icon.value().c_str());
+        spr->setScale(.45f);
+        spr->setPosition({ width + spr->getScaledContentSize().width / 2, height / 2 });
+        this->addChild(spr);
+        width += spr->getScaledContentSize().width;
+        width += 5.f;
+    }
 
     auto label = CCLabelBMFont::create(text.c_str(), "bigFont.fnt");
-    label->setScale(.35f);
-    bg->addChild(label);
+    label->setScale(.45f);
+    label->setPosition({ width, height / 2 });
+    label->setAnchorPoint({ .0f, .5f });
+    width += label->getScaledContentSize().width;
+    this->addChild(label);
 
-    bg->setContentSize({ label->getScaledContentSize().width + 10.f, 25.f });
+    width += 5.f;
 
-    this->addChild(bg);
+    this->setContentSize({ width, height });
+
+    bg->setScale(.5f);
+    bg->setContentSize(m_obContentSize / bg->getScale());
+    bg->setPosition(m_obContentSize / 2);
 
     return true;
 }
 
-Tag* Tag::create(std::string const& text) {
+Tag* Tag::create(std::string const& text, std::optional<std::string> const& icon) {
     auto ret = new Tag;
-    if (ret && ret->init(text)) {
+    if (ret && ret->init(text, icon)) {
         ret->autorelease();
         return ret;
     }

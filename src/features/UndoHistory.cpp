@@ -11,6 +11,7 @@
 #include <Geode/ui/General.hpp>
 #include <other/AutoGrowingLayout.hpp>
 #include <other/ValueTo.hpp>
+#include <ui/Tag.hpp>
 
 struct $modify(HistoryUI, EditorUI) {
     bool init(LevelEditorLayer* lel) {
@@ -103,11 +104,27 @@ bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
     this->setContentSize({ width, 30.f });
 
     m_bottomMenu = CCMenu::create();
-    m_bottomMenu->setContentSize({ width, 30.f });
+    m_bottomMenu->setContentSize({ width - 16.f, 30.f });
+    m_bottomMenu->ignoreAnchorPointForPosition(false);
+    m_bottomMenu->setAnchorPoint({ .0f, .0f });
+    m_bottomMenu->setPosition(8.f, 0.f);
+
+    for (auto& detail : event->details()) {
+        auto tag = Tag::create(detail.info, detail.icon);
+        m_bottomMenu->addChild(tag);
+    }
+
+    m_bottomMenu->setLayout(
+        RowLayout::create()
+            ->setCrossAxisOverflow(false)
+            ->setAxisAlignment(AxisAlignment::Start)
+    );
+
     this->addChild(m_bottomMenu);
 
-    m_topBG = CCLayerColor::create(ccc4(0xa1, 0x58, 0x2c, 0xff), width, 30.f);
+    m_topBG = CCLayerColor::create(ccc4(153, 85, 51, 255), width, 30.f);
     m_topBG->setPosition(0.f, 0.f);
+    m_topBG->setZOrder(10);
 
     m_topMenu = CCMenu::create();
     m_topMenu->setPosition(0.f, 0.f);
@@ -117,12 +134,12 @@ bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
     icon->setPosition({ 20.f, 15.f });
     m_topBG->addChild(icon);
 
-    auto title = CCLabelBMFont::create(event->desc().c_str(), "bigFont.fnt");
-    title->limitLabelWidth(width - 120.f, .5f, .1f);
-    title->setAnchorPoint({ .0f, .5f });
-    title->setPosition(40.f, 15.f);
-    title->setID("name");
-    m_topBG->addChild(title);
+    m_name = CCLabelBMFont::create(event->desc().c_str(), "bigFont.fnt");
+    m_name->limitLabelWidth(width - 120.f, .5f, .1f);
+    m_name->setAnchorPoint({ .0f, .5f });
+    m_name->setPosition(40.f, 15.f);
+    m_name->setID("name");
+    m_topBG->addChild(m_name);
 
     auto undoBtnSpr = ButtonSprite::create(
         CCSprite::createWithSpriteFrameName("undo.png"_spr),
@@ -136,19 +153,22 @@ bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
     m_undoBtn->setID("undo-button");
     m_topMenu->addChild(m_undoBtn);
 
-    auto detailsBtnSpr = CCSprite::createWithSpriteFrameName("edit_downBtn_001.png");
-    detailsBtnSpr->setScale(.725f);
-    m_detailsBtn = CCMenuItemSpriteExtra::create(
-        detailsBtnSpr, this, menu_selector(HistoryNode::onDetails)
-    );
-    m_detailsBtn->setPosition(width - 45.f, 15.f);
-    m_detailsBtn->setID("details-button");
-    m_topMenu->addChild(m_detailsBtn);
+    if (event->details().size()) {
+        auto detailsBtnSpr = CCSprite::createWithSpriteFrameName("edit_downBtn_001.png");
+        detailsBtnSpr->setScale(.725f);
+        m_detailsBtn = CCMenuItemSpriteExtra::create(
+            detailsBtnSpr, this, menu_selector(HistoryNode::onDetails)
+        );
+        m_detailsBtn->setPosition(width - 45.f, 15.f);
+        m_detailsBtn->setID("details-button");
+        m_topMenu->addChild(m_detailsBtn);
+    }
 
+    m_topBG->addChild(m_topMenu);
     this->addChild(m_topBG);
-    this->addChild(m_topMenu);
 
     auto border = CCLayerColor::create({ 0, 0, 0, 100 }, width, 1);
+    border->setZOrder(11);
     this->addChild(border);
 
     return true;
@@ -168,7 +188,7 @@ void HistoryNode::onDetails(CCObject*) {
     this->stopAllActions();
     this->runAction(CCEaseInOut::create(
         ValueTo<float>::create(
-            .25f,
+            .15f,
             m_detailsOpen, (m_detailsOpen > 0.f ? 0.f : 1.f), 
             [this](auto&) {
                 m_popup->updateState();
@@ -179,7 +199,7 @@ void HistoryNode::onDetails(CCObject*) {
 }
 
 void HistoryNode::updateState(bool redoable) {
-    static_cast<CCLabelBMFont*>(this->getChildByID("name"))->setColor(
+    m_name->setColor(
         redoable ? ccColor3B { 155, 155, 155 } : ccColor3B { 255, 255, 255 }
     );
     auto bspr = static_cast<ButtonSprite*>(m_undoBtn->getNormalImage());
@@ -193,8 +213,10 @@ void HistoryNode::updateState(bool redoable) {
     auto extension = m_detailsOpen * 30.f;
     this->setContentSize({ m_obContentSize.width, extension + 30.f });
 
-    static_cast<CCSprite*>(m_detailsBtn->getNormalImage())->setFlipY(m_detailsOpen > 0.f);
-    m_topMenu->setPosition(0.f, extension);
+    if (m_detailsBtn) {
+        static_cast<CCSprite*>(m_detailsBtn->getNormalImage())->setFlipY(m_detailsOpen > 0.f);
+    }
+    m_topBG->setPosition(0.f, extension);
     m_bottomMenu->setEnabled(m_detailsOpen >= 1.f);
 }
 
@@ -239,7 +261,30 @@ bool HistoryPopup::setup(History* history) {
 
     addListBorders(m_mainLayer, scrollPos, scrollSize);
 
+    auto spr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
+    spr->setScale(.5f);
+    auto btn = CCMenuItemSpriteExtra::create(
+        spr, this, menu_selector(HistoryPopup::onClear)
+    );
+    btn->setPosition(m_size.width / 2 - 20.f, m_size.height / 2 - 20.f);
+    m_buttonMenu->addChild(btn);
+
     return true;
+}
+
+void HistoryPopup::onClear(CCObject*) {
+    createQuickPopup(
+        "Clear History",
+        "Are you sure you want to <cr>clear history</c>? This will make it "
+        "impossible to undo current changes!",
+        "Cancel", "Clear",
+        [this](auto, bool btn2) {
+            if (btn2) {
+                m_history->clear();
+                this->onClose(nullptr);
+            }
+        }
+    );
 }
 
 void HistoryPopup::updateState() {
@@ -339,6 +384,11 @@ bool History::canUndo() const {
 
 bool History::canRedo() const {
     return m_undone > 0;
+}
+
+void History::clear() {
+    m_events.clear();
+    m_undone = 0;
 }
 
 History* History::create(GJGameLevel* level) {
