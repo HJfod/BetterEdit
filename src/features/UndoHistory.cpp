@@ -12,6 +12,7 @@
 #include <other/AutoGrowingLayout.hpp>
 #include <other/ValueTo.hpp>
 #include <ui/Tag.hpp>
+#include <Geode/ui/BasedButtonSprite.hpp>
 
 struct $modify(HistoryUI, EditorUI) {
     bool init(LevelEditorLayer* lel) {
@@ -20,7 +21,10 @@ struct $modify(HistoryUI, EditorUI) {
         
         if (auto menu = this->getChildByID("undo-menu")) {
             menu->addChild(CCMenuItemSpriteExtra::create(
-                CCSprite::createWithSpriteFrameName("btn_chatHistory_001.png"),
+                CircleButtonSprite::createWithSpriteFrameName(
+                    "GJ_timeIcon_001.png", 1.f, CircleBaseColor::Green,
+                    CircleBaseSize::Small
+                ),
                 this, menu_selector(HistoryUI::onHistory)
             ));
             menu->updateLayout();
