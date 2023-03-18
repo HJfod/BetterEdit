@@ -285,6 +285,7 @@ void HistoryPopup::onClear(CCObject*) {
         [this](auto, bool btn2) {
             if (btn2) {
                 m_history->clear();
+                static_cast<HistoryUI*>(EditorUI::get())->updateUIAfterAction();
                 this->onClose(nullptr);
             }
         }
