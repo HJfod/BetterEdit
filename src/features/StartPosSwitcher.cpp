@@ -1,5 +1,4 @@
 #include <Geode/Geode.hpp>
-#include <BetterEdit.hpp>
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
 #include <Geode/modify/GJGameLevel.hpp>

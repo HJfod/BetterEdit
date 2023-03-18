@@ -1,4 +1,3 @@
-#include "../BetterEdit.hpp"
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
