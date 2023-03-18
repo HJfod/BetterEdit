@@ -756,6 +756,9 @@ void TriggerState::to(EffectGameObject* obj) const {
     obj->m_touchTriggered = touchTrigger;
     obj->m_spawnTriggered = spawnTrigger;
     obj->m_multiTrigger = multiTrigger;
+
+    obj->updateLabel();
+    LevelEditorLayer::get()->resetEffectTriggerOptim(obj, nullptr);
 }
 
 std::unique_ptr<EditorEvent> EditorEvent::unique() const {

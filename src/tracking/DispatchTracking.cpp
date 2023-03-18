@@ -473,13 +473,10 @@ using States = std::vector<std::optional<TriggerState>>;
 
 class $modify(CCLayerColor) {
     // mfw no fields on cocos classes yet
-    // also hooking the destructor doesn't work
 
     bool initWithColor(ccColor4B const& color) {
         if (!CCLayerColor::initWithColor(color))
             return false;
-        
-        log::info("brah");
         
         if (auto ui = EditorUI::get()) {
             States states;
@@ -495,7 +492,6 @@ class $modify(CCLayerColor) {
     }
     
     void destructor() {
-        log::info("broh");
         if (auto ui = EditorUI::get()) {
             auto states = this->template getAttribute<States>("states"_spr);
             if (states) {
