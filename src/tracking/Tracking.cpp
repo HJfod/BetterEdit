@@ -54,6 +54,15 @@ std::string toDiffString(ColorState const& value) {
     );
 }
 
+std::string toDiffString(ObjColorState const& value) {
+    return fmt::format(
+        "{},{},{},{},{}",
+        value.base, toDiffString(value.baseHSV),
+        value.detail, toDiffString(value.detailHSV),
+        value.glow
+    );
+}
+
 std::string toDiffString(ObjState const& value) {
     return fmt::format(
         "{},{},{},{},{},{},{},{},{}",
@@ -129,6 +138,41 @@ bool ColorState::operator==(ColorState const& other) const {
 }
 
 bool ColorState::operator!=(ColorState const& other) const {
+    return !(*this == other);
+}
+
+ObjColorState ObjColorState::from(GameObject* obj) {
+    return ObjColorState {
+        .base = obj->m_baseColor ? obj->m_baseColor->m_colorID : 0,
+        .baseHSV = obj->m_baseColor ? obj->m_baseColor->m_hsv : ccHSVValue(),
+        .detail = obj->m_detailColor ? obj->m_detailColor->m_colorID : 0,
+        .detailHSV = obj->m_detailColor ? obj->m_detailColor->m_hsv : ccHSVValue(),
+        .glow = !obj->m_isGlowDisabled,
+    };
+}
+
+void ObjColorState::to(GameObject* obj) const {
+    if (obj->m_baseColor) {
+        obj->m_baseColor->m_colorID = base;
+        obj->m_baseColor->m_hsv = baseHSV;
+    }
+    if (obj->m_detailColor) {
+        obj->m_detailColor->m_colorID = detail;
+        obj->m_detailColor->m_hsv = detailHSV;
+    }
+    obj->m_isGlowDisabled = !glow;
+    obj->m_shouldUpdateColorSprite = true;
+}
+
+bool ObjColorState::operator==(ObjColorState const& other) const {
+    return base == other.base &&
+        baseHSV == other.baseHSV &&
+        detail == other.detail &&
+        detailHSV == other.detailHSV &&
+        glow == other.glow;
+}
+
+bool ObjColorState::operator!=(ObjColorState const& other) const {
     return !(*this == other);
 }
 
@@ -243,6 +287,35 @@ std::vector<Detail> ObjRemoved::details() const {
     return {};
 }
 
+// ObjPasted
+
+std::string ObjPasted::toDiffString() const {
+    return fmtDiffString("pst", obj, src);
+}
+
+EditorEventData* ObjPasted::clone() const {
+    return new ObjPasted(obj, src);
+}
+
+void ObjPasted::undo() const {
+    auto _ = BlockAll();
+    LevelEditorLayer::get()->removeObjectFromSection(obj);
+    LevelEditorLayer::get()->removeSpecial(obj);
+    EditorUI::get()->deselectObject(obj);
+    obj->deactivateObject(true);
+}
+
+void ObjPasted::redo() const {
+    auto _ = BlockAll();
+    LevelEditorLayer::get()->addToSection(obj);
+    LevelEditorLayer::get()->addSpecial(obj);
+    EditorUI::get()->selectObject(obj, true);
+}
+
+std::vector<Detail> ObjPasted::details() const {
+    return {};
+}
+
 // ObjMoved
 
 std::string ObjMoved::toDiffString() const {
@@ -345,7 +418,7 @@ void ObjScaled::redo() const {
 std::vector<Detail> ObjScaled::details() const {
     return {{
         .info = fmt::format("{}x", scale.to),
-        .icon = "scale"_spr
+        .icon = "scale.png"_spr
     }};
 }
 
@@ -412,94 +485,22 @@ std::vector<Detail> ObjFlipY::details() const {
 // ObjColored
 
 std::string ObjColored::toDiffString() const {
-    return fmtDiffString("col", obj, detail, channel);
+    return fmtDiffString("col", obj, color);
 }
 
 EditorEventData* ObjColored::clone() const {
-    return new ObjColored(obj, detail, channel);
+    return new ObjColored(obj, color);
 }
 
 void ObjColored::undo() const {
-    if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
-        color->m_colorID = channel.from;
-    }
-    obj->m_shouldUpdateColorSprite = true;
+    color.from.to(obj);
 }
 
 void ObjColored::redo() const {
-    if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
-        color->m_colorID = channel.to;
-    }
-    obj->m_shouldUpdateColorSprite = true;
+    color.to.to(obj);
 }
 
 std::vector<Detail> ObjColored::details() const {
-    return {};
-}
-
-// ObjHSVChanged
-
-std::string ObjHSVChanged::toDiffString() const {
-    return fmtDiffString("hsv", obj, detail, hsv);
-}
-
-EditorEventData* ObjHSVChanged::clone() const {
-    return new ObjHSVChanged(obj, detail, hsv);
-}
-
-void ObjHSVChanged::undo() const {
-    if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
-        color->m_hsv = hsv.from;
-    }
-    obj->m_shouldUpdateColorSprite = true;
-}
-
-void ObjHSVChanged::redo() const {
-    if (auto color = detail ? obj->m_detailColor : obj->m_baseColor) {
-        color->m_hsv = hsv.to;
-    }
-    obj->m_shouldUpdateColorSprite = true;
-}
-
-std::vector<Detail> ObjHSVChanged::details() const {
-    return {};
-}
-
-// ObjColorPasted
-
-std::string ObjColorPasted::toDiffString() const {
-    return fmtDiffString("cps", obj, baseChannel, baseHSV, detailChannel, detailHSV);
-}
-
-EditorEventData* ObjColorPasted::clone() const {
-    return new ObjColorPasted(obj, baseChannel, baseHSV, detailChannel, detailHSV);
-}
-
-void ObjColorPasted::undo() const {
-    if (obj->m_baseColor) {
-        obj->m_baseColor->m_colorID = baseChannel.from;
-        obj->m_baseColor->m_hsv = baseHSV.from;
-    }
-    if (obj->m_detailColor) {
-        obj->m_detailColor->m_colorID = detailChannel.from;
-        obj->m_detailColor->m_hsv = detailHSV.from;
-    }
-    obj->m_shouldUpdateColorSprite = true;
-}
-
-void ObjColorPasted::redo() const {
-    if (obj->m_baseColor) {
-        obj->m_baseColor->m_colorID = baseChannel.to;
-        obj->m_baseColor->m_hsv = baseHSV.to;
-    }
-    if (obj->m_detailColor) {
-        obj->m_detailColor->m_colorID = detailChannel.to;
-        obj->m_detailColor->m_hsv = detailHSV.to;
-    }
-    obj->m_shouldUpdateColorSprite = true;
-}
-
-std::vector<Detail> ObjColorPasted::details() const {
     return {};
 }
 

@@ -35,6 +35,19 @@ struct ColorState {
     bool operator!=(ColorState const& other) const;
 };
 
+struct ObjColorState {
+    int base;
+    ccHSVValue baseHSV;
+    int detail;
+    ccHSVValue detailHSV;
+    bool glow;
+
+    static ObjColorState from(GameObject* obj);
+    void to(GameObject* obj) const;
+    bool operator==(ObjColorState const& other) const;
+    bool operator!=(ObjColorState const& other) const;
+};
+
 struct ObjState {
     std::vector<short> groups;
     int editorLayer1;
@@ -67,6 +80,7 @@ std::string toDiffString(ccHSVValue const& value);
 std::string toDiffString(ccColor3B const& value);
 std::string toDiffString(ccColor4B const& value);
 std::string toDiffString(ColorState const& value);
+std::string toDiffString(ObjColorState const& value);
 std::string toDiffString(ObjState const& value);
 std::string toDiffString(std::vector<short> const& value);
 
@@ -148,6 +162,7 @@ struct ObjPlaced : public ObjEventData {
     CCPoint pos;
     inline ObjPlaced(Ref<GameObject> obj, CCPoint const& pos)
       : ObjEventData(obj), pos(pos) {}
+    
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
@@ -161,6 +176,7 @@ struct ObjPlaced : public ObjEventData {
 struct ObjRemoved : public ObjEventData {
     inline ObjRemoved(Ref<GameObject> obj)
       : ObjEventData(obj) {}
+    
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
@@ -171,10 +187,26 @@ struct ObjRemoved : public ObjEventData {
     static inline auto DESC_FMT = "Removed {}";
 };
 
+struct ObjPasted : public ObjEventData {
+    Ref<GameObject> src;
+    inline ObjPasted(Ref<GameObject> obj, Ref<GameObject> src)
+      : ObjEventData(obj), src(src) {}
+    
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+    std::vector<Detail> details() const override;
+
+    static inline auto ICON_NAME = "plus.png"_spr;
+    static inline auto DESC_FMT = "Copied {}";
+};
+
 struct ObjMoved : public ObjEventData {
     Transform<CCPoint> pos;
     inline ObjMoved(Ref<GameObject> obj, Transform<CCPoint> const& pos)
       : ObjEventData(obj), pos(pos) {}
+    
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
@@ -190,6 +222,7 @@ struct ObjRotated : public ObjEventData {
     Transform<float> angle;
     inline ObjRotated(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> angle)
       : ObjEventData(obj), pos(pos), angle(angle) {}
+    
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
@@ -205,6 +238,7 @@ struct ObjScaled : public ObjEventData {
     Transform<float> scale;
     inline ObjScaled(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> scale)
       : ObjEventData(obj), pos(pos), scale(scale) {}
+    
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
@@ -220,6 +254,7 @@ struct ObjFlipX : public ObjEventData {
     Transform<bool> flip;
     inline ObjFlipX(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip)
       : ObjEventData(obj), pos(pos), flip(flip) {}
+    
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
@@ -235,6 +270,7 @@ struct ObjFlipY : public ObjEventData {
     Transform<bool> flip;
     inline ObjFlipY(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip)
       : ObjEventData(obj), pos(pos), flip(flip) {}
+    
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
@@ -246,15 +282,9 @@ struct ObjFlipY : public ObjEventData {
 };
 
 struct ObjColored : public ObjEventData {
-    bool detail;
-    Transform<int> channel;
-    inline ObjColored(
-        Ref<GameObject> obj,
-        bool detail,
-        Transform<int> const& channel
-    ) : ObjEventData(obj),
-        channel(channel),
-        detail(detail) {}
+    Transform<ObjColorState> color;
+    inline ObjColored(Ref<GameObject> obj, Transform<ObjColorState> const& color)
+      : ObjEventData(obj), color(color) {}
 
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
@@ -264,49 +294,6 @@ struct ObjColored : public ObjEventData {
 
     static inline auto ICON_NAME = "color.png"_spr;
     static inline auto DESC_FMT = "Colored {}";
-};
-
-struct ObjHSVChanged : public ObjEventData {
-    bool detail;
-    Transform<ccHSVValue> hsv;
-
-    inline ObjHSVChanged(Ref<GameObject> obj, bool detail, Transform<ccHSVValue> hsv)
-      : ObjEventData(obj), detail(detail), hsv(hsv) {}
-
-    std::string toDiffString() const override;
-    EditorEventData* clone() const override;
-    void undo() const override;
-    void redo() const override;
-    std::vector<Detail> details() const override;
-
-    static inline auto ICON_NAME = "color.png"_spr;
-    static inline auto DESC_FMT = "Changed HSV for {}";
-};
-
-struct ObjColorPasted : public ObjEventData {
-    Transform<int> baseChannel;
-    Transform<ccHSVValue> baseHSV;
-    Transform<int> detailChannel;
-    Transform<ccHSVValue> detailHSV;
-
-    inline ObjColorPasted(
-        Ref<GameObject> obj,
-        Transform<int> const& baseChannel,
-        Transform<ccHSVValue> const& baseHSV,
-        Transform<int> const& detailChannel,
-        Transform<ccHSVValue> const& detailHSV
-    ) : ObjEventData(obj),
-        baseChannel(baseChannel), baseHSV(baseHSV),
-        detailChannel(detailChannel), detailHSV(detailHSV) {}
-
-    std::string toDiffString() const override;
-    EditorEventData* clone() const override;
-    void undo() const override;
-    void redo() const override;
-    std::vector<Detail> details() const override;
-
-    static inline auto ICON_NAME = "color.png"_spr;
-    static inline auto DESC_FMT = "Pasted Color to {}";
 };
 
 struct ObjPropsChanged : public ObjEventData {
@@ -328,6 +315,7 @@ struct ObjPropsChanged : public ObjEventData {
 struct ObjSelected : public ObjEventData {
     inline ObjSelected(Ref<GameObject> obj)
       : ObjEventData(obj) {}
+    
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
@@ -341,6 +329,7 @@ struct ObjSelected : public ObjEventData {
 struct ObjDeselected : public ObjEventData {
     inline ObjDeselected(Ref<GameObject> obj)
       : ObjEventData(obj) {}
+    
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
