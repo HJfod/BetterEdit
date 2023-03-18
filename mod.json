@@ -30,6 +30,12 @@
 			"default": true,
 			"name": "Better Undo",
 			"description": "When enabled, allows undoing any action taken in the editor, like modifying object colors"
+		},
+		"developer-mode": {
+			"type": "bool",
+			"default": false,
+			"name": "Developer Mode",
+			"description": "Enables some features intended for developers"
 		}
 	},
 	"resources": {

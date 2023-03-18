@@ -44,7 +44,10 @@ class $modify(EditorUI) {
         ss << "Pos: " << m_selectedObject->getPositionX() << ","
             << m_selectedObject->getPositionY() << "\n";
         ss << "ObjID: " << m_selectedObject->m_objectID << "\n";
-        ss << fmt::format("Addr: {}", static_cast<void*>(m_selectedObject)) << "\n";
+
+        if (Mod::get()->getSettingValue<bool>("developer-mode")) {
+            ss << fmt::format("Addr: {}", static_cast<void*>(m_selectedObject)) << "\n";
+        }
         
         m_objectInfoLabel->setString(ss.str().c_str());
     }
