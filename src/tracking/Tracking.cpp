@@ -11,6 +11,7 @@
 #include <Geode/binding/ColorAction.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <Geode/loader/Log.hpp>
+#include <ui/Tag.hpp>
 
 std::string toDiffString(Ref<GameObject> obj) {
     return fmt::format(
@@ -76,6 +77,22 @@ std::string toDiffString(bool value) {
 
 std::string toDiffString(ZLayer const& value) {
     return std::to_string(static_cast<int>(value));
+}
+
+bool BlockAll::blocked() {
+    return s_current;
+}
+
+BlockAll::BlockAll() {
+    if (!s_current) {
+        s_current = this;
+    }
+}
+
+BlockAll::~BlockAll() {
+    if (s_current == this) {
+        s_current = nullptr;
+    }
 }
 
 ColorState ColorState::from(ColorAction* action) {
@@ -174,22 +191,6 @@ EditorEventData* ObjPlaced::clone() const {
     return new ObjPlaced(obj, pos);
 }
 
-bool BlockAll::blocked() {
-    return s_current;
-}
-
-BlockAll::BlockAll() {
-    if (!s_current) {
-        s_current = this;
-    }
-}
-
-BlockAll::~BlockAll() {
-    if (s_current == this) {
-        s_current = nullptr;
-    }
-}
-
 void ObjPlaced::undo() const {
     auto _ = BlockAll();
     LevelEditorLayer::get()->removeObjectFromSection(obj);
@@ -204,6 +205,10 @@ void ObjPlaced::redo() const {
     LevelEditorLayer::get()->addSpecial(obj);
     EditorUI::get()->moveObject(obj, pos - obj->getPosition());
     EditorUI::get()->selectObject(obj, true);
+}
+
+std::vector<std::string> ObjPlaced::details() const {
+    return { fmt::format("ID {}", obj->m_objectID) };
 }
 
 // ObjRemoved
@@ -230,6 +235,10 @@ void ObjRemoved::redo() const {
     obj->deactivateObject(true);
 }
 
+std::vector<std::string> ObjRemoved::details() const {
+    return { fmt::format("At {}, {}", obj->getPositionX(), obj->getPositionY()) };
+}
+
 // ObjMoved
 
 std::string ObjMoved::toDiffString() const {
@@ -248,6 +257,10 @@ void ObjMoved::undo() const {
 void ObjMoved::redo() const {
     auto _ = BlockAll();
     EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
+}
+
+std::vector<std::string> ObjMoved::details() const {
+    return { fmt::format("By {}, {}", pos.to.x - pos.from.x, pos.to.y - pos.from.y) };
 }
 
 // ObjRotated

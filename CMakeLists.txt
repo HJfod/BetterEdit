@@ -9,6 +9,7 @@ file(GLOB SOURCES
 	src/tracking/*.cpp
 	src/script/*.cpp
 	src/other/*.cpp
+	src/ui/*.cpp
 	src/*.cpp
 )
 

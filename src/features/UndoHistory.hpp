@@ -7,12 +7,13 @@
 class History;
 class HistoryPopup;
 
-class HistoryNode : public CCMenu {
+class HistoryNode : public CCNode {
 protected:
     HistoryPopup* m_popup;
     EditorEvent* m_event;
-    CCNode* m_icon;
-    CCLabelBMFont* m_title;
+    CCLayerColor* m_topBG;
+    CCMenu* m_topMenu;
+    CCMenu* m_bottomMenu;
     CCMenuItemSpriteExtra* m_undoBtn;
     CCMenuItemSpriteExtra* m_detailsBtn;
     float m_detailsOpen = 0.f;

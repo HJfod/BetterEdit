@@ -94,7 +94,7 @@ struct $modify(HistoryUI, EditorUI) {
 };
 
 bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
-    if (!CCMenu::init())
+    if (!CCNode::init())
         return false;
     
     m_popup = popup;
@@ -102,16 +102,27 @@ bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
     this->ignoreAnchorPointForPosition(false);
     this->setContentSize({ width, 30.f });
 
-    m_icon = event->icon();
-    m_icon->setPosition({ 20.f, 15.f });
-    this->addChild(m_icon);
+    m_bottomMenu = CCMenu::create();
+    m_bottomMenu->setContentSize({ width, 30.f });
+    this->addChild(m_bottomMenu);
 
-    m_title = CCLabelBMFont::create(event->desc().c_str(), "bigFont.fnt");
-    m_title->limitLabelWidth(width - 120.f, .5f, .1f);
-    m_title->setAnchorPoint({ .0f, .5f });
-    m_title->setPosition(40.f, 15.f);
-    m_title->setID("name");
-    this->addChild(m_title);
+    m_topBG = CCLayerColor::create(ccc4(0xa1, 0x58, 0x2c, 0xff), width, 30.f);
+    m_topBG->setPosition(0.f, 0.f);
+
+    m_topMenu = CCMenu::create();
+    m_topMenu->setPosition(0.f, 0.f);
+    m_topMenu->setContentSize({ width, 30.f });
+
+    auto icon = event->icon();
+    icon->setPosition({ 20.f, 15.f });
+    m_topBG->addChild(icon);
+
+    auto title = CCLabelBMFont::create(event->desc().c_str(), "bigFont.fnt");
+    title->limitLabelWidth(width - 120.f, .5f, .1f);
+    title->setAnchorPoint({ .0f, .5f });
+    title->setPosition(40.f, 15.f);
+    title->setID("name");
+    m_topBG->addChild(title);
 
     auto undoBtnSpr = ButtonSprite::create(
         CCSprite::createWithSpriteFrameName("undo.png"_spr),
@@ -123,7 +134,7 @@ bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
     );
     m_undoBtn->setPosition(width - 20.f, 15.f);
     m_undoBtn->setID("undo-button");
-    this->addChild(m_undoBtn);
+    m_topMenu->addChild(m_undoBtn);
 
     auto detailsBtnSpr = CCSprite::createWithSpriteFrameName("edit_downBtn_001.png");
     detailsBtnSpr->setScale(.725f);
@@ -132,7 +143,10 @@ bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
     );
     m_detailsBtn->setPosition(width - 45.f, 15.f);
     m_detailsBtn->setID("details-button");
-    this->addChild(m_detailsBtn);
+    m_topMenu->addChild(m_detailsBtn);
+
+    this->addChild(m_topBG);
+    this->addChild(m_topMenu);
 
     auto border = CCLayerColor::create({ 0, 0, 0, 100 }, width, 1);
     this->addChild(border);
@@ -180,11 +194,8 @@ void HistoryNode::updateState(bool redoable) {
     this->setContentSize({ m_obContentSize.width, extension + 30.f });
 
     static_cast<CCSprite*>(m_detailsBtn->getNormalImage())->setFlipY(m_detailsOpen > 0.f);
-
-    m_icon->setPosition({ 20.f, extension + 15.f });
-    m_title->setPosition(40.f, extension + 15.f);
-    m_undoBtn->setPosition(m_obContentSize.width - 20.f, extension + 15.f);
-    m_detailsBtn->setPosition(m_obContentSize.width - 45.f, extension + 15.f);
+    m_topMenu->setPosition(0.f, extension);
+    m_bottomMenu->setEnabled(m_detailsOpen >= 1.f);
 }
 
 HistoryNode* HistoryNode::create(HistoryPopup* popup, EditorEvent* event, float width) {
