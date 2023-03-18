@@ -478,8 +478,9 @@ class $modify(CCLayerColor) {
         if (!CCLayerColor::initWithColor(color))
             return false;
         
-        if (auto ui = EditorUI::get()) {
+        if (LevelEditorLayer::get()) {
             States states;
+            auto ui = EditorUI::get();
             for (auto obj : iterTargets(ui->m_selectedObject, ui->m_selectedObjects)) {
                 if (auto eobj = typeinfo_cast<EffectGameObject*>(obj)) {
                     states.push_back(TriggerState::from(eobj));
