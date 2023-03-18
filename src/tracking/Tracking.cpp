@@ -273,6 +273,7 @@ void ObjRemoved::undo() const {
     auto _ = BlockAll();
     LevelEditorLayer::get()->addToSection(obj);
     LevelEditorLayer::get()->addSpecial(obj);
+    EditorUI::get()->selectObject(obj, true);
 }
 
 void ObjRemoved::redo() const {

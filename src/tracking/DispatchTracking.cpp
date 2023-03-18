@@ -127,6 +127,7 @@ class $modify(LevelEditorLayer) {
 
 class $modify(EditorUI) {
     std::vector<std::pair<CCPoint, float>> originalScales;
+    std::vector<CCPoint> freeMoveStart;
 
     void onDuplicate(CCObject* sender) {
         std::vector<GameObject*> src;
@@ -222,6 +223,36 @@ class $modify(EditorUI) {
     void selectObjects(CCArray* objs, bool filter) {
         auto bubble = Bubble<ObjSelected>();
         EditorUI::selectObjects(objs, filter);
+    }
+
+    bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
+        m_fields->freeMoveStart = {};
+        for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
+            m_fields->freeMoveStart.push_back(obj->getPosition());
+        }
+        return EditorUI::ccTouchBegan(touch, event);
+    }
+
+    void ccTouchMoved(CCTouch* touch, CCEvent* event) {
+        auto bubble = Bubble<ObjMoved>();
+        EditorUI::ccTouchMoved(touch, event);
+        bubble.cancel();
+    }
+
+    void ccTouchEnded(CCTouch* touch, CCEvent* event) {
+        if (m_freeMovingObject) {
+            BLOCKED_CALL(EditorUI::ccTouchEnded(touch, event));
+            auto bubble = Bubble<ObjMoved>();
+            size_t i = 0;
+            for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
+                Bubble<ObjMoved>::push(
+                    obj, Transform { m_fields->freeMoveStart.at(i++), obj->getPosition() }
+                );
+            }
+        }
+        else {
+            EditorUI::ccTouchEnded(touch, event);
+        }
     }
 
     void scaleChangeBegin() {
