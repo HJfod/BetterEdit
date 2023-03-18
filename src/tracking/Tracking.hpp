@@ -31,8 +31,7 @@ struct ColorState {
 
     static ColorState from(ColorAction* action);
     void to(ColorAction* action) const;
-    bool operator==(ColorState const& other) const;
-    bool operator!=(ColorState const& other) const;
+    bool operator==(ColorState const& other) const = default;
 };
 
 struct ObjColorState {
@@ -44,8 +43,7 @@ struct ObjColorState {
 
     static ObjColorState from(GameObject* obj);
     void to(GameObject* obj) const;
-    bool operator==(ObjColorState const& other) const;
-    bool operator!=(ObjColorState const& other) const;
+    bool operator==(ObjColorState const& other) const = default;
 };
 
 struct ObjState {
@@ -61,8 +59,209 @@ struct ObjState {
 
     static ObjState from(GameObject* obj);
     void to(GameObject* obj) const;
-    bool operator==(ObjState const& other) const;
-    bool operator!=(ObjState const& other) const;
+    bool operator==(ObjState const& other) const = default;
+};
+
+struct StartPosState {
+    int speed;
+    int mode;
+    bool flipGravity;
+    bool mini;
+    bool dual;
+
+    static StartPosState from(StartPosObject* obj);
+    void to(StartPosObject* obj) const;
+    bool operator==(StartPosState const& other) const = default;
+};
+
+struct TriggerState {
+    struct Color {
+        int channel;
+        float fadeTime;
+        ccColor3B color;
+        float opacity;
+        bool blending;
+        bool playerColor1;
+        bool playerColor2;
+        int copyID;
+        ccHSVValue copyHSV;
+        bool copyOpacity;
+        // for some reason default doesn't work for this one
+        inline bool operator==(Color const& other) const {
+            return channel == other.channel &&
+                fadeTime == other.fadeTime &&
+                color == other.color &&
+                opacity == other.opacity &&
+                blending == other.blending &&
+                playerColor1 == other.playerColor1 &&
+                playerColor2 == other.playerColor2 &&
+                copyID == other.copyID &&
+                copyHSV == other.copyHSV &&
+                copyOpacity == other.copyOpacity;
+        }
+    };
+
+    struct Move {
+        float x;
+        float y;
+        bool lockToPlayerX;
+        bool lockToPlayerY;
+        EasingType easing;
+        float easingRate;
+        float time;
+        int targetGroupID;
+        bool useTarget;
+        int followGroupID;
+        MoveTargetType followType;
+        bool operator==(Move const&) const = default;
+    };
+
+    struct Stop {
+        int targetGroupID;
+        bool operator==(Stop const&) const = default;
+    };
+
+    struct Pulse {
+        int targetID;
+        bool targetGroup;
+        bool mainOnly;
+        bool detailOnly;
+        ccColor3B color;
+        bool pulseHSV;
+        int copyID;
+        ccHSVValue copyHSV;
+        float fadeIn;
+        float hold;
+        float fadeOut;
+        bool exclusive;
+        bool operator==(Pulse const&) const = default;
+    };
+
+    struct Alpha {
+        int targetGroupID;
+        float time;
+        float opacity;
+        bool operator==(Alpha const&) const = default;
+    };
+
+    struct Toggle {
+        int targetGroupID;
+        bool activateGroup;
+        bool operator==(Toggle const&) const = default;
+    };
+
+    struct Spawn {
+        int targetGroupID;
+        float delayTime;
+        bool editorDisable;
+        bool operator==(Spawn const&) const = default;
+    };
+
+    struct Rotate {
+        int targetGroupID;
+        int centerGroupID;
+        int degrees;
+        int times360;
+        bool lockObjectRotation;
+        EasingType easing;
+        float easingRate;
+        float time;
+        bool operator==(Rotate const&) const = default;
+    };
+
+    struct Follow {
+        int targetGroupID;
+        int followGroupID;
+        float xMod;
+        float yMod;
+        float time;
+        bool operator==(Follow const&) const = default;
+    };
+
+    struct Shake {
+        float strength;
+        float interval;
+        float duration;
+        bool operator==(Shake const&) const = default;
+    };
+
+    struct Animation {
+        int targetGroupID;
+        int animationID;
+        bool operator==(Animation const&) const = default;
+    };
+
+    struct FollowPlayerY {
+        int targetGroupID;
+        float speed;
+        float delay;
+        int offset;
+        float maxSpeed;
+        float time;
+        bool operator==(FollowPlayerY const&) const = default;
+    };
+
+    struct Touch {
+        int targetGroupID;
+        bool dualMode;
+        bool holdMode;
+        TouchToggleMode toggleMode;
+        bool operator==(Touch const&) const = default;
+    };
+
+    struct Count {
+        int itemID;
+        int targetGroupID;
+        int targetCount;
+        bool activateGroup;
+        bool multiActivate;
+        bool operator==(Count const&) const = default;
+    };
+
+    struct InstantCount {
+        int itemID;
+        int targetGroupID;
+        int targetCount;
+        bool activateGroup;
+        ComparisonType comparisonType;
+        bool operator==(InstantCount const&) const = default;
+    };
+
+    struct Pickup {
+        int itemID;
+        int count;
+        bool operator==(Pickup const&) const = default;
+    };
+
+    struct Collision {
+        int blockAID;
+        int blockBID;
+        int targetID;
+        bool activateGroup;
+        bool triggerOnExit;
+        bool operator==(Collision const&) const = default;
+    };
+
+    struct OnDeath {
+        int targetGroupID;
+        bool activateGroup;
+        bool operator==(OnDeath const&) const = default;
+    };
+
+    std::variant<
+        Color, Move, Stop, Pulse, Alpha, Toggle, Spawn, Rotate,
+        Follow, Shake, Animation, FollowPlayerY,
+        Touch, Count, InstantCount, Pickup, Collision, OnDeath
+    > props;
+
+    // shared
+    bool touchTrigger;
+    bool spawnTrigger;
+    bool multiTrigger;
+
+    static std::optional<TriggerState> from(EffectGameObject* obj);
+    void to(EffectGameObject* obj) const;
+    bool operator==(TriggerState const&) const = default;
 };
 
 struct BlockAll {
@@ -82,11 +281,37 @@ std::string toDiffString(ccColor4B const& value);
 std::string toDiffString(ColorState const& value);
 std::string toDiffString(ObjColorState const& value);
 std::string toDiffString(ObjState const& value);
+std::string toDiffString(StartPosState const& value);
+std::string toDiffString(TriggerState const& value);
 std::string toDiffString(std::vector<short> const& value);
+
+template <class... T, std::size_t... Is>
+std::string toDiffStringImpl2(std::index_sequence<Is...>, T&&... value) {
+    std::string ret = "";
+    ((ret += (Is == 0 ? "" : ",") + toDiffString(value)), ...);
+    return ret;
+}
+
+template <class... T>
+std::string toDiffStringImpl(T&&... value) {
+    return toDiffStringImpl2(std::index_sequence_for<T...> {}, std::forward<T>(value)...);
+}
+
+template <class A, class B, class... T>
+std::string toDiffString(A&& a, B&& b, T&&... value) {
+    return toDiffStringImpl(
+        std::forward<A>(a), std::forward<B>(b), std::forward<T>(value)...
+    );
+}
 
 template <class T>
 std::string toDiffString(T const& value) {
-    return fmt::format("{}", value);
+    if constexpr (std::is_enum_v<T>) {
+        return fmt::format("{}", static_cast<int>(value));
+    }
+    else {
+        return fmt::format("{}", value);
+    }
 }
 
 template <class T>
@@ -340,6 +565,22 @@ struct ObjDeselected : public ObjEventData {
     static inline auto DESC_FMT = "Deselected {}";
 };
 
+struct TriggerPropsChanged : public ObjEventData {
+    Transform<TriggerState> state;
+
+    inline TriggerPropsChanged(Ref<EffectGameObject> obj, Transform<TriggerState> const& state)
+      : ObjEventData(obj.data()), state(state) {}
+    
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+    std::vector<Detail> details() const override;
+
+    static inline auto ICON_NAME = "GJ_hammerIcon_001.png";
+    static inline auto DESC_FMT = "Changed {} Properties";
+};
+
 struct EditorEvent : public Event, public EditorEventData {
     virtual std::string desc() const = 0;
     virtual CCNode* icon() const = 0;
@@ -419,11 +660,10 @@ struct MultiObjEvent : public EditorEvent {
     }
 
     std::string desc() const override {
+        const char* ty = typeinfo_cast<EffectGameObject*>(events.at(0).obj.data()) ? "Trigger" : "Object";
         return fmt::format(
             fmt::runtime(Ev::DESC_FMT),
-            (events.size() == 1 ?
-                "Object" :
-                fmt::format("{} Objects", events.size()))
+            (events.size() == 1 ? ty : fmt::format("{} {}s", events.size(), ty))
         );
     }
 };

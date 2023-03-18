@@ -1,15 +1,17 @@
+
+#include <Geode/utils/cocos.hpp>
 #include "Tracking.hpp"
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/EditorUI.hpp>
 #include <Geode/binding/GameObject.hpp>
 #include <Geode/binding/EffectGameObject.hpp>
+#include <Geode/binding/StartPosObject.hpp>
 #include <Geode/binding/CustomizeObjectLayer.hpp>
 #include <Geode/binding/HSVWidgetPopup.hpp>
 #include <Geode/binding/GJSpriteColor.hpp>
 #include <Geode/binding/GJEffectManager.hpp>
 #include <Geode/binding/LevelSettingsObject.hpp>
 #include <Geode/binding/ColorAction.hpp>
-#include <Geode/utils/cocos.hpp>
 #include <Geode/loader/Log.hpp>
 #include <other/Utils.hpp>
 
@@ -47,29 +49,181 @@ std::string toDiffString(ccColor4B const& value) {
 }
 
 std::string toDiffString(ColorState const& value) {
-    return fmt::format(
-        "{},{},{},{},{},{}",
-        toDiffString(value.color), value.opacity, value.blending,
-        value.playerColor, value.copyColorID, toDiffString(value.copyHSV)
+    return toDiffString(
+        value.color, value.opacity, value.blending,
+        value.playerColor, value.copyColorID, value.copyHSV
     );
 }
 
 std::string toDiffString(ObjColorState const& value) {
-    return fmt::format(
-        "{},{},{},{},{}",
-        value.base, toDiffString(value.baseHSV),
-        value.detail, toDiffString(value.detailHSV),
+    return toDiffString(
+        value.base, value.baseHSV,
+        value.detail, value.detailHSV,
         value.glow
     );
 }
 
 std::string toDiffString(ObjState const& value) {
-    return fmt::format(
-        "{},{},{},{},{},{},{},{},{}",
-        toDiffString(value.groups), value.editorLayer1, value.editorLayer2, value.zOrder, 
-        toDiffString(value.zLayer), value.dontFade, value.dontEnter, value.groupParent,
+    return toDiffString(
+        value.groups, value.editorLayer1, value.editorLayer2, value.zOrder, 
+        value.zLayer, value.dontFade, value.dontEnter, value.groupParent,
         value.highDetail
     );
+}
+
+std::string toDiffString(StartPosState const& value) {
+    return toDiffString(
+        value.speed, value.mode, value.flipGravity, value.mini, value.dual
+    );
+}
+
+std::string toDiffString(TriggerState const& value) {
+    return std::visit(makeVisitor {
+        [](TriggerState::Color const& color) {
+            return toDiffString(
+                color.channel,
+                color.fadeTime,
+                color.color,
+                color.opacity,
+                color.blending,
+                color.playerColor1,
+                color.playerColor2,
+                color.copyID,
+                color.copyHSV,
+                color.copyOpacity
+            );
+        },
+        [](TriggerState::Move const& move) {
+            return toDiffString(
+                move.x,
+                move.y,
+                move.lockToPlayerX,
+                move.lockToPlayerY,
+                move.easing,
+                move.easingRate,
+                move.time,
+                move.targetGroupID,
+                move.useTarget,
+                move.followGroupID,
+                move.followType
+            );
+        },
+        [](TriggerState::Stop const& stop) {
+            return toDiffString(stop.targetGroupID);
+        },
+        [](TriggerState::Pulse const& pulse) {
+            return toDiffString(
+                pulse.targetID,
+                pulse.targetGroup,
+                pulse.mainOnly,
+                pulse.detailOnly,
+                pulse.color,
+                pulse.pulseHSV,
+                pulse.copyID,
+                pulse.copyHSV,
+                pulse.fadeIn,
+                pulse.hold,
+                pulse.fadeOut,
+                pulse.exclusive
+            );
+        },
+        [](TriggerState::Alpha const& alpha) {
+            return toDiffString(
+                alpha.targetGroupID,
+                alpha.time,
+                alpha.opacity
+            );
+        },
+        [](TriggerState::Toggle const& toggle) {
+            return toDiffString(
+                toggle.targetGroupID,
+                toggle.activateGroup
+            );
+        },
+        [](TriggerState::Spawn const& spawn) {
+            return toDiffString(
+                spawn.targetGroupID,
+                spawn.delayTime,
+                spawn.editorDisable
+            );
+        },
+        [](TriggerState::Rotate const& rotate) {
+            return toDiffString(
+                rotate.targetGroupID,
+                rotate.centerGroupID,
+                rotate.degrees,
+                rotate.times360,
+                rotate.lockObjectRotation,
+                rotate.easing,
+                rotate.easingRate,
+                rotate.time
+            );
+        },
+        [](TriggerState::Follow const& follow) {
+            return toDiffString(
+                follow.targetGroupID,
+                follow.followGroupID,
+                follow.xMod,
+                follow.yMod,
+                follow.time
+            );
+        },
+        [](TriggerState::Shake const& shake) {
+            return toDiffString(
+                shake.strength, shake.interval, shake.duration
+            );
+        },
+        [](TriggerState::Animation const& animation) {
+            return toDiffString(
+                animation.targetGroupID, animation.animationID
+            );
+        },
+        [](TriggerState::FollowPlayerY const& followPlayerY) {
+            return toDiffString(
+                followPlayerY.targetGroupID,
+                followPlayerY.speed,
+                followPlayerY.delay,
+                followPlayerY.offset,
+                followPlayerY.maxSpeed,
+                followPlayerY.time
+            );
+        },
+        [](TriggerState::Touch const& touch) {
+            return toDiffString(
+                touch.targetGroupID,
+                touch.dualMode,
+                touch.holdMode,
+                touch.toggleMode
+            );
+        },
+        [](TriggerState::Count const& count) {
+            return toDiffString(
+                count.itemID,
+                count.targetGroupID,
+                count.targetCount,
+                count.activateGroup,
+                count.multiActivate
+            );
+        },
+        [](TriggerState::InstantCount const& instantCount) {
+            return toDiffString(
+                instantCount.itemID,
+                instantCount.targetGroupID,
+                instantCount.targetCount,
+                instantCount.activateGroup,
+                instantCount.comparisonType
+            );
+        },
+        [](TriggerState::Pickup const& pickup) {
+            return toDiffString(pickup.itemID, pickup.count);
+        },
+        [](TriggerState::Collision const& collision) {
+            return toDiffString(collision.blockAID, collision.blockBID);
+        },
+        [](TriggerState::OnDeath const& onDeath) {
+            return toDiffString(onDeath.targetGroupID, onDeath.activateGroup);
+        },
+    }, value.props) + "," + toDiffString(value.touchTrigger, value.spawnTrigger, value.multiTrigger);
 }
 
 std::string toDiffString(std::vector<short> const& value) {
@@ -128,19 +282,6 @@ void ColorState::to(ColorAction* action) const {
     action->m_copyHSV = copyHSV;
 }
 
-bool ColorState::operator==(ColorState const& other) const {
-    return color == other.color &&
-        opacity == other.opacity &&
-        blending == other.blending &&
-        playerColor == other.playerColor &&
-        copyColorID == other.copyColorID &&
-        copyHSV == other.copyHSV;
-}
-
-bool ColorState::operator!=(ColorState const& other) const {
-    return !(*this == other);
-}
-
 ObjColorState ObjColorState::from(GameObject* obj) {
     return ObjColorState {
         .base = obj->m_baseColor ? obj->m_baseColor->m_colorID : 0,
@@ -162,18 +303,6 @@ void ObjColorState::to(GameObject* obj) const {
     }
     obj->m_isGlowDisabled = !glow;
     obj->m_shouldUpdateColorSprite = true;
-}
-
-bool ObjColorState::operator==(ObjColorState const& other) const {
-    return base == other.base &&
-        baseHSV == other.baseHSV &&
-        detail == other.detail &&
-        detailHSV == other.detailHSV &&
-        glow == other.glow;
-}
-
-bool ObjColorState::operator!=(ObjColorState const& other) const {
-    return !(*this == other);
 }
 
 ObjState ObjState::from(GameObject* obj) {
@@ -206,20 +335,427 @@ void ObjState::to(GameObject* obj) const {
     obj->m_highDetail = this->highDetail;
 }
 
-bool ObjState::operator==(ObjState const& other) const {
-    return groups == other.groups &&
-        editorLayer1 == other.editorLayer1 &&
-        editorLayer2 == other.editorLayer2 &&
-        zOrder == other.zOrder &&
-        zLayer == other.zLayer &&
-        dontFade == other.dontFade && 
-        dontEnter == other.dontEnter && 
-        groupParent == other.groupParent && 
-        highDetail == other.highDetail;
+StartPosState StartPosState::from(StartPosObject* obj) {
+    return StartPosState {
+        .speed = obj->m_levelSettings->m_startSpeed,
+        .mode = obj->m_levelSettings->m_startMode,
+        .flipGravity = obj->m_levelSettings->m_isFlipped,
+        .mini = obj->m_levelSettings->m_startMini,
+        .dual = obj->m_levelSettings->m_startDual,
+    };
 }
 
-bool ObjState::operator!=(ObjState const& other) const {
-    return !(*this == other);
+void StartPosState::to(StartPosObject* obj) const {
+    obj->m_levelSettings->m_startSpeed = speed;
+    obj->m_levelSettings->m_startMode = mode;
+    obj->m_levelSettings->m_isFlipped = flipGravity;
+    obj->m_levelSettings->m_startMini = mini;
+    obj->m_levelSettings->m_startDual = dual;
+}
+
+std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
+    switch (obj->m_objectID) {
+        case 899: {
+            return TriggerState {
+                .props = {TriggerState::Color {
+                    .channel = obj->m_targetColorID,
+                    .fadeTime = obj->m_duration,
+                    .color = obj->m_colColor,
+                    .opacity = obj->m_opacity,
+                    .blending = obj->m_blending,
+                    .playerColor1 = obj->m_playerColor1,
+                    .playerColor2 = obj->m_playerColor2,
+                    .copyID = obj->m_copyColorID,
+                    .copyHSV = obj->m_hsvValue,
+                    .copyOpacity = obj->m_copyOpacity,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 901: {
+            return TriggerState {
+                .props = {TriggerState::Move {
+                    .x = obj->m_move.x,
+                    .y = obj->m_move.y,
+                    .lockToPlayerX = obj->m_lockToPlayerX,
+                    .lockToPlayerY = obj->m_lockToPlayerY,
+                    .easing = obj->m_easingType,
+                    .easingRate = obj->m_easingRate,
+                    .time = obj->m_duration,
+                    .targetGroupID = obj->m_targetGroupID,
+                    .useTarget = obj->m_useTarget,
+                    .followGroupID = obj->m_centerGroupID,
+                    .followType = obj->m_moveTargetType,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1616: {
+            return TriggerState {
+                .props = {TriggerState::Stop {
+                    .targetGroupID = obj->m_targetGroupID,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1006: {
+            return TriggerState {
+                .props = {TriggerState::Pulse {
+                    .targetID = obj->m_targetGroupID,
+                    .targetGroup = obj->m_pulseGroupMode == 1,
+                    .mainOnly = obj->m_pulseMainOnly,
+                    .detailOnly = obj->m_pulseDetailOnly,
+                    .color = obj->m_colColor,
+                    .pulseHSV = obj->m_pulseHSVMode == 1,
+                    .copyID = obj->m_copyColorID,
+                    .copyHSV = obj->m_hsvValue,
+                    .fadeIn = obj->m_fadeInTime,
+                    .hold = obj->m_holdTime,
+                    .fadeOut = obj->m_fadeOutTime,
+                    .exclusive = obj->m_pulseExclusive,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1007: {
+            return TriggerState {
+                .props = {TriggerState::Alpha {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .time = obj->m_duration,
+                    .opacity = obj->m_opacity,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1049: {
+            return TriggerState {
+                .props = {TriggerState::Toggle {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .activateGroup = obj->m_activateGroup,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1268: {
+            return TriggerState {
+                .props = {TriggerState::Spawn {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .delayTime = obj->m_spawnDelay,
+                    .editorDisable = obj->m_editorDisabled,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1346: {
+            return TriggerState {
+                .props = {TriggerState::Rotate {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .centerGroupID = obj->m_centerGroupID,
+                    .degrees = obj->m_rotateDegrees,
+                    .times360 = obj->m_times360,
+                    .lockObjectRotation = obj->m_lockObjectRotation,
+                    .easing = obj->m_easingType,
+                    .easingRate = obj->m_easingRate,
+                    .time = obj->m_duration,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1347: {
+            return TriggerState {
+                .props = {TriggerState::Follow {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .followGroupID = obj->m_centerGroupID,
+                    .xMod = obj->m_followMod.x,
+                    .yMod = obj->m_followMod.y,
+                    .time = obj->m_duration,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1520: {
+            return TriggerState {
+                .props = {TriggerState::Shake {
+                    .strength = obj->m_shakeStrength,
+                    .interval = obj->m_shakeInterval,
+                    .duration = obj->m_duration,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1585: {
+            return TriggerState {
+                .props = {TriggerState::Animation {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .animationID = obj->m_animationID,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1814: {
+            return TriggerState {
+                .props = {TriggerState::FollowPlayerY {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .speed = obj->m_followYSpeed,
+                    .delay = obj->m_followYDelay,
+                    .offset = obj->m_followYOffset,
+                    .maxSpeed = obj->m_followYMaxSpeed,
+                    .time = obj->m_duration,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1595: {
+            return TriggerState {
+                .props = {TriggerState::Touch {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .dualMode = obj->m_touchDualMode,
+                    .holdMode = obj->m_touchHoldMode,
+                    .toggleMode = obj->m_touchToggleMode,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1611: {
+            return TriggerState {
+                .props = {TriggerState::Count {
+                    .itemID = obj->m_itemBlockAID,
+                    .targetGroupID = obj->m_targetGroupID,
+                    .targetCount = obj->m_targetCount,
+                    .activateGroup = obj->m_activateGroup,
+                    .multiActivate = obj->m_multiActivate,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1811: {
+            return TriggerState {
+                .props = {TriggerState::InstantCount {
+                    .itemID = obj->m_itemBlockAID,
+                    .targetGroupID = obj->m_targetGroupID,
+                    .targetCount = obj->m_targetCount,
+                    .activateGroup = obj->m_activateGroup,
+                    .comparisonType = obj->m_comparisonType,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1817: {
+            return TriggerState {
+                .props = {TriggerState::Pickup {
+                    .itemID = obj->m_itemBlockAID,
+                    .count = obj->m_targetCount,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1815: {
+            return TriggerState {
+                .props = {TriggerState::Collision {
+                    .blockAID = obj->m_itemBlockAID,
+                    .blockBID = obj->m_blockBID,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        case 1812: {
+            return TriggerState {
+                .props = {TriggerState::OnDeath {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .activateGroup = obj->m_activateGroup,
+                }},
+                .touchTrigger = obj->m_touchTriggered,
+                .spawnTrigger = obj->m_spawnTriggered,
+                .multiTrigger = obj->m_multiTrigger,
+            };
+        } break;
+
+        default: {
+            return std::nullopt;
+        } break;
+    }
+}
+
+void TriggerState::to(EffectGameObject* obj) const {
+    std::visit(makeVisitor {
+        [&](TriggerState::Color const& color) {
+            obj->m_targetColorID = color.channel;
+            obj->m_duration = color.fadeTime;
+            obj->m_colColor = color.color;
+            obj->m_opacity = color.opacity;
+            obj->m_blending = color.blending;
+            obj->m_playerColor1 = color.playerColor1;
+            obj->m_playerColor2 = color.playerColor2;
+            obj->m_copyColorID = color.copyID;
+            obj->m_hsvValue = color.copyHSV;
+            obj->m_copyOpacity = color.copyOpacity;
+        },
+        [&](TriggerState::Move const& move) {
+            obj->m_move.x = move.x;
+            obj->m_move.y = move.y;
+            obj->m_lockToPlayerX = move.lockToPlayerX;
+            obj->m_lockToPlayerY = move.lockToPlayerY;
+            obj->m_easingType = move.easing;
+            obj->m_easingRate = move.easingRate;
+            obj->m_duration = move.time;
+            obj->m_targetGroupID = move.targetGroupID;
+            obj->m_useTarget = move.useTarget;
+            obj->m_centerGroupID = move.followGroupID;
+            obj->m_moveTargetType = move.followType;
+        },
+        [&](TriggerState::Stop const& stop) {
+            obj->m_targetGroupID = stop.targetGroupID;
+        },
+        [&](TriggerState::Pulse const& pulse) {
+            obj->m_targetGroupID = pulse.targetID;
+            obj->m_pulseGroupMode = pulse.targetGroup;
+            obj->m_pulseMainOnly = pulse.mainOnly;
+            obj->m_pulseDetailOnly = pulse.detailOnly;
+            obj->m_colColor = pulse.color;
+            obj->m_pulseHSVMode = pulse.pulseHSV;
+            obj->m_copyColorID = pulse.copyID;
+            obj->m_hsvValue = pulse.copyHSV;
+            obj->m_fadeInTime = pulse.fadeIn;
+            obj->m_holdTime = pulse.hold;
+            obj->m_fadeOutTime = pulse.fadeOut;
+            obj->m_pulseExclusive = pulse.exclusive;
+        },
+        [&](TriggerState::Alpha const& alpha) {
+            obj->m_targetGroupID = alpha.targetGroupID;
+            obj->m_duration = alpha.time;
+            obj->m_opacity = alpha.opacity;
+        },
+        [&](TriggerState::Toggle const& toggle) {
+            obj->m_targetGroupID = toggle.targetGroupID;
+            obj->m_activateGroup = toggle.activateGroup;
+        },
+        [&](TriggerState::Spawn const& spawn) {
+            obj->m_targetGroupID = spawn.targetGroupID;
+            obj->m_spawnDelay = spawn.delayTime;
+            obj->m_editorDisabled = spawn.editorDisable;
+        },
+        [&](TriggerState::Rotate const& rotate) {
+            obj->m_targetGroupID = rotate.targetGroupID;
+            obj->m_centerGroupID = rotate.centerGroupID;
+            obj->m_rotateDegrees = rotate.degrees;
+            obj->m_times360 = rotate.times360;
+            obj->m_lockObjectRotation = rotate.lockObjectRotation;
+            obj->m_easingType = rotate.easing;
+            obj->m_easingRate = rotate.easingRate;
+            obj->m_duration = rotate.time;
+        },
+        [&](TriggerState::Follow const& follow) {
+            obj->m_targetGroupID = follow.targetGroupID;
+            obj->m_centerGroupID = follow.followGroupID;
+            obj->m_followMod.x = follow.xMod;
+            obj->m_followMod.y = follow.yMod;
+            obj->m_duration = follow.time;
+        },
+        [&](TriggerState::Shake const& shake) {
+            obj->m_shakeStrength = shake.strength;
+            obj->m_shakeInterval = shake.interval;
+            obj->m_duration = shake.duration;
+        },
+        [&](TriggerState::Animation const& animation) {
+            obj->m_targetGroupID = animation.targetGroupID;
+            obj->m_animationID = animation.animationID;
+        },
+        [&](TriggerState::FollowPlayerY const& followPlayerY) {
+            obj->m_targetGroupID = followPlayerY.targetGroupID;
+            obj->m_followYSpeed = followPlayerY.speed;
+            obj->m_followYDelay = followPlayerY.delay;
+            obj->m_followYOffset = followPlayerY.offset;
+            obj->m_followYMaxSpeed = followPlayerY.maxSpeed;
+            obj->m_duration = followPlayerY.time;
+        },
+        [&](TriggerState::Touch const& touch) {
+            obj->m_targetGroupID = touch.targetGroupID;
+            obj->m_touchDualMode = touch.dualMode;
+            obj->m_touchHoldMode = touch.holdMode;
+            obj->m_touchToggleMode = touch.toggleMode;
+        },
+        [&](TriggerState::Count const& count) {
+            obj->m_itemBlockAID = count.itemID;
+            obj->m_targetGroupID = count.targetGroupID;
+            obj->m_targetCount = count.targetCount;
+            obj->m_activateGroup = count.activateGroup;
+            obj->m_multiActivate = count.multiActivate;
+        },
+        [&](TriggerState::InstantCount const& instantCount) {
+            obj->m_itemBlockAID = instantCount.itemID;
+            obj->m_targetGroupID = instantCount.targetGroupID;
+            obj->m_targetCount = instantCount.targetCount;
+            obj->m_activateGroup = instantCount.activateGroup;
+            obj->m_comparisonType = instantCount.comparisonType;
+        },
+        [&](TriggerState::Pickup const& pickup) {
+            obj->m_itemBlockAID = pickup.itemID;
+            obj->m_targetCount = pickup.count;
+        },
+        [&](TriggerState::Collision const& collision) {
+            obj->m_itemBlockAID = collision.blockAID;
+            obj->m_blockBID = collision.blockBID;
+        },
+        [&](TriggerState::OnDeath const& onDeath) {
+            obj->m_targetGroupID = onDeath.targetGroupID;
+            obj->m_activateGroup = onDeath.activateGroup;
+        },
+    }, props);
+
+    obj->m_touchTriggered = touchTrigger;
+    obj->m_spawnTriggered = spawnTrigger;
+    obj->m_multiTrigger = multiTrigger;
 }
 
 std::unique_ptr<EditorEvent> EditorEvent::unique() const {
@@ -623,6 +1159,29 @@ void ObjDeselected::redo() const {
 }
 
 std::vector<Detail> ObjDeselected::details() const {
+    return {};
+}
+
+// TriggerPropsChanged
+
+std::string TriggerPropsChanged::toDiffString() const {
+    return fmtDiffString("trg", obj, state);
+}
+
+EditorEventData* TriggerPropsChanged::clone() const {
+    return new TriggerPropsChanged(static_cast<EffectGameObject*>(obj.data()), state);
+}
+
+void TriggerPropsChanged::undo() const {
+    state.from.to(static_cast<EffectGameObject*>(obj.data()));
+}
+
+void TriggerPropsChanged::redo() const {
+    state.to.to(static_cast<EffectGameObject*>(obj.data()));
+}
+
+std::vector<Detail> TriggerPropsChanged::details() const {
+    // todo
     return {};
 }
 

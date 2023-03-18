@@ -8,6 +8,8 @@
 #include <Geode/modify/HSVWidgetPopup.hpp>
 #include <Geode/modify/ColorSelectPopup.hpp>
 #include <Geode/modify/SetGroupIDLayer.hpp>
+#include <Geode/modify/CCLayerColor.hpp>
+#include <Geode/modify/FLAlertLayer.hpp>
 #include <Geode/binding/GJSpriteColor.hpp>
 #include <Geode/binding/GJEffectManager.hpp>
 #include <Geode/binding/ColorAction.hpp>
@@ -464,5 +466,57 @@ class $modify(SetGroupIDLayer) {
             }
             i += 1;
         }
+    }
+};
+
+using States = std::vector<std::optional<TriggerState>>;
+
+class $modify(CCLayerColor) {
+    // mfw no fields on cocos classes yet
+    // also hooking the destructor doesn't work
+
+    bool initWithColor(ccColor4B const& color) {
+        if (!CCLayerColor::initWithColor(color))
+            return false;
+        
+        log::info("brah");
+        
+        if (auto ui = EditorUI::get()) {
+            States states;
+            for (auto obj : iterTargets(ui->m_selectedObject, ui->m_selectedObjects)) {
+                if (auto eobj = typeinfo_cast<EffectGameObject*>(obj)) {
+                    states.push_back(TriggerState::from(eobj));
+                }
+            }
+            this->setAttribute("states"_spr, states);
+        }
+
+        return true;
+    }
+    
+    void destructor() {
+        log::info("broh");
+        if (auto ui = EditorUI::get()) {
+            auto states = this->template getAttribute<States>("states"_spr);
+            if (states) {
+                size_t i = 0;
+                auto bubble = Bubble<TriggerPropsChanged>();
+                for (auto obj : iterTargets(ui->m_selectedObject, ui->m_selectedObjects)) {
+                    if (auto eobj = typeinfo_cast<EffectGameObject*>(obj)) {
+                        auto prev = states.value().at(i);
+                        auto state = TriggerState::from(eobj);
+                        if (prev && state) {
+                            if (prev.value().props != state.value().props) {
+                                Bubble<TriggerPropsChanged>::push(
+                                    eobj, Transform { prev.value(), state.value() }
+                                );
+                            }
+                            i += 1;
+                        }
+                    }
+                }
+            }
+        }
+        CCLayerColor::~CCLayerColor();
     }
 };
