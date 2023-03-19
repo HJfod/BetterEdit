@@ -480,7 +480,7 @@ class $modify(SetGroupIDLayer) {
     }
 };
 
-using States = std::vector<std::optional<TriggerState>>;
+using States = std::vector<std::pair<std::optional<TriggerState>, std::optional<SpecialState>>>;
 
 class $modify(CCLayerColor) {
     // mfw no fields on cocos classes yet
@@ -494,7 +494,10 @@ class $modify(CCLayerColor) {
             auto ui = EditorUI::get();
             for (auto obj : iterTargets(ui->m_selectedObject, ui->m_selectedObjects)) {
                 if (auto eobj = typeinfo_cast<EffectGameObject*>(obj)) {
-                    states.push_back(TriggerState::from(eobj));
+                    states.emplace_back(TriggerState::from(eobj), SpecialState::from(eobj));
+                }
+                else {
+                    states.emplace_back(std::nullopt, SpecialState::from(obj));
                 }
             }
             this->setAttribute("states"_spr, states);
@@ -508,18 +511,26 @@ class $modify(CCLayerColor) {
             auto states = this->template getAttribute<States>("states"_spr);
             if (states && states.value().size()) {
                 size_t i = 0;
-                auto bubble = Bubble<TriggerPropsChanged>();
+                auto bubble1 = Bubble<TriggerPropsChanged>();
+                auto bubble2 = Bubble<SpecialPropsChanged>();
                 for (auto obj : iterTargets(ui->m_selectedObject, ui->m_selectedObjects)) {
+                    auto prev = states.value().at(i++);
                     if (auto eobj = typeinfo_cast<EffectGameObject*>(obj)) {
-                        auto prev = states.value().at(i);
                         auto state = TriggerState::from(eobj);
-                        if (prev && state) {
-                            if (prev.value().props != state.value().props) {
+                        if (prev.first && state) {
+                            if (prev.first.value().props != state.value().props) {
                                 Bubble<TriggerPropsChanged>::push(
-                                    eobj, Transform { prev.value(), state.value() }
+                                    eobj, Transform { prev.first.value(), state.value() }
                                 );
                             }
-                            i += 1;
+                        }
+                    }
+                    auto state = SpecialState::from(obj);
+                    if (prev.second && state) {
+                        if (prev.second.value().props != state.value().props) {
+                            Bubble<SpecialPropsChanged>::push(
+                                obj, Transform { prev.second.value(), state.value() }
+                            );
                         }
                     }
                 }

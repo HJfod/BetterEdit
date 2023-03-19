@@ -15,6 +15,7 @@
 #include <Geode/binding/SelectFontLayer.hpp>
 #include <Geode/loader/Log.hpp>
 #include <other/Utils.hpp>
+#include <objects/ObjectType.hpp>
 
 std::string toDiffString(Ref<GameObject> obj) {
     return fmt::format(
@@ -229,6 +230,36 @@ std::string toDiffString(TriggerState const& value) {
     }, value.props) + "," + toDiffString(value.touchTrigger, value.spawnTrigger, value.multiTrigger);
 }
 
+std::string toDiffString(SpecialState const& value) {
+    return std::visit(makeVisitor {
+        [](SpecialState::CollisionBlock const& value) {
+            return toDiffString(value.id, value.dynamic);
+        },
+        [](SpecialState::Counter const& value) {
+            return toDiffString(value.id);
+        },
+        [](SpecialState::Saw const& value) {
+            return toDiffString(value.degrees, value.disable);
+        },
+        [](SpecialState::OrbPadPortal const& value) {
+            return toDiffString(value.multiActivate);
+        },
+        [](SpecialState::ToggleOrb const& value) {
+            return toDiffString(value.targetGroupID, value.activateGroup, value.multiActivate);
+        },
+        [](SpecialState::Collectible const& value) {
+            return toDiffString(
+                value.pickupMode, value.itemID,
+                value.subtractCount, value.groupID,
+                value.enableGroup
+            );
+        },
+        [](SpecialState::Pulse const& value) {
+            return toDiffString(value.randomizeStart, value.speed);
+        },
+    }, value.props);
+}
+
 std::string toDiffString(std::vector<short> const& value) {
     std::string res = "[";
     for (auto& c : value) {
@@ -376,9 +407,109 @@ void LevelSettingsState::to(LevelSettingsObject* obj) const {
     obj->m_fontIndex = font;
 }
 
+std::optional<SpecialState> SpecialState::from(GameObject* robj) {
+    if (auto obj = typeinfo_cast<EffectGameObject*>(robj)) {
+        if (obj->m_objectID == ObjectProps::COUNTER_ITEM_ID) {
+            return SpecialState {
+                .props = {SpecialState::Counter {
+                    .id = obj->m_itemBlockAID,
+                }},
+            };
+        }
+        if (obj->m_objectID == ObjectProps::TOGGLE_ORB_ID) {
+            return SpecialState {
+                .props = {SpecialState::ToggleOrb {
+                    .targetGroupID = obj->m_targetGroupID,
+                    .activateGroup = obj->m_activateGroup,
+                    .multiActivate = obj->m_multiActivate,
+                }},
+            };
+        }
+        if (obj->m_objectType == GameObjectType::Collectible) {
+            return SpecialState {
+                .props = {SpecialState::Collectible {
+                    .pickupMode = obj->m_pickupMode,
+                    .itemID = obj->m_itemBlockAID,
+                    .subtractCount = obj->m_subtractCount,
+                    .groupID = obj->m_targetGroupID,
+                    .enableGroup = obj->m_activateGroup,
+                }},
+            };
+        }
+        if (obj->m_objectID == ObjectProps::COLLISION_BLOCK_ID) {
+            return SpecialState {
+                .props = {SpecialState::CollisionBlock {
+                    .id = obj->m_itemBlockAID,
+                    .dynamic = obj->m_dynamicBlock,
+                }},
+            };
+        }
+        if (obj->canAllowMultiActivate()) {
+            return SpecialState {
+                .props = {SpecialState::OrbPadPortal {
+                    .multiActivate = obj->m_orbMultiActivate,
+                }},
+            };
+        }
+    }
+    if (robj->m_isSaw) {
+        return SpecialState {
+            .props = {SpecialState::Saw {
+                .degrees = robj->m_customRotateSpeed,
+                .disable = robj->m_sawIsDisabled,
+            }},
+        };
+    }
+    if (robj->m_isEffectObject) {
+        return SpecialState {
+            .props = {SpecialState::Pulse {
+                .randomizeStart = robj->m_randomisedAnimStart,
+                .speed = robj->m_animSpeed,
+            }},
+        };
+    }
+    return std::nullopt;
+}
+
+void SpecialState::to(GameObject* robj) const {
+    auto obj = typeinfo_cast<EffectGameObject*>(robj);
+    std::visit(makeVisitor {
+        [&](SpecialState::CollisionBlock const& value) {
+            obj->m_itemBlockAID = value.id;
+            obj->m_dynamicBlock = value.dynamic;
+        },
+        [&](SpecialState::Counter const& value) {
+            obj->m_itemBlockAID = value.id;
+        },
+        [&](SpecialState::Saw const& value) {
+            robj->m_customRotateSpeed = value.degrees;
+            robj->m_sawIsDisabled = value.disable;
+        },
+        [&](SpecialState::OrbPadPortal const& value) {
+            obj->m_orbMultiActivate = value.multiActivate;
+        },
+        [&](SpecialState::ToggleOrb const& value) {
+            obj->m_targetGroupID = value.targetGroupID;
+            obj->m_activateGroup = value.activateGroup;
+            obj->m_multiActivate = value.multiActivate;
+        },
+        [&](SpecialState::Collectible const& value) {
+            obj->m_pickupMode = value.pickupMode;
+            obj->m_itemBlockAID = value.itemID;
+            obj->m_subtractCount = value.subtractCount;
+            obj->m_targetGroupID = value.groupID;
+            obj->m_activateGroup = value.enableGroup;
+        },
+        [&](SpecialState::Pulse const& value) {
+            robj->m_randomisedAnimStart = value.randomizeStart;
+            robj->m_animSpeed = value.speed;
+        },
+    }, props);
+}
+
 std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
     switch (obj->m_objectID) {
-        case 899: {
+        case ObjectProps::COLOR_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Color {
                     .channel = obj->m_targetColorID,
@@ -398,7 +529,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 901: {
+        case ObjectProps::MOVE_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Move {
                     .x = obj->m_move.x,
@@ -419,7 +550,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1616: {
+        case ObjectProps::STOP_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Stop {
                     .targetGroupID = obj->m_targetGroupID,
@@ -430,7 +561,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1006: {
+        case ObjectProps::PULSE_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Pulse {
                     .targetID = obj->m_targetGroupID,
@@ -452,7 +583,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1007: {
+        case ObjectProps::ALPHA_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Alpha {
                     .targetGroupID = obj->m_targetGroupID,
@@ -465,7 +596,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1049: {
+        case ObjectProps::TOGGLE_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Toggle {
                     .targetGroupID = obj->m_targetGroupID,
@@ -477,7 +608,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1268: {
+        case ObjectProps::SPAWN_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Spawn {
                     .targetGroupID = obj->m_targetGroupID,
@@ -490,7 +621,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1346: {
+        case ObjectProps::ROTATE_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Rotate {
                     .targetGroupID = obj->m_targetGroupID,
@@ -508,7 +639,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1347: {
+        case ObjectProps::FOLLOW_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Follow {
                     .targetGroupID = obj->m_targetGroupID,
@@ -523,7 +654,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1520: {
+        case ObjectProps::SHAKE_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Shake {
                     .strength = obj->m_shakeStrength,
@@ -536,7 +667,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1585: {
+        case ObjectProps::ANIMATION_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Animation {
                     .targetGroupID = obj->m_targetGroupID,
@@ -548,7 +679,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1814: {
+        case ObjectProps::FOLLOW_PLAYER_Y_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::FollowPlayerY {
                     .targetGroupID = obj->m_targetGroupID,
@@ -564,7 +695,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1595: {
+        case ObjectProps::TOUCH_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Touch {
                     .targetGroupID = obj->m_targetGroupID,
@@ -578,7 +709,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1611: {
+        case ObjectProps::COUNT_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Count {
                     .itemID = obj->m_itemBlockAID,
@@ -593,7 +724,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1811: {
+        case ObjectProps::INSTANT_COUNT_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::InstantCount {
                     .itemID = obj->m_itemBlockAID,
@@ -608,7 +739,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1817: {
+        case ObjectProps::PICKUP_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Pickup {
                     .itemID = obj->m_itemBlockAID,
@@ -620,7 +751,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1815: {
+        case ObjectProps::COLLISION_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::Collision {
                     .blockAID = obj->m_itemBlockAID,
@@ -632,7 +763,7 @@ std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
             };
         } break;
 
-        case 1812: {
+        case ObjectProps::ON_DEATH_TRIGGER_ID: {
             return TriggerState {
                 .props = {TriggerState::OnDeath {
                     .targetGroupID = obj->m_targetGroupID,
@@ -1230,6 +1361,29 @@ void TriggerPropsChanged::redo() const {
 }
 
 std::vector<Detail> TriggerPropsChanged::details() const {
+    // todo
+    return {};
+}
+
+// SpecialPropsChanged
+
+std::string SpecialPropsChanged::toDiffString() const {
+    return fmtDiffString("spp", obj, state);
+}
+
+EditorEventData* SpecialPropsChanged::clone() const {
+    return new SpecialPropsChanged(obj, state);
+}
+
+void SpecialPropsChanged::undo() const {
+    state.from.to(obj);
+}
+
+void SpecialPropsChanged::redo() const {
+    state.to.to(obj);
+}
+
+std::vector<Detail> SpecialPropsChanged::details() const {
     // todo
     return {};
 }

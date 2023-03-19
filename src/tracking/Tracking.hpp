@@ -63,24 +63,59 @@ struct ObjState {
     bool operator==(ObjState const& other) const = default;
 };
 
-struct LevelSettingsState {
-    Speed speed;
-    int mode;
-    bool flipGravity;
-    bool mini;
-    bool dual;
-    bool twoPlayer;
-    float songOffset;
-    bool fadeIn;
-    bool fadeOut;
-    int bg;
-    int ground;
-    int groundLine;
-    int font;
+struct SpecialState {
+    struct CollisionBlock {
+        int id;
+        bool dynamic;
+        bool operator==(CollisionBlock const&) const = default;
+    };
 
-    static LevelSettingsState from(LevelSettingsObject* obj);
-    void to(LevelSettingsObject* obj) const;
-    bool operator==(LevelSettingsState const& other) const = default;
+    struct Counter {
+        int id;
+        bool operator==(Counter const&) const = default;
+    };
+
+    struct Saw {
+        int degrees; // 0 is default
+        bool disable;
+        bool operator==(Saw const&) const = default;
+    };
+
+    struct OrbPadPortal {
+        bool multiActivate;
+        bool operator==(OrbPadPortal const&) const = default;
+    };
+
+    struct ToggleOrb {
+        int targetGroupID;
+        bool activateGroup;
+        bool multiActivate;
+        bool operator==(ToggleOrb const&) const = default;
+    };
+
+    struct Collectible {
+        int pickupMode;
+        int itemID;
+        bool subtractCount;
+        int groupID;
+        bool enableGroup;
+        bool operator==(Collectible const&) const = default;
+    };
+
+    struct Pulse {
+        bool randomizeStart;
+        float speed;
+        bool operator==(Pulse const&) const = default;
+    };
+
+    std::variant<
+        CollisionBlock, Counter, Saw, OrbPadPortal,
+        ToggleOrb, Collectible, Pulse
+    > props;
+
+    static std::optional<SpecialState> from(GameObject* obj);
+    void to(GameObject* obj) const;
+    bool operator==(SpecialState const&) const = default;
 };
 
 struct TriggerState {
@@ -273,6 +308,26 @@ struct TriggerState {
     bool operator==(TriggerState const&) const = default;
 };
 
+struct LevelSettingsState {
+    Speed speed;
+    int mode;
+    bool flipGravity;
+    bool mini;
+    bool dual;
+    bool twoPlayer;
+    float songOffset;
+    bool fadeIn;
+    bool fadeOut;
+    int bg;
+    int ground;
+    int groundLine;
+    int font;
+
+    static LevelSettingsState from(LevelSettingsObject* obj);
+    void to(LevelSettingsObject* obj) const;
+    bool operator==(LevelSettingsState const& other) const = default;
+};
+
 struct BlockAll {
     static inline BlockAll* s_current = nullptr;
     static bool blocked();
@@ -292,6 +347,7 @@ std::string toDiffString(ObjColorState const& value);
 std::string toDiffString(ObjState const& value);
 std::string toDiffString(LevelSettingsState const& value);
 std::string toDiffString(TriggerState const& value);
+std::string toDiffString(SpecialState const& value);
 std::string toDiffString(std::vector<short> const& value);
 
 template <class... T, std::size_t... Is>
@@ -594,6 +650,22 @@ struct TriggerPropsChanged : public ObjEventData {
     Transform<TriggerState> state;
 
     inline TriggerPropsChanged(Ref<EffectGameObject> obj, Transform<TriggerState> const& state)
+      : ObjEventData(obj.data()), state(state) {}
+    
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+    std::vector<Detail> details() const override;
+
+    static inline auto ICON_NAME = "GJ_hammerIcon_001.png";
+    static inline auto DESC_FMT = "Changed {} Properties";
+};
+
+struct SpecialPropsChanged : public ObjEventData {
+    Transform<SpecialState> state;
+
+    inline SpecialPropsChanged(Ref<GameObject> obj, Transform<SpecialState> const& state)
       : ObjEventData(obj.data()), state(state) {}
     
     std::string toDiffString() const override;
