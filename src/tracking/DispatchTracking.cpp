@@ -349,6 +349,11 @@ class $modify(EditorUI) {
         }
     }
 
+    void alignObjects(CCArray* objs, bool y) {
+        auto bubble = Bubble<ObjMoved>();
+        EditorUI::alignObjects(objs, y);
+    }
+
     void onPlaytest(CCObject* sender) {
         BLOCKED_CALL(EditorUI::onPlaytest(sender));
     }
@@ -501,7 +506,7 @@ class $modify(CCLayerColor) {
     void destructor() {
         if (auto ui = EditorUI::get()) {
             auto states = this->template getAttribute<States>("states"_spr);
-            if (states) {
+            if (states && states.value().size()) {
                 size_t i = 0;
                 auto bubble = Bubble<TriggerPropsChanged>();
                 for (auto obj : iterTargets(ui->m_selectedObject, ui->m_selectedObjects)) {

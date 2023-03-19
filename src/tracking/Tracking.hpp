@@ -686,7 +686,9 @@ struct MultiObjEvent : public EditorEvent {
                 if (!ranges::contains(res, detail)) {
                     res.push_back(detail);
                 }
+                if (res.size() > 6) break;
             }
+            if (res.size() > 6) break;
         }
         return res;
     }

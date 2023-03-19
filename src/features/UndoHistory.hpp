@@ -3,6 +3,7 @@
 #include "../tracking/Tracking.hpp"
 #include <Geode/ui/Popup.hpp>
 #include <Geode/loader/Event.hpp>
+#include <ui/Clip.hpp>
 
 class History;
 class HistoryPopup;
@@ -11,10 +12,10 @@ class HistoryNode : public CCNode {
 protected:
     HistoryPopup* m_popup;
     EditorEvent* m_event;
-    CCLayerColor* m_topBG;
     CCLabelBMFont* m_name;
     CCMenu* m_topMenu;
     CCMenu* m_bottomMenu;
+    Clip* m_bottomClip;
     CCMenuItemSpriteExtra* m_undoBtn;
     CCMenuItemSpriteExtra* m_detailsBtn = nullptr;
     float m_detailsOpen = 0.f;
