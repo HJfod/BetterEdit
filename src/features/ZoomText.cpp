@@ -1,10 +1,8 @@
 #include "ZoomText.hpp"
 
-static auto TAG_ZOOM = 0xB00B;
-
 void showZoomText(EditorUI* ui) {
     if (Mod::get()->template getSettingValue<bool>("show-zoom-text")) {
-        auto label = static_cast<CCLabelBMFont*>(ui->getChildByTag(TAG_ZOOM));
+        auto label = static_cast<CCLabelBMFont*>(ui->getChildByID("zoom-text"_spr));
 
         if (label) {
             label->setString(
@@ -33,7 +31,7 @@ class $modify(EditorUI) {
         auto zoomLabel = CCLabelBMFont::create("", "bigFont.fnt");
         zoomLabel->setScale(.5f);
         zoomLabel->setPosition(winSize.width / 2, winSize.height - 60.f);
-        zoomLabel->setTag(TAG_ZOOM);
+        zoomLabel->setID("zoom-text"_spr);
         zoomLabel->setOpacity(0);
         zoomLabel->setZOrder(99999);
         this->addChild(zoomLabel);
