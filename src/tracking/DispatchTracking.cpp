@@ -348,6 +348,10 @@ class $modify(EditorUI) {
             );
         }
     }
+
+    void onPlaytest(CCObject* sender) {
+        BLOCKED_CALL(EditorUI::onPlaytest(sender));
+    }
 };
 
 class $modify(GameObject) {
