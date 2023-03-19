@@ -2,7 +2,7 @@
 
 This is the branch for the v5 version of BetterEdit, which is only for [Geode](https://geode-sdk.org) - if you're looking for the old standalone version, see the [v4](https://github.com/HJfod/BetterEdit/tree/v4) and [v4-min](https://github.com/HJfod/BetterEdit/tree/v4-min) branches.
 
-### Please note that BE 5 is still in very early stages of development, and many features are yet to add.
+### Please note that BE 5 is still in very early stages of development, and many features are yet to be added.
 
 BetterEdit 5 is currently available as an alpha version on both **Windows and Mac**. Android support is planned in the future.
 
