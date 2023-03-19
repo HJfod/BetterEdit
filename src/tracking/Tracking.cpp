@@ -71,9 +71,11 @@ std::string toDiffString(ObjState const& value) {
     );
 }
 
-std::string toDiffString(StartPosState const& value) {
+std::string toDiffString(LevelSettingsState const& value) {
     return toDiffString(
-        value.speed, value.mode, value.flipGravity, value.mini, value.dual
+        value.speed, value.mode, value.flipGravity, value.mini,
+        value.dual, value.twoPlayer, value.songOffset, value.fadeIn,
+        value.fadeOut, value.bg, value.ground, value.groundLine, value.font
     );
 }
 
@@ -335,22 +337,38 @@ void ObjState::to(GameObject* obj) const {
     obj->m_highDetail = this->highDetail;
 }
 
-StartPosState StartPosState::from(StartPosObject* obj) {
-    return StartPosState {
-        .speed = obj->m_levelSettings->m_startSpeed,
-        .mode = obj->m_levelSettings->m_startMode,
-        .flipGravity = obj->m_levelSettings->m_isFlipped,
-        .mini = obj->m_levelSettings->m_startMini,
-        .dual = obj->m_levelSettings->m_startDual,
+LevelSettingsState LevelSettingsState::from(LevelSettingsObject* obj) {
+    return LevelSettingsState {
+        .speed = obj->m_startSpeed,
+        .mode = obj->m_startMode,
+        .flipGravity = obj->m_isFlipped,
+        .mini = obj->m_startMini,
+        .dual = obj->m_startDual,
+        .twoPlayer = obj->m_twoPlayerMode,
+        .songOffset = obj->m_songOffset,
+        .fadeIn = obj->m_fadeIn,
+        .fadeOut = obj->m_fadeOut,
+        .bg = obj->m_backgroundIndex,
+        .ground = obj->m_groundIndex,
+        .groundLine = obj->m_groundLineIndex,
+        .font = obj->m_fontIndex,
     };
 }
 
-void StartPosState::to(StartPosObject* obj) const {
-    obj->m_levelSettings->m_startSpeed = speed;
-    obj->m_levelSettings->m_startMode = mode;
-    obj->m_levelSettings->m_isFlipped = flipGravity;
-    obj->m_levelSettings->m_startMini = mini;
-    obj->m_levelSettings->m_startDual = dual;
+void LevelSettingsState::to(LevelSettingsObject* obj) const {
+    obj->m_startSpeed = speed;
+    obj->m_startMode = mode;
+    obj->m_isFlipped = flipGravity;
+    obj->m_startMini = mini;
+    obj->m_startDual = dual;
+    obj->m_twoPlayerMode = twoPlayer;
+    obj->m_songOffset = songOffset;
+    obj->m_fadeIn = fadeIn;
+    obj->m_fadeOut = fadeOut;
+    obj->m_backgroundIndex = bg;
+    obj->m_groundIndex = ground;
+    obj->m_groundLineIndex = groundLine;
+    obj->m_fontIndex = font;
 }
 
 std::optional<TriggerState> TriggerState::from(EffectGameObject* obj) {
@@ -1165,6 +1183,29 @@ std::vector<Detail> ObjDeselected::details() const {
     return {};
 }
 
+// StartPosChanged
+
+std::string StartPosChanged::toDiffString() const {
+    return fmtDiffString("str", obj, state);
+}
+
+EditorEventData* StartPosChanged::clone() const {
+    return new StartPosChanged(static_cast<StartPosObject*>(obj.data()), state);
+}
+
+void StartPosChanged::undo() const {
+    state.from.to(static_cast<StartPosObject*>(obj.data())->m_levelSettings);
+}
+
+void StartPosChanged::redo() const {
+    state.to.to(static_cast<StartPosObject*>(obj.data())->m_levelSettings);
+}
+
+std::vector<Detail> StartPosChanged::details() const {
+    // todo
+    return {};
+}
+
 // TriggerPropsChanged
 
 std::string TriggerPropsChanged::toDiffString() const {
@@ -1220,6 +1261,36 @@ CCNode* ColorChannelEvent::icon() const {
 
 std::string ColorChannelEvent::desc() const {
     return fmt::format("Channel {} Changed", channel);
+}
+
+// LevelSettingsChanged
+
+std::string LevelSettingsChanged::toDiffString() const {
+    return fmtDiffString("set", state);
+}
+
+EditorEventData* LevelSettingsChanged::clone() const {
+    return new LevelSettingsChanged(state);
+}
+
+void LevelSettingsChanged::undo() const {
+    state.from.to(LevelEditorLayer::get()->m_levelSettings);
+}
+
+void LevelSettingsChanged::redo() const {
+    state.to.to(LevelEditorLayer::get()->m_levelSettings);
+}
+
+std::vector<Detail> LevelSettingsChanged::details() const {
+    return {};
+}
+
+CCNode* LevelSettingsChanged::icon() const {
+    return CCSprite::createWithSpriteFrameName("GJ_hammerIcon_001.png");
+}
+
+std::string LevelSettingsChanged::desc() const {
+    return "Level Settings Changed";
 }
 
 ListenerResult EditorFilter::handle(utils::MiniFunction<Callback> fn, EditorEvent* event) {

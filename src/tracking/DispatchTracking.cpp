@@ -10,9 +10,11 @@
 #include <Geode/modify/SetGroupIDLayer.hpp>
 #include <Geode/modify/CCLayerColor.hpp>
 #include <Geode/modify/FLAlertLayer.hpp>
+#include <Geode/modify/LevelSettingsLayer.hpp>
 #include <Geode/binding/GJSpriteColor.hpp>
 #include <Geode/binding/GJEffectManager.hpp>
 #include <Geode/binding/ColorAction.hpp>
+#include <Geode/binding/LevelSettingsObject.hpp>
 
 #define BLOCKED_CALL(...) \
     {\
@@ -515,5 +517,37 @@ class $modify(CCLayerColor) {
             }
         }
         CCLayerColor::~CCLayerColor();
+    }
+};
+
+class $modify(LevelSettingsLayer) {
+    LevelSettingsState state;
+
+    bool init(LevelSettingsObject* obj, LevelEditorLayer* lel) {
+        if (!LevelSettingsLayer::init(obj, lel))
+            return false;
+        
+        m_fields->state = LevelSettingsState::from(obj);
+        
+        return true;
+    }
+
+    void onClose(CCObject* sender) {
+        if (m_settingsObject->m_startsWithStartPos) {
+            // m_editorLayer is null wtf
+            if (auto sel = typeinfo_cast<StartPosObject*>(EditorUI::get()->m_selectedObject)) {
+                auto state = LevelSettingsState::from(sel->m_levelSettings);
+                if (m_fields->state != state) {
+                    Bubble<StartPosChanged>::push(sel, Transform { m_fields->state, state });
+                }
+            }
+        }
+        else {
+            auto state = LevelSettingsState::from(LevelEditorLayer::get()->m_levelSettings);
+            if (m_fields->state != state) {
+                LevelSettingsChanged(Transform { m_fields->state, state }).post();
+            }
+        }
+        LevelSettingsLayer::onClose(sender);
     }
 };

@@ -5,6 +5,7 @@
 #include <Geode/loader/Mod.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <Geode/binding/GameObject.hpp>
+#include <Geode/binding/StartPosObject.hpp>
 
 using namespace geode::prelude;
 
@@ -62,16 +63,24 @@ struct ObjState {
     bool operator==(ObjState const& other) const = default;
 };
 
-struct StartPosState {
-    int speed;
+struct LevelSettingsState {
+    Speed speed;
     int mode;
     bool flipGravity;
     bool mini;
     bool dual;
+    bool twoPlayer;
+    float songOffset;
+    bool fadeIn;
+    bool fadeOut;
+    int bg;
+    int ground;
+    int groundLine;
+    int font;
 
-    static StartPosState from(StartPosObject* obj);
-    void to(StartPosObject* obj) const;
-    bool operator==(StartPosState const& other) const = default;
+    static LevelSettingsState from(LevelSettingsObject* obj);
+    void to(LevelSettingsObject* obj) const;
+    bool operator==(LevelSettingsState const& other) const = default;
 };
 
 struct TriggerState {
@@ -281,7 +290,7 @@ std::string toDiffString(ccColor4B const& value);
 std::string toDiffString(ColorState const& value);
 std::string toDiffString(ObjColorState const& value);
 std::string toDiffString(ObjState const& value);
-std::string toDiffString(StartPosState const& value);
+std::string toDiffString(LevelSettingsState const& value);
 std::string toDiffString(TriggerState const& value);
 std::string toDiffString(std::vector<short> const& value);
 
@@ -565,6 +574,22 @@ struct ObjDeselected : public ObjEventData {
     static inline auto DESC_FMT = "Deselected {}";
 };
 
+struct StartPosChanged : public ObjEventData {
+    Transform<LevelSettingsState> state;
+
+    inline StartPosChanged(Ref<StartPosObject> obj, Transform<LevelSettingsState> const& state)
+      : ObjEventData(obj.data()), state(state) {}
+    
+    std::string toDiffString() const override;
+    EditorEventData* clone() const override;
+    void undo() const override;
+    void redo() const override;
+    std::vector<Detail> details() const override;
+
+    static inline auto ICON_NAME = "edit_eStartPosBtn_001.png";
+    static inline auto DESC_FMT = "Edited Start Pos";
+};
+
 struct TriggerPropsChanged : public ObjEventData {
     Transform<TriggerState> state;
 
@@ -593,6 +618,22 @@ struct ColorChannelEvent : public EditorEvent {
 
     inline ColorChannelEvent(int channel, Transform<ColorState> const& state)
       : channel(channel), state(state) {}
+    
+    std::string toDiffString() const override;
+    void undo() const override;
+    void redo() const override;
+    EditorEventData* clone() const override;
+    std::vector<Detail> details() const override;
+
+    CCNode* icon() const override;
+    std::string desc() const override;
+};
+
+struct LevelSettingsChanged : public EditorEvent {
+    Transform<LevelSettingsState> state;
+
+    inline LevelSettingsChanged(Transform<LevelSettingsState> const& state)
+      : state(state) {}
     
     std::string toDiffString() const override;
     void undo() const override;
