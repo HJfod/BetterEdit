@@ -323,6 +323,7 @@ void History::onEvent(EditorEvent* ev) {
         m_undone = 0;
     }
     m_events.emplace_back(ev->unique());
+    EditorUI::get()->updateButtons();
 }
 
 std::vector<EditorEvent*> History::getEvents() const {

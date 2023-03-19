@@ -12,6 +12,7 @@
 #include <Geode/binding/GJEffectManager.hpp>
 #include <Geode/binding/LevelSettingsObject.hpp>
 #include <Geode/binding/ColorAction.hpp>
+#include <Geode/binding/SelectFontLayer.hpp>
 #include <Geode/loader/Log.hpp>
 #include <other/Utils.hpp>
 
@@ -356,6 +357,10 @@ LevelSettingsState LevelSettingsState::from(LevelSettingsObject* obj) {
 }
 
 void LevelSettingsState::to(LevelSettingsObject* obj) const {
+    // needs to be updated first
+    if (obj = LevelEditorLayer::get()->m_levelSettings) {
+        LevelEditorLayer::get()->updateLevelFont(font);
+    }
     obj->m_startSpeed = speed;
     obj->m_startMode = mode;
     obj->m_isFlipped = flipGravity;
