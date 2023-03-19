@@ -48,13 +48,9 @@ struct $modify(EditorUI) {
     }
 
     void toggleMode(CCObject* sender) {
-        if (!sender) return;
-        auto tag = sender->getTag();
-        if (m_selectedMode != tag) {
-            m_selectedMode = tag;
-            this->resetUI();
-            this->updateModeSprites();
-        }
+        EditorUI::toggleMode(sender);
+        this->resetUI();
+        this->updateModeSprites();
     }
 
     void updateModeSprite(CCNode* node, int tag, const char* spr) {

@@ -15,6 +15,7 @@
 #include <Geode/binding/GJEffectManager.hpp>
 #include <Geode/binding/ColorAction.hpp>
 #include <Geode/binding/LevelSettingsObject.hpp>
+#include <other/Utils.hpp>
 
 #define BLOCKED_CALL(...) \
     {\
@@ -27,15 +28,6 @@
         auto block = BlockAll();\
         var_ = __VA_ARGS__;\
     }
-
-static CCArrayExt<GameObject> iterTargets(GameObject* target, CCArray* targets) {
-    if (target) {
-        return CCArrayExt<GameObject>(CCArray::createWithObject(target));
-    }
-    else {
-        return targets;
-    }
-}
 
 template <class T>
 struct Bubble {
@@ -230,11 +222,14 @@ class $modify(EditorUI) {
     }
 
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
-        m_fields->freeMoveStart = {};
-        for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
-            m_fields->freeMoveStart.push_back(obj->getPosition());
+        if (EditorUI::ccTouchBegan(touch, event)) {
+            m_fields->freeMoveStart = {};
+            for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
+                m_fields->freeMoveStart.push_back(obj->getPosition());
+            }
+            return true;
         }
-        return EditorUI::ccTouchBegan(touch, event);
+        return false;
     }
 
     void ccTouchMoved(CCTouch* touch, CCEvent* event) {
