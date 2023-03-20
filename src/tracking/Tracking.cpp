@@ -389,7 +389,7 @@ LevelSettingsState LevelSettingsState::from(LevelSettingsObject* obj) {
 
 void LevelSettingsState::to(LevelSettingsObject* obj) const {
     // needs to be updated first
-    if (obj = LevelEditorLayer::get()->m_levelSettings) {
+    if (obj == LevelEditorLayer::get()->m_levelSettings) {
         LevelEditorLayer::get()->updateLevelFont(font);
     }
     obj->m_startSpeed = speed;
