@@ -13,6 +13,7 @@
 #include <Geode/binding/ButtonSprite.hpp>
 #include <Geode/binding/TextArea.hpp>
 #include <script/Parser.hpp>
+#include <other/AutoGrowingLayout.hpp>
 
 using namespace geode::prelude;
 
@@ -271,9 +272,10 @@ protected:
             m_list->m_contentLayer->addChild(menu);
         }
         m_list->m_contentLayer->setLayout(
-            ColumnLayout::create()
-                ->setGap(0.f)
+            AutoGrowingLayout::create(listSize.height)
+                ->setAxisAlignment(AxisAlignment::End)
                 ->setAxisReverse(true)
+                ->setGap(0)
         );
         m_list->setPosition(winSize / 2 - listSize / 2 - CCPoint { 0.f, 10.f });
         this->addChild(m_list);
