@@ -1,4 +1,14 @@
 
+# v5.0.0-alpha.4
+
+### Fixes
+ - Fixed performance issue while moving around in the editor
+ - Disabling percentage text now actually disables it
+ - Fixed crash when exiting editor
+ - Fixed script popup list not being aligned to the top
+ - Other small performance improvements and fixes
+ - Fixed multiple objects being removed getting reported as multiple events
+
 # v5.0.0-alpha.3
 
 ### Additions
