@@ -1,5 +1,6 @@
 #include "Utils.hpp"
 #include <Geode/binding/EditorUI.hpp>
+#include <Geode/binding/OBB2D.hpp>
 #include <clipper2/clipper.h>
 
 std::string zLayerToString(ZLayer z) {
@@ -37,4 +38,67 @@ bool polygonIntersect(std::vector<CCPoint> const& a, CCPoint const& b) {
         path.push_back({ pt.x, pt.y });
     }
     return PointInPolygon(pb, { path }) != PointInPolygonResult::IsOutside;
+}
+
+static bool objectsAreAdjacent(GameObject* o1, GameObject* o2) {
+    auto rect1 = o1->boundingBox();
+    auto rect2 = o2->boundingBox();
+    return (
+        rect1.origin.x <= rect2.origin.x + rect2.size.width &&
+        rect2.origin.x <= rect1.origin.x + rect1.size.width &&
+        rect1.origin.y <= rect2.origin.y + rect2.size.height &&
+        rect2.origin.y <= rect1.origin.y + rect1.size.height
+    );
+}
+
+static void recursiveAddNear(EditorUI* ui, GameObject* fromObj, std::vector<GameObject*> const& vnear, CCArray* arr) {
+    for (auto const& obj : vnear) {
+        if (objectsAreAdjacent(fromObj, obj)) {
+            if (!arr->containsObject(obj)) {
+                arr->addObject(obj);
+                recursiveAddNear(ui, obj, vnear, arr);
+            }
+        }
+    }
+}
+
+CCArray* selectStructure(EditorUI* ui, GameObject* from) {
+    if (!from) return CCArray::create();
+    std::vector<GameObject*> nearby;
+    auto pos = from->getPosition();
+    for (auto obj : CCArrayExt<GameObject>(ui->m_editorLayer->m_objects)) {
+        switch (obj->m_objectType) {
+            case GameObjectType::Slope:
+            case GameObjectType::Solid:
+            case GameObjectType::Special:
+            case GameObjectType::Decoration:
+            case GameObjectType::Hazard:
+            case GameObjectType::GravityPad:
+            case GameObjectType::PinkJumpPad:
+            case GameObjectType::YellowJumpPad:
+            case GameObjectType::RedJumpPad: {
+                if (obj->m_editorLayer == from->m_editorLayer) {
+                    if (ccpDistance(obj->getPosition(), pos) < 500.0f) {
+                        nearby.push_back(obj);
+                    }
+                }
+            } break;
+        }
+    }
+    auto arr = CCArray::create();
+    arr->addObject(from);
+    recursiveAddNear(ui, from, nearby, arr);
+    return arr;
+}
+
+CCArray* selectStructure(EditorUI* ui, CCArray* from) {
+    CCArray* res = CCArray::create();
+    for (auto fr : CCArrayExt<GameObject>(from)) {
+        for (auto obj : CCArrayExt<GameObject>(selectStructure(ui, fr))) {
+            if (!res->containsObject(obj)) {
+                res->addObject(obj);
+            }
+        }
+    }
+    return res;
 }

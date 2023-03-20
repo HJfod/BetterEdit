@@ -295,8 +295,10 @@ class $modify(EditorUI) {
         auto touchEnd = getTouchPoint(touch, event);
         if (
             m_editorLayer->m_playbackMode != PlaybackMode::Playing &&
-            m_selectedMode == 3 && m_swiping && 
-            ccpDistance(m_swipeStart, touchEnd) > 2.f
+            m_selectedMode == 3 && m_swiping && (
+                ccpDistance(m_swipeStart, touchEnd) > 2.f ||
+                m_fields->select->getTool() == SelectTool::MagicWand
+            )
         ) {
             auto start = m_editorLayer->m_objectLayer->convertToNodeSpace(m_swipeStart);
             auto end = m_editorLayer->m_objectLayer->convertToNodeSpace(touchEnd);
@@ -308,14 +310,22 @@ class $modify(EditorUI) {
             }
             end -= start;
             CCArray* objs;
-            if (m_fields->select->getTool() == SelectTool::Lasso) {
-                std::vector<CCPoint> casted;
-                for (auto& pt : m_fields->lassoPoints) {
-                    casted.push_back(m_editorLayer->m_objectLayer->convertToNodeSpace(pt));
-                }
-                objs = this->objectsInPolygon(casted);
-            } else {
-                objs = m_editorLayer->objectsInRect(CCRect { start, end }, false);
+            switch (m_fields->select->getTool()) {
+                case SelectTool::Lasso: {
+                    std::vector<CCPoint> casted;
+                    for (auto& pt : m_fields->lassoPoints) {
+                        casted.push_back(m_editorLayer->m_objectLayer->convertToNodeSpace(pt));
+                    }
+                    objs = this->objectsInPolygon(casted);
+                } break;
+
+                case SelectTool::MagicWand: {
+                    objs = selectStructure(this, m_editorLayer->objectsAtPosition(end + start));
+                } break;
+
+                case SelectTool::Swipe: default: {
+                    objs = m_editorLayer->objectsInRect(CCRect { start, end }, false);
+                } break;
             }
             auto filtered = filterSwipe(objs);
             {
@@ -331,10 +341,22 @@ class $modify(EditorUI) {
     }
 
     void draw() {
-        if (m_swiping && m_fields->select->getTool() == SelectTool::Lasso) {
-            CCNode::draw();
-            ccDrawColor4B(0, 255, 0, 255);
-            ccDrawPoly(m_fields->lassoPoints.data(), m_fields->lassoPoints.size(), true);
+        if (m_swiping) {
+            switch (m_fields->select->getTool()) {
+                case SelectTool::Swipe: {
+                    EditorUI::draw();
+                } break;
+
+                case SelectTool::Lasso: {
+                    CCNode::draw();
+                    ccDrawColor4B(0, 255, 0, 255);
+                    ccDrawPoly(m_fields->lassoPoints.data(), m_fields->lassoPoints.size(), true);
+                } break;
+
+                case SelectTool::MagicWand: {
+                    CCNode::draw();
+                } break;
+            }
         }
         else {
             EditorUI::draw();
