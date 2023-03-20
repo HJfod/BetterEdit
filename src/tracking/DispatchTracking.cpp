@@ -146,6 +146,13 @@ class $modify(EditorUI) {
         return EditorUI::onCreate();
     }
 
+    void onDeleteSelected(CCObject* sender) {
+        auto bubble1 = Bubble<ObjRemoved>();
+        auto bubble2 = Bubble<ObjDeselected>();
+        EditorUI::onDeleteSelected(sender);
+        bubble2.cancel();
+    }
+
     void deleteObject(GameObject* obj, bool filter) {
         BLOCKED_CALL(EditorUI::deleteObject(obj, filter));
         Bubble<ObjRemoved>::push(obj);
