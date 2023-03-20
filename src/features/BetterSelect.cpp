@@ -206,6 +206,7 @@ class $modify(SelectUI, EditorUI) {
     BetterSelect* select = nullptr;
     std::vector<CCPoint> lassoPoints;
     Ref<CCArray> selection;
+    std::vector<Ref<GameObject>> deselection;
 
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
@@ -305,6 +306,7 @@ class $modify(SelectUI, EditorUI) {
     CCArray* getSwipedObjects(CCTouch* touch, CCEvent* event) {
         auto touchEnd = getTouchPoint(touch, event);
         if (this->isSwiping(touch, event)) {
+            auto _ = BlockAll();
             auto rect = this->getSwipeRect(touch, event);
             CCArray* objs;
             switch (m_fields->select->getTool()) {
@@ -330,17 +332,43 @@ class $modify(SelectUI, EditorUI) {
     }
 
     void updateSwipePreview(CCTouch* touch, CCEvent* event) {
+        for (auto obj : m_fields->deselection) {
+            tintObject(obj, std::nullopt);
+        }
+        m_fields->deselection.clear();
+
+        // reset colors
+        for (auto obj : CCArrayExt<GameObject>(m_fields->selection)) {
+            tintObject(obj, std::nullopt);
+        }
+
         if (!Mod::get()->getSettingValue<bool>("selection-preview")) {
             m_fields->selection = nullptr;
             return;
         }
         
-        // reset colors
-        // for (auto obj : CCArrayExt<GameObject>(m_fields->previousSelection)) {
-        //     obj->updateObjectEditorColor();
-        // }
-        
-        m_fields->selection = getSwipedObjects(touch, event);
+        auto objs = getSwipedObjects(touch, event);
+        if (!objs) {
+            m_fields->selection = nullptr;
+            return;
+        }
+
+        for (auto obj : CCArrayExt<GameObject>(objs)) {
+            if (!obj->m_isSelected) {
+                tintObject(obj, {{ 155, 255, 155 }});
+            }
+        }
+        for (auto obj : iterSelected(this)) {
+            if (!objs->containsObject(obj)) {
+                tintObject(obj, {{ 255, 155, 155 }});
+                m_fields->deselection.push_back(obj);
+            }
+            else {
+                tintObject(obj, {{ 0, 255, 0 }});
+            }
+        }
+
+        m_fields->selection = objs;
     }
 
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
@@ -360,6 +388,14 @@ class $modify(SelectUI, EditorUI) {
     }
 
     void ccTouchEnded(CCTouch* touch, CCEvent* event) {
+        for (auto obj : CCArrayExt<GameObject>(m_fields->selection)) {
+            tintObject(obj, std::nullopt);
+        }
+        m_fields->selection = nullptr;
+        for (auto obj : m_fields->deselection) {
+            tintObject(obj, std::nullopt);
+        }
+        m_fields->deselection = {};
         if (auto objs = this->getSwipedObjects(touch, event)) {
             {
                 auto _ = BlockAll();
@@ -389,17 +425,6 @@ class $modify(SelectUI, EditorUI) {
                 case SelectTool::MagicWand: {
                     CCNode::draw();
                 } break;
-            }
-            auto objs = m_fields->selection;
-            for (auto obj : CCArrayExt<GameObject>(objs)) {
-                if (!obj->m_isSelected) {
-                    obj->setColor({ 0, 255, 0 });
-                }
-            }
-            for (auto obj : iterSelected(this)) {
-                if (!objs->containsObject(obj)) {
-                    obj->setColor({ 255, 0, 0 });
-                }
             }
         }
         else {

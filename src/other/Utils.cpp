@@ -1,7 +1,11 @@
 #include "Utils.hpp"
 #include <Geode/binding/EditorUI.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/OBB2D.hpp>
+#include <Geode/modify/GameObject.hpp>
+#include <Geode/modify/LevelEditorLayer.hpp>
 #include <clipper2/clipper.h>
+#include <tracking/Tracking.hpp>
 
 std::string zLayerToString(ZLayer z) {
     switch (z) {
@@ -101,4 +105,44 @@ CCArray* selectStructure(EditorUI* ui, CCArray* from) {
         }
     }
     return res;
+}
+
+class $modify(TintLayer, LevelEditorLayer) {
+    std::unordered_set<Ref<GameObject>> tinted {};
+
+    void updateVisibility(float dt);
+};
+
+class $modify(TintGameObject, GameObject) {
+    std::optional<ccColor3B> tint;
+
+    void updateTintColor() {
+        auto lel = static_cast<TintLayer*>(LevelEditorLayer::get());
+        if (m_fields->tint) {
+            this->setColor(m_fields->tint.value());
+            if (m_detailSprite) {
+                m_detailSprite->setColor(m_fields->tint.value());
+                m_detailSprite->setChildColor(m_fields->tint.value());
+            }
+            lel->m_fields->tinted.insert(this);
+        }
+        else {
+            lel->m_fields->tinted.erase(this);
+        }
+    }
+};
+
+void TintLayer::updateVisibility(float dt) {
+    LevelEditorLayer::updateVisibility(dt);
+    auto _ = BlockAll();
+    for (auto obj : m_fields->tinted) {
+        static_cast<TintGameObject*>(obj.data())->updateTintColor();
+    }
+}
+
+void tintObject(GameObject* obj, std::optional<ccColor3B> const& color) {
+    auto _ = BlockAll();
+    auto tobj = static_cast<TintGameObject*>(obj);
+    tobj->m_fields->tint = color;
+    tobj->updateTintColor();
 }
