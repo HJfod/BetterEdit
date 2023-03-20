@@ -15,6 +15,7 @@
 #include <Geode/binding/GJEffectManager.hpp>
 #include <Geode/binding/ColorAction.hpp>
 #include <Geode/binding/LevelSettingsObject.hpp>
+#include <Geode/binding/GameManager.hpp>
 #include <other/Utils.hpp>
 
 #define BLOCKED_CALL(...) \
@@ -491,7 +492,10 @@ class $modify(CCLayerColor) {
         if (!CCLayerColor::initWithColor(color))
             return false;
         
-        if (LevelEditorLayer::get()) {
+        if (
+            CCDirector::get()->getRunningScene()->getObjType() == CCObjectType::LevelEditorLayer &&
+            LevelEditorLayer::get() && EditorUI::get()
+        ) {
             States states;
             auto ui = EditorUI::get();
             for (auto obj : iterTargets(ui->m_selectedObject, ui->m_selectedObjects)) {
