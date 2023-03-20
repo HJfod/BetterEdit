@@ -10,6 +10,9 @@
 #include <other/Utils.hpp>
 #include <tracking/Tracking.hpp>
 
+using namespace std::chrono;
+using Clock = high_resolution_clock;
+
 static CCMenuItemToggler* createEditorButton(
     const char* top,
     CCObject* target,
@@ -43,7 +46,7 @@ static const char* getToolSprite(SelectTool tool) {
     }
 }
 
-enum class SelectType {
+enum class SelectMode {
     Unique,
     Add,
     Subtract,
@@ -51,78 +54,64 @@ enum class SelectType {
     XOR,
 };
 
-static const char* getTypeSprite(SelectType type) {
+static const char* getModeSprite(SelectMode type) {
     switch (type) {
         default:
-        case SelectType::Unique: return "select-unique.png"_spr;
-        case SelectType::Add: return "select-add.png"_spr;
-        case SelectType::Subtract: return "select-subtract.png"_spr;
-        case SelectType::Intersect: return "select-intersect.png"_spr;
-        case SelectType::XOR: return "select-xor.png"_spr;
+        case SelectMode::Unique: return "select-unique.png"_spr;
+        case SelectMode::Add: return "select-add.png"_spr;
+        case SelectMode::Subtract: return "select-subtract.png"_spr;
+        case SelectMode::Intersect: return "select-intersect.png"_spr;
+        case SelectMode::XOR: return "select-xor.png"_spr;
     }
 }
 
-class BetterSelect : public CCNode {
+class ASelect : public CCNode {
 protected:
     EditorUI* m_ui;
     CCMenu* m_selectToolMenu;
     CCMenu* m_selectTypeMenu;
     std::vector<CCMenuItemToggler*> m_tools;
     std::vector<CCMenuItemToggler*> m_types;
-    SelectTool m_tool = SelectTool::Swipe;
-    SelectType m_type = SelectType::Add;
+    static inline SelectTool s_tool = SelectTool::Swipe;
+    static inline SelectMode s_mode = SelectMode::Add;
 
     bool init(EditorUI* ui) {
         if (!CCNode::init())
             return false;
         
         m_ui = ui;
-
+        
         auto winSize = CCDirector::get()->getWinSize();
 
         m_selectToolMenu = CCMenu::create();
-        m_selectToolMenu->setContentSize({ 110.f, 50.f });
-        m_selectToolMenu->setPosition(winSize.width / 2 - 70.f, 45.f);
         m_selectToolMenu->ignoreAnchorPointForPosition(false);
 
         this->addTool(SelectTool::Swipe);
         this->addTool(SelectTool::Lasso);
         this->addTool(SelectTool::MagicWand);
         
-        m_selectToolMenu->setLayout(
-            RowLayout::create()
-                ->setGrowCrossAxis(true)
-                ->setAxisAlignment(AxisAlignment::End)
-        );
         this->addChild(m_selectToolMenu);
 
         m_selectTypeMenu = CCMenu::create();
-        m_selectTypeMenu->setContentSize({ 110.f, 50.f });
-        m_selectTypeMenu->setPosition(winSize.width / 2 + 70.f, 45.f);
         m_selectTypeMenu->ignoreAnchorPointForPosition(false);
 
-        this->addType(SelectType::Unique);
-        this->addType(SelectType::Add);
-        this->addType(SelectType::Subtract);
-        this->addType(SelectType::Intersect);
-        this->addType(SelectType::XOR);
+        this->addType(SelectMode::Unique);
+        this->addType(SelectMode::Add);
+        this->addType(SelectMode::Subtract);
+        this->addType(SelectMode::Intersect);
+        this->addType(SelectMode::XOR);
         
-        m_selectTypeMenu->setLayout(
-            RowLayout::create()
-                ->setGrowCrossAxis(true)
-                ->setAxisAlignment(AxisAlignment::Start)
-        );
         this->addChild(m_selectTypeMenu);
 
         this->updateTool();
-        this->updateType();
+        this->updateMode();
 
         return true;
     }
 
     CCMenuItemToggler* addTool(SelectTool to) {
         auto tool = createEditorButton(
-            getToolSprite(to), this, menu_selector(BetterSelect::onSelectTool)
+            getToolSprite(to), this, menu_selector(ASelect::onSelectTool)
         );
         tool->setTag(static_cast<int>(to));
         m_tools.push_back(tool);
@@ -130,9 +119,9 @@ protected:
         return tool;
     }
 
-    CCMenuItemToggler* addType(SelectType ty) {
+    CCMenuItemToggler* addType(SelectMode ty) {
         auto type = createEditorButton(
-            getTypeSprite(ty), this, menu_selector(BetterSelect::onSelectType)
+            getModeSprite(ty), this, menu_selector(ASelect::onSelectMode)
         );
         type->setTag(static_cast<int>(ty));
         m_types.push_back(type);
@@ -146,7 +135,7 @@ protected:
                 tool->toggle(false);
             }
             else {
-                m_tool = static_cast<SelectTool>(tool->getTag());
+                s_tool = static_cast<SelectTool>(tool->getTag());
                 // this code makes no sense until you remember that 
                 // CCMenuItemToggler toggles after the callback
                 m_ui->m_swipeEnabled = tool->isToggled();
@@ -156,14 +145,73 @@ protected:
         }
     }
 
-    void onSelectType(CCObject* sender) {
+    void onSelectMode(CCObject* sender) {
         for (auto& type : m_types) {
             type->toggle(false);
             if (type == sender) {
-                m_type = static_cast<SelectType>(type->getTag());
+                s_mode = static_cast<SelectMode>(type->getTag());
             }
         }
+        this->updateEditorUI();
     }
+
+    virtual void updateEditorUI();
+
+public:
+    void updateTool() {
+        for (auto& tool : m_tools) {
+            tool->toggle(
+                m_ui->m_swipeEnabled &&
+                static_cast<SelectTool>(tool->getTag()) == s_tool
+            );
+        }
+    }
+
+    void updateMode() {
+        for (auto& type : m_types) {
+            type->toggle(
+                static_cast<SelectMode>(type->getTag()) == s_mode
+            );
+        }
+    }
+
+    static SelectTool getTool() {
+        return s_tool;
+    }
+
+    static SelectMode getMode() {
+        return s_mode;
+    }
+};
+
+class BetterSelect : public ASelect {
+protected:
+    bool init(EditorUI* ui) {
+        if (!ASelect::init(ui))
+            return false;
+        
+        auto winSize = CCDirector::get()->getWinSize();
+
+        m_selectToolMenu->setContentSize({ 110.f, 50.f });
+        m_selectToolMenu->setPosition(winSize.width / 2 - 70.f, 45.f);
+        m_selectToolMenu->setLayout(
+            RowLayout::create()
+                ->setGrowCrossAxis(true)
+                ->setAxisAlignment(AxisAlignment::End)
+        );
+
+        m_selectTypeMenu->setContentSize({ 110.f, 50.f });
+        m_selectTypeMenu->setPosition(winSize.width / 2 + 70.f, 45.f);
+        m_selectTypeMenu->setLayout(
+            RowLayout::create()
+                ->setGrowCrossAxis(true)
+                ->setAxisAlignment(AxisAlignment::Start)
+        );
+
+        return true;
+    }
+
+    void updateEditorUI() override;
 
 public:
     static BetterSelect* create(EditorUI* ui) {
@@ -175,30 +223,52 @@ public:
         CC_SAFE_DELETE(ret);
         return nullptr;
     }
+};
 
-    void updateTool() {
-        for (auto& tool : m_tools) {
-            tool->toggle(
-                m_ui->m_swipeEnabled &&
-                static_cast<SelectTool>(tool->getTag()) == m_tool
-            );
+class QuickSelect : public ASelect {
+protected:
+    bool init(EditorUI* ui) {
+        if (!ASelect::init(ui))
+            return false;
+
+        auto bg = CCScale9Sprite::createWithSpriteFrameName("border-square.png"_spr);
+        bg->setContentSize({ 80.f, 170.f });
+        bg->setZOrder(-1);
+        this->addChild(bg);
+
+        auto winSize = CCDirector::get()->getWinSize();
+
+        m_selectToolMenu->setContentSize({ 40.f, 150.f });
+        m_selectToolMenu->setPosition(-20.f, 0.f);
+        m_selectToolMenu->setLayout(
+            ColumnLayout::create()
+                ->setAxisAlignment(AxisAlignment::Start)
+        );
+
+        m_selectTypeMenu->setContentSize({ 40.f, 150.f });
+        m_selectTypeMenu->setPosition(20.f, 0.f);
+        m_selectTypeMenu->setLayout(
+            ColumnLayout::create()
+                ->setAxisAlignment(AxisAlignment::Start)
+        );
+
+        this->setZOrder(101);
+        this->setScale(.65f);
+
+        return true;
+    }
+
+    void updateEditorUI() override;
+
+public:
+    static QuickSelect* create(EditorUI* ui) {
+        auto ret = new QuickSelect();
+        if (ret && ret->init(ui)) {
+            ret->autorelease();
+            return ret;
         }
-    }
-
-    void updateType() {
-        for (auto& type : m_types) {
-            type->toggle(
-                static_cast<SelectType>(type->getTag()) == m_type
-            );
-        }
-    }
-
-    SelectTool getTool() const {
-        return m_tool;
-    }
-
-    SelectType getType() const {
-        return m_type;
+        CC_SAFE_DELETE(ret);
+        return nullptr;
     }
 };
 
@@ -207,6 +277,8 @@ class $modify(SelectUI, EditorUI) {
     std::vector<CCPoint> lassoPoints;
     Ref<CCArray> selection;
     std::vector<Ref<GameObject>> deselection;
+    Clock::time_point lastSwipeClick;
+    QuickSelect* quickSelect = nullptr;
 
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
@@ -216,22 +288,23 @@ class $modify(SelectUI, EditorUI) {
             "edit_swipeBtn_001.png",
             m_fields->select = BetterSelect::create(this)
         );
+        this->updateSwipeImage();
 
         return true;
     }
 
     CCArray* filterSwipe(CCArray* src) {
-        switch (m_fields->select->getType()) {
-            case SelectType::Unique: {
+        switch (m_fields->select->getMode()) {
+            case SelectMode::Unique: {
                 return src;
             } break;
 
-            case SelectType::Add: {
+            case SelectMode::Add: {
                 src->addObjectsFromArray(this->getSelectedObjects());
                 return src;
             } break;
 
-            case SelectType::Subtract: {
+            case SelectMode::Subtract: {
                 auto res = CCArray::create();
                 for (auto obj : iterSelected(this)) {
                     if (!src->containsObject(obj)) {
@@ -241,7 +314,7 @@ class $modify(SelectUI, EditorUI) {
                 return res;
             } break;
 
-            case SelectType::Intersect: {
+            case SelectMode::Intersect: {
                 auto res = CCArray::create();
                 for (auto obj : iterSelected(this)) {
                     if (src->containsObject(obj)) {
@@ -251,7 +324,7 @@ class $modify(SelectUI, EditorUI) {
                 return res;
             } break;
 
-            case SelectType::XOR: {
+            case SelectMode::XOR: {
                 auto res = CCArray::create();
                 for (auto obj : iterSelected(this)) {
                     if (!src->containsObject(obj)) {
@@ -372,6 +445,10 @@ class $modify(SelectUI, EditorUI) {
     }
 
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
+        if (m_fields->quickSelect) {
+            m_fields->quickSelect->removeFromParent();
+            m_fields->quickSelect = nullptr;
+        }
         m_fields->lassoPoints = {};
         return EditorUI::ccTouchBegan(touch, event);
     }
@@ -432,14 +509,67 @@ class $modify(SelectUI, EditorUI) {
         }
     }
 
-    void toggleSwipe(CCObject* sender) {
-        EditorUI::toggleSwipe(sender);
+    void updateSwipeImage() {
         if (m_fields->select) {
-            m_fields->select->updateTool();
             auto bspr = static_cast<ButtonSprite*>(m_swipeBtn->getNormalImage());
             bspr->m_subSprite->setDisplayFrame(CCSpriteFrameCache::get()->spriteFrameByName(
                 getToolSprite(m_fields->select->getTool())
             ));
+            if (auto c = bspr->getChildByID("select-mode"_spr)) {
+                c->removeFromParent();
+            }
+            auto mode = CCSprite::createWithSpriteFrameName(
+                getModeSprite(m_fields->select->getMode())
+            );
+            mode->setID("select-mode"_spr);
+            mode->setScale(.4f);
+            mode->setZOrder(15);
+            mode->setPosition({ 11.f, 11.f });
+            bspr->addChild(mode);
+        }
+    }
+
+    void toggleSwipe(CCObject* sender) {
+        EditorUI::toggleSwipe(sender);
+        if (m_fields->select) {
+            m_fields->select->updateTool();
+            this->updateSwipeImage();
+            if (
+                !m_fields->quickSelect && 
+                duration_cast<milliseconds>(Clock::now() - m_fields->lastSwipeClick).count() < 250
+            ) {
+                auto quick = QuickSelect::create(this);
+                quick->setPosition(m_swipeBtn->getParent()->convertToWorldSpace(
+                    m_swipeBtn->getPosition()
+                ) + ccp(0, 85));
+                quick->setID("quick-select"_spr);
+                m_fields->quickSelect = quick;
+                this->addChild(quick);
+                this->toggleMode(m_editModeBtn);
+            }
+            m_fields->lastSwipeClick = Clock::now();
         }
     }
 };
+
+void ASelect::updateEditorUI() {
+    static_cast<SelectUI*>(m_ui)->updateSwipeImage();
+}
+
+void BetterSelect::updateEditorUI() {
+    ASelect::updateEditorUI();
+    auto select = static_cast<SelectUI*>(m_ui)->m_fields->quickSelect;
+    if (select) {
+        select->updateTool();
+        select->updateMode();
+    }
+}
+
+void QuickSelect::updateEditorUI() {
+    ASelect::updateEditorUI();
+    auto select = static_cast<SelectUI*>(m_ui)->m_fields->select;
+    if (select) {
+        select->updateTool();
+        select->updateMode();
+    }
+}
