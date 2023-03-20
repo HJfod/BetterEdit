@@ -15,3 +15,7 @@ If you would like to report any issues or suggest features, feel free to use the
 The source code of BetterEdit is available here mostly as an educational resource for other modders as well as for users to check the code.
 
 However, if you would like to contribute, [pull requests](https://github.com/HJfod/BetterEdit/pulls) are accepted.
+
+## Alpha Testing
+
+If you'd like to test out BE 5, you can find the latest binaries in [releases](https://github.com/HJfod/BetterEdit/releases/tag/v5.0.0-alpha). Please post any bugs you find / features you'd like to suggest [as an issue](https://github.com/HJfod/BetterEdit/issues/new). If you'd like, there's also a [dedicated Discord server](https://discord.gg/UGHDfzQtpz) for testing the mod.
