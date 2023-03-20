@@ -31,6 +31,12 @@
 			"name": "Better Undo",
 			"description": "When enabled, allows undoing any action taken in the editor, like modifying object colors"
 		},
+		"selection-preview": {
+			"type": "bool",
+			"default": true,
+			"name": "Selection Preview",
+			"description": "Shows which objects are about to be selected when using Swipe"
+		},
 		"developer-mode": {
 			"type": "bool",
 			"default": false,

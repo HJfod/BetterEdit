@@ -1,5 +1,6 @@
 #include <MoreTabs.hpp>
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/binding/CCMenuItemToggler.hpp>
@@ -201,9 +202,10 @@ public:
     }
 };
 
-class $modify(EditorUI) {
+class $modify(SelectUI, EditorUI) {
     BetterSelect* select = nullptr;
     std::vector<CCPoint> lassoPoints;
+    Ref<CCArray> selection;
 
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
@@ -276,6 +278,71 @@ class $modify(EditorUI) {
         return res;
     }
 
+    CCRect getSwipeRect(CCTouch* touch, CCEvent* event) {
+        auto touchEnd = getTouchPoint(touch, event);
+        auto start = m_editorLayer->m_objectLayer->convertToNodeSpace(m_swipeStart);
+        auto end = m_editorLayer->m_objectLayer->convertToNodeSpace(touchEnd);
+        if (end.x < start.x) {
+            std::swap(start.x, end.x);
+        }
+        if (end.y < start.y) {
+            std::swap(start.y, end.y);
+        }
+        end -= start;
+        return { start, end };
+    }
+
+    bool isSwiping(CCTouch* touch, CCEvent* event) {
+        auto touchEnd = getTouchPoint(touch, event);
+        return 
+            m_editorLayer->m_playbackMode != PlaybackMode::Playing &&
+            m_selectedMode == 3 && m_swiping && (
+                ccpDistance(m_swipeStart, touchEnd) > 2.f ||
+                m_fields->select->getTool() == SelectTool::MagicWand
+            );
+    }
+
+    CCArray* getSwipedObjects(CCTouch* touch, CCEvent* event) {
+        auto touchEnd = getTouchPoint(touch, event);
+        if (this->isSwiping(touch, event)) {
+            auto rect = this->getSwipeRect(touch, event);
+            CCArray* objs;
+            switch (m_fields->select->getTool()) {
+                case SelectTool::Lasso: {
+                    std::vector<CCPoint> casted;
+                    for (auto& pt : m_fields->lassoPoints) {
+                        casted.push_back(m_editorLayer->m_objectLayer->convertToNodeSpace(pt));
+                    }
+                    objs = this->objectsInPolygon(casted);
+                } break;
+
+                case SelectTool::MagicWand: {
+                    objs = selectStructure(this, m_editorLayer->objectsAtPosition(rect.origin + rect.size));
+                } break;
+
+                case SelectTool::Swipe: default: {
+                    objs = m_editorLayer->objectsInRect(rect, false);
+                } break;
+            }
+            return this->filterSwipe(objs);
+        }
+        return nullptr;
+    }
+
+    void updateSwipePreview(CCTouch* touch, CCEvent* event) {
+        if (!Mod::get()->getSettingValue<bool>("selection-preview")) {
+            m_fields->selection = nullptr;
+            return;
+        }
+        
+        // reset colors
+        // for (auto obj : CCArrayExt<GameObject>(m_fields->previousSelection)) {
+        //     obj->updateObjectEditorColor();
+        // }
+        
+        m_fields->selection = getSwipedObjects(touch, event);
+    }
+
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
         m_fields->lassoPoints = {};
         return EditorUI::ccTouchBegan(touch, event);
@@ -289,51 +356,17 @@ class $modify(EditorUI) {
             }
         }
         EditorUI::ccTouchMoved(touch, event);
+        this->updateSwipePreview(touch, event);
     }
 
     void ccTouchEnded(CCTouch* touch, CCEvent* event) {
-        auto touchEnd = getTouchPoint(touch, event);
-        if (
-            m_editorLayer->m_playbackMode != PlaybackMode::Playing &&
-            m_selectedMode == 3 && m_swiping && (
-                ccpDistance(m_swipeStart, touchEnd) > 2.f ||
-                m_fields->select->getTool() == SelectTool::MagicWand
-            )
-        ) {
-            auto start = m_editorLayer->m_objectLayer->convertToNodeSpace(m_swipeStart);
-            auto end = m_editorLayer->m_objectLayer->convertToNodeSpace(touchEnd);
-            if (end.x < start.x) {
-                std::swap(start.x, end.x);
-            }
-            if (end.y < start.y) {
-                std::swap(start.y, end.y);
-            }
-            end -= start;
-            CCArray* objs;
-            switch (m_fields->select->getTool()) {
-                case SelectTool::Lasso: {
-                    std::vector<CCPoint> casted;
-                    for (auto& pt : m_fields->lassoPoints) {
-                        casted.push_back(m_editorLayer->m_objectLayer->convertToNodeSpace(pt));
-                    }
-                    objs = this->objectsInPolygon(casted);
-                } break;
-
-                case SelectTool::MagicWand: {
-                    objs = selectStructure(this, m_editorLayer->objectsAtPosition(end + start));
-                } break;
-
-                case SelectTool::Swipe: default: {
-                    objs = m_editorLayer->objectsInRect(CCRect { start, end }, false);
-                } break;
-            }
-            auto filtered = filterSwipe(objs);
+        if (auto objs = this->getSwipedObjects(touch, event)) {
             {
                 auto _ = BlockAll();
                 EditorUI::ccTouchEnded(touch, event);
                 this->deselectAll();
             }
-            this->selectObjects(filtered, true);
+            this->selectObjects(objs, true);
         }
         else {
             EditorUI::ccTouchEnded(touch, event);
@@ -356,6 +389,17 @@ class $modify(EditorUI) {
                 case SelectTool::MagicWand: {
                     CCNode::draw();
                 } break;
+            }
+            auto objs = m_fields->selection;
+            for (auto obj : CCArrayExt<GameObject>(objs)) {
+                if (!obj->m_isSelected) {
+                    obj->setColor({ 0, 255, 0 });
+                }
+            }
+            for (auto obj : iterSelected(this)) {
+                if (!objs->containsObject(obj)) {
+                    obj->setColor({ 255, 0, 0 });
+                }
             }
         }
         else {
