@@ -105,4 +105,11 @@ struct $modify(MoreTabsUI, EditorUI) {
             tabs->updateMode();
         }
     }
+
+    void showUI(bool show) {
+        EditorUI::showUI(show);
+        if (auto tabs = MoreTabs::get(this, false)) {
+            tabs->updateMode();
+        }
+    }
 };
