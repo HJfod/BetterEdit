@@ -134,9 +134,11 @@ class $modify(TintGameObject, GameObject) {
 
 void TintLayer::updateVisibility(float dt) {
     LevelEditorLayer::updateVisibility(dt);
-    auto _ = BlockAll();
-    for (auto obj : m_fields->tinted) {
-        static_cast<TintGameObject*>(obj.data())->updateTintColor();
+    if (m_fields->tinted.size()) {
+        auto _ = BlockAll();
+        for (auto obj : m_fields->tinted) {
+            static_cast<TintGameObject*>(obj.data())->updateTintColor();
+        }
     }
 }
 
