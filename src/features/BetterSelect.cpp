@@ -268,7 +268,7 @@ class $modify(EditorUI) {
 
     CCArray* objectsInPolygon(std::vector<CCPoint> const& polygon) {
         auto res = CCArray::create();
-        for (auto& obj : CCArrayExt<GameObject>(this->getSelectedObjects())) {
+        for (auto& obj : CCArrayExt<GameObject>(m_editorLayer->m_objects)) {
             if (polygonIntersect(polygon, { obj->getPosition() })) {
                 res->addObject(obj);
             }
@@ -309,7 +309,11 @@ class $modify(EditorUI) {
             end -= start;
             CCArray* objs;
             if (m_fields->select->getTool() == SelectTool::Lasso) {
-                objs = this->objectsInPolygon(m_fields->lassoPoints);
+                std::vector<CCPoint> casted;
+                for (auto& pt : m_fields->lassoPoints) {
+                    casted.push_back(m_editorLayer->m_objectLayer->convertToNodeSpace(pt));
+                }
+                objs = this->objectsInPolygon(casted);
             } else {
                 objs = m_editorLayer->objectsInRect(CCRect { start, end }, false);
             }

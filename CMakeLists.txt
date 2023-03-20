@@ -21,6 +21,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     src
 )
 
+option(CLIPPER2_UTILS "Build utilities" Off)
+option(CLIPPER2_EXAMPLES "Build examples" Off)
+option(CLIPPER2_TESTS "Build tests" Off)
+add_subdirectory(src/external/Clipper2)
+
 if (NOT DEFINED ENV{GEODE_SDK})
     message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")
 else()
@@ -30,5 +35,5 @@ endif()
 set(GEODE_LINK_NIGHTLY On)
 add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
-target_link_libraries(${PROJECT_NAME} geode-sdk)
+target_link_libraries(${PROJECT_NAME} geode-sdk Clipper2)
 create_geode_file(${PROJECT_NAME})

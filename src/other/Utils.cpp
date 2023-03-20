@@ -1,5 +1,6 @@
 #include "Utils.hpp"
 #include <Geode/binding/EditorUI.hpp>
+#include <clipper2/clipper.h>
 
 std::string zLayerToString(ZLayer z) {
     switch (z) {
@@ -28,39 +29,12 @@ CCArrayExt<GameObject> iterSelected(EditorUI* ui) {
     return iterTargets(ui->m_selectedObject, ui->m_selectedObjects);
 }
 
-bool polygonIntersect(std::vector<CCPoint> const& a, std::vector<CCPoint> const& b) {
-    std::vector polygons { a, b };
-    std::optional<float> minA, maxA;
-    std::optional<float> minB, maxB;
-    for (size_t i = 0; i < polygons.size(); i++) {
-        auto polygon = polygons[i];
-        for (size_t i1 = 0; i1 < polygon.size(); i1 += 2) {
-            auto i2 = (i1 + 2) % polygon.size();
-            auto normal = CCPoint { polygon[i2].y - polygon[i1].y, polygon[i1].x - polygon[i2].x };
-            minA = maxA = std::nullopt;
-            for (size_t j = 0; j < a.size(); j += 2) {
-                auto projected = normal.x * a[j].x + normal.y * a[j].y;
-                if (!minA || projected < minA.value()) {
-                    minA = projected;
-                }
-                if (!maxA || projected > maxA.value()) {
-                    maxA = projected;
-                }
-            }
-            minB = maxB = std::nullopt;
-            for (size_t j = 0; j < b.size(); j += 2) {
-                auto projected = normal.x * b[j].x + normal.y * b[j].y;
-                if (!minB || projected < minB.value()) {
-                    minB = projected;
-                }
-                if (!maxB || projected > maxB.value()) {
-                    maxB = projected;
-                }
-            }
-            if (maxA < minB || maxB < minA) {
-                return false;
-            }
-        }
+bool polygonIntersect(std::vector<CCPoint> const& a, CCPoint const& b) {
+    using namespace Clipper2Lib;
+    PointD pb { b.x, b.y };
+    PathD path;
+    for (auto& pt : a) {
+        path.push_back({ pt.x, pt.y });
     }
-    return true;
+    return PointInPolygon(pb, { path }) != PointInPolygonResult::IsOutside;
 }
