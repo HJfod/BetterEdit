@@ -3,6 +3,13 @@
 
 ### Additions
  - Add level percentage in editor
+ - Full undo history that allows undoing anything
+ - Better selection stuff
+ - Add ability to enable blending from live color select
+ - Scripting support
+ - Extra object info
+ - View tab (that doesn't contain anything yet)
+ - Settings button in the editor pause menu
 
 ### Changes
  - Retroactively switched versioning to v5.0.0-alpha.X as Geode now supports that

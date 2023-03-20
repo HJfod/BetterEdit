@@ -9,12 +9,13 @@ The next generation of BetterEdit.
  - Zoom with Control + Scroll Wheel
  - Display current zoom level when you zoom in/out
  - Display current percentage in level
- - Added blending toggle in quick color selector
+ - Blending toggle in quick color selector
  - Undo history that lets you undo anything, including color and trigger changes
  - Visibility tab for quickly toggling visibility of elements
  - Scripting support using a custom language
  - Extra object info
  - Start Pos switcher in the editor
+ - Better selection features
 
 More features coming soon. If you have <cr>**suggestions**</c>, please post them [on the GitHub as an issue](https://github.com/HJfod/BetterEdit/issues).
 
