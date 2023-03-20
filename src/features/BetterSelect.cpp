@@ -461,7 +461,9 @@ class $modify(SelectUI, EditorUI) {
             }
         }
         EditorUI::ccTouchMoved(touch, event);
-        this->updateSwipePreview(touch, event);
+        if (m_swiping) {
+            this->updateSwipePreview(touch, event);
+        }
     }
 
     void ccTouchEnded(CCTouch* touch, CCEvent* event) {
