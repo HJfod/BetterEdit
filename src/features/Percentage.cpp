@@ -9,7 +9,7 @@
 
 using namespace geode::prelude;
 
-class $modify(EditorUI) {
+class $modify(SliderUI, EditorUI) {
     void updateSlider() {
         EditorUI::updateSlider();
         this->updatePercentage();
@@ -31,9 +31,22 @@ class $modify(EditorUI) {
     }
 
     void updatePercentage() {
-        if (!Mod::get()->template getSettingValue<bool>("show-zoom-text")) {
+        if (!Mod::get()->template getSettingValue<bool>("show-percentage")) {
             return;
         }
+        // only update once per frame
+        if (!this->getActionByTag(0xBE77E)) {
+            auto action = CCSequence::create(
+                CCDelayTime::create(0.f),
+                CCCallFunc::create(this, callfunc_selector(SliderUI::doUpdatePercentage)),
+                nullptr
+            );
+            action->setTag(0xBE77E);
+            this->runAction(action);
+        }
+    }
+
+    void doUpdatePercentage() {
         auto perLabel = static_cast<CCLabelBMFont*>(
             m_positionSlider->getChildByID("percentage-label"_spr)
         );
