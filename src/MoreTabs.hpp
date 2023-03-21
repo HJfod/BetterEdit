@@ -16,7 +16,7 @@ protected:
 
     bool init(EditorUI* ui);
     void onEditTab(CCObject*);
-    void updateMode();
+    void updateMode(bool show = true);
 
     friend struct MoreTabsUI; 
 

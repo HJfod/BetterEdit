@@ -22,11 +22,11 @@ bool MoreTabs::init(EditorUI* ui) {
     return true;
 }
 
-void MoreTabs::updateMode() {
-    m_editTabMenu->setVisible(m_ui->m_selectedMode == 3);
+void MoreTabs::updateMode(bool show) {
+    m_editTabMenu->setVisible(show && m_ui->m_selectedMode == 3);
     int i = 0;
     for (auto& tab : m_editTabs) {
-        tab->setVisible(m_ui->m_selectedMode == 3 && m_selected == i++);
+        tab->setVisible(show && m_ui->m_selectedMode == 3 && m_selected == i++);
     }
 }
 
@@ -109,7 +109,7 @@ struct $modify(MoreTabsUI, EditorUI) {
     void showUI(bool show) {
         EditorUI::showUI(show);
         if (auto tabs = MoreTabs::get(this, false)) {
-            tabs->updateMode();
+            tabs->updateMode(show);
         }
     }
 };

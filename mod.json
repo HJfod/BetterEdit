@@ -51,7 +51,8 @@
 		"spritesheets": {
 			"UISheet": [
 				"resources/*.png",
-				"resources/history/*.png"
+				"resources/history/*.png",
+				"resources/objs/*.png"
 			]
 		}
 	},
