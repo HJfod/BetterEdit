@@ -5,7 +5,9 @@
 #include <Geode/utils/ranges.hpp>
 #include <Geode/loader/ModEvent.hpp>
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/GameObject.hpp>
 #include <MoreTabs.hpp>
+#include <other/Utils.hpp>
 
 static bool isAround(float a, float b) {
     return fabsf(a - b) < 2.f;
@@ -51,6 +53,7 @@ void AutoLinkObject::cleanAutoLinkObjects() {
 
 void AutoLinkObject::updateLinking() {
     this->cleanAutoLinkObjects();
+    if (!m_set) return;
     AutoLinkDefinition def;
     for (auto obj : s_autoLinkObjects) {
         bool left  = isAround(obj->getPositionX() - this->getPositionX(), -30.f);
@@ -88,13 +91,50 @@ $on_mod(Loaded) {
     ObjectToolbox::sharedState()->addObject(AutoLinkObject::OBJ_ID, "link-obj.png"_spr);
 }
 
-struct $modify(EditorUI) {
+struct $modify(AutoLinkUI, EditorUI) {
+    Ref<AutoLinkSet> selected;
+
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
             return false;
         
-        MoreTabs::get(this)->addCreateTab("link-obj.png"_spr, { AutoLinkObject::OBJ_ID });
+        auto btns = CCArray::create();
+        btns->addObject(this->getCreateBtn(AutoLinkObject::OBJ_ID, 4));
+        for (auto& set : AutoLinkManager::get()->getSets()) {
+            auto btn = this->getCreateBtn(AutoLinkObject::OBJ_ID, 4);
+            btn->setUserObject(set);
+            btns->addObject(btn);
+        }
+        btns->addObject(CCMenuItemSpriteExtra::create(
+            createEditorButtonSprite("edit_addCBtn_001.png"),
+            this, nullptr
+        ));
+        MoreTabs::get(this)->addCreateTab("link-obj.png"_spr, btns);
 
         return true;
+    }
+
+    void onCreateButton(CCObject* sender) {
+        EditorUI::onCreateButton(sender);
+        auto item = static_cast<CreateMenuItem*>(sender);
+        if (item->m_objectID == AutoLinkObject::OBJ_ID) {
+            m_fields->selected = static_cast<AutoLinkSet*>(item->getUserObject());
+        }
+        else {
+            m_fields->selected = nullptr;
+        }
+    }
+};
+
+struct $modify(GameObject) {
+    static GameObject* createWithKey(int key) {
+        if (key == AutoLinkObject::OBJ_ID) {
+            return AutoLinkObject::create(
+                EditorUI::get() ? 
+                    static_cast<AutoLinkUI*>(EditorUI::get())->m_fields->selected :
+                    nullptr
+            );
+        }
+        return GameObject::createWithKey(key);
     }
 };

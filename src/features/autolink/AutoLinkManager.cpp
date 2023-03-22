@@ -28,6 +28,14 @@ AutoLinkSet* AutoLinkSet::create() {
     return nullptr;
 }
 
+std::vector<Ref<AutoLinkSet>> AutoLinkManager::getSets() const {
+    return m_sets;
+}
+
+void AutoLinkManager::figureOutSet(CCArray* objs) {
+
+}
+
 AutoLinkManager* AutoLinkManager::get() {
     static auto ret = new AutoLinkManager;
     return ret;

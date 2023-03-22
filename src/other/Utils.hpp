@@ -15,3 +15,4 @@ bool polygonIntersect(std::vector<CCPoint> const& a, CCPoint const& b);
 CCArray* selectStructure(EditorUI* ui, GameObject* from);
 CCArray* selectStructure(EditorUI* ui, CCArray* from);
 void tintObject(GameObject* obj, std::optional<ccColor3B> const& color);
+ButtonSprite* createEditorButtonSprite(const char* top, const char* bg = "GJ_button_01.png");

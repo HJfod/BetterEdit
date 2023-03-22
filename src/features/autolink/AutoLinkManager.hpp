@@ -61,5 +61,8 @@ protected:
 
 public:
     static AutoLinkManager* get();
+
+    std::vector<Ref<AutoLinkSet>> getSets() const;
+    void figureOutSet(CCArray* objs);
 };
 

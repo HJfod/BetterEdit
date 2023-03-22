@@ -63,7 +63,7 @@ CCMenuItemToggler* MoreTabs::createTab(const char* icon, CCObject* target, SEL_M
     return tab;
 }
 
-void MoreTabs::addCreateTab(const char* icon, std::vector<int> const& objIDs) {
+void MoreTabs::addCreateTab(const char* icon, EditButtonBar* content) {
     auto tab = this->createTab(icon, m_ui, menu_selector(EditorUI::onSelectBuildTab));
     tab->setTag(m_ui->m_tabsArray->count());
     tab->setClickable(false);
@@ -72,20 +72,29 @@ void MoreTabs::addCreateTab(const char* icon, std::vector<int> const& objIDs) {
     m_ui->m_tabsMenu->addChild(tab);
     m_ui->m_tabsMenu->updateLayout();
 
+    content->setVisible(false);
+    m_ui->m_createButtonBars->addObject(content);
+    if (!content->getParent()) {
+        m_ui->addChild(content, 10);
+    }
+}
+
+void MoreTabs::addCreateTab(const char* icon, CCArray* buttons) {
     auto winSize = CCDirector::get()->getWinSize();
+    this->addCreateTab(icon, EditButtonBar::create(
+        buttons, { winSize.width / 2, 86.f },
+        m_ui->m_tabsArray->count(), true,
+        GameManager::get()->getIntGameVariable("0049"),
+        GameManager::get()->getIntGameVariable("0050")
+    ));
+}
+
+void MoreTabs::addCreateTab(const char* icon, std::vector<int> const& objIDs) {
     auto buttons = CCArray::create();
     for (auto& id : objIDs) {
         buttons->addObject(m_ui->getCreateBtn(id, 4));
     }
-    auto content = EditButtonBar::create(
-        buttons, { winSize.width / 2, 86.f },
-        tab->getTag(), true,
-        GameManager::get()->getIntGameVariable("0049"),
-        GameManager::get()->getIntGameVariable("0050")
-    );
-    content->setVisible(false);
-    m_ui->m_createButtonBars->addObject(content);
-    m_ui->addChild(content, 10);
+    this->addCreateTab(icon, buttons);
 }
 
 void MoreTabs::addEditTab(const char* icon, CCNode* content) {

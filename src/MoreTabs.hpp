@@ -24,6 +24,8 @@ protected:
     friend struct MoreTabsUI; 
 
 public:
+    void addCreateTab(const char* icon, EditButtonBar* content);
+    void addCreateTab(const char* icon, CCArray* buttons);
     void addCreateTab(const char* icon, std::vector<int> const& objIDs);
     void addEditTab(const char* icon, CCNode* content);
 

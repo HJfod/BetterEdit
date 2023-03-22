@@ -148,3 +148,10 @@ void tintObject(GameObject* obj, std::optional<ccColor3B> const& color) {
     tobj->m_fields->tint = color;
     tobj->updateTintColor();
 }
+
+ButtonSprite* createEditorButtonSprite(const char* top, const char* bg) {
+    return ButtonSprite::create(
+        CCSprite::createWithSpriteFrameName(top),
+        32, true, 32, bg, 1.f
+    );
+}
