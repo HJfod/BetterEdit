@@ -23,10 +23,9 @@ protected:
 
 public:
     static AutoLinkObject* create(Ref<AutoLinkSet> set);
+    CCArray* getObjects() const;
 
     void updateLinking();
-
-    void setPosition(CCPoint const& pos) override;
 
     static constexpr size_t OBJ_ID = 5002;
 };

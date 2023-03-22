@@ -29,6 +29,16 @@ union AutoLinkDefinition {
         defs.downRight = AutoLinkNeighbour::None;
         defs.downLeft = AutoLinkNeighbour::None;
     }
+    void set(bool up, bool right, bool down, bool left, AutoLinkNeighbour neigh) {
+        if (left && up)         defs.upLeft = neigh;
+        else if (up)            defs.up = neigh;
+        else if (up && right)   defs.upRight = neigh;
+        else if (right)         defs.right = neigh;
+        else if (down && right) defs.downRight = neigh;
+        else if (down)          defs.down = neigh;
+        else if (down && left)  defs.downLeft = neigh;
+        else if (left)          defs.left = neigh;
+    }
     bool operator==(AutoLinkDefinition const& other) const {
         return value == other.value;
     }
@@ -43,14 +53,16 @@ namespace std {
     };
 }
 
+using Definitions = std::unordered_map<AutoLinkDefinition, std::vector<std::string>>;
+
 class AutoLinkSet : public CCObject {
 protected:
-    std::unordered_map<AutoLinkDefinition, std::vector<std::string>> m_definitions;
+    Definitions m_definitions;
 
-    bool init();
+    bool init(Definitions const& defs);
 
 public:
-    static AutoLinkSet* create();
+    static AutoLinkSet* create(Definitions const& defs);
 
     std::string getObject(AutoLinkDefinition def);
 };

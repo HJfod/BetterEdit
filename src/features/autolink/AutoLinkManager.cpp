@@ -1,7 +1,14 @@
 #include "AutoLinkManager.hpp"
+#include "AutoLinkObject.hpp"
 #include <Geode/utils/cocos.hpp>
+#include <Geode/binding/GameObject.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/binding/EditorUI.hpp>
 
-bool AutoLinkSet::init() {
+using namespace geode::prelude;
+
+bool AutoLinkSet::init(Definitions const& defs) {
+    m_definitions = defs;
     return true;
 }
 
@@ -19,9 +26,9 @@ std::string AutoLinkSet::getObject(AutoLinkDefinition def) {
     return "";
 }
 
-AutoLinkSet* AutoLinkSet::create() {
+AutoLinkSet* AutoLinkSet::create(Definitions const& defs) {
     auto ret = new AutoLinkSet;
-    if (ret && ret->init()) {
+    if (ret && ret->init(defs)) {
         ret->autorelease();
         return ret;
     }
@@ -38,6 +45,13 @@ namespace std {
     struct std::hash<CCPoint> {
         std::size_t operator()(CCPoint const& pt) const noexcept {
             return std::hash<float>()(pt.x) ^ std::hash<float>()(pt.y);
+        }
+    };
+
+    template <>
+    struct equal_to<CCPoint> {
+        bool operator()(CCPoint const& p1, CCPoint const& p2) const {
+            return p1.fuzzyEquals(p2, .01f);
         }
     };
 }
@@ -80,10 +94,23 @@ void AutoLinkManager::figureOutSet(CCArray* objs) {
     for (auto [pt, objs] : gridSnapped) {
         std::stringstream str;
         for (auto obj : objs) {
+            // no recursive autolinking
+            if (obj->m_objectID == AutoLinkObject::OBJ_ID) {
+                continue;
+            }
             str << std::string(obj->getSaveString()) << ";";
         }
         AutoLinkDefinition def;
+        def.set(
+            gridSnapped.contains(pt + CCPoint { 0.f, 30.f }),
+            gridSnapped.contains(pt + CCPoint { 30.f, 0.f }),
+            gridSnapped.contains(pt - CCPoint { 0.f, 30.f }),
+            gridSnapped.contains(pt - CCPoint { 30.f, 0.f }),
+            AutoLinkNeighbour::Block
+        );
+        definitions[def].push_back(str.str());
     }
+    m_sets.push_back(AutoLinkSet::create(definitions));
 }
 
 AutoLinkManager* AutoLinkManager::get() {
