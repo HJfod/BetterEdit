@@ -1,6 +1,8 @@
 #include "MoreTabs.hpp"
 #include <Geode/binding/CCMenuItemToggler.hpp>
 #include <Geode/binding/EditButtonBar.hpp>
+#include <Geode/binding/GameManager.hpp>
+#include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/modify/EditorUI.hpp>
 
 bool MoreTabs::init(EditorUI* ui) {
@@ -63,7 +65,7 @@ CCMenuItemToggler* MoreTabs::createTab(const char* icon, CCObject* target, SEL_M
     return tab;
 }
 
-void MoreTabs::addCreateTab(const char* icon, EditButtonBar* content) {
+int MoreTabs::addCreateTab(const char* icon, EditButtonBar* content) {
     auto tab = this->createTab(icon, m_ui, menu_selector(EditorUI::onSelectBuildTab));
     tab->setTag(m_ui->m_tabsArray->count());
     tab->setClickable(false);
@@ -77,11 +79,13 @@ void MoreTabs::addCreateTab(const char* icon, EditButtonBar* content) {
     if (!content->getParent()) {
         m_ui->addChild(content, 10);
     }
+
+    return tab->getTag();
 }
 
-void MoreTabs::addCreateTab(const char* icon, CCArray* buttons) {
+int MoreTabs::addCreateTab(const char* icon, CCArray* buttons) {
     auto winSize = CCDirector::get()->getWinSize();
-    this->addCreateTab(icon, EditButtonBar::create(
+    return this->addCreateTab(icon, EditButtonBar::create(
         buttons, { winSize.width / 2, 86.f },
         m_ui->m_tabsArray->count(), true,
         GameManager::get()->getIntGameVariable("0049"),
@@ -89,15 +93,15 @@ void MoreTabs::addCreateTab(const char* icon, CCArray* buttons) {
     ));
 }
 
-void MoreTabs::addCreateTab(const char* icon, std::vector<int> const& objIDs) {
+int MoreTabs::addCreateTab(const char* icon, std::vector<int> const& objIDs) {
     auto buttons = CCArray::create();
     for (auto& id : objIDs) {
         buttons->addObject(m_ui->getCreateBtn(id, 4));
     }
-    this->addCreateTab(icon, buttons);
+    return this->addCreateTab(icon, buttons);
 }
 
-void MoreTabs::addEditTab(const char* icon, CCNode* content) {
+int MoreTabs::addEditTab(const char* icon, CCNode* content) {
     auto tab = this->createTab(icon, this, menu_selector(MoreTabs::onEditTab));
     tab->setTag(m_editTabs.size());
     m_editTabMenu->addChild(tab);
@@ -114,6 +118,12 @@ void MoreTabs::addEditTab(const char* icon, CCNode* content) {
         this->onEditTab(tab);
         tab->toggle(true);
     }
+
+    return tab->getTag();
+}
+
+EditButtonBar* MoreTabs::getCreateTab(int tag) const {
+    return static_cast<EditButtonBar*>(m_ui->m_createButtonBars->objectAtIndex(tag));
 }
 
 MoreTabs* MoreTabs::create(EditorUI* ui) {

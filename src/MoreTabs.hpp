@@ -24,10 +24,12 @@ protected:
     friend struct MoreTabsUI; 
 
 public:
-    void addCreateTab(const char* icon, EditButtonBar* content);
-    void addCreateTab(const char* icon, CCArray* buttons);
-    void addCreateTab(const char* icon, std::vector<int> const& objIDs);
-    void addEditTab(const char* icon, CCNode* content);
+    int addCreateTab(const char* icon, EditButtonBar* content);
+    int addCreateTab(const char* icon, CCArray* buttons);
+    int addCreateTab(const char* icon, std::vector<int> const& objIDs);
+    int addEditTab(const char* icon, CCNode* content);
+
+    EditButtonBar* getCreateTab(int tag) const;
 
     static MoreTabs* create(EditorUI* ui);
     static MoreTabs* get(EditorUI* ui, bool create = true);
