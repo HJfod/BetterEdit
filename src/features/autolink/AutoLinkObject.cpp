@@ -4,6 +4,8 @@
 #include <Geode/binding/ObjectToolbox.hpp>
 #include <Geode/utils/ranges.hpp>
 #include <Geode/loader/ModEvent.hpp>
+#include <Geode/modify/EditorUI.hpp>
+#include <MoreTabs.hpp>
 
 static bool isAround(float a, float b) {
     return fabsf(a - b) < 2.f;
@@ -12,11 +14,12 @@ static bool isAround(float a, float b) {
 bool AutoLinkObject::init(Ref<AutoLinkSet> set) {
     m_eObjType = CCObjectType::GameObject;
 
-    if (!CCSprite::initWithSpriteFrameName("link-obj"_spr))
+    if (!CCSprite::initWithSpriteFrameName("link-obj.png"_spr))
         return false;
     
-    m_textureName = "link-obj"_spr;
+    m_textureName = "link-obj.png"_spr;
     m_objectID = AutoLinkObject::OBJ_ID;
+    m_set = set;
 
     this->commonSetup();
 
@@ -82,5 +85,16 @@ void AutoLinkObject::setPosition(CCPoint const& pos) {
 }
 
 $on_mod(Loaded) {
-    ObjectToolbox::sharedState()->addObject(AutoLinkObject::OBJ_ID, "link-obj"_spr);
+    ObjectToolbox::sharedState()->addObject(AutoLinkObject::OBJ_ID, "link-obj.png"_spr);
 }
+
+struct $modify(EditorUI) {
+    bool init(LevelEditorLayer* lel) {
+        if (!EditorUI::init(lel))
+            return false;
+        
+        MoreTabs::get(this)->addCreateTab("link-obj.png"_spr, { AutoLinkObject::OBJ_ID });
+
+        return true;
+    }
+};

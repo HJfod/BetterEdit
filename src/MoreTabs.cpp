@@ -10,7 +10,7 @@ bool MoreTabs::init(EditorUI* ui) {
     m_ui = ui;
 
     m_editTabMenu = CCMenu::create();
-    m_editTabMenu->setLayout(RowLayout::create()->setGap(2.5f));
+    m_editTabMenu->setLayout(ui->m_tabsMenu->getLayout());
     m_editTabMenu->setContentSize(ui->m_tabsMenu->getContentSize());
     m_editTabMenu->setPosition(ui->m_tabsMenu->getPosition());
     this->addChild(m_editTabMenu);
@@ -42,7 +42,7 @@ void MoreTabs::onEditTab(CCObject* sender) {
     }
 }
 
-void MoreTabs::addEditTab(const char* icon, CCNode* content) {
+CCMenuItemToggler* MoreTabs::createTab(const char* icon, CCObject* target, SEL_MenuHandler selector) {
     auto tabOff = CCSprite::createWithSpriteFrameName("GJ_tabOff_001.png");
     tabOff->setOpacity(150);
     
@@ -58,7 +58,38 @@ void MoreTabs::addEditTab(const char* icon, CCNode* content) {
     tabOn->addChild(tabOnTop);
     limitNodeSize(tabOnTop, tabOff->getContentSize() / 1.5f, 1.f, .1f);
 
-    auto tab = CCMenuItemToggler::create(tabOff, tabOn, this, menu_selector(MoreTabs::onEditTab));
+    auto tab = CCMenuItemToggler::create(tabOff, tabOn, target, selector);
+    tab->setSizeMult(1.2f);
+    return tab;
+}
+
+void MoreTabs::addCreateTab(const char* icon, std::vector<int> const& objIDs) {
+    auto tab = this->createTab(icon, m_ui, menu_selector(EditorUI::onSelectBuildTab));
+    tab->setTag(m_ui->m_tabsArray->count());
+    tab->setClickable(false);
+
+    m_ui->m_tabsArray->addObject(tab);
+    m_ui->m_tabsMenu->addChild(tab);
+    m_ui->m_tabsMenu->updateLayout();
+
+    auto winSize = CCDirector::get()->getWinSize();
+    auto buttons = CCArray::create();
+    for (auto& id : objIDs) {
+        buttons->addObject(m_ui->getCreateBtn(id, 4));
+    }
+    auto content = EditButtonBar::create(
+        buttons, { winSize.width / 2, 86.f },
+        tab->getTag(), true,
+        GameManager::get()->getIntGameVariable("0049"),
+        GameManager::get()->getIntGameVariable("0050")
+    );
+    content->setVisible(false);
+    m_ui->m_createButtonBars->addObject(content);
+    m_ui->addChild(content, 10);
+}
+
+void MoreTabs::addEditTab(const char* icon, CCNode* content) {
+    auto tab = this->createTab(icon, this, menu_selector(MoreTabs::onEditTab));
     tab->setTag(m_editTabs.size());
     m_editTabMenu->addChild(tab);
     m_editTabMenu->updateLayout();
