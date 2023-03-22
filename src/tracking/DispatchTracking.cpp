@@ -18,6 +18,8 @@
 #include <Geode/binding/GameManager.hpp>
 #include <other/Utils.hpp>
 
+static int TRACKING_HOOK_PRIORITY = 999;
+
 #define BLOCKED_CALL(...) \
     {\
         auto block = BlockAll();\
@@ -72,6 +74,15 @@ private:
 };
 
 class $modify(LevelEditorLayer) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("LevelEditorLayer::addSpecial", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("LevelEditorLayer::createObjectsFromString", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("LevelEditorLayer::createObjectsFromSetup", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("LevelEditorLayer::removeSpecial", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("LevelEditorLayer::pasteAtributeState", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("LevelEditorLayer::pasteColorState", TRACKING_HOOK_PRIORITY);
+    }
+
     void addSpecial(GameObject* obj) {
         BLOCKED_CALL(LevelEditorLayer::addSpecial(obj));
         Bubble<ObjPlaced>::push(obj, obj->getPosition());
@@ -125,6 +136,31 @@ class $modify(LevelEditorLayer) {
 class $modify(EditorUI) {
     std::vector<std::pair<CCPoint, float>> originalScales;
     std::vector<CCPoint> freeMoveStart;
+
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("EditorUI::onDuplicate", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::onCreate", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::onDeleteSelected", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::deleteObject", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::moveObject", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::moveObjectCall", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::transformObjectCall", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::transformObject", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::deselectAll", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::selectObjects", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::ccTouchBegan", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::ccTouchMoved", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::ccTouchEnded", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::scaleChangeBegin", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::scaleChanged", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::scaleChangeEnded", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::scaleObjects", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::rotateObjects", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::flipObjectsX", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::flipObjectsY", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::alignObjects", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("EditorUI::onPlaytest", TRACKING_HOOK_PRIORITY);
+    }
 
     void onDuplicate(CCObject* sender) {
         std::vector<GameObject*> src;
@@ -363,6 +399,13 @@ class $modify(EditorUI) {
 };
 
 class $modify(GameObject) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("GameObject::selectObject", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("GameObject::deselectObject", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("GameObject::removeFromGroup", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("GameObject::addToGroup", TRACKING_HOOK_PRIORITY);
+    }
+
     void selectObject(ccColor3B color) {
         GameObject::selectObject(color);
         Bubble<ObjSelected>::push(this);
@@ -389,6 +432,11 @@ class $modify(GameObject) {
 };
 
 class $modify(CustomizeObjectLayer) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("CustomizeObjectLayer::init", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("CustomizeObjectLayer::onClose", TRACKING_HOOK_PRIORITY);
+    }
+
     std::vector<ObjColorState> prev;
 
     bool init(GameObject* target, CCArray* targets) {
@@ -419,6 +467,11 @@ class $modify(CustomizeObjectLayer) {
 };
 
 struct $modify(ColorSelectPopup) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("ColorSelectPopup::init", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("ColorSelectPopup::closeColorSelect", TRACKING_HOOK_PRIORITY);
+    }
+
     ColorState state;
 
     bool init(EffectGameObject* target, CCArray* targets, ColorAction* action) {
@@ -447,6 +500,12 @@ struct $modify(ColorSelectPopup) {
 };
 
 class $modify(SetGroupIDLayer) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("SetGroupIDLayer::init", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("SetGroupIDLayer::onAddGroup", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("SetGroupIDLayer::onClose", TRACKING_HOOK_PRIORITY);
+    }
+
     std::vector<ObjState> states;
 
     bool init(GameObject* obj, CCArray* objs) {
@@ -486,6 +545,11 @@ class $modify(SetGroupIDLayer) {
 using States = std::vector<std::pair<std::optional<TriggerState>, std::optional<SpecialState>>>;
 
 class $modify(CCLayerColor) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("CCLayerColor::initWithColor", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("CCLayerColor::destructor", TRACKING_HOOK_PRIORITY);
+    }
+
     // mfw no fields on cocos classes yet
 
     bool initWithColor(ccColor4B const& color) {
@@ -547,6 +611,11 @@ class $modify(CCLayerColor) {
 };
 
 class $modify(LevelSettingsLayer) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("LevelSettingsLayer::init", TRACKING_HOOK_PRIORITY);
+        (void)self.setHookPriority("LevelSettingsLayer::onClose", TRACKING_HOOK_PRIORITY);
+    }
+
     LevelSettingsState state;
 
     bool init(LevelSettingsObject* obj, LevelEditorLayer* lel) {
