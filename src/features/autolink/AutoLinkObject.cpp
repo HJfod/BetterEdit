@@ -107,11 +107,22 @@ struct $modify(AutoLinkUI, EditorUI) {
         }
         btns->addObject(CCMenuItemSpriteExtra::create(
             createEditorButtonSprite("edit_addCBtn_001.png"),
-            this, nullptr
+            this, menu_selector(AutoLinkUI::onNewAutoLinkSet)
         ));
         MoreTabs::get(this)->addCreateTab("link-obj.png"_spr, btns);
 
         return true;
+    }
+
+    void onNewAutoLinkSet(CCObject*) {
+        if (!m_selectedObjects || !m_selectedObjects->count()) {
+            return FLAlertLayer::create(
+                "Select Objects",
+                "You need to select at least two objects to create an autolink set",
+                "OK"
+            )->show();
+        }
+        AutoLinkManager::get()->figureOutSet(m_selectedObjects);
     }
 
     void onCreateButton(CCObject* sender) {
