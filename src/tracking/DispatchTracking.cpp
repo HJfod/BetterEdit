@@ -544,6 +544,8 @@ class $modify(SetGroupIDLayer) {
 
 using States = std::vector<std::pair<std::optional<TriggerState>, std::optional<SpecialState>>>;
 
+static std::unordered_map<CCLayerColor*, States> ALERT_STATES {};
+
 class $modify(CCLayerColor) {
     static void onModify(auto& self) {
         (void)self.setHookPriority("CCLayerColor::initWithColor", TRACKING_HOOK_PRIORITY);
@@ -560,17 +562,15 @@ class $modify(CCLayerColor) {
             CCDirector::get()->getRunningScene()->getObjType() == CCObjectType::LevelEditorLayer &&
             LevelEditorLayer::get() && EditorUI::get()
         ) {
-            States states;
             auto ui = EditorUI::get();
             for (auto obj : iterTargets(ui->m_selectedObject, ui->m_selectedObjects)) {
                 if (auto eobj = typeinfo_cast<EffectGameObject*>(obj)) {
-                    states.emplace_back(TriggerState::from(eobj), SpecialState::from(eobj));
+                    ALERT_STATES[this].emplace_back(TriggerState::from(eobj), SpecialState::from(eobj));
                 }
                 else {
-                    states.emplace_back(std::nullopt, SpecialState::from(obj));
+                    ALERT_STATES[this].emplace_back(std::nullopt, SpecialState::from(obj));
                 }
             }
-            this->setAttribute("states"_spr, states);
         }
 
         return true;
@@ -578,13 +578,12 @@ class $modify(CCLayerColor) {
     
     void destructor() {
         if (auto ui = EditorUI::get()) {
-            auto states = this->template getAttribute<States>("states"_spr);
-            if (states && states.value().size()) {
+            if (ALERT_STATES.contains(this) && ALERT_STATES.at(this).size()) {
                 size_t i = 0;
                 auto bubble1 = Bubble<TriggerPropsChanged>();
                 auto bubble2 = Bubble<SpecialPropsChanged>();
                 for (auto obj : iterTargets(ui->m_selectedObject, ui->m_selectedObjects)) {
-                    auto prev = states.value().at(i++);
+                    auto prev = ALERT_STATES.at(this).at(i++);
                     if (auto eobj = typeinfo_cast<EffectGameObject*>(obj)) {
                         auto state = TriggerState::from(eobj);
                         if (prev.first && state) {
@@ -605,6 +604,7 @@ class $modify(CCLayerColor) {
                     }
                 }
             }
+            ALERT_STATES.erase(this);
         }
         CCLayerColor::~CCLayerColor();
     }

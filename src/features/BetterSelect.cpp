@@ -46,6 +46,15 @@ static const char* getToolSprite(SelectTool tool) {
     }
 }
 
+static const char* getToolName(SelectTool tool) {
+    switch (tool) {
+        case SelectTool::Lasso: return "Lasso";
+        case SelectTool::MagicWand: return "Magic Wand";
+        case SelectTool::Swipe: return "Swipe";
+        default: return nullptr;
+    }
+}
+
 enum class SelectMode {
     Unique,
     Add,
@@ -62,6 +71,17 @@ static const char* getModeSprite(SelectMode type) {
         case SelectMode::Subtract: return "select-subtract.png"_spr;
         case SelectMode::Intersect: return "select-intersect.png"_spr;
         case SelectMode::XOR: return "select-xor.png"_spr;
+    }
+}
+
+static const char* getModeName(SelectMode tool) {
+    switch (tool) {
+        case SelectMode::Unique: return "Replace";
+        case SelectMode::Add: return "Add";
+        case SelectMode::Subtract: return "Subtract";
+        case SelectMode::Intersect: return "Intersect";
+        case SelectMode::XOR: return "XOR";
+        default: return nullptr;
     }
 }
 
@@ -114,6 +134,7 @@ protected:
             getToolSprite(to), this, menu_selector(ASelect::onSelectTool)
         );
         tool->setTag(static_cast<int>(to));
+        tool->setAttribute("hjfod.mouse-api/tooltip", getToolName(to));
         m_tools.push_back(tool);
         m_selectToolMenu->addChild(tool);
         return tool;
@@ -124,6 +145,7 @@ protected:
             getModeSprite(ty), this, menu_selector(ASelect::onSelectMode)
         );
         type->setTag(static_cast<int>(ty));
+        type->setAttribute("hjfod.mouse-api/tooltip", getModeName(ty));
         m_types.push_back(type);
         m_selectTypeMenu->addChild(type);
         return type;
