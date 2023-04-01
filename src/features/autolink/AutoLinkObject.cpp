@@ -98,17 +98,17 @@ struct $modify(AutoLinkUI, EditorUI) {
         if (!EditorUI::init(lel))
             return false;
         
-        auto btns = CCArray::create();
-        for (auto& set : AutoLinkManager::get()->getSets()) {
-            auto btn = this->getCreateBtn(AutoLinkObject::OBJ_ID, 4);
-            btn->setUserObject(set);
-            btns->addObject(btn);
-        }
-        btns->addObject(CCMenuItemSpriteExtra::create(
-            createEditorButtonSprite("edit_addCBtn_001.png"),
-            this, menu_selector(AutoLinkUI::onNewAutoLinkSet)
-        ));
-        m_fields->tag = MoreTabs::get(this)->addCreateTab("link-obj.png"_spr, btns);
+        // auto btns = CCArray::create();
+        // for (auto& set : AutoLinkManager::get()->getSets()) {
+        //     auto btn = this->getCreateBtn(AutoLinkObject::OBJ_ID, 4);
+        //     btn->setUserObject(set);
+        //     btns->addObject(btn);
+        // }
+        // btns->addObject(CCMenuItemSpriteExtra::create(
+        //     createEditorButtonSprite("edit_addCBtn_001.png"),
+        //     this, menu_selector(AutoLinkUI::onNewAutoLinkSet)
+        // ));
+        // m_fields->tag = MoreTabs::get(this)->addCreateTab("link-obj.png"_spr, btns);
 
         return true;
     }

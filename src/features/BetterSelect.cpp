@@ -347,12 +347,12 @@ class $modify(SelectUI, EditorUI) {
         return true;
     }
 
-    CCArray* filterSwipe(CCArray* rawSrc) {
+    std::pair<CCArray*, bool> filterSwipe(CCArray* rawSrc) {
         auto src = CCArray::create();
-        if (
+        auto custom = 
             GameManager::get()->getGameVariable("0064") && 
-            GameManager::get()->getIntGameVariable("0005") == 3
-        ) {
+            GameManager::get()->getIntGameVariable("0005") == 3;
+        if (custom) {
             auto id = GameManager::get()->getIntGameVariable("0006");
             for (auto obj : CCArrayExt<GameObject>(rawSrc)) {
                 if (obj->m_objectID == id) {
@@ -363,14 +363,15 @@ class $modify(SelectUI, EditorUI) {
         else {
             src->addObjectsFromArray(rawSrc);
         }
+        custom = custom && rawSrc->count();
         switch (m_fields->select->getMode()) {
             case SelectMode::Unique: {
-                return src;
+                return { src, custom };
             } break;
 
             case SelectMode::Add: {
                 src->addObjectsFromArray(this->getSelectedObjects());
-                return src;
+                return { src, custom };
             } break;
 
             case SelectMode::Subtract: {
@@ -380,7 +381,7 @@ class $modify(SelectUI, EditorUI) {
                         res->addObject(obj);
                     }
                 }
-                return res;
+                return { res, custom };
             } break;
 
             case SelectMode::Intersect: {
@@ -390,7 +391,7 @@ class $modify(SelectUI, EditorUI) {
                         res->addObject(obj);
                     }
                 }
-                return res;
+                return { res, custom };
             } break;
 
             case SelectMode::XOR: {
@@ -405,10 +406,10 @@ class $modify(SelectUI, EditorUI) {
                         res->addObject(obj);
                     }
                 }
-                return res;
+                return { res, custom };
             } break;
         }
-        return src;
+        return { src, custom };
     }
 
     CCArray* objectsInPolygon(std::vector<CCPoint> const& polygon) {
@@ -445,7 +446,7 @@ class $modify(SelectUI, EditorUI) {
             );
     }
 
-    CCArray* getSwipedObjects(CCTouch* touch, CCEvent* event) {
+    std::pair<CCArray*, bool> getSwipedObjects(CCTouch* touch, CCEvent* event) {
         auto touchEnd = getTouchPoint(touch, event);
         if (this->isSwiping(touch, event)) {
             auto _ = BlockAll();
@@ -470,7 +471,7 @@ class $modify(SelectUI, EditorUI) {
             }
             return this->filterSwipe(objs);
         }
-        return nullptr;
+        return { nullptr, false };
     }
 
     void updateSwipePreview(CCTouch* touch, CCEvent* event) {
@@ -489,7 +490,7 @@ class $modify(SelectUI, EditorUI) {
             return;
         }
         
-        auto objs = getSwipedObjects(touch, event);
+        auto [objs, _] = getSwipedObjects(touch, event);
         if (!objs) {
             m_fields->selection = nullptr;
             return;
@@ -544,11 +545,28 @@ class $modify(SelectUI, EditorUI) {
             tintObject(obj, std::nullopt);
         }
         m_fields->deselection = {};
-        if (auto objs = this->getSwipedObjects(touch, event)) {
+        auto [objs, filtered] = this->getSwipedObjects(touch, event);
+        if (objs) {
             {
                 auto _ = BlockAll();
                 EditorUI::ccTouchEnded(touch, event);
                 this->deselectAll();
+            }
+            if (!objs->count() && filtered) {
+                auto winSize = CCDirector::get()->getWinSize();
+                auto infoLabel = CCLabelBMFont::create("You have select filters enabled", "bigFont.fnt");
+                infoLabel->setScale(.5f);
+                infoLabel->setColor({ 255, 25, 25 });
+                infoLabel->setOpacity(0);
+                infoLabel->setPosition(winSize / 2);
+                infoLabel->runAction(CCSequence::create(
+                    CCFadeTo::create(1.f, 255),
+                    CCDelayTime::create(1.f),
+                    CCFadeTo::create(1.f, 0),
+                    CCCallFunc::create(infoLabel, callfunc_selector(CCNode::removeFromParent)),
+                    nullptr
+                ));
+                this->addChild(infoLabel);
             }
             this->selectObjects(objs, false);
         }
