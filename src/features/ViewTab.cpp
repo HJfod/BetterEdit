@@ -47,6 +47,11 @@ struct $modify(EditorUI) {
         return true;
     }
 
+    void showUI(bool show) {
+        EditorUI::showUI(show);
+        m_fields->m_viewModeBtn->setVisible(show);
+    }
+
     void toggleMode(CCObject* sender) {
         EditorUI::toggleMode(sender);
         this->resetUI();

@@ -15,12 +15,14 @@
 #include <Geode/ui/BasedButtonSprite.hpp>
 
 struct $modify(HistoryUI, EditorUI) {
+    CCMenuItemSpriteExtra* historyBtn = nullptr;
+
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
             return false;
         
         if (auto menu = this->getChildByID("undo-menu")) {
-            menu->addChild(CCMenuItemSpriteExtra::create(
+            menu->addChild(m_fields->historyBtn = CCMenuItemSpriteExtra::create(
                 CircleButtonSprite::createWithSpriteFrameName(
                     "GJ_timeIcon_001.png", 1.f, CircleBaseColor::Green,
                     CircleBaseSize::Small
@@ -36,6 +38,13 @@ struct $modify(HistoryUI, EditorUI) {
     void onHistory(CCObject*) {
         if (auto history = History::get(m_editorLayer)) {
             HistoryPopup::create(history)->show();
+        }
+    }
+
+    void showUI(bool show) {
+        EditorUI::showUI(show);
+        if (m_fields->historyBtn) {
+            m_fields->historyBtn->setVisible(show);
         }
     }
 
@@ -421,5 +430,6 @@ struct $modify(HistoryLayer, LevelEditorLayer) {
 };
 
 History* History::get(LevelEditorLayer* lel) {
+    if (!lel) return nullptr;
     return static_cast<HistoryLayer*>(lel)->m_fields->history;
 }

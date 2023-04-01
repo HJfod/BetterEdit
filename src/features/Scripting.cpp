@@ -407,6 +407,8 @@ public:
 };
 
 class $modify(ScriptingUI, EditorUI) {
+    CCMenuItemSpriteExtra* scriptButton;
+
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
             return false;
@@ -416,16 +418,21 @@ class $modify(ScriptingUI, EditorUI) {
             auto spr = EditorButtonSprite::createWithSpriteFrameName(
                 "run-script.png"_spr, .7f, EditorBaseColor::Orange
             );
-            auto button = CCMenuItemSpriteExtra::create(
+            m_fields->scriptButton = CCMenuItemSpriteExtra::create(
                 spr, this, menu_selector(ScriptingUI::onScripts)
             );
-            button->setSizeMult(1.2f);
-            button->setContentSize({ 40.f, 40.f });
-            menu->addChild(button);
+            m_fields->scriptButton->setSizeMult(1.2f);
+            m_fields->scriptButton->setContentSize({ 40.f, 40.f });
+            menu->addChild(m_fields->scriptButton);
             menu->updateLayout();
         }
 
         return true;
+    }
+
+    void showUI(bool show) {
+        EditorUI::showUI(show);
+        m_fields->scriptButton->setVisible(show);
     }
 
     void onScripts(CCObject*) {

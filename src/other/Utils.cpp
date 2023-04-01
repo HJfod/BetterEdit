@@ -2,6 +2,7 @@
 #include <Geode/binding/EditorUI.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/OBB2D.hpp>
+#include <Geode/binding/ButtonSprite.hpp>
 #include <Geode/modify/GameObject.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <clipper2/clipper.h>
