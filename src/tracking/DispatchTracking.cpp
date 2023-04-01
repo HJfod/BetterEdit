@@ -107,7 +107,7 @@ class $modify(LevelEditorLayer) {
     void pasteAtributeState(GameObject* target, CCArray* targets) {
         std::vector<ObjState> states;
         for (auto& obj : iterTargets(target, targets)) {
-            states.push_back(ObjState::from(target));
+            states.push_back(ObjState::from(obj));
         }
         LevelEditorLayer::pasteAtributeState(target, targets);
         size_t i = 0;
