@@ -6,6 +6,7 @@
 #include <Geode/binding/CCMenuItemToggler.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/GameObject.hpp>
+#include <Geode/binding/GameManager.hpp>
 #include <Geode/ui/BasedButtonSprite.hpp>
 #include <other/Utils.hpp>
 #include <tracking/Tracking.hpp>
@@ -315,7 +316,22 @@ class $modify(SelectUI, EditorUI) {
         return true;
     }
 
-    CCArray* filterSwipe(CCArray* src) {
+    CCArray* filterSwipe(CCArray* rawSrc) {
+        auto src = CCArray::create();
+        if (
+            GameManager::get()->getGameVariable("0064") && 
+            GameManager::get()->getIntGameVariable("0005") == 3
+        ) {
+            auto id = GameManager::get()->getIntGameVariable("0006");
+            for (auto obj : CCArrayExt<GameObject>(rawSrc)) {
+                if (obj->m_objectID == id) {
+                    src->addObject(obj);
+                }
+            }
+        }
+        else {
+            src->addObjectsFromArray(rawSrc);
+        }
         switch (m_fields->select->getMode()) {
             case SelectMode::Unique: {
                 return src;
@@ -503,7 +519,8 @@ class $modify(SelectUI, EditorUI) {
                 EditorUI::ccTouchEnded(touch, event);
                 this->deselectAll();
             }
-            this->selectObjects(objs, true);
+            // todo: have swipe preview also acknowledge filters
+            this->selectObjects(objs, false);
         }
         else {
             EditorUI::ccTouchEnded(touch, event);
