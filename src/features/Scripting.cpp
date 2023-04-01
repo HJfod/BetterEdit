@@ -406,36 +406,36 @@ public:
     }
 };
 
-class $modify(ScriptingUI, EditorUI) {
-    CCMenuItemSpriteExtra* scriptButton;
+// class $modify(ScriptingUI, EditorUI) {
+//     CCMenuItemSpriteExtra* scriptButton;
 
-    bool init(LevelEditorLayer* lel) {
-        if (!EditorUI::init(lel))
-            return false;
+//     bool init(LevelEditorLayer* lel) {
+//         if (!EditorUI::init(lel))
+//             return false;
         
-        auto menu = this->getChildByID("editor-buttons-menu");
-        if (menu) {
-            auto spr = EditorButtonSprite::createWithSpriteFrameName(
-                "run-script.png"_spr, .7f, EditorBaseColor::Orange
-            );
-            m_fields->scriptButton = CCMenuItemSpriteExtra::create(
-                spr, this, menu_selector(ScriptingUI::onScripts)
-            );
-            m_fields->scriptButton->setSizeMult(1.2f);
-            m_fields->scriptButton->setContentSize({ 40.f, 40.f });
-            menu->addChild(m_fields->scriptButton);
-            menu->updateLayout();
-        }
+//         auto menu = this->getChildByID("editor-buttons-menu");
+//         if (menu) {
+//             auto spr = EditorButtonSprite::createWithSpriteFrameName(
+//                 "run-script.png"_spr, .7f, EditorBaseColor::Orange
+//             );
+//             m_fields->scriptButton = CCMenuItemSpriteExtra::create(
+//                 spr, this, menu_selector(ScriptingUI::onScripts)
+//             );
+//             m_fields->scriptButton->setSizeMult(1.2f);
+//             m_fields->scriptButton->setContentSize({ 40.f, 40.f });
+//             menu->addChild(m_fields->scriptButton);
+//             menu->updateLayout();
+//         }
 
-        return true;
-    }
+//         return true;
+//     }
 
-    void showUI(bool show) {
-        EditorUI::showUI(show);
-        m_fields->scriptButton->setVisible(show);
-    }
+//     void showUI(bool show) {
+//         EditorUI::showUI(show);
+//         m_fields->scriptButton->setVisible(show);
+//     }
 
-    void onScripts(CCObject*) {
-        ScriptsPopup::create()->show();
-    }
-};
+//     void onScripts(CCObject*) {
+//         ScriptsPopup::create()->show();
+//     }
+// };
