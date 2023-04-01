@@ -26,6 +26,15 @@ CCArrayExt<GameObject> iterTargets(GameObject* target, CCArray* targets) {
         return CCArrayExt<GameObject>(CCArray::createWithObject(target));
     }
     else {
+        if (targets->containsObject(nullptr)) {
+            auto arr = CCArray::create();
+            for (auto obj : CCArrayExt<CCObject>(targets)) {
+                if (obj) {
+                    arr->addObject(obj);
+                }
+            }
+            return arr;
+        }
         return targets;
     }
 }
@@ -119,7 +128,7 @@ class $modify(TintGameObject, GameObject) {
     void updateTintColor() {
         auto lel = static_cast<TintLayer*>(LevelEditorLayer::get());
         if (m_fields->tint) {
-            this->setColor(m_fields->tint.value());
+            this->setObjectColor(m_fields->tint.value());
             if (m_detailSprite) {
                 m_detailSprite->setColor(m_fields->tint.value());
                 m_detailSprite->setChildColor(m_fields->tint.value());
