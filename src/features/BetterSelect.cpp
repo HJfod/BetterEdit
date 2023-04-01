@@ -9,6 +9,7 @@
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/ui/BasedButtonSprite.hpp>
 #include <other/Utils.hpp>
+#include <ui/InfoPopup.hpp>
 #include <tracking/Tracking.hpp>
 
 using namespace std::chrono;
@@ -231,7 +232,37 @@ protected:
                 ->setAxisAlignment(AxisAlignment::Start)
         );
 
+        auto infoMenu = CCMenu::create();
+        infoMenu->setPosition(winSize.width / 2 + 130.f, 45.f);
+
+        auto infoBtnSpr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
+        auto infoBtn = CCMenuItemSpriteExtra::create(
+            infoBtnSpr, this, menu_selector(BetterSelect::onInfo)
+        );
+        infoMenu->addChild(infoBtn);
+
+        this->addChild(infoMenu);
+
         return true;
+    }
+
+    void onInfo(CCObject*) {
+        auto popup = InfoPopup::create("Selection Tools");
+
+        popup->setDirection(Axis::Column);
+
+        popup->addIconText(getToolSprite(SelectTool::Swipe), "Classic rectangle selection");
+        popup->addIconText(getToolSprite(SelectTool::Lasso), "Free-hand selection");
+        popup->addIconText(getToolSprite(SelectTool::MagicWand), "Select structure automatically");
+        popup->addBreak();
+
+        popup->addIconText(getModeSprite(SelectMode::Unique), getModeName(SelectMode::Unique));
+        popup->addIconText(getModeSprite(SelectMode::Add), getModeName(SelectMode::Add));
+        popup->addIconText(getModeSprite(SelectMode::Subtract), getModeName(SelectMode::Subtract));
+        popup->addIconText(getModeSprite(SelectMode::Intersect), getModeName(SelectMode::Intersect));
+        popup->addIconText(getModeSprite(SelectMode::XOR), getModeName(SelectMode::XOR));
+
+        popup->show();
     }
 
     void updateEditorUI() override;
