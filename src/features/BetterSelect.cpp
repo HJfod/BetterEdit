@@ -519,7 +519,6 @@ class $modify(SelectUI, EditorUI) {
                 EditorUI::ccTouchEnded(touch, event);
                 this->deselectAll();
             }
-            // todo: have swipe preview also acknowledge filters
             this->selectObjects(objs, false);
         }
         else {
