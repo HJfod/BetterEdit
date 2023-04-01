@@ -5,6 +5,8 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/GameObject.hpp>
+#include <MoreTabs.hpp>
+#include <other/Utils.hpp>
 #undef min
 #undef max
 
@@ -20,54 +22,6 @@ using StartPosKind = std::variant<
     FromPoint,
     FromObj
 >;
-
-class SelectStartPosPopup : public Popup<LevelEditorLayer*> {
-protected:
-    LevelEditorLayer* m_editor;
-
-    bool setup(LevelEditorLayer* editor) override {
-        m_editor = editor;
-        m_noElasticity = true;
-
-        this->setTitle("Select Start Pos");
-
-        auto goToStartSpr = ButtonSprite::create(
-            "From Level Start", "goldFont.fnt", "GJ_button_01.png"
-        );
-        goToStartSpr->setScale(.7f);
-        auto goToStartBtn = CCMenuItemSpriteExtra::create(
-            goToStartSpr, this, menu_selector(SelectStartPosPopup::onSelectFromStart)
-        );
-        goToStartBtn->setPosition(0.f, 20.f);
-        m_buttonMenu->addChild(goToStartBtn);
-
-        auto goToEndSpr = ButtonSprite::create(
-            "From Last Start Pos", "goldFont.fnt", "GJ_button_01.png"
-        );
-        goToEndSpr->setScale(.7f);
-        auto goToEndBtn = CCMenuItemSpriteExtra::create(
-            goToEndSpr, this, menu_selector(SelectStartPosPopup::onSelectFromLast)
-        );
-        goToEndBtn->setPosition(0.f, -20.f);
-        m_buttonMenu->addChild(goToEndBtn);
-
-        return true;
-    }
-
-    void onSelectFromStart(CCObject*);
-    void onSelectFromLast(CCObject*);
-
-public:
-    static SelectStartPosPopup* create(LevelEditorLayer* editor) {
-        auto ret = new SelectStartPosPopup();
-        if (ret && ret->init(220.f, 150.f, editor)) {
-            ret->autorelease();
-            return ret;
-        }
-        CC_SAFE_DELETE(ret);
-        return nullptr;
-    }
-};
 
 class $modify(StartPosLevel, GJGameLevel) {
     StartPosKind m_startPos;
@@ -270,43 +224,6 @@ void PlaytestHerePopup::onPlaytest(CCObject*) {
     EditorUI::get()->onPlaytest(EditorUI::get()->m_playtestBtn);
 }
 
-void SelectStartPosPopup::onSelectFromStart(CCObject*) {
-    static_cast<StartPosSwitchLayer*>(
-        m_editor
-    )->m_fields->m_selectedStartPos = FromLevelStart();
-    static_cast<StartPosLevel*>(
-        m_editor->m_level
-    )->m_fields->m_startPos = FromLevelStart();
-    this->onClose(nullptr);
-}
-
-void SelectStartPosPopup::onSelectFromLast(CCObject*) {
-    StartPosObject* last = nullptr;
-	for(auto* obj : cocos::CCArrayExt<StartPosObject>(m_editor->m_objects)) {
-        if (obj->m_objectID == 31) {
-            if (!last || last->getPositionX() < obj->getPositionX()) {
-                last = obj;
-            }
-        }
-    }
-    if (last) {
-        static_cast<StartPosSwitchLayer*>(
-            m_editor
-        )->m_fields->m_selectedStartPos = last;
-        static_cast<StartPosLevel*>(
-            m_editor->m_level
-        )->m_fields->m_startPos = last->getPosition();
-    } else {
-        static_cast<StartPosSwitchLayer*>(
-            m_editor
-        )->m_fields->m_selectedStartPos = DefaultBehaviour();
-        static_cast<StartPosLevel*>(
-            m_editor->m_level
-        )->m_fields->m_startPos = DefaultBehaviour();
-    }
-    this->onClose(nullptr);
-}
-
 class $modify(EditorPauseLayer) {
     bool init(LevelEditorLayer* lel) {
         if (!EditorPauseLayer::init(lel))
@@ -318,40 +235,109 @@ class $modify(EditorPauseLayer) {
     }
 };
 
-class $modify(MyEditorUI, EditorUI) {
-    CCMenuItemSpriteExtra* m_startPosBtn;
-
-    void onSelectStartPos(CCObject*) {
-        SelectStartPosPopup::create(m_editorLayer)->show();
-    }
+class StartPosButtonBar : public CCMenu {
+protected:
+    LevelEditorLayer* m_editor;
 
     bool init(LevelEditorLayer* lel) {
-        if (!EditorUI::init(lel))
+        if (!CCMenu::init())
             return false;
         
-        auto startPosInnerSpr = CCSprite::createWithSpriteFrameName(
-            "start-pos-border.png"_spr
-        );
-        startPosInnerSpr->setScale(.75f);
+        m_editor = lel;
 
-        auto startPosSpr = CircleButtonSprite::create(startPosInnerSpr);
-        startPosSpr->setScale(.8f);
+        auto winSize = CCDirector::get()->getWinSize();
 
-        m_fields->m_startPosBtn = CCMenuItemSpriteExtra::create(
-            startPosSpr, this, menu_selector(MyEditorUI::onSelectStartPos)
+        this->ignoreAnchorPointForPosition(false);
+        this->setPosition(winSize.width / 2, 45.f);
+        this->setContentSize({ 200.f, 60.f });
+        
+        auto goToStartSpr = ButtonSprite::create(
+            CCSprite::createWithSpriteFrameName("start-from-start.png"_spr),
+            0x32, true, 0x32, "GJ_button_01.png", .7f
         );
-        m_fields->m_startPosBtn->setPosition(
-            m_playtestBtn->getPositionX() + 50.f,
-            m_playtestBtn->getPositionY()
+        auto goToStartBtn = CCMenuItemSpriteExtra::create(
+            goToStartSpr, this, menu_selector(StartPosButtonBar::onGoToStart)
         );
-        m_playtestBtn->getParent()->addChild(m_fields->m_startPosBtn);
+        goToStartBtn->setPosition(
+            m_obContentSize.width / 2 - 25.f,
+            m_obContentSize.height / 2
+        );
+        this->addChild(goToStartBtn);
+
+        auto goToLastSpr = ButtonSprite::create(
+            CCSprite::createWithSpriteFrameName("last-start-pos.png"_spr),
+            0x32, true, 0x32, "GJ_button_01.png", .75f
+        );
+        auto goToLastBtn = CCMenuItemSpriteExtra::create(
+            goToLastSpr, this, menu_selector(StartPosButtonBar::onGoToLast)
+        );
+        goToLastBtn->setPosition(
+            m_obContentSize.width / 2 + 25.f,
+            m_obContentSize.height / 2
+        );
+        this->addChild(goToLastBtn);
 
         return true;
     }
 
-    void showUI(bool show) {
-        EditorUI::showUI(show);
-        m_fields->m_startPosBtn->setVisible(show);
+    void onGoToStart(CCObject*) {
+        static_cast<StartPosSwitchLayer*>(
+            m_editor
+        )->m_fields->m_selectedStartPos = FromLevelStart();
+        static_cast<StartPosLevel*>(
+            m_editor->m_level
+        )->m_fields->m_startPos = FromLevelStart();
+    }
+
+    void onGoToLast(CCObject*) {
+        StartPosObject* last = nullptr;
+        for(auto* obj : cocos::CCArrayExt<StartPosObject>(m_editor->m_objects)) {
+            if (obj->m_objectID == 31) {
+                if (!last || last->getPositionX() < obj->getPositionX()) {
+                    last = obj;
+                }
+            }
+        }
+        if (last) {
+            static_cast<StartPosSwitchLayer*>(
+                m_editor
+            )->m_fields->m_selectedStartPos = last;
+            static_cast<StartPosLevel*>(
+                m_editor->m_level
+            )->m_fields->m_startPos = last->getPosition();
+        } else {
+            static_cast<StartPosSwitchLayer*>(
+                m_editor
+            )->m_fields->m_selectedStartPos = DefaultBehaviour();
+            static_cast<StartPosLevel*>(
+                m_editor->m_level
+            )->m_fields->m_startPos = DefaultBehaviour();
+        }
+    }
+
+public:
+    static StartPosButtonBar* create(LevelEditorLayer* lel) {
+        auto ret = new StartPosButtonBar;
+        if (ret && ret->init(lel)) {
+            ret->autorelease();
+            return ret;
+        }
+        CC_SAFE_DELETE(ret);
+        return nullptr;
+    }
+};
+
+class $modify(MyEditorUI, EditorUI) {
+    bool init(LevelEditorLayer* lel) {
+        if (!EditorUI::init(lel))
+            return false;
+        
+        MoreTabs::get(this)->addEditTab(
+            "start-pos-border.png"_spr,
+            StartPosButtonBar::create(m_editorLayer)
+        );
+
+        return true;
     }
 
     void moveObject(GameObject* obj, CCPoint pos) {
