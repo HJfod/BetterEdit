@@ -1,3 +1,17 @@
+# v5.0.0-alpha.5
+
+### Changes
+ - Fix select filters not working with new Swipe mechanics
+ - Fix some black objects being incorrectly colored with the new Swipe mechanics
+ - Fix a crash when using Paste State on multiple objects
+ - Fix a crash related to playing levels
+ - Remove start pos button from the UI and instead move the functionality to its own tab under Edit
+ - Make the UI properly be hidden when playtesting
+ - Remove the scripting button due to the feature still being half-baked
+ - Add info popup for the new Swipe selection mechanics
+ - New colors for selection mode sprites
+ - If you try to select objects but have filters enabled, now displays a warning
+ - Tracking hooks now have lower priority, lowering the chance of conflicts with other editor mods
 
 # v5.0.0-alpha.4
 
