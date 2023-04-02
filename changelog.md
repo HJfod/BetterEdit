@@ -1,3 +1,10 @@
+# v5.0.0-alpha.6
+
+### Changes
+ - Add Playtest Replay
+ - Add logo
+ - Now on MacOS
+
 # v5.0.0-alpha.5
 
 ### Changes
