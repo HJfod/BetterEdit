@@ -1,7 +1,8 @@
-
 #include "Tracking.hpp"
 #include <Geode/modify/LevelEditorLayer.hpp>
+#include <Geode/modify/EditorPauseLayer.hpp>
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GameObject.hpp>
 #include <Geode/modify/EffectGameObject.hpp>
 #include <Geode/modify/CustomizeObjectLayer.hpp>
@@ -70,6 +71,32 @@ private:
         if (EditorUI::get() && !BlockAll::blocked()) {
             t.post();
         }
+    }
+};
+
+class $modify(EditorPauseLayer) {
+    void onSaveAndPlay(CCObject* sender) {
+        BLOCKED_CALL(EditorPauseLayer::onSaveAndPlay(sender));
+    }
+
+    void onSave(CCObject* sender) {
+        BLOCKED_CALL(EditorPauseLayer::onSave(sender));
+    }
+
+    void onSaveAndExit(CCObject* sender) {
+        BLOCKED_CALL(EditorPauseLayer::onSaveAndExit(sender));
+    }
+
+    void onExitNoSave(CCObject* sender) {
+        BLOCKED_CALL(EditorPauseLayer::onExitNoSave(sender));
+    }
+};
+
+class $modify(PlayLayer) {
+    bool init(GJGameLevel* level) {
+        bool ret;
+        BLOCKED_CALL_TO(ret, PlayLayer::init(level));
+        return ret;
     }
 };
 
