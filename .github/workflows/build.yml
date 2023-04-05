@@ -29,7 +29,7 @@ jobs:
         - name: "macOS"
           bin_folder: "macos"
           os: macos-latest
-          extra_flags: ""
+          extra_flags: "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13"
           out_paths: './build/*.dylib'
           platform_suffix: 'mac'
           
