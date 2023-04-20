@@ -1,3 +1,8 @@
+# v5.0.0-alpha.7
+
+ - Add customizable keybinds support through Custom Keybinds dependency
+ - Add hover tooltips to Swipe mode buttons if the MouseAPI mod is installed
+
 # v5.0.0-alpha.6
 
 ### Changes

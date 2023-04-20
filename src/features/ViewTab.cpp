@@ -4,11 +4,13 @@
 #include <Geode/binding/ButtonSprite.hpp>
 #include <Geode/binding/EditButtonBar.hpp>
 #include <Geode/utils/cocos.hpp>
+#include <hjfod.custom-keybinds/include/Keybinds.hpp>
 
 using namespace geode::prelude;
+using namespace keybinds;
 
 struct $modify(EditorUI) {
-    CCNode* m_viewModeBtn;
+    CCNode* viewModeBtn;
 
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
@@ -27,12 +29,12 @@ struct $modify(EditorUI) {
         }
 
         if (auto menu = this->getChildByID("toolbar-categories-menu")) {
-            m_fields->m_viewModeBtn = CCMenuItemSpriteExtra::create(
+            m_fields->viewModeBtn = CCMenuItemSpriteExtra::create(
                 CCNode::create(), this, menu_selector(EditorUI::toggleMode)
             );
-            m_fields->m_viewModeBtn->setID("view-button"_spr);
-            m_fields->m_viewModeBtn->setTag(4);
-            menu->addChild(m_fields->m_viewModeBtn);
+            m_fields->viewModeBtn->setID("view-button"_spr);
+            m_fields->viewModeBtn->setTag(4);
+            menu->addChild(m_fields->viewModeBtn);
 
             this->updateModeSprites();
 
@@ -44,12 +46,19 @@ struct $modify(EditorUI) {
             );
         }
 
+        this->template addEventListener<InvokeBindFilter>([=](InvokeBindEvent* event) {
+            if (event->isDown()) {
+                this->toggleMode(m_fields->viewModeBtn);
+            }
+            return ListenerResult::Propagate;
+        }, "view-mode"_spr);
+
         return true;
     }
 
     void showUI(bool show) {
         EditorUI::showUI(show);
-        m_fields->m_viewModeBtn->setVisible(show);
+        m_fields->viewModeBtn->setVisible(show);
     }
 
     void toggleMode(CCObject* sender) {
@@ -83,6 +92,16 @@ struct $modify(EditorUI) {
         this->updateModeSprite(m_buildModeBtn, 2, "tab-create.png"_spr);
         this->updateModeSprite(m_deleteModeBtn, 1, "tab-delete.png"_spr);
         this->updateModeSprite(m_editModeBtn, 3, "tab-edit.png"_spr);
-        this->updateModeSprite(m_fields->m_viewModeBtn, 4, "tab-view.png"_spr);
+        this->updateModeSprite(m_fields->viewModeBtn, 4, "tab-view.png"_spr);
     }
 };
+
+$execute {
+    BindManager::get()->registerBindable(BindableAction(
+        "view-mode"_spr,
+        "View Mode",
+        "Toggle the View Tab",
+        { Keybind::create(KEY_Four) },
+        Category::EDITOR_UI
+    ), "robtop.geometry-dash/delete-mode");
+}

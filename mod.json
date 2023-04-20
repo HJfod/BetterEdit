@@ -65,6 +65,16 @@
 			"id": "hjfod.gmd-api",
 			"version": "v1.0.0",
 			"required": true
+		},
+		{
+			"id": "hjfod.custom-keybinds",
+			"version": "v1.0.0",
+			"required": true
+		},
+		{
+			"id": "geode.mouse-api",
+			"version": "v1.0.0",
+			"required": false
 		}
 	]
 }
