@@ -469,6 +469,8 @@ class $modify(SelectUI, EditorUI) {
                 }
                 return { res, custom };
             } break;
+
+            default: break;
         }
         return { src, custom };
     }
@@ -652,6 +654,8 @@ class $modify(SelectUI, EditorUI) {
                 case SelectTool::MagicWand: {
                     CCNode::draw();
                 } break;
+
+                default: break;
             }
         }
         else {
