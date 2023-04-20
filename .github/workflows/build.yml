@@ -9,9 +9,7 @@ on:
 env:
   GEODE_SDK: ${{ github.workspace }}/sdk
   GEODE_VERSION: nightly
-  CLI_VERSION: v2.0.0
-  MOD_NAME: BetterEdit
-  MOD_ID: hjfod.betteredit
+  CLI_VERSION: v2.3.0
 
 jobs:
   build:
@@ -23,8 +21,12 @@ jobs:
           bin_folder: "windows"
           os: windows-2019
           extra_flags: '-T host=x64 -A win32'
-          out_paths:  './build/Release/*.dll'
+          out_paths: |
+            ./build/Release/*.dll
+            ./build/Release/*.lib
           platform_suffix: 'win'
+          cli_setup: ''
+          cli_name: 'geode.exe'
           
         - name: "macOS"
           bin_folder: "macos"
@@ -32,6 +34,8 @@ jobs:
           extra_flags: "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13"
           out_paths: './build/*.dylib'
           platform_suffix: 'mac'
+          cli_setup: 'chmod a+rwx ./geode'
+          cli_name: 'geode'
           
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -60,11 +64,23 @@ jobs:
         cd bin/nightly
         curl -L https://github.com/geode-sdk/geode/releases/download/${{ env.GEODE_VERSION }}/geode-${{ env.GEODE_VERSION }}-${{ matrix.config.platform_suffix }}.zip -o geode-sdk.zip
         tar -xf geode-sdk.zip
+            
+    - name: Download and Unzip CLI
+      run: |
+        mkdir ${{ github.workspace }}/cli
+        cd ${{ github.workspace }}/cli
+        curl -L https://github.com/geode-sdk/cli/releases/download/${{ env.CLI_VERSION }}/geode-cli-${{ env.CLI_VERSION }}-${{ matrix.config.platform_suffix }}.zip -o geode-cli.zip
+        tar -xf geode-cli.zip
+        ${{ matrix.config.cli_setup }}
+        mkdir ${{ github.workspace }}/profile
+        mkdir ${{ github.workspace }}/profile/geode
+        mkdir ${{ github.workspace }}/profile/geode/mods
+        ./${{ matrix.config.cli_name }} profile add --name GithubActions ${{ github.workspace }}/profile
       
     - name: Configure CMake
       run: |
         cd ${{ github.workspace }}
-        cmake -B build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1
+        cmake -B build ${{ matrix.config.extra_flags }} -DCLI_PATH=${{ github.workspace }}/cli -DGEODE_DONT_INSTALL_MODS=On
     
     - name: Build
       run: |
@@ -107,14 +123,12 @@ jobs:
       - name: Merge
         shell: bash
         run: |
-          mv $MOD_NAME.dll $MOD_ID.dll
-          mv $MOD_NAME.dylib $MOD_ID.dylib
-          ./geode.exe package new . --binary $MOD_ID.dll --binary $MOD_ID.dylib --output $MOD_ID.geode
+          ./geode.exe package new .
          
       - uses: actions/upload-artifact@v3
         with:
           name: Build Output
-          path: "${{ env.MOD_NAME }}.geode"
+          path: "*.geode"
           
       - uses: geekyeggo/delete-artifact@v2
         with:
@@ -125,12 +139,3 @@ jobs:
         with:
             name: build-macos
             failOnError: false
-
-      - name: Update release
-        uses: IsaacShelton/update-existing-release@v1.3.2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          files: "${{ env.MOD_ID }}.geode"
-          release: "Alpha"
-          prerelease: true
-          replace: true
