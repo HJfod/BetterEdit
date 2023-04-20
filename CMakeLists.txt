@@ -37,5 +37,5 @@ endif()
 set(GEODE_LINK_NIGHTLY On)
 add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
-target_link_libraries(${PROJECT_NAME} geode-sdk Clipper2)
-create_geode_file(${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} Clipper2)
+setup_geode_mod(${PROJECT_NAME})
