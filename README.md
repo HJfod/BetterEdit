@@ -18,4 +18,4 @@ However, if you would like to contribute, [pull requests](https://github.com/HJf
 
 ## Alpha Testing
 
-If you'd like to test out BE 5, you can find the latest binaries in [releases](https://github.com/HJfod/BetterEdit/releases/tag/v5.0.0-alpha). Please post any bugs you find / features you'd like to suggest [as an issue](https://github.com/HJfod/BetterEdit/issues/new). If you'd like, there's also a [dedicated Discord server](https://discord.gg/UGHDfzQtpz) for testing the mod.
+If you'd like to test out BE 5, you can find the latest binaries in [releases](https://github.com/HJfod/BetterEdit/releases/tag/v5.0.0-alpha). Please post any bugs you find / features you'd like to suggest [as an issue](https://github.com/HJfod/BetterEdit/issues/new). If you'd like, there's also a [dedicated Discord server](https://discord.gg/UGHDfzQtpz) for the mod.
