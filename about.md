@@ -16,6 +16,7 @@ The next generation of BetterEdit.
  - Extra object info
  - Start Pos switcher in the editor
  - Better selection features
+ - Custom keybinds
 
 More features coming soon. If you have <cr>**suggestions**</c>, please post them [on the GitHub as an issue](https://github.com/HJfod/BetterEdit/issues).
 
