@@ -2,6 +2,7 @@
 
  - Add customizable keybinds support through Custom Keybinds dependency
  - Add hover tooltips to Swipe mode buttons if the MouseAPI mod is installed
+ - Added some default keybinds like Rotate 45 degrees
 
 # v5.0.0-alpha.6
 
