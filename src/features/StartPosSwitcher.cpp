@@ -278,7 +278,25 @@ protected:
         );
         this->addChild(goToLastBtn);
 
+        auto infoSpr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
+        auto infoBtn = CCMenuItemSpriteExtra::create(
+            infoSpr, this, menu_selector(StartPosButtonBar::onInfo)
+        );
+        infoBtn->setPosition(m_obContentSize / 2 + ccp(60.f, 0.f));
+        this->addChild(infoBtn);
+
         return true;
+    }
+
+    void onInfo(CCObject*) {
+        FLAlertLayer::create(
+            "Start Pos Info",
+            "<cp>From Level Start</c>: Start playing from the beginning of the "
+            "level, ignoring all start positions\n"
+            "<cb>From Last Start Pos</c>: Start playing from the last start "
+            "position in the level",
+            "OK"
+        )->show();
     }
 
     void onGoToStart(CCObject*) {
