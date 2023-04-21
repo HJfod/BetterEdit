@@ -10,7 +10,7 @@ struct MoreTabsUI;
 
 class MoreTabs : public CCNode {
 protected:
-    int m_selected;
+    int m_selectedEditTab;
     EditorUI* m_ui;
     CCMenu* m_editTabMenu;
     std::vector<Ref<CCNode>> m_editTabs;
@@ -30,6 +30,9 @@ public:
     int addEditTab(const char* icon, CCNode* content);
 
     EditButtonBar* getCreateTab(int tag) const;
+
+    void nextTab();
+    void prevTab();
 
     static MoreTabs* create(EditorUI* ui);
     static MoreTabs* get(EditorUI* ui, bool create = true);

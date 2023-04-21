@@ -4,6 +4,9 @@
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/modify/EditorUI.hpp>
+#include <hjfod.custom-keybinds/include/Keybinds.hpp>
+
+using namespace keybinds;
 
 bool MoreTabs::init(EditorUI* ui) {
     if (!CCNode::init())
@@ -28,16 +31,18 @@ void MoreTabs::updateMode(bool show) {
     m_editTabMenu->setVisible(show && m_ui->m_selectedMode == 3);
     int i = 0;
     for (auto& tab : m_editTabs) {
-        tab->setVisible(show && m_ui->m_selectedMode == 3 && m_selected == i++);
+        tab->setVisible(show && m_ui->m_selectedMode == 3 && m_selectedEditTab == i++);
+    }
+    for (auto& child : CCArrayExt<CCMenuItemToggler>(m_editTabMenu->getChildren())) {
+        child->toggle(m_selectedEditTab == child->getTag());
     }
 }
 
 void MoreTabs::onEditTab(CCObject* sender) {
-    m_selected = sender->getTag();
-
+    m_selectedEditTab = sender->getTag();
     int i = 0;
     for (auto& tab : m_editTabs) {
-        tab->setVisible(m_selected == i++);
+        tab->setVisible(m_selectedEditTab == i++);
     }
     for (auto& child : CCArrayExt<CCMenuItemToggler>(m_editTabMenu->getChildren())) {
         child->toggle(false);
@@ -126,6 +131,26 @@ EditButtonBar* MoreTabs::getCreateTab(int tag) const {
     return static_cast<EditButtonBar*>(m_ui->m_createButtonBars->objectAtIndex(tag));
 }
 
+void MoreTabs::nextTab() {
+    if (m_ui->m_selectedMode == 3) {
+        m_selectedEditTab += 1;
+        if (m_selectedEditTab >= static_cast<int>(m_editTabs.size())) {
+            m_selectedEditTab = 0;
+        }
+        this->updateMode();
+    }
+}
+
+void MoreTabs::prevTab() {
+    if (m_ui->m_selectedMode == 3) {
+        m_selectedEditTab -= 1;
+        if (m_selectedEditTab < 0) {
+            m_selectedEditTab = m_editTabs.size() - 1;
+        }
+        this->updateMode();
+    }
+}
+
 MoreTabs* MoreTabs::create(EditorUI* ui) {
     auto ret = new MoreTabs;
     if (ret && ret->init(ui)) {
@@ -149,6 +174,35 @@ MoreTabs* MoreTabs::get(EditorUI* ui, bool create) {
 }
 
 struct $modify(MoreTabsUI, EditorUI) {
+    bool init(LevelEditorLayer* lel) {
+        if (!EditorUI::init(lel))
+            return false;
+        
+        // hook into F1 and F2 keybinds to have them work for additional tabs aswell
+
+        this->defineKeybind("robtop.geometry-dash/prev-build-tab", [=] {
+            if (auto tabs = MoreTabs::get(this, false)) {
+                tabs->prevTab();
+            }
+        });
+        this->defineKeybind("robtop.geometry-dash/next-build-tab", [=] {
+            if (auto tabs = MoreTabs::get(this, false)) {
+                tabs->nextTab();
+            }
+        });
+        
+        return true;
+    }
+
+    void defineKeybind(const char* id, std::function<void()> callback) {
+        this->template addEventListener<InvokeBindFilter>([=](InvokeBindEvent* event) {
+            if (event->isDown()) {
+                callback();
+            }
+            return ListenerResult::Propagate;
+        }, id);
+    }
+
     void toggleMode(CCObject* sender) {
         EditorUI::toggleMode(sender);
         if (auto tabs = MoreTabs::get(this, false)) {
