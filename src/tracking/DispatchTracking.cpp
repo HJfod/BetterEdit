@@ -152,9 +152,20 @@ class $modify(LevelEditorLayer) {
     }
 };
 
+struct FreeMoveData {
+    CCPoint pos;
+    float angle;
+    float scale;
+    bool flipX;
+    bool flipY;
+};
+
 class $modify(EditorUI) {
     std::vector<std::pair<CCPoint, float>> originalScales;
-    std::vector<CCPoint> freeMoveStart;
+    std::vector<FreeMoveData> freeMoveStart;
+    bool freeMoveFlippedX;
+    bool freeMoveFlippedY;
+    std::unique_ptr<Bubble<ObjTransformed>> freeMoveBubble;
 
     static void onModify(auto& self) {
         (void)self.setHookPriority("EditorUI::onDuplicate", TRACKING_HOOK_PRIORITY);
@@ -197,9 +208,16 @@ class $modify(EditorUI) {
     bool onCreate() {
         auto b1 = Bubble<ObjSelected>();
         auto b2 = Bubble<ObjDeselected>();
+        auto b = EditorUI::onCreate();
         b1.cancel();
         b2.cancel();
-        return EditorUI::onCreate();
+        return b;
+    }
+
+    void onDelete(CCObject* sender) {
+        auto b2 = Bubble<ObjDeselected>();
+        EditorUI::onDelete(sender);
+        b2.cancel();
     }
 
     void onDeleteSelected(CCObject* sender) {
@@ -217,19 +235,23 @@ class $modify(EditorUI) {
     void moveObject(GameObject* obj, CCPoint to) {
         auto from = obj->getPosition();
         BLOCKED_CALL(EditorUI::moveObject(obj, to));
-        Bubble<ObjMoved>::push(obj, Transform { from, from + to });
+        Bubble<ObjTransformed>::push(
+            obj,
+            Transform { from, from + to },
+            Transform<float>::zero(),
+            Transform<float>::zero(),
+            Transform<bool>::zero(),
+            Transform<bool>::zero()
+        );
     }
 
     void moveObjectCall(EditCommand command) {
-        auto bubble = Bubble<ObjMoved>();
+        auto bubble = Bubble<ObjTransformed>();
         EditorUI::moveObjectCall(command);
     }
 
     void transformObjectCall(EditCommand command) {
-        auto bubble0 = Bubble<ObjFlipX>();
-        auto bubble1 = Bubble<ObjFlipY>();
-        auto bubble2 = Bubble<ObjRotated>();
-        auto bubble3 = Bubble<ObjScaled>();
+        auto bubble = Bubble<ObjTransformed>();
         EditorUI::transformObjectCall(command);
     }
 
@@ -241,31 +263,42 @@ class $modify(EditorUI) {
                 auto prevAngle = obj->getRotation();
                 auto prevPos = obj->getPosition();
                 BLOCKED_CALL(EditorUI::transformObject(obj, command, snap));
-                Bubble<ObjRotated>::push(
+                Bubble<ObjTransformed>::push(
                     obj,
                     Transform { prevPos, obj->getPosition() },
-                    Transform { prevAngle, obj->getRotation() }
+                    Transform { prevAngle, obj->getRotation() },
+                    Transform<float>::zero(),
+                    Transform<bool>::zero(),
+                    Transform<bool>::zero()
                 );
             } break;
 
             case EditCommand::FlipX: {
                 auto prevPos = obj->getPosition();
                 BLOCKED_CALL(EditorUI::transformObject(obj, command, snap));
-                Bubble<ObjFlipX>::push(
+                Bubble<ObjTransformed>::push(
                     obj,
                     Transform { prevPos, obj->getPosition() },
-                    Transform { false, true }
+                    Transform<float>::zero(),
+                    Transform<float>::zero(),
+                    Transform { false, true },
+                    Transform<bool>::zero()
                 );
+                m_fields->freeMoveFlippedX ^= 1;
             } break;
 
             case EditCommand::FlipY: {
                 auto prevPos = obj->getPosition();
                 BLOCKED_CALL(EditorUI::transformObject(obj, command, snap));
-                Bubble<ObjFlipY>::push(
+                Bubble<ObjTransformed>::push(
                     obj,
                     Transform { prevPos, obj->getPosition() },
+                    Transform<float>::zero(),
+                    Transform<float>::zero(),
+                    Transform<bool>::zero(),
                     Transform { false, true }
                 );
+                m_fields->freeMoveFlippedY ^= 1;
             } break;
 
             default: {
@@ -283,12 +316,20 @@ class $modify(EditorUI) {
         auto bubble = Bubble<ObjSelected>();
         EditorUI::selectObjects(objs, filter);
     }
-
+ 
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
         if (EditorUI::ccTouchBegan(touch, event)) {
             m_fields->freeMoveStart = {};
+            m_fields->freeMoveFlippedX = false;
+            m_fields->freeMoveFlippedY = false;
             for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
-                m_fields->freeMoveStart.push_back(obj->getPosition());
+                m_fields->freeMoveStart.push_back({
+                    .pos = obj->getPosition(),
+                    .angle = obj->getRotation(),
+                    .scale = obj->getScale(),
+                    .flipX = false,
+                    .flipY = false,
+                });
             }
             return true;
         }
@@ -296,20 +337,37 @@ class $modify(EditorUI) {
     }
 
     void ccTouchMoved(CCTouch* touch, CCEvent* event) {
-        auto bubble = Bubble<ObjMoved>();
-        EditorUI::ccTouchMoved(touch, event);
-        bubble.cancel();
+        {
+            auto bubble = Bubble<ObjTransformed>();
+            EditorUI::ccTouchMoved(touch, event);
+            bubble.cancel();
+        }
+        if (m_freeMovingObject && !m_fields->freeMoveBubble.get()) {
+            m_fields->freeMoveBubble = std::make_unique<Bubble<ObjTransformed>>();
+        }
     }
 
     void ccTouchEnded(CCTouch* touch, CCEvent* event) {
         if (m_freeMovingObject) {
             BLOCKED_CALL(EditorUI::ccTouchEnded(touch, event));
-            auto bubble = Bubble<ObjMoved>();
+            if (m_fields->freeMoveBubble) {
+                m_fields->freeMoveBubble->cancel();
+                m_fields->freeMoveBubble = nullptr;
+            }
+            auto bubble = Bubble<ObjTransformed>();
             size_t i = 0;
             for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
-                Bubble<ObjMoved>::push(
-                    obj, Transform { m_fields->freeMoveStart.at(i++), obj->getPosition() }
-                );
+                auto& start = m_fields->freeMoveStart.at(i++);
+                if (start.pos != obj->getPosition()) {
+                    Bubble<ObjTransformed>::push(
+                        obj,
+                        Transform { start.pos, obj->getPosition() },
+                        Transform { start.angle, obj->getRotation() },
+                        Transform { start.scale, obj->getScale() },
+                        Transform { start.flipX, m_fields->freeMoveFlippedX },
+                        Transform { start.flipY, m_fields->freeMoveFlippedY }
+                    );
+                }
             }
         }
         else {
@@ -332,12 +390,15 @@ class $modify(EditorUI) {
     void scaleChangeEnded() {
         BLOCKED_CALL(EditorUI::scaleChangeEnded());
         size_t i = 0;
-        auto bubble = Bubble<ObjScaled>();
+        auto bubble = Bubble<ObjTransformed>();
         for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
-            Bubble<ObjScaled>::push(
+            Bubble<ObjTransformed>::push(
                 obj,
                 Transform { m_fields->originalScales.at(i).first, obj->getPosition() },
-                Transform { m_fields->originalScales.at(i).second, obj->getScale() }
+                Transform<float>::zero(),
+                Transform { m_fields->originalScales.at(i).second, obj->getScale() },
+                Transform<bool>::zero(),
+                Transform<bool>::zero()
             );
             i += 1;
         }
@@ -349,12 +410,15 @@ class $modify(EditorUI) {
             scales.push_back({ obj, obj->getPosition(), obj->m_scale });
         }
         BLOCKED_CALL(EditorUI::scaleObjects(objs, scale, center));
-        auto bubble = Bubble<ObjScaled>();
+        auto bubble = Bubble<ObjTransformed>();
         for (auto& [obj, pos, from] : scales) {
-            Bubble<ObjScaled>::push(
+            Bubble<ObjTransformed>::push(
                 obj,
                 Transform { pos, obj->getPosition() },
-                Transform { from, obj->m_scale }
+                Transform<float>::zero(),
+                Transform { from, obj->m_scale },
+                Transform<bool>::zero(),
+                Transform<bool>::zero()
             );
         }
     }
@@ -365,12 +429,15 @@ class $modify(EditorUI) {
             angles.push_back({ obj, obj->getPosition(), obj->m_rotation });
         }
         BLOCKED_CALL(EditorUI::rotateObjects(objs, angle, center));
-        auto bubble = Bubble<ObjRotated>();
+        auto bubble = Bubble<ObjTransformed>();
         for (auto& [obj, pos, from] : angles) {
-            Bubble<ObjRotated>::push(
+            Bubble<ObjTransformed>::push(
                 obj,
                 Transform { pos, obj->getPosition() },
-                Transform { from, obj->m_rotation }
+                Transform { from, obj->m_rotation },
+                Transform<float>::zero(),
+                Transform<bool>::zero(),
+                Transform<bool>::zero()
             );
         }
     }
@@ -381,14 +448,18 @@ class $modify(EditorUI) {
             flips.push_back({ obj, obj->getPosition(), false });
         }
         BLOCKED_CALL(EditorUI::flipObjectsX(objs));
-        auto bubble = Bubble<ObjFlipX>();
+        auto bubble = Bubble<ObjTransformed>();
         for (auto& [obj, pos, from] : flips) {
-            Bubble<ObjFlipX>::push(
+            Bubble<ObjTransformed>::push(
                 obj,
                 Transform { pos, obj->getPosition() },
-                Transform { from, true }
+                Transform<float>::zero(),
+                Transform<float>::zero(),
+                Transform { from, true },
+                Transform<bool>::zero()
             );
         }
+        m_fields->freeMoveFlippedX ^= 1;
     }
 
     void flipObjectsY(CCArray* objs) {
@@ -397,18 +468,22 @@ class $modify(EditorUI) {
             flips.push_back({ obj, obj->getPosition(), false });
         }
         BLOCKED_CALL(EditorUI::flipObjectsY(objs));
-        auto bubble = Bubble<ObjFlipY>();
+        auto bubble = Bubble<ObjTransformed>();
         for (auto& [obj, pos, from] : flips) {
-            Bubble<ObjFlipY>::push(
+            Bubble<ObjTransformed>::push(
                 obj,
                 Transform { pos, obj->getPosition() },
+                Transform<float>::zero(),
+                Transform<float>::zero(),
+                Transform<bool>::zero(),
                 Transform { from, true }
             );
         }
+        m_fields->freeMoveFlippedY ^= 1;
     }
 
     void alignObjects(CCArray* objs, bool y) {
-        auto bubble = Bubble<ObjMoved>();
+        auto bubble = Bubble<ObjTransformed>();
         EditorUI::alignObjects(objs, y);
     }
 
@@ -470,7 +545,6 @@ class $modify(CustomizeObjectLayer) {
     }
 
     void onClose(CCObject* sender) {
-        CustomizeObjectLayer::onClose(sender);
         auto bubble = Bubble<ObjColored>();
         size_t i = 0;
         for (auto obj : iterTargets(m_targetObject, m_targetObjects)) {
@@ -482,6 +556,7 @@ class $modify(CustomizeObjectLayer) {
             }
             i += 1;
         }
+        CustomizeObjectLayer::onClose(sender);
     }
 };
 
@@ -505,7 +580,6 @@ struct $modify(ColorSelectPopup) {
     }
 
     void closeColorSelect(CCObject* sender) {
-        ColorSelectPopup::closeColorSelect(sender);
         if (m_colorAction) {
             auto state = ColorState::from(m_colorAction);
             if (m_fields->state != state) {
@@ -515,6 +589,7 @@ struct $modify(ColorSelectPopup) {
                 ).post();
             }
         }
+        ColorSelectPopup::closeColorSelect(sender);
     }
 };
 
@@ -546,7 +621,6 @@ class $modify(SetGroupIDLayer) {
     }
 
     void onClose(CCObject* sender) {
-        SetGroupIDLayer::onClose(sender);
         auto bubble = Bubble<ObjPropsChanged>();
         size_t i = 0;
         for (auto obj : iterTargets(m_targetObject, m_targetObjects)) {
@@ -558,6 +632,7 @@ class $modify(SetGroupIDLayer) {
             }
             i += 1;
         }
+        SetGroupIDLayer::onClose(sender);
     }
 };
 

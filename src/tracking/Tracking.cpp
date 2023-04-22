@@ -952,6 +952,14 @@ std::vector<Detail> ObjPlaced::details() const {
     return {{ .info = fmt::format("ID {}", obj->m_objectID) }};
 }
 
+std::string ObjPlaced::getIconName() const {
+    return "plus.png"_spr;
+}
+
+std::string ObjPlaced::getDescFmt() const {
+    return "Added {}";
+}
+
 // ObjRemoved
 
 std::string ObjRemoved::toDiffString() const {
@@ -979,6 +987,14 @@ void ObjRemoved::redo() const {
 
 std::vector<Detail> ObjRemoved::details() const {
     return {};
+}
+
+std::string ObjRemoved::getIconName() const {
+    return "neg.png"_spr;
+}
+
+std::string ObjRemoved::getDescFmt() const {
+    return "Removed {}";
 }
 
 // ObjPasted
@@ -1010,27 +1026,71 @@ std::vector<Detail> ObjPasted::details() const {
     return {};
 }
 
-// ObjMoved
-
-std::string ObjMoved::toDiffString() const {
-    return fmtDiffString("mov", obj, pos);
+std::string ObjPasted::getIconName() const {
+    return "plus.png"_spr;
 }
 
-EditorEventData* ObjMoved::clone() const {
-    return new ObjMoved(obj, pos);
+std::string ObjPasted::getDescFmt() const {
+    return "Copied {}";
 }
 
-void ObjMoved::undo() const {
+// ObjTransformed
+
+std::string ObjTransformed::toDiffString() const {
+    return fmtDiffString("trf", obj, pos, angle, scale, flipX, flipY);
+}
+
+EditorEventData* ObjTransformed::clone() const {
+    return new ObjTransformed(obj, pos, angle, scale, flipX, flipY);
+}
+
+void ObjTransformed::undo() const {
     auto _ = BlockAll();
-    EditorUI::get()->moveObject(obj, pos.from - obj->getPosition());
+    if (!flipX.isZero()) {
+        EditorUI::get()->flipObjectsX(CCArray::createWithObject(obj));
+    }
+    if (!flipY.isZero()) {
+        EditorUI::get()->flipObjectsY(CCArray::createWithObject(obj));
+    }
+    if (!angle.isZero()) {
+        EditorUI::get()->rotateObjects(
+            CCArray::createWithObject(obj), angle.from - obj->getRotation(), obj->getPosition()
+        );
+    }
+    if (!scale.isZero()) {
+        EditorUI::get()->scaleObjects(
+            CCArray::createWithObject(obj), scale.from, obj->getPosition()
+        );
+    }
+    if (!pos.isZero()) {
+        EditorUI::get()->moveObject(obj, pos.from - obj->getPosition());
+    }
 }
 
-void ObjMoved::redo() const {
+void ObjTransformed::redo() const {
     auto _ = BlockAll();
-    EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
+    if (!flipX.isZero()) {
+        EditorUI::get()->flipObjectsX(CCArray::createWithObject(obj));
+    }
+    if (!flipY.isZero()) {
+        EditorUI::get()->flipObjectsY(CCArray::createWithObject(obj));
+    }
+    if (!angle.isZero()) {
+        EditorUI::get()->rotateObjects(
+            CCArray::createWithObject(obj), angle.to - obj->getRotation(), obj->getPosition()
+        );
+    }
+    if (!scale.isZero()) {
+        EditorUI::get()->scaleObjects(
+            CCArray::createWithObject(obj), scale.to, obj->getPosition()
+        );
+    }
+    if (!pos.isZero()) {
+        EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
+    }
 }
 
-std::vector<Detail> ObjMoved::details() const {
+std::vector<Detail> ObjTransformed::details() const {
     std::vector<Detail> res;
     auto dx = pos.to.x - pos.from.x;
     auto dy = pos.to.y - pos.from.y;
@@ -1046,134 +1106,68 @@ std::vector<Detail> ObjMoved::details() const {
             .icon = dy > 0.f ? "edit_upBtn2_001.png" : "edit_downBtn2_001.png"
         });
     }
+    auto delta = angle.to - angle.from;
+    if (delta != 0.f) {
+        res.push_back({
+            .info = fmt::format("{}°", std::fabsf(delta)),
+            .icon = delta > 0.f ? "edit_cwBtn_001.png" : "edit_ccwBtn_001.png"
+        });
+    }
+    if (!scale.isZero()) {
+        res.push_back({
+            .info = fmt::format("{}x", scale.to),
+            .icon = "scale.png"_spr
+        });
+    }
     return res;
 }
 
-// ObjRotated
+std::string ObjTransformed::getIconName() const {
+    size_t tally = !pos.isZero() + !angle.isZero() + !scale.isZero() +
+        !flipX.isZero() + !flipY.isZero();
 
-std::string ObjRotated::toDiffString() const {
-    return fmtDiffString("rot", obj, pos, angle);
-}
-
-EditorEventData* ObjRotated::clone() const {
-    return new ObjRotated(obj, pos, angle);
-}
-
-void ObjRotated::undo() const {
-    auto _ = BlockAll();
-    EditorUI::get()->rotateObjects(
-        CCArray::createWithObject(obj), angle.from - obj->getRotation(), obj->getPosition()
-    );
-    EditorUI::get()->moveObject(obj, pos.from - obj->getPosition());
-}
-
-void ObjRotated::redo() const {
-    auto _ = BlockAll();
-    EditorUI::get()->rotateObjects(
-        CCArray::createWithObject(obj), angle.to - obj->getRotation(), obj->getPosition()
-    );
-    EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
-}
-
-std::vector<Detail> ObjRotated::details() const {
-    auto delta = angle.to - angle.from;
-    return {{
-        .info = fmt::format("{}°", std::fabsf(delta)),
-        .icon = delta > 0.f ? "edit_cwBtn_001.png" : "edit_ccwBtn_001.png"
-    }};
-}
-
-// ObjScaled
-
-std::string ObjScaled::toDiffString() const {
-    return fmtDiffString("scl", obj, pos, scale);
-}
-
-EditorEventData* ObjScaled::clone() const {
-    return new ObjScaled(obj, pos, scale);
-}
-
-void ObjScaled::undo() const {
-    auto _ = BlockAll();
-    EditorUI::get()->scaleObjects(
-        CCArray::createWithObject(obj), scale.from, obj->getPosition()
-    );
-    EditorUI::get()->moveObject(obj, pos.from - obj->getPosition());
-}
-
-void ObjScaled::redo() const {
-    auto _ = BlockAll();
-    EditorUI::get()->scaleObjects(
-        CCArray::createWithObject(obj), scale.to, obj->getPosition()
-    );
-    EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
-}
-
-std::vector<Detail> ObjScaled::details() const {
-    return {{
-        .info = fmt::format("{}x", scale.to),
-        .icon = "scale.png"_spr
-    }};
-}
-
-// ObjFlipX
-
-std::string ObjFlipX::toDiffString() const {
-    return fmtDiffString("fpx", obj, pos, flip);
-}
-
-EditorEventData* ObjFlipX::clone() const {
-    return new ObjFlipX(obj, pos, flip);
-}
-
-void ObjFlipX::undo() const {
-    auto _ = BlockAll();
-    if (flip.from != flip.to) {
-        EditorUI::get()->flipObjectsX(CCArray::createWithObject(obj));
+    // Only one property was changed
+    if (tally == 1) {
+        if (!angle.isZero()) {
+            return "edit_ccwBtn_001.png";
+        }
+        if (!scale.isZero()) {
+            return "scale.png"_spr;
+        }
+        if (!flipX.isZero()) {
+            return "edit_flipXBtn_001.png";
+        }
+        if (!flipY.isZero()) {
+            return "edit_flipYBtn_001.png";
+        }
     }
-    EditorUI::get()->moveObject(obj, pos.from - obj->getPosition());
+    // Default to move
+    return "move.png"_spr;
 }
 
-void ObjFlipX::redo() const {
-    auto _ = BlockAll();
-    if (flip.from != flip.to) {
-        EditorUI::get()->flipObjectsX(CCArray::createWithObject(obj));
+std::string ObjTransformed::getDescFmt() const {
+    size_t tally = !pos.isZero() + !angle.isZero() + !scale.isZero() +
+        !flipX.isZero() + !flipY.isZero();
+
+    // Only one property was changed
+    if (tally == 1) {
+        if (!angle.isZero()) {
+            return "Rotated {}";
+        }
+        if (!scale.isZero()) {
+            return "Scaled {}";
+        }
+        if (!flipX.isZero()) {
+            return "Flipped {} on the X-axis";
+        }
+        if (!flipY.isZero()) {
+            return "Flipped {} on the Y-axis";
+        }
+        if (!pos.isZero()) {
+            return "Moved {}";
+        }
     }
-    EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
-}
-
-std::vector<Detail> ObjFlipX::details() const {
-    return {};
-}
-
-// ObjFlipY
-
-std::string ObjFlipY::toDiffString() const {
-    return fmtDiffString("fpy", obj, pos, flip);
-}
-
-EditorEventData* ObjFlipY::clone() const {
-    return new ObjFlipY(obj, pos, flip);
-}
-
-void ObjFlipY::undo() const {
-    auto _ = BlockAll();
-    if (flip.from != flip.to) {
-        EditorUI::get()->flipObjectsY(CCArray::createWithObject(obj));
-    }
-    EditorUI::get()->moveObject(obj, pos.from - obj->getPosition());
-}
-
-void ObjFlipY::redo() const {
-    auto _ = BlockAll();
-    if (flip.from != flip.to) {
-        EditorUI::get()->flipObjectsY(CCArray::createWithObject(obj));
-    }
-    EditorUI::get()->moveObject(obj, pos.to - obj->getPosition());
-}
-
-std::vector<Detail> ObjFlipY::details() const {
-    return {};
+    return "Transformed {}";
 }
 
 // ObjColored
@@ -1196,6 +1190,14 @@ void ObjColored::redo() const {
 
 std::vector<Detail> ObjColored::details() const {
     return {};
+}
+
+std::string ObjColored::getIconName() const {
+    return "color.png"_spr;
+}
+
+std::string ObjColored::getDescFmt() const {
+    return "Colored {}";
 }
 
 // ObjPropsChanged
@@ -1267,6 +1269,14 @@ std::vector<Detail> ObjPropsChanged::details() const {
     return res;
 }
 
+std::string ObjPropsChanged::getIconName() const {
+    return "GJ_hammerIcon_001.png";
+}
+
+std::string ObjPropsChanged::getDescFmt() const {
+    return "Changed {} Properties";
+}
+
 // ObjSelected
 
 std::string ObjSelected::toDiffString() const {
@@ -1291,6 +1301,14 @@ void ObjSelected::redo() const {
 
 std::vector<Detail> ObjSelected::details() const {
     return {};
+}
+
+std::string ObjSelected::getIconName() const {
+    return "select.png"_spr;
+}
+
+std::string ObjSelected::getDescFmt() const {
+    return "Selected {}";
 }
 
 // ObjDeselected
@@ -1319,6 +1337,14 @@ std::vector<Detail> ObjDeselected::details() const {
     return {};
 }
 
+std::string ObjDeselected::getIconName() const {
+    return "deselect.png"_spr;
+}
+
+std::string ObjDeselected::getDescFmt() const {
+    return "Deselected {}";
+}
+
 // StartPosChanged
 
 std::string StartPosChanged::toDiffString() const {
@@ -1340,6 +1366,14 @@ void StartPosChanged::redo() const {
 std::vector<Detail> StartPosChanged::details() const {
     // todo
     return {};
+}
+
+std::string StartPosChanged::getIconName() const {
+    return "edit_eStartPosBtn_001.png";
+}
+
+std::string StartPosChanged::getDescFmt() const {
+    return "Edited {}";
 }
 
 // TriggerPropsChanged
@@ -1365,6 +1399,14 @@ std::vector<Detail> TriggerPropsChanged::details() const {
     return {};
 }
 
+std::string TriggerPropsChanged::getIconName() const {
+    return "GJ_hammerIcon_001.png";
+}
+
+std::string TriggerPropsChanged::getDescFmt() const {
+    return "Changed {} Properties";
+}
+
 // SpecialPropsChanged
 
 std::string SpecialPropsChanged::toDiffString() const {
@@ -1386,6 +1428,14 @@ void SpecialPropsChanged::redo() const {
 std::vector<Detail> SpecialPropsChanged::details() const {
     // todo
     return {};
+}
+
+std::string SpecialPropsChanged::getIconName() const {
+    return "GJ_hammerIcon_001.png";
+}
+
+std::string SpecialPropsChanged::getDescFmt() const {
+    return "Changed {} Properties";
 }
 
 // ColorChannelEvent

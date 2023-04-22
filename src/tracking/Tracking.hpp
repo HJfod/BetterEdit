@@ -17,6 +17,16 @@ template <class T>
 struct Transform {
     T from, to;
     Transform(T const& from, T const& to) : from(from), to(to) {}
+    static Transform zero() {
+        return { T(), T() };
+    }
+
+    T delta() const {
+        return to - from;
+    }
+    bool isZero() const {
+        return to == from;
+    }
 };
 
 template <class T>
@@ -446,6 +456,9 @@ struct EditorEventData {
 struct ObjEventData : public EditorEventData {
     Ref<GameObject> obj;
     ObjEventData(Ref<GameObject> obj);
+
+    virtual std::string getIconName() const = 0;
+    virtual std::string getDescFmt() const = 0;
 };
 
 struct ObjPlaced : public ObjEventData {
@@ -459,8 +472,8 @@ struct ObjPlaced : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "plus.png"_spr;
-    static inline auto DESC_FMT = "Added {}";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct ObjRemoved : public ObjEventData {
@@ -473,8 +486,8 @@ struct ObjRemoved : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "neg.png"_spr;
-    static inline auto DESC_FMT = "Removed {}";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct ObjPasted : public ObjEventData {
@@ -488,87 +501,36 @@ struct ObjPasted : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "plus.png"_spr;
-    static inline auto DESC_FMT = "Copied {}";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
-struct ObjMoved : public ObjEventData {
-    Transform<CCPoint> pos;
-    inline ObjMoved(Ref<GameObject> obj, Transform<CCPoint> const& pos)
-      : ObjEventData(obj), pos(pos) {}
-    
-    std::string toDiffString() const override;
-    EditorEventData* clone() const override;
-    void undo() const override;
-    void redo() const override;
-    std::vector<Detail> details() const override;
-
-    static inline auto ICON_NAME = "move.png"_spr;
-    static inline auto DESC_FMT = "Moved {}";
-};
-
-struct ObjRotated : public ObjEventData {
+struct ObjTransformed : public ObjEventData {
     Transform<CCPoint> pos;
     Transform<float> angle;
-    inline ObjRotated(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> angle)
-      : ObjEventData(obj), pos(pos), angle(angle) {}
-    
-    std::string toDiffString() const override;
-    EditorEventData* clone() const override;
-    void undo() const override;
-    void redo() const override;
-    std::vector<Detail> details() const override;
-
-    static inline auto ICON_NAME = "edit_ccwBtn_001.png";
-    static inline auto DESC_FMT = "Rotated {}";
-};
-
-struct ObjScaled : public ObjEventData {
-    Transform<CCPoint> pos;
     Transform<float> scale;
-    inline ObjScaled(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<float> scale)
-      : ObjEventData(obj), pos(pos), scale(scale) {}
-    
+    Transform<bool> flipX;
+    Transform<bool> flipY;
+
+    inline ObjTransformed(
+        Ref<GameObject> obj,
+        Transform<CCPoint> const& pos,
+        Transform<float> const& angle,
+        Transform<float> const& scale,
+        Transform<bool> const& flipX,
+        Transform<bool> const& flipY
+    ) : ObjEventData(obj),
+        pos(pos), angle(angle), scale(scale),
+        flipX(flipX), flipY(flipY) {}
+
     std::string toDiffString() const override;
     EditorEventData* clone() const override;
     void undo() const override;
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "scale.png"_spr;
-    static inline auto DESC_FMT = "Scaled {}";
-};
-
-struct ObjFlipX : public ObjEventData {
-    Transform<CCPoint> pos;
-    Transform<bool> flip;
-    inline ObjFlipX(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip)
-      : ObjEventData(obj), pos(pos), flip(flip) {}
-    
-    std::string toDiffString() const override;
-    EditorEventData* clone() const override;
-    void undo() const override;
-    void redo() const override;
-    std::vector<Detail> details() const override;
-
-    static inline auto ICON_NAME = "edit_flipXBtn_001.png";
-    static inline auto DESC_FMT = "Flipped {} on the X-axis";
-};
-
-struct ObjFlipY : public ObjEventData {
-    Transform<CCPoint> pos;
-    Transform<bool> flip;
-    inline ObjFlipY(Ref<GameObject> obj, Transform<CCPoint> const& pos, Transform<bool> const& flip)
-      : ObjEventData(obj), pos(pos), flip(flip) {}
-    
-    std::string toDiffString() const override;
-    EditorEventData* clone() const override;
-    void undo() const override;
-    void redo() const override;
-    std::vector<Detail> details() const override;
-
-    static inline auto ICON_NAME = "edit_flipYBtn_001.png";
-    static inline auto DESC_FMT = "Flipped {} on the Y-axis";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct ObjColored : public ObjEventData {
@@ -582,8 +544,8 @@ struct ObjColored : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "color.png"_spr;
-    static inline auto DESC_FMT = "Colored {}";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct ObjPropsChanged : public ObjEventData {
@@ -598,8 +560,8 @@ struct ObjPropsChanged : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "GJ_hammerIcon_001.png";
-    static inline auto DESC_FMT = "Changed {} Properties";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct ObjSelected : public ObjEventData {
@@ -612,8 +574,8 @@ struct ObjSelected : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "select.png"_spr;
-    static inline auto DESC_FMT = "Selected {}";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct ObjDeselected : public ObjEventData {
@@ -626,8 +588,8 @@ struct ObjDeselected : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "deselect.png"_spr;
-    static inline auto DESC_FMT = "Deselected {}";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct StartPosChanged : public ObjEventData {
@@ -642,8 +604,8 @@ struct StartPosChanged : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "edit_eStartPosBtn_001.png";
-    static inline auto DESC_FMT = "Edited Start Pos";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct TriggerPropsChanged : public ObjEventData {
@@ -658,8 +620,8 @@ struct TriggerPropsChanged : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "GJ_hammerIcon_001.png";
-    static inline auto DESC_FMT = "Changed {} Properties";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct SpecialPropsChanged : public ObjEventData {
@@ -674,8 +636,8 @@ struct SpecialPropsChanged : public ObjEventData {
     void redo() const override;
     std::vector<Detail> details() const override;
 
-    static inline auto ICON_NAME = "GJ_hammerIcon_001.png";
-    static inline auto DESC_FMT = "Changed {} Properties";
+    std::string getIconName() const override;
+    std::string getDescFmt() const override;
 };
 
 struct EditorEvent : public Event, public EditorEventData {
@@ -766,8 +728,11 @@ struct MultiObjEvent : public EditorEvent {
     }
 
     CCNode* icon() const override {
+        if (events.empty()) {
+            return nullptr;
+        }
         auto base = CCSprite::createWithSpriteFrameName("square_01_001.png");
-        auto top = CCSprite::createWithSpriteFrameName(Ev::ICON_NAME);
+        auto top = CCSprite::createWithSpriteFrameName(events.at(0).getIconName().c_str());
         top->setPosition({ base->getContentSize().width - 5.f, 5.f });
         base->addChild(top);
         base->setScale(.5f);
@@ -775,9 +740,22 @@ struct MultiObjEvent : public EditorEvent {
     }
 
     std::string desc() const override {
-        const char* ty = typeinfo_cast<EffectGameObject*>(events.at(0).obj.data()) ? "Trigger" : "Object";
+        if (events.empty()) {
+            return "Invalid Event";
+        }
+        auto& event = events.at(0);
+        const char* ty;
+        if (typeinfo_cast<StartPosObject*>(event.obj.data())) {
+            ty = "Start Pos";
+        }
+        else if (typeinfo_cast<EffectGameObject*>(event.obj.data())) {
+            ty = "Trigger";
+        }
+        else {
+            ty = "Object";
+        }
         return fmt::format(
-            fmt::runtime(Ev::DESC_FMT),
+            fmt::runtime(event.getDescFmt()),
             (events.size() == 1 ? ty : fmt::format("{} {}s", events.size(), ty))
         );
     }

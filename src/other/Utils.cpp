@@ -26,7 +26,7 @@ CCArrayExt<GameObject> iterTargets(GameObject* target, CCArray* targets) {
     if (target) {
         return CCArrayExt<GameObject>(CCArray::createWithObject(target));
     }
-    else {
+    else if (targets) {
         if (targets->containsObject(nullptr)) {
             auto arr = CCArray::create();
             for (auto obj : CCArrayExt<CCObject>(targets)) {
@@ -37,6 +37,9 @@ CCArrayExt<GameObject> iterTargets(GameObject* target, CCArray* targets) {
             return arr;
         }
         return targets;
+    }
+    else {
+        return nullptr;
     }
 }
 
