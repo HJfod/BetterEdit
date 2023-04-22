@@ -79,7 +79,6 @@ jobs:
     - name: Manually download index
       uses: actions/checkout@v3
       with:
-        submodules: recursive
         repository: geode-sdk/mods
         path: ${{ github.workspace }}/profile/geode/index/geode-sdk_mods
 
