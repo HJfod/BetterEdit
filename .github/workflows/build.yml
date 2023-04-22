@@ -9,7 +9,7 @@ on:
 env:
   GEODE_SDK: ${{ github.workspace }}/sdk
   GEODE_VERSION: nightly
-  CLI_VERSION: v2.3.0
+  CLI_VERSION: v2.4.0
 
 jobs:
   build:
