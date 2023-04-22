@@ -97,6 +97,7 @@ CCArray* selectStructure(EditorUI* ui, GameObject* from) {
                     }
                 }
             } break;
+            default: break;
         }
     }
     auto arr = CCArray::create();

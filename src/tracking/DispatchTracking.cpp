@@ -75,20 +75,12 @@ private:
 };
 
 class $modify(EditorPauseLayer) {
-    void onSaveAndPlay(CCObject* sender) {
-        BLOCKED_CALL(EditorPauseLayer::onSaveAndPlay(sender));
+    void saveLevel() {
+        BLOCKED_CALL(EditorPauseLayer::saveLevel());
     }
 
-    void onSave(CCObject* sender) {
-        BLOCKED_CALL(EditorPauseLayer::onSave(sender));
-    }
-
-    void onSaveAndExit(CCObject* sender) {
-        BLOCKED_CALL(EditorPauseLayer::onSaveAndExit(sender));
-    }
-
-    void onExitNoSave(CCObject* sender) {
-        BLOCKED_CALL(EditorPauseLayer::onExitNoSave(sender));
+    void onExitEditor(CCObject* sender) {
+        BLOCKED_CALL(EditorPauseLayer::onExitEditor(sender));
     }
 };
 
