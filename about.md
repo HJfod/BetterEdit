@@ -18,6 +18,6 @@ The next generation of BetterEdit.
  - Better selection features
  - Custom keybinds
 
-More features coming soon. If you have <cr>**suggestions**</c>, please post them [on the GitHub as an issue](https://github.com/HJfod/BetterEdit/issues).
+More features coming soon. If you have <cb>**suggestions**</c>, please post them [on the GitHub as an issue](https://github.com/HJfod/BetterEdit/issues).
 
 If you'd like to <cy>**support development**</c>, click the `Support` button :)
