@@ -76,6 +76,7 @@ jobs:
         mkdir ${{ github.workspace }}/profile/geode/mods
         ./${{ matrix.config.cli_name }} profile add --name GithubActions ${{ github.workspace }}/profile
       
+      # Mac for some reason returns a 403 when updating index through CLI
     - name: Manually download index
       uses: actions/checkout@v3
       with:
