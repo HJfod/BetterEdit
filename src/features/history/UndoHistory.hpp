@@ -1,7 +1,10 @@
 #pragma once
 
-#include "../tracking/Tracking.hpp"
+// todo: merge history, recovery, and version control
+
+#include <tracking/Tracking.hpp>
 #include <Geode/ui/Popup.hpp>
+#include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/loader/Event.hpp>
 #include <ui/Clip.hpp>
 
@@ -67,6 +70,7 @@ public:
     std::vector<EditorEvent*> getEvents() const;
     size_t getUndoneCount() const;
     size_t getRedoneCount() const;
+    size_t getMaxCount() const;
 
     void undo(size_t count = 1);
     void undoTo(EditorEvent* event);

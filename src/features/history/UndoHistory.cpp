@@ -6,6 +6,7 @@
 #include <Geode/binding/GJScaleControl.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
+#include <Geode/binding/GameManager.hpp>
 #include <Geode/loader/SettingEvent.hpp>
 #include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/ui/General.hpp>
@@ -334,6 +335,9 @@ void History::onEvent(EditorEvent* ev) {
         m_events.erase(m_events.end() - m_undone, m_events.end());
         m_undone = 0;
     }
+    if (m_events.size() >= this->getMaxCount()) {
+        m_events.erase(m_events.begin());
+    }
     m_events.emplace_back(ev->unique());
     EditorUI::get()->updateButtons();
 }
@@ -353,6 +357,10 @@ size_t History::getRedoneCount() const {
 
 size_t History::getUndoneCount() const {
     return m_undone;
+}
+
+size_t History::getMaxCount() const {
+    return GameManager::get()->getGameVariable("0013") ? 1000 : 200;
 }
 
 EditorEvent* History::current() {

@@ -7,6 +7,7 @@ project(BetterEdit VERSION 4.6.0)
 file(GLOB SOURCES
 	src/features/backups/*.cpp
 	src/features/autolink/*.cpp
+	src/features/history/*.cpp
 	src/features/*.cpp
 	src/tracking/*.cpp
 	src/script/*.cpp
