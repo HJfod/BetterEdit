@@ -49,7 +49,6 @@ jobs:
       with:
         submodules: recursive
         repository: geode-sdk/geode
-        # ref: v0.4.8
         path: ${{ env.GEODE_SDK }}
      
     - uses: ilammy/msvc-dev-cmd@v1
@@ -77,10 +76,17 @@ jobs:
         mkdir ${{ github.workspace }}/profile/geode/mods
         ./${{ matrix.config.cli_name }} profile add --name GithubActions ${{ github.workspace }}/profile
       
+    - name: Manually download index
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        repository: geode-sdk/mods
+        path: ${{ github.workspace }}/profile/geode/index/geode-sdk_mods
+
     - name: Configure CMake
       run: |
         cd ${{ github.workspace }}
-        cmake -B build ${{ matrix.config.extra_flags }} -DCLI_PATH=${{ github.workspace }}/cli -DGEODE_DONT_INSTALL_MODS=On
+        cmake -B build ${{ matrix.config.extra_flags }} -DCLI_PATH=${{ github.workspace }}/cli -DGEODE_DONT_INSTALL_MODS=On -DGEODE_DONT_UPDATE_INDEX=On
     
     - name: Build
       run: |
