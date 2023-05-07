@@ -79,6 +79,10 @@ class $modify(EditorPauseLayer) {
         BLOCKED_CALL(EditorPauseLayer::saveLevel());
     }
 
+    void onSaveAndPlay(CCObject* sender) {
+        BLOCKED_CALL(EditorPauseLayer::onSaveAndPlay(sender));
+    }
+
     void onExitEditor(CCObject* sender) {
         BLOCKED_CALL(EditorPauseLayer::onExitEditor(sender));
     }
