@@ -14,6 +14,8 @@ It is also notable that summer is starting up, and while most of my days will be
 
 The reason for this short blog post is that I felt it would be dishonest to keep responding "yea I can add that" to feature requests when realistically I know that if I do get to adding the suggestion, 2.2 will already have been released and I have bigger problems.
 
+If I do end up quitting mod development entirely, I want to try and push myself to make a bunch of tutorials on modding at least. Because I know way too much about this game and if I don't put that knowledge to use, someone else should.
+
 That's about it.
 
 -HJfod
