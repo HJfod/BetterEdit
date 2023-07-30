@@ -37,6 +37,12 @@
 			"name": "Selection Preview",
 			"description": "Shows which objects are about to be selected when using Swipe"
 		},
+		"new-color-menu": {
+			"type": "bool",
+			"default": true,
+			"name": "New Color Menu",
+			"description": "Changes the object color selection menu to show more channels aswell as previews for colors and special colors"
+		},
 		"developer-mode": {
 			"type": "bool",
 			"default": false,

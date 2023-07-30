@@ -178,11 +178,6 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
         }
     }
 
-    void destructor() {
-        PlaytestHerePopup::hide();
-        LevelEditorLayer::~LevelEditorLayer();
-    }
-
     void handleAction(bool idk, CCArray* idk2) {
         LevelEditorLayer::handleAction(idk, idk2);
         PlaytestHerePopup::move();

@@ -451,6 +451,7 @@ struct EditorEventData {
     virtual void redo() const = 0;
     virtual EditorEventData* clone() const = 0;
     virtual std::vector<Detail> details() const = 0;
+    virtual ~EditorEventData() = default;
 };
 
 struct ObjEventData : public EditorEventData {
