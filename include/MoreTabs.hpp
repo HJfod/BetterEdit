@@ -21,7 +21,7 @@ namespace better_edit {
 
         CCMenuItemToggler* createTab(const char* icon, cocos2d::CCObject* target, cocos2d::SEL_MenuHandler selector);
 
-        friend struct MoreTabsUI; 
+        friend struct ::MoreTabsUI; 
 
     public:
         int addCreateTab(const char* icon, EditButtonBar* content);
