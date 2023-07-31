@@ -1,5 +1,7 @@
-#include <Geode/Bindings.hpp>
-#include <Geode/Modify.hpp>
+
+#include <Geode/modify/EditorUI.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/binding/GJGroundLayer.hpp>
 #include <Geode/Loader.hpp>
 #include <numbers>
 

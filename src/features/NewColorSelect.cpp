@@ -56,7 +56,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
     bool modified = false;
 
     void updateSprite(ColorChannelSprite* sprite) {
-        auto channel = reinterpret_cast<int>(sprite->getUserData());
+        auto channel = static_cast<int>(reinterpret_cast<intptr_t>(sprite->getUserData()));
         auto action = LevelEditorLayer::get()->m_levelSettings->m_effectManager->getColorAction(channel);
 
         sprite->updateValues(action);
