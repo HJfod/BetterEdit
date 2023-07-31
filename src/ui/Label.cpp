@@ -1,5 +1,8 @@
-#include "Label.hpp"
+#include <ui/Label.hpp>
 #include <Geode/utils/string.hpp>
+
+using namespace geode::prelude;
+using namespace better_edit;
 
 bool Label::init(std::string const& text, const char* font, CCSize const& size) {
     if (!CCNodeRGBA::init())

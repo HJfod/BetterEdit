@@ -16,6 +16,7 @@
 using namespace geode::prelude;
 using namespace std::chrono;
 using namespace keybinds;
+using namespace better_edit;
 using Clock = high_resolution_clock;
 
 static CCMenuItemToggler* createEditorButton(

@@ -11,6 +11,7 @@
 #undef max
 
 using namespace geode::prelude;
+using namespace better_edit;
 
 struct FromLevelStart {};
 struct DefaultBehaviour {};

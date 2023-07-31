@@ -1,4 +1,7 @@
-#include "Clip.hpp"
+#include <ui/Clip.hpp>
+
+using namespace geode::prelude;
+using namespace better_edit;
 
 bool Clip::init(bool invert) {
     m_stencil = CCLayerColor::create({ 255, 255, 255, 255 });

@@ -1,6 +1,5 @@
-
 #include <Geode/utils/cocos.hpp>
-#include "Tracking.hpp"
+#include <tracking/Tracking.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/EditorUI.hpp>
 #include <Geode/binding/GameObject.hpp>
@@ -17,7 +16,10 @@
 #include <other/Utils.hpp>
 #include <objects/ObjectType.hpp>
 
-std::string toDiffString(Ref<GameObject> obj) {
+using namespace geode::prelude;
+using namespace better_edit;
+
+std::string better_edit::toDiffString(Ref<GameObject> obj) {
     return fmt::format(
         "{}_{}_{}_{}_{}_{}_{}",
         obj->m_objectID,
@@ -30,11 +32,11 @@ std::string toDiffString(Ref<GameObject> obj) {
     );
 }
 
-std::string toDiffString(CCPoint const& point) {
+std::string better_edit::toDiffString(CCPoint const& point) {
     return fmt::format("({},{})", point.x, point.y);
 }
 
-std::string toDiffString(ccHSVValue const& value) {
+std::string better_edit::toDiffString(ccHSVValue const& value) {
     return fmt::format(
         "({},{},{},{},{})",
         value.h, value.s, value.v,
@@ -42,22 +44,22 @@ std::string toDiffString(ccHSVValue const& value) {
     );
 }
 
-std::string toDiffString(ccColor3B const& value) {
+std::string better_edit::toDiffString(ccColor3B const& value) {
     return fmt::format("({},{},{})", value.r, value.g, value.b);
 }
 
-std::string toDiffString(ccColor4B const& value) {
+std::string better_edit::toDiffString(ccColor4B const& value) {
     return fmt::format("({},{},{},{})", value.r, value.g, value.b, value.a);
 }
 
-std::string toDiffString(ColorState const& value) {
+std::string better_edit::toDiffString(ColorState const& value) {
     return toDiffString(
         value.color, value.opacity, value.blending,
         value.playerColor, value.copyColorID, value.copyHSV
     );
 }
 
-std::string toDiffString(ObjColorState const& value) {
+std::string better_edit::toDiffString(ObjColorState const& value) {
     return toDiffString(
         value.base, value.baseHSV,
         value.detail, value.detailHSV,
@@ -65,7 +67,7 @@ std::string toDiffString(ObjColorState const& value) {
     );
 }
 
-std::string toDiffString(ObjState const& value) {
+std::string better_edit::toDiffString(ObjState const& value) {
     return toDiffString(
         value.groups, value.editorLayer1, value.editorLayer2, value.zOrder, 
         value.zLayer, value.dontFade, value.dontEnter, value.groupParent,
@@ -73,7 +75,7 @@ std::string toDiffString(ObjState const& value) {
     );
 }
 
-std::string toDiffString(LevelSettingsState const& value) {
+std::string better_edit::toDiffString(LevelSettingsState const& value) {
     return toDiffString(
         value.speed, value.mode, value.flipGravity, value.mini,
         value.dual, value.twoPlayer, value.songOffset, value.fadeIn,
@@ -81,7 +83,7 @@ std::string toDiffString(LevelSettingsState const& value) {
     );
 }
 
-std::string toDiffString(TriggerState const& value) {
+std::string better_edit::toDiffString(TriggerState const& value) {
     return std::visit(makeVisitor {
         [](TriggerState::Color const& color) {
             return toDiffString(
@@ -230,7 +232,7 @@ std::string toDiffString(TriggerState const& value) {
     }, value.props) + "," + toDiffString(value.touchTrigger, value.spawnTrigger, value.multiTrigger);
 }
 
-std::string toDiffString(SpecialState const& value) {
+std::string better_edit::toDiffString(SpecialState const& value) {
     return std::visit(makeVisitor {
         [](SpecialState::CollisionBlock const& value) {
             return toDiffString(value.id, value.dynamic);
@@ -260,7 +262,7 @@ std::string toDiffString(SpecialState const& value) {
     }, value.props);
 }
 
-std::string toDiffString(std::vector<short> const& value) {
+std::string better_edit::toDiffString(std::vector<short> const& value) {
     std::string res = "[";
     for (auto& c : value) {
         res += std::to_string(c) + ",";
@@ -268,11 +270,11 @@ std::string toDiffString(std::vector<short> const& value) {
     return res + "]";
 }
 
-std::string toDiffString(bool value) {
+std::string better_edit::toDiffString(bool value) {
     return value ? "t" : "f";
 }
 
-std::string toDiffString(ZLayer const& value) {
+std::string better_edit::toDiffString(ZLayer const& value) {
     return std::to_string(static_cast<int>(value));
 }
 

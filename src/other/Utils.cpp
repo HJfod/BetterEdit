@@ -1,4 +1,4 @@
-#include "Utils.hpp"
+#include <other/Utils.hpp>
 #include <Geode/binding/EditorUI.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/OBB2D.hpp>
@@ -7,6 +7,9 @@
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <clipper2/clipper.h>
 #include <tracking/Tracking.hpp>
+
+using namespace geode::prelude;
+using namespace better_edit;
 
 std::string zLayerToString(ZLayer z) {
     switch (z) {

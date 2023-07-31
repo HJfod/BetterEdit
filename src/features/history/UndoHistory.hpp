@@ -8,6 +8,9 @@
 #include <Geode/loader/Event.hpp>
 #include <ui/Clip.hpp>
 
+using namespace geode::prelude;
+using namespace better_edit;
+
 class History;
 class HistoryPopup;
 

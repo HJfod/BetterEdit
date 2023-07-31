@@ -1,4 +1,7 @@
-#include "Tag.hpp"
+#include <ui/Tag.hpp>
+
+using namespace geode::prelude;
+using namespace better_edit;
 
 bool Tag::init(std::string const& text, std::optional<std::string> const& icon) {
     if (!CCNode::init())

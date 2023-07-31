@@ -1,3 +1,7 @@
+# v5.0.0-alpha.8
+
+ - Add the new color selection menu from v4 with even better features
+
 # v5.0.0-alpha.7
 
  - Add customizable keybinds support through Custom Keybinds dependency

@@ -1,4 +1,4 @@
-#include "Tracking.hpp"
+#include <tracking/Tracking.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
 #include <Geode/modify/EditorUI.hpp>
@@ -18,6 +18,9 @@
 #include <Geode/binding/LevelSettingsObject.hpp>
 #include <Geode/binding/GameManager.hpp>
 #include <other/Utils.hpp>
+
+using namespace geode::prelude;
+using namespace better_edit;
 
 static int TRACKING_HOOK_PRIORITY = 999;
 

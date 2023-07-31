@@ -1,4 +1,4 @@
-#include "ObjectType.hpp"
+#include <objects/ObjectType.hpp>
 #include <unordered_set>
 
 std::unordered_set ROTATING_OBJ_IDS {

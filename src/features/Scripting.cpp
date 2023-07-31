@@ -16,6 +16,7 @@
 #include <other/AutoGrowingLayout.hpp>
 
 using namespace geode::prelude;
+using namespace better_edit;
 
 using script::Rc;
 using script::State;

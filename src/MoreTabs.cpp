@@ -1,4 +1,4 @@
-#include "MoreTabs.hpp"
+#include <MoreTabs.hpp>
 #include <Geode/binding/CCMenuItemToggler.hpp>
 #include <Geode/binding/EditButtonBar.hpp>
 #include <Geode/binding/GameManager.hpp>
@@ -6,7 +6,9 @@
 #include <Geode/modify/EditorUI.hpp>
 #include <hjfod.custom-keybinds/include/Keybinds.hpp>
 
+using namespace geode::prelude;
 using namespace keybinds;
+using namespace better_edit;
 
 bool MoreTabs::init(EditorUI* ui) {
     if (!CCNode::init())

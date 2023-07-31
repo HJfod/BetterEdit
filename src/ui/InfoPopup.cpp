@@ -1,9 +1,12 @@
-#include "InfoPopup.hpp"
+#include <ui/InfoPopup.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
 #include <Geode/binding/TextArea.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <Geode/ui/MDTextArea.hpp>
-#include "Label.hpp"
+#include <ui/Label.hpp>
+
+using namespace geode::prelude;
+using namespace better_edit;
 
 bool InfoPopup::setup(std::string const& title) {
     this->setTitle(title);

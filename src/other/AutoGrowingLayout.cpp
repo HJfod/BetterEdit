@@ -1,7 +1,8 @@
-#include "AutoGrowingLayout.hpp"
+#include <other/AutoGrowingLayout.hpp>
 #include <Geode/utils/cocos.hpp>
 
 using namespace geode::prelude;
+using namespace better_edit;
 
 void AutoGrowingLayout::apply(CCNode* on) {
     float height = 0.f;
