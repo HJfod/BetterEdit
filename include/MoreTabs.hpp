@@ -16,7 +16,7 @@ namespace better_edit {
         std::vector<geode::Ref<cocos2d::CCNode>> m_editTabs;
 
         bool init(EditorUI* ui);
-        void onEditTab(cocos2d::CCObject*);
+        void onSelectEditTab(cocos2d::CCObject*);
         void updateMode(bool show = true);
 
         CCMenuItemToggler* createTab(const char* icon, cocos2d::CCObject* target, cocos2d::SEL_MenuHandler selector);
@@ -27,7 +27,7 @@ namespace better_edit {
         int addCreateTab(const char* icon, EditButtonBar* content);
         int addCreateTab(const char* icon, cocos2d::CCArray* buttons);
         int addCreateTab(const char* icon, std::vector<int> const& objIDs);
-        int addEditTab(const char* icon, cocos2d::CCNode* content);
+        int addEditTab(const char* icon, cocos2d::CCNode* content, bool centered = true);
 
         EditButtonBar* getCreateTab(int tag) const;
 

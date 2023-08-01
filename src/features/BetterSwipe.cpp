@@ -245,7 +245,7 @@ protected:
         auto winSize = CCDirector::get()->getWinSize();
 
         m_selectToolMenu->setContentSize({ 110.f, 50.f });
-        m_selectToolMenu->setPosition(winSize.width / 2 - 70.f, 45.f);
+        m_selectToolMenu->setPosition(-70.f, 0.f);
         m_selectToolMenu->setLayout(
             RowLayout::create()
                 ->setGrowCrossAxis(true)
@@ -253,7 +253,7 @@ protected:
         );
 
         m_selectTypeMenu->setContentSize({ 110.f, 50.f });
-        m_selectTypeMenu->setPosition(winSize.width / 2 + 70.f, 45.f);
+        m_selectTypeMenu->setPosition(70.f, 0.f);
         m_selectTypeMenu->setLayout(
             RowLayout::create()
                 ->setGrowCrossAxis(true)
@@ -261,7 +261,7 @@ protected:
         );
 
         auto infoMenu = CCMenu::create();
-        infoMenu->setPosition(winSize.width / 2 + 130.f, 45.f);
+        infoMenu->setPosition(130.f, 0.f);
 
         auto infoBtnSpr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
         auto infoBtn = CCMenuItemSpriteExtra::create(

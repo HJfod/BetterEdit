@@ -245,7 +245,6 @@ protected:
         auto winSize = CCDirector::get()->getWinSize();
 
         this->ignoreAnchorPointForPosition(false);
-        this->setPosition(winSize.width / 2, 45.f);
         this->setContentSize({ 200.f, 60.f });
         
         auto goToStartSpr = ButtonSprite::create(
@@ -278,7 +277,7 @@ protected:
         auto infoBtn = CCMenuItemSpriteExtra::create(
             infoSpr, this, menu_selector(StartPosButtonBar::onInfo)
         );
-        infoBtn->setPosition(m_obContentSize / 2 + ccp(60.f, 0.f));
+        infoBtn->setPosition(m_obContentSize / 2 + ccp(75.f, 0.f));
         this->addChild(infoBtn);
 
         return true;

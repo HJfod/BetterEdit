@@ -22,7 +22,7 @@ bool MoreTabs::init(EditorUI* ui) {
     m_editTabMenu->setPosition(ui->m_tabsMenu->getPosition());
     this->addChild(m_editTabMenu);
 
-    this->addEditTab("edit_rightBtn2_001.png", ui->m_editButtonBar);
+    this->addEditTab("edit_rightBtn2_001.png", ui->m_editButtonBar, false);
 
     this->updateMode();
 
@@ -40,14 +40,14 @@ void MoreTabs::updateMode(bool show) {
     }
 }
 
-void MoreTabs::onEditTab(CCObject* sender) {
+void MoreTabs::onSelectEditTab(CCObject* sender) {
     m_selectedEditTab = sender->getTag();
     int i = 0;
     for (auto& tab : m_editTabs) {
         tab->setVisible(m_selectedEditTab == i++);
     }
     for (auto& child : CCArrayExt<CCMenuItemToggler>(m_editTabMenu->getChildren())) {
-        child->toggle(false);
+        child->toggle(m_selectedEditTab == child->getTag());
     }
 }
 
@@ -69,13 +69,13 @@ CCMenuItemToggler* MoreTabs::createTab(const char* icon, CCObject* target, SEL_M
 
     auto tab = CCMenuItemToggler::create(tabOff, tabOn, target, selector);
     tab->setSizeMult(1.2f);
+    tab->setClickable(false);
     return tab;
 }
 
 int MoreTabs::addCreateTab(const char* icon, EditButtonBar* content) {
     auto tab = this->createTab(icon, m_ui, menu_selector(EditorUI::onSelectBuildTab));
     tab->setTag(m_ui->m_tabsArray->count());
-    tab->setClickable(false);
 
     m_ui->m_tabsArray->addObject(tab);
     m_ui->m_tabsMenu->addChild(tab);
@@ -108,12 +108,17 @@ int MoreTabs::addCreateTab(const char* icon, std::vector<int> const& objIDs) {
     return this->addCreateTab(icon, buttons);
 }
 
-int MoreTabs::addEditTab(const char* icon, CCNode* content) {
-    auto tab = this->createTab(icon, this, menu_selector(MoreTabs::onEditTab));
+int MoreTabs::addEditTab(const char* icon, CCNode* content, bool centered) {
+    auto tab = this->createTab(icon, this, menu_selector(MoreTabs::onSelectEditTab));
     tab->setTag(m_editTabs.size());
     m_editTabMenu->addChild(tab);
     m_editTabMenu->updateLayout();
     
+    if (centered) {
+        auto winSize = CCDirector::get()->getWinSize();
+        content->setPosition(winSize.width / 2, 45.f);
+    }
+
     m_editTabs.push_back(content);
     if (!content->getParent()) {
         content->setZOrder(10);
@@ -122,7 +127,7 @@ int MoreTabs::addEditTab(const char* icon, CCNode* content) {
     content->setVisible(false);
 
     if (m_editTabs.size() == 1) {
-        this->onEditTab(tab);
+        this->onSelectEditTab(tab);
         tab->toggle(true);
     }
 

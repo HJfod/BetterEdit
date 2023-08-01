@@ -11,7 +11,7 @@
 using namespace geode::prelude;
 using namespace better_edit;
 
-std::string zLayerToString(ZLayer z) {
+std::string better_edit::zLayerToString(ZLayer z) {
     switch (z) {
         case ZLayer::B4:      return "B4";
         case ZLayer::B3:      return "B3";
@@ -25,7 +25,7 @@ std::string zLayerToString(ZLayer z) {
     return "Unknown";
 }
 
-CCArrayExt<GameObject> iterTargets(GameObject* target, CCArray* targets) {
+CCArrayExt<GameObject> better_edit::iterTargets(GameObject* target, CCArray* targets) {
     if (target) {
         return CCArrayExt<GameObject>(CCArray::createWithObject(target));
     }
@@ -46,11 +46,11 @@ CCArrayExt<GameObject> iterTargets(GameObject* target, CCArray* targets) {
     }
 }
 
-CCArrayExt<GameObject> iterSelected(EditorUI* ui) {
+CCArrayExt<GameObject> better_edit::iterSelected(EditorUI* ui) {
     return iterTargets(ui->m_selectedObject, ui->m_selectedObjects);
 }
 
-bool polygonIntersect(std::vector<CCPoint> const& a, CCPoint const& b) {
+bool better_edit::polygonIntersect(std::vector<CCPoint> const& a, CCPoint const& b) {
     using namespace Clipper2Lib;
     PointD pb { b.x, b.y };
     PathD path;
@@ -82,7 +82,7 @@ static void recursiveAddNear(EditorUI* ui, GameObject* fromObj, std::vector<Game
     }
 }
 
-CCArray* selectStructure(EditorUI* ui, GameObject* from) {
+CCArray* better_edit::selectStructure(EditorUI* ui, GameObject* from) {
     if (!from) return CCArray::create();
     std::vector<GameObject*> nearby;
     auto pos = from->getPosition();
@@ -112,7 +112,7 @@ CCArray* selectStructure(EditorUI* ui, GameObject* from) {
     return arr;
 }
 
-CCArray* selectStructure(EditorUI* ui, CCArray* from) {
+CCArray* better_edit::selectStructure(EditorUI* ui, CCArray* from) {
     CCArray* res = CCArray::create();
     for (auto fr : CCArrayExt<GameObject>(from)) {
         for (auto obj : CCArrayExt<GameObject>(selectStructure(ui, fr))) {
@@ -159,14 +159,14 @@ void TintLayer::updateVisibility(float dt) {
     }
 }
 
-void tintObject(GameObject* obj, std::optional<ccColor3B> const& color) {
+void better_edit::tintObject(GameObject* obj, std::optional<ccColor3B> const& color) {
     auto _ = BlockAll();
     auto tobj = static_cast<TintGameObject*>(obj);
     tobj->m_fields->tint = color;
     tobj->updateTintColor();
 }
 
-ButtonSprite* createEditorButtonSprite(const char* top, const char* bg) {
+ButtonSprite* better_edit::createEditorButtonSprite(const char* top, const char* bg) {
     return ButtonSprite::create(
         CCSprite::createWithSpriteFrameName(top),
         32, true, 32, bg, 1.f
