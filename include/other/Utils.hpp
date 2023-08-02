@@ -20,4 +20,6 @@ namespace better_edit {
     BE_DLL void tintObject(GameObject* obj, std::optional<cocos2d::ccColor3B> const& color);
     
     BE_DLL ButtonSprite* createEditorButtonSprite(const char* top, const char* bg = "GJ_button_01.png");
+
+    BE_DLL void showEditorWarning(std::string const& text);
 }

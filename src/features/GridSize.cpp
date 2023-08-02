@@ -1,6 +1,8 @@
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/binding/CCMenuItemToggler.hpp>
+#include <Geode/binding/TextInputDelegate.hpp>
+#include <Geode/binding/FLAlertLayer.hpp>
 #include <Geode/ui/InputNode.hpp>
 #include <hjfod.custom-keybinds/include/Keybinds.hpp>
 #include <MoreTabs.hpp>
@@ -10,9 +12,7 @@ using namespace geode::prelude;
 using namespace better_edit;
 using namespace keybinds;
 
-// todo: make the input work and post an event when the grid size is changed
-
-class GridSizeButtonBar : public CCMenu {
+class GridSizeButtonBar : public CCMenu, public TextInputDelegate {
 protected:
     InputNode* m_input;
     CCMenuItemToggler* m_lockBtn;
@@ -55,14 +55,26 @@ protected:
             lockOffSpr, lockOnSpr,
             this, menu_selector(GridSizeButtonBar::onLock)
         );
-        m_lockBtn->setPosition(m_obContentSize / 2 + ccp(65.f, 0.f));
+        m_lockBtn->setPosition(m_obContentSize / 2 - ccp(75.f, 0.f));
         m_lockBtn->setClickable(false);
         this->addChild(m_lockBtn);
+
+        auto infoSpr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
+        infoSpr->setScale(.65f);
+        auto infoBtn = CCMenuItemSpriteExtra::create(
+            infoSpr, this, menu_selector(GridSizeButtonBar::onInfo)
+        );
+        infoBtn->setPosition(m_obContentSize / 2 + ccp(75.f, 0.f));
+        this->addChild(infoBtn);
 
         m_input = InputNode::create(60.f, "Size");
         m_input->setPosition(m_obContentSize / 2);
         m_input->setScale(.85f);
+        m_input->getInput()->setDelegate(this);
         this->addChild(m_input);
+
+        // update ui
+        this->onEvent(nullptr);
         
         return true;
     }
@@ -73,12 +85,48 @@ protected:
 
     void onLock(CCObject* sender) {
         EditorGrid::get()->setLocked(!EditorGrid::get()->isLocked());
-        static_cast<CCMenuItemToggler*>(sender)->toggle(EditorGrid::get()->isLocked());
     }
 
-    ListenerResult onEvent(GridChangeEvent* ev) {
-        m_input->setString(numToString(ev->newSize));
-        m_lockBtn->toggle(ev->locked);
+    void onInfo(CCObject*) {
+        FLAlertLayer::create(
+            "Grid Info",
+            "Use the zoom buttons to <cy>change the grid size in units</c>. "
+            "If the grid size is set to 30 (1 block), then default behaviour "
+            "is used, where selecting a small object automatically resizes the grid. "
+            "Otherwise if the grid size is not 30 or if the <cb>constant lock</c> is enabled, "
+            "the grid size is locked.",
+            "OK"
+        )->show();
+    }
+
+    void textChanged(CCTextInputNode*) override {
+        float value = 30.f;
+        if (m_input->getString() && strlen(m_input->getString())) {
+            try {
+                value = std::stof(m_input->getString());
+            }
+            catch(...) {}
+        }
+        // disable ui update as we don't want to overwrite the input text
+        m_listener.disable();
+        EditorGrid::get()->setSize(value);
+        m_listener.enable();
+    }
+
+    ListenerResult onEvent(GridChangeEvent*) {
+        // i hate cctextinputnode always firing textChanged...
+        m_input->getInput()->setDelegate(nullptr);
+        m_input->setString(numToString(EditorGrid::get()->getSize()));
+        m_input->getInput()->setDelegate(this);
+        m_lockBtn->toggle(EditorGrid::get()->isLocked());
+        if (EditorGrid::get()->isDynamicallyLocked()) {
+            m_lockBtn->m_onButton->setColor({ 25, 185, 65 });
+            m_lockBtn->m_onButton->setOpacity(155);
+        }
+        else {
+            m_lockBtn->m_onButton->setColor({ 255, 255, 255 });
+            m_lockBtn->m_onButton->setOpacity(255);
+        }
         return ListenerResult::Propagate;
     }
 

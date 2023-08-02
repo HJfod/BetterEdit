@@ -1,7 +1,12 @@
 #include <ModifyEditor.hpp>
 #include <Geode/modify/ObjectToolbox.hpp>
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/binding/DrawGridLayer.hpp>
+#include <Geode/binding/GameManager.hpp>
+#include <Geode/binding/CreateMenuItem.hpp>
 #include <optional>
+#include <other/Utils.hpp>
 
 using namespace geode::prelude;
 using namespace better_edit;
@@ -15,15 +20,11 @@ EditorGrid* EditorGrid::get() {
 }
 
 void EditorGrid::zoom(bool in) {
-    auto size = static_cast<float>(clamp(
-        (pow(2, round(log2(m_size / 30.0))) * 30.0) * (in ? 0.5 : 2.0),
-        30.0 / 8,
-        30.0 * 4
-    ));
-    if (std::isnan(size)) {
-        size = 30.f;
+    auto rounded = (pow(2, round(log2(m_size / 30.0))) * 30.0);
+    auto size = clamp(static_cast<float>(rounded) * (in ? .5f : 2.f), 30.f / 8, 30.f * 4);
+    if (!std::isnan(size)) {
+        this->setSize(size);
     }
-    this->setSize(size);
 }
 
 float EditorGrid::getSize() const {
@@ -33,7 +34,15 @@ float EditorGrid::getSize() const {
 void EditorGrid::setSize(float size) {
     m_size = size;
     GridChangeEvent(m_size, m_locked).post();
+    if (Mod::get()->template getSettingValue<bool>("auto-show-grid")) {
+        GameManager::get()->setGameVariable("0038", true);
+        LevelEditorLayer::get()->updateOptions();
+    }
     EditorUI::get()->updateGridNodeSize();
+}
+
+bool EditorGrid::isDynamicallyLocked() const {
+    return !m_locked && this->isLocked();
 }
 
 bool EditorGrid::isLocked() const {
@@ -43,23 +52,45 @@ bool EditorGrid::isLocked() const {
 void EditorGrid::setLocked(bool lock) {
     m_locked = lock;
     GridChangeEvent(m_size, m_locked).post();
+    if (Mod::get()->template getSettingValue<bool>("auto-show-grid")) {
+        GameManager::get()->setGameVariable("0038", true);
+        LevelEditorLayer::get()->updateOptions();
+    }
 }
 
-class $modify(ObjectToolbox) {
+class $modify(OTB, ObjectToolbox) {
+    bool bypassLock = false;
+
     float gridNodeSizeForKey(int key) {
-        return EditorGrid::get()->isLocked() ?
-            EditorGrid::get()->getSize() : 
-            ObjectToolbox::gridNodeSizeForKey(key);
+        if (EditorGrid::get()->isLocked() && !m_fields->bypassLock) {
+            return EditorGrid::get()->getSize(); 
+        }
+        else {
+            return ObjectToolbox::gridNodeSizeForKey(key);
+        }
     }
 };
 
 class $modify(EditorUI) {
+    // todo: persistent icon warning
+    // void onCreateButton(CCObject* item) {
+    //     EditorUI::onCreateButton(item);
+    //     if (EditorGrid::get()->isLocked()) {
+    //         auto otb = static_cast<OTB*>(ObjectToolbox::sharedState());
+    //         otb->m_fields->bypassLock = true;
+    //         if (otb->gridNodeSizeForKey(
+    //             static_cast<CreateMenuItem*>(item)->m_objectID
+    //         ) != 30.f) {
+    //             showEditorWarning("Grid size is locked");
+    //         }
+    //         otb->m_fields->bypassLock = false;
+    //     }
+    // }
+
     void updateGridNodeSize() {
         if (EditorGrid::get()->isLocked()) {
-            auto mode = m_selectedMode;
-            m_selectedMode = 2;
-            EditorUI::updateGridNodeSize();
-            m_selectedMode = mode;
+            m_gridSize = EditorGrid::get()->getSize();
+            m_editorLayer->m_drawGridLayer->m_activeGridNodeSize = m_gridSize;
         }
         else {
             EditorUI::updateGridNodeSize();

@@ -7,6 +7,7 @@
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <clipper2/clipper.h>
 #include <tracking/Tracking.hpp>
+#include <other/CallStdFunc.hpp>
 
 using namespace geode::prelude;
 using namespace better_edit;
@@ -171,4 +172,29 @@ ButtonSprite* better_edit::createEditorButtonSprite(const char* top, const char*
         CCSprite::createWithSpriteFrameName(top),
         32, true, 32, bg, 1.f
     );
+}
+
+void better_edit::showEditorWarning(std::string const& text) {
+    static size_t NOTIF_COUNT = 0;
+    NOTIF_COUNT += 1;
+    auto winSize = CCDirector::get()->getWinSize();
+    auto infoLabel = CCLabelBMFont::create(text.c_str(), "bigFont.fnt");
+    infoLabel->setScale(.5f);
+    infoLabel->setColor({ 255, 25, 25 });
+    infoLabel->setOpacity(0);
+    infoLabel->setPosition(
+        winSize.width / 2,
+        winSize.height / 2 - 30.f * (NOTIF_COUNT - 1)
+    );
+    infoLabel->runAction(CCSequence::create(
+        CCFadeTo::create(1.f, 255),
+        CCDelayTime::create(1.f),
+        CCFadeTo::create(1.f, 0),
+        CallStdFunc::create([=] {
+            NOTIF_COUNT -= 1;
+            infoLabel->removeFromParent();
+        }),
+        nullptr
+    ));
+    EditorUI::get()->addChild(infoLabel);
 }

@@ -43,6 +43,12 @@
 			"name": "New Color Menu",
 			"description": "Changes the object color selection menu to show more channels aswell as previews for colors and special colors"
 		},
+		"auto-show-grid": {
+			"type": "bool",
+			"default": true,
+			"name": "Show Grid on Size Change",
+			"description": "Automatically show the grid when its size is changed or it is locked"
+		},
 		"developer-mode": {
 			"type": "bool",
 			"default": false,

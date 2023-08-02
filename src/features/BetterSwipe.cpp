@@ -617,20 +617,7 @@ class $modify(SelectUI, EditorUI) {
                 this->deselectAll();
             }
             if (!objs->count() && filtered) {
-                auto winSize = CCDirector::get()->getWinSize();
-                auto infoLabel = CCLabelBMFont::create("You have select filters enabled", "bigFont.fnt");
-                infoLabel->setScale(.5f);
-                infoLabel->setColor({ 255, 25, 25 });
-                infoLabel->setOpacity(0);
-                infoLabel->setPosition(winSize / 2);
-                infoLabel->runAction(CCSequence::create(
-                    CCFadeTo::create(1.f, 255),
-                    CCDelayTime::create(1.f),
-                    CCFadeTo::create(1.f, 0),
-                    CCCallFunc::create(infoLabel, callfunc_selector(CCNode::removeFromParent)),
-                    nullptr
-                ));
-                this->addChild(infoLabel);
+                showEditorWarning("You have select filters enabled");
             }
             this->selectObjects(objs, false);
         }

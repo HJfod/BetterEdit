@@ -22,6 +22,7 @@ namespace better_edit {
         float getSize() const;
         void setSize(float size);
         bool isLocked() const;
+        bool isDynamicallyLocked() const;
         void setLocked(bool lock);
     };
 }
