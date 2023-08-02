@@ -1,12 +1,27 @@
 #pragma once
 
 #include "Macros.hpp"
-#include <Geode/DefaultInclude.hpp>
+#include <Geode/loader/Event.hpp>
 
 namespace better_edit {
-    BE_DLL bool isGridSizeLocked();
-    BE_DLL void zoomGridSize(bool in);
-    BE_DLL float getGridSize();
-    BE_DLL void setGridSize(float size);
-    BE_DLL void setGridSizeLocked(bool lock);
+    struct BE_DLL GridChangeEvent : public geode::Event {
+        float newSize;
+        bool locked;
+        GridChangeEvent(float size, bool locked);
+    };
+
+    class BE_DLL EditorGrid final {
+    protected:
+        float m_size = 30.f;
+        bool m_locked = false;
+
+    public:
+        static EditorGrid* get();
+
+        void zoom(bool in);
+        float getSize() const;
+        void setSize(float size);
+        bool isLocked() const;
+        void setLocked(bool lock);
+    };
 }

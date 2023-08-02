@@ -6,45 +6,56 @@
 using namespace geode::prelude;
 using namespace better_edit;
 
-static bool GRID_SIZE_LOCKED = false;
-static float GRID_SIZE = 30.f;
+GridChangeEvent::GridChangeEvent(float size, bool locked)
+  : newSize(size), locked(locked) {}
 
-void better_edit::zoomGridSize(bool in) {
-    setGridSize(clamp(
-        powf(2, roundf(log2f(GRID_SIZE / 30.f))) * 30.f * (in ? .5f : 2.f),
-        30.f / 8,
-        30.f * 4
+EditorGrid* EditorGrid::get() {
+    static auto inst = new EditorGrid();
+    return inst;
+}
+
+void EditorGrid::zoom(bool in) {
+    auto size = static_cast<float>(clamp(
+        (pow(2, round(log2(m_size / 30.0))) * 30.0) * (in ? 0.5 : 2.0),
+        30.0 / 8,
+        30.0 * 4
     ));
+    if (std::isnan(size)) {
+        size = 30.f;
+    }
+    this->setSize(size);
 }
 
-bool better_edit::isGridSizeLocked() {
-    return GRID_SIZE_LOCKED || GRID_SIZE != 30.f;
+float EditorGrid::getSize() const {
+    return m_size;
 }
 
-float better_edit::getGridSize() {
-    return GRID_SIZE;
-}
-
-void better_edit::setGridSize(float size) {
-    GRID_SIZE = size;
+void EditorGrid::setSize(float size) {
+    m_size = size;
+    GridChangeEvent(m_size, m_locked).post();
     EditorUI::get()->updateGridNodeSize();
 }
 
-void better_edit::setGridSizeLocked(bool lock) {
-    GRID_SIZE_LOCKED = lock;
+bool EditorGrid::isLocked() const {
+    return m_locked || m_size != 30.f;
+}
+
+void EditorGrid::setLocked(bool lock) {
+    m_locked = lock;
+    GridChangeEvent(m_size, m_locked).post();
 }
 
 class $modify(ObjectToolbox) {
     float gridNodeSizeForKey(int key) {
-        return isGridSizeLocked() ?
-            GRID_SIZE : 
+        return EditorGrid::get()->isLocked() ?
+            EditorGrid::get()->getSize() : 
             ObjectToolbox::gridNodeSizeForKey(key);
     }
 };
 
 class $modify(EditorUI) {
     void updateGridNodeSize() {
-        if (GRID_SIZE) {
+        if (EditorGrid::get()->isLocked()) {
             auto mode = m_selectedMode;
             m_selectedMode = 2;
             EditorUI::updateGridNodeSize();

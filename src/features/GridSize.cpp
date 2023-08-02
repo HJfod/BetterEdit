@@ -14,6 +14,10 @@ using namespace keybinds;
 
 class GridSizeButtonBar : public CCMenu {
 protected:
+    InputNode* m_input;
+    CCMenuItemToggler* m_lockBtn;
+    EventListener<EventFilter<GridChangeEvent>> m_listener = { this, &GridSizeButtonBar::onEvent };
+
     bool init() {
         if (!CCMenu::init())
             return false;
@@ -47,29 +51,35 @@ protected:
         lockOffSpr->setScale(.65f);
         auto lockOnSpr = CCSprite::createWithSpriteFrameName("GJ_lock_001.png");
         lockOnSpr->setScale(.65f);
-        auto lockBtn = CCMenuItemToggler::create(
+        m_lockBtn = CCMenuItemToggler::create(
             lockOffSpr, lockOnSpr,
             this, menu_selector(GridSizeButtonBar::onLock)
         );
-        lockBtn->setPosition(m_obContentSize / 2 + ccp(65.f, 0.f));
-        lockBtn->setClickable(false);
-        this->addChild(lockBtn);
+        m_lockBtn->setPosition(m_obContentSize / 2 + ccp(65.f, 0.f));
+        m_lockBtn->setClickable(false);
+        this->addChild(m_lockBtn);
 
-        auto input = InputNode::create(60.f, "Size");
-        input->setPosition(m_obContentSize / 2);
-        input->setScale(.85f);
-        this->addChild(input);
+        m_input = InputNode::create(60.f, "Size");
+        m_input->setPosition(m_obContentSize / 2);
+        m_input->setScale(.85f);
+        this->addChild(m_input);
         
         return true;
     }
 
     void onZoom(CCObject* sender) {
-        zoomGridSize(static_cast<CCMenuItemSpriteExtra*>(sender)->getTag());
+        EditorGrid::get()->zoom(static_cast<CCMenuItemSpriteExtra*>(sender)->getTag());
     }
 
     void onLock(CCObject* sender) {
-        setGridSizeLocked(!isGridSizeLocked());
-        static_cast<CCMenuItemToggler*>(sender)->toggle(isGridSizeLocked());
+        EditorGrid::get()->setLocked(!EditorGrid::get()->isLocked());
+        static_cast<CCMenuItemToggler*>(sender)->toggle(EditorGrid::get()->isLocked());
+    }
+
+    ListenerResult onEvent(GridChangeEvent* ev) {
+        m_input->setString(numToString(ev->newSize));
+        m_lockBtn->toggle(ev->locked);
+        return ListenerResult::Propagate;
     }
 
 public:
@@ -96,14 +106,14 @@ struct $modify(EditorUI) {
 
         this->template addEventListener<InvokeBindFilter>([=](InvokeBindEvent* event) {
             if (event->isDown()) {
-                zoomGridSize(true);
+                EditorGrid::get()->zoom(true);
             }
             return ListenerResult::Propagate;
         }, "zoom-grid-in"_spr);
 
         this->template addEventListener<InvokeBindFilter>([=](InvokeBindEvent* event) {
             if (event->isDown()) {
-                zoomGridSize(false);
+                EditorGrid::get()->zoom(false);
             }
             return ListenerResult::Propagate;
         }, "zoom-grid-out"_spr);
