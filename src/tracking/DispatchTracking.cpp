@@ -24,78 +24,27 @@ using namespace better_edit;
 
 static int TRACKING_HOOK_PRIORITY = 999;
 
-#define BLOCKED_CALL(...) \
-    {\
-        auto block = BlockAll();\
-        __VA_ARGS__;\
-    }
-
-#define BLOCKED_CALL_TO(var_, ...) \
-    {\
-        auto block = BlockAll();\
-        var_ = __VA_ARGS__;\
-    }
-
-template <class T>
-struct Bubble {
-    std::vector<T> events;
-    static inline Bubble<T>* s_current = nullptr;
-    Bubble() {
-        if (!s_current) {
-            s_current = this;
-        }
-    }
-    ~Bubble() {
-        if (s_current == this) {
-            s_current = nullptr;
-            if (events.size()) {
-                post(MultiObjEvent(std::move(events)));
-            }
-        }
-    }
-    void cancel() {
-        if (s_current == this) {
-            s_current = nullptr;
-        }
-    }
-    template <class... Args>
-    static void push(Args&&... args) {
-        if (BlockAll::blocked()) return;
-        if (s_current) {
-            s_current->events.emplace_back(std::forward<Args>(args)...);
-        }
-        else {
-            post(MultiObjEvent<T>({ T(std::forward<Args>(args)...) }));
-        }
-    }
-private:
-    template <class E>
-    static void post(E&& t) {
-        if (EditorUI::get() && !BlockAll::blocked()) {
-            t.post();
-        }
-    }
-};
-
 class $modify(EditorPauseLayer) {
     void saveLevel() {
-        BLOCKED_CALL(EditorPauseLayer::saveLevel());
+        auto _ = EditorEvent::block();
+        EditorPauseLayer::saveLevel();
     }
 
     void onSaveAndPlay(CCObject* sender) {
-        BLOCKED_CALL(EditorPauseLayer::onSaveAndPlay(sender));
+        auto _ = EditorEvent::block();
+        EditorPauseLayer::onSaveAndPlay(sender);
     }
 
     void onExitEditor(CCObject* sender) {
-        BLOCKED_CALL(EditorPauseLayer::onExitEditor(sender));
+        auto _ = EditorEvent::block();
+        EditorPauseLayer::onExitEditor(sender);
     }
 };
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* level) {
-        bool ret;
-        BLOCKED_CALL_TO(ret, PlayLayer::init(level));
-        return ret;
+        auto _ = EditorEvent::block();
+        return PlayLayer::init(level);
     }
 };
 
@@ -110,24 +59,38 @@ class $modify(LevelEditorLayer) {
     }
 
     void addSpecial(GameObject* obj) {
-        BLOCKED_CALL(LevelEditorLayer::addSpecial(obj));
-        Bubble<ObjPlaced>::push(obj, obj->getPosition());
+        {
+            auto _ = EditorEvent::block();
+            LevelEditorLayer::addSpecial(obj);
+        }
+        EditorEvent::post(EditorEvent::ObjectPlaced { obj, obj->getPosition() });
     }
 
     CCArray* createObjectsFromString(gd::string str, bool undo) {
-        auto bubble = Bubble<ObjPlaced>();
-        return LevelEditorLayer::createObjectsFromString(str, undo);
+        CCArray* objs;
+        {
+            auto _ = EditorEvent::block();
+            objs = LevelEditorLayer::createObjectsFromString(str, undo);
+        }
+        std::vector<EditorEvent::ObjectPlaced> events = {};
+        for (auto& obj : CCArrayExt<GameObject>(objs)) {
+            events.push_back(EditorEvent::ObjectPlaced { obj, obj->getPosition() });
+        }
+        EditorEvent::post(events);
+        return objs;
     }
 
     void createObjectsFromSetup(gd::string str) {
-        auto bubble = Bubble<ObjPlaced>();
+        auto _ = EditorEvent::block();
         LevelEditorLayer::createObjectsFromSetup(str);
-        bubble.cancel();
     }
 
     void removeSpecial(GameObject* obj) {
-        BLOCKED_CALL(LevelEditorLayer::removeSpecial(obj));
-        Bubble<ObjRemoved>::push(obj);
+        {
+            auto _ = EditorEvent::block();
+            LevelEditorLayer::removeSpecial(obj);
+        }
+        EditorEvent::post(EditorEvent::ObjectRemoved { obj });
     }
 
     void pasteAtributeState(GameObject* target, CCArray* targets) {
