@@ -153,7 +153,7 @@ class $modify(TintGameObject, GameObject) {
 void TintLayer::updateVisibility(float dt) {
     LevelEditorLayer::updateVisibility(dt);
     if (m_fields->tinted.size()) {
-        auto _ = BlockAll();
+        auto _ = Collect();
         for (auto obj : m_fields->tinted) {
             static_cast<TintGameObject*>(obj.data())->updateTintColor();
         }
@@ -161,7 +161,7 @@ void TintLayer::updateVisibility(float dt) {
 }
 
 void better_edit::tintObject(GameObject* obj, std::optional<ccColor3B> const& color) {
-    auto _ = BlockAll();
+    auto _ = Collect();
     auto tobj = static_cast<TintGameObject*>(obj);
     tobj->m_fields->tint = color;
     tobj->updateTintColor();

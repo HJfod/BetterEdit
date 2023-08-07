@@ -45,7 +45,7 @@ namespace better_edit {
             cocos2d::ccColor3B,
             cocos2d::ccHSVValue,
             cocos2d::CCPoint,
-            std::vector<short>,  // groups
+            std::vector<short>  // groups
         >;
         Value value;
         ObjectKey key;
@@ -62,6 +62,8 @@ namespace better_edit {
         }
 
         static List all(GameObject* obj);
+
+        void assign(GameObject* obj) const;
 
         bool operator==(StateValue const& other) const;
         bool operator!=(StateValue const& other) const;
@@ -120,7 +122,7 @@ namespace better_edit {
         Collect(Collect&&) = delete;
 
         bool push(EditorEvent const& event) override {
-            if (auto e = geode::casts::typeinfo_cast<E*>(event)) {
+            if (auto e = (geode::casts::typeinfo_cast<E*>(event))) {
                 m_events.push_back(std::make_unique<E>(e));
                 return true;
             }
@@ -162,6 +164,9 @@ namespace better_edit {
         void post();
 
         virtual std::string getName() const = 0;
+        virtual std::unique_ptr<EditorEvent> clone() const = 0;
+        virtual void undo() const = 0;
+        virtual void redo() const = 0;
     };
 
     class BE_DLL GroupedEditorEvent : public EditorEvent {
@@ -175,6 +180,9 @@ namespace better_edit {
             std::string const& name
         );
         std::string getName() const override;
+        std::unique_ptr<EditorEvent> clone() const override;
+        void undo() const override;
+        void redo() const override;
     };
 
     class BE_DLL ObjectsPlacedEvent : public EditorEvent {
@@ -184,6 +192,9 @@ namespace better_edit {
     public:
         static ObjectsPlacedEvent from(std::vector<GameObject*> const& objs);
         std::string getName() const override;
+        std::unique_ptr<EditorEvent> clone() const override;
+        void undo() const override;
+        void redo() const override;
         void merge(ObjectsPlacedEvent const& other);
     };
 
@@ -194,18 +205,36 @@ namespace better_edit {
     public:
         static ObjectsRemovedEvent from(std::vector<GameObject*> const& objs);
         std::string getName() const override;
+        std::unique_ptr<EditorEvent> clone() const override;
+        void undo() const override;
+        void redo() const override;
         void merge(ObjectsRemovedEvent const& other);
     };
 
     class BE_DLL ObjectsSelectedEvent : public EditorEvent {
     protected:
         std::vector<geode::Ref<GameObject>> m_objects;
-        bool m_selected;
     
     public:
-        static ObjectsSelectedEvent from(std::vector<GameObject*> const& objs, bool selected);
+        static ObjectsSelectedEvent from(std::vector<GameObject*> const& objs);
         std::string getName() const override;
+        std::unique_ptr<EditorEvent> clone() const override;
+        void undo() const override;
+        void redo() const override;
         void merge(ObjectsSelectedEvent const& other);
+    };
+
+    class BE_DLL ObjectsDeselectedEvent : public EditorEvent {
+    protected:
+        std::vector<geode::Ref<GameObject>> m_objects;
+    
+    public:
+        static ObjectsDeselectedEvent from(std::vector<GameObject*> const& objs);
+        std::string getName() const override;
+        std::unique_ptr<EditorEvent> clone() const override;
+        void undo() const override;
+        void redo() const override;
+        void merge(ObjectsDeselectedEvent const& other);
     };
 
     class BE_DLL ObjectsEditedEvent : public EditorEvent {
@@ -215,6 +244,9 @@ namespace better_edit {
     public:
         static ObjectsEditedEvent from(std::vector<ObjectKeyMap> const& objs);
         std::string getName() const override;
+        std::unique_ptr<EditorEvent> clone() const override;
+        void undo() const override;
+        void redo() const override;
         void merge(ObjectsEditedEvent const& other);
     };
 

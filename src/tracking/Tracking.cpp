@@ -19,7 +19,7 @@
 using namespace geode::prelude;
 using namespace better_edit;
 
-std::vector<GroupedEditorEvent> s_groupCollection = {};
+std::vector<Collector*> EditorEvent::s_groupCollection = {};
 
 static std::unordered_set<ObjectKey> ALL_KEYS = {};
 
@@ -35,6 +35,14 @@ StateValue StateValue::from(GameObject* obj, ObjectKey key) {
     auto res = StateValue();
     res.key = key;
     // todo
+}
+
+void StateValue::assign(GameObject* obj) const {
+    switch (this->key) {
+        case ObjectKey::X: {
+            
+        } break;
+    }
 }
 
 StateValue::List StateValue::all(GameObject* obj) {
@@ -109,6 +117,22 @@ std::string GroupedEditorEvent::getName() const {
     return m_name;
 }
 
+std::unique_ptr<EditorEvent> GroupedEditorEvent::clone() const {
+    return std::make_unique<GroupedEditorEvent>(*this);
+}
+
+void GroupedEditorEvent::undo() const {
+    for (auto& event : ranges::reverse(m_events)) {
+        event->undo();
+    }
+}
+
+void GroupedEditorEvent::redo() const {
+    for (auto& event : m_events) {
+        event->redo();
+    }
+}
+
 ObjectsPlacedEvent ObjectsPlacedEvent::from(std::vector<GameObject*> const& objs) {
     auto ev = ObjectsPlacedEvent();
     for (auto& obj : objs) {
@@ -119,6 +143,34 @@ ObjectsPlacedEvent ObjectsPlacedEvent::from(std::vector<GameObject*> const& objs
 
 std::string ObjectsPlacedEvent::getName() const {
     return fmt::format("Placed {} objects", m_objects.size());
+}
+
+std::unique_ptr<EditorEvent> ObjectsPlacedEvent::clone() const {
+    return std::make_unique<ObjectsPlacedEvent>(*this);
+}
+
+void ObjectsPlacedEvent::undo() const {
+    auto _ = Collect();
+    for (auto& [obj, _] : m_objects) {
+        LevelEditorLayer::get()->removeObjectFromSection(obj);
+        LevelEditorLayer::get()->removeSpecial(obj);
+        EditorUI::get()->deselectObject(obj);
+        obj->deactivateObject(true);
+    }
+}
+
+void ObjectsPlacedEvent::redo() const {
+    auto _ = Collect();
+    for (auto& [obj, pos] : m_objects) {
+        LevelEditorLayer::get()->addToSection(obj);
+        LevelEditorLayer::get()->addSpecial(obj);
+        EditorUI::get()->moveObject(obj, pos - obj->getPosition());
+        EditorUI::get()->selectObject(obj, true);
+    }
+}
+
+void ObjectsPlacedEvent::merge(ObjectsPlacedEvent const& other) {
+    ranges::push(m_objects, other.m_objects);
 }
 
 ObjectsRemovedEvent ObjectsRemovedEvent::from(std::vector<GameObject*> const& objs) {
@@ -133,9 +185,35 @@ std::string ObjectsRemovedEvent::getName() const {
     return fmt::format("Deleted {} objects", m_objects.size());
 }
 
-ObjectsSelectedEvent ObjectsSelectedEvent::from(std::vector<GameObject*> const& objs, bool selected) {
+std::unique_ptr<EditorEvent> ObjectsRemovedEvent::clone() const {
+    return std::make_unique<ObjectsRemovedEvent>(*this);
+}
+
+void ObjectsRemovedEvent::undo() const {
+    auto _ = Collect();
+    for (auto& obj : m_objects) {
+        LevelEditorLayer::get()->addToSection(obj);
+        LevelEditorLayer::get()->addSpecial(obj);
+        EditorUI::get()->selectObject(obj, true);
+    }
+}
+
+void ObjectsRemovedEvent::redo() const {
+    auto _ = Collect();
+    for (auto& obj : m_objects) {
+        LevelEditorLayer::get()->removeObjectFromSection(obj);
+        LevelEditorLayer::get()->removeSpecial(obj);
+        EditorUI::get()->deselectObject(obj);
+        obj->deactivateObject(true);
+    }
+}
+
+void ObjectsRemovedEvent::merge(ObjectsRemovedEvent const& other) {
+    ranges::push(m_objects, other.m_objects);
+}
+
+ObjectsSelectedEvent ObjectsSelectedEvent::from(std::vector<GameObject*> const& objs) {
     auto ev = ObjectsSelectedEvent();
-    ev.m_selected = selected;
     for (auto& obj : objs) {
         ev.m_objects.push_back(obj);
     }
@@ -143,7 +221,67 @@ ObjectsSelectedEvent ObjectsSelectedEvent::from(std::vector<GameObject*> const& 
 }
 
 std::string ObjectsSelectedEvent::getName() const {
-    return fmt::format("{} {} objects", (m_selected ? "Selected" : "Deselected"), m_objects.size());
+    return fmt::format("Selected {} objects", m_objects.size());
+}
+
+std::unique_ptr<EditorEvent> ObjectsSelectedEvent::clone() const {
+    return std::make_unique<ObjectsSelectedEvent>(*this);
+}
+
+void ObjectsSelectedEvent::undo() const {
+    auto _ = Collect();
+    for (auto& obj : m_objects) {
+        EditorUI::get()->deselectObject(obj);
+    }
+}
+
+void ObjectsSelectedEvent::redo() const {
+    auto _ = Collect();
+    auto arr = EditorUI::get()->getSelectedObjects();
+    for (auto& obj : m_objects) {
+        arr->addObject(obj);
+    }
+    EditorUI::get()->selectObjects(arr, false);
+}
+
+void ObjectsSelectedEvent::merge(ObjectsSelectedEvent const& other) {
+    ranges::push(m_objects, other.m_objects);
+}
+
+ObjectsDeselectedEvent ObjectsDeselectedEvent::from(std::vector<GameObject*> const& objs) {
+    auto ev = ObjectsDeselectedEvent();
+    for (auto& obj : objs) {
+        ev.m_objects.push_back(obj);
+    }
+    return ev;
+}
+
+std::string ObjectsDeselectedEvent::getName() const {
+    return fmt::format("Deselected {} objects", m_objects.size());
+}
+
+std::unique_ptr<EditorEvent> ObjectsDeselectedEvent::clone() const {
+    return std::make_unique<ObjectsDeselectedEvent>(*this);
+}
+
+void ObjectsDeselectedEvent::undo() const {
+    auto _ = Collect();
+    auto arr = EditorUI::get()->getSelectedObjects();
+    for (auto& obj : m_objects) {
+        arr->addObject(obj);
+    }
+    EditorUI::get()->selectObjects(arr, false);
+}
+
+void ObjectsDeselectedEvent::redo() const {
+    auto _ = Collect();
+    for (auto& obj : m_objects) {
+        EditorUI::get()->deselectObject(obj);
+    }
+}
+
+void ObjectsDeselectedEvent::merge(ObjectsDeselectedEvent const& other) {
+    ranges::push(m_objects, other.m_objects);
 }
 
 ObjectsEditedEvent ObjectsEditedEvent::from(std::vector<ObjectKeyMap> const& objs) {
@@ -154,6 +292,26 @@ ObjectsEditedEvent ObjectsEditedEvent::from(std::vector<ObjectKeyMap> const& obj
 
 std::string ObjectsEditedEvent::getName() const {
     return fmt::format("Edited {} objects", m_objects.size());
+}
+
+std::unique_ptr<EditorEvent> ObjectsEditedEvent::clone() const {
+    return std::make_unique<ObjectsEditedEvent>(*this);
+}
+
+void ObjectsEditedEvent::undo() const {
+    auto _ = Collect();
+    for (auto& obj : m_objects) {
+    }
+}
+
+void ObjectsEditedEvent::redo() const {
+    auto _ = Collect();
+    for (auto& obj : m_objects) {
+    }
+}
+
+void ObjectsEditedEvent::merge(ObjectsEditedEvent const& other) {
+    ranges::push(m_objects, other.m_objects);
 }
 
 ListenerResult EditorFilter::handle(utils::MiniFunction<Callback> fn, EditorEvent* event) {

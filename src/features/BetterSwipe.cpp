@@ -513,7 +513,7 @@ class $modify(SelectUI, EditorUI) {
     std::pair<CCArray*, bool> getSwipedObjects(CCTouch* touch, CCEvent* event) {
         auto touchEnd = getTouchPoint(touch, event);
         if (this->isSwiping(touch, event)) {
-            auto _ = BlockAll();
+            auto _ = Collect();
             auto rect = this->getSwipeRect(touch, event);
             CCArray* objs;
             switch (m_fields->select->getTool()) {
@@ -612,7 +612,7 @@ class $modify(SelectUI, EditorUI) {
         auto [objs, filtered] = this->getSwipedObjects(touch, event);
         if (objs) {
             {
-                auto _ = BlockAll();
+                auto _ = Collect();
                 EditorUI::ccTouchEnded(touch, event);
                 this->deselectAll();
             }

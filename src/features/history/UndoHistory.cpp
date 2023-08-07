@@ -127,10 +127,10 @@ bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
     m_bottomMenu->setAnchorPoint({ .0f, .0f });
     m_bottomMenu->setPosition(8.f, 5.f);
 
-    for (auto& detail : event->details()) {
-        auto tag = Tag::create(detail.info, detail.icon);
-        m_bottomMenu->addChild(tag);
-    }
+    // for (auto& detail : event->details()) {
+    //     auto tag = Tag::create(detail.info, detail.icon);
+    //     m_bottomMenu->addChild(tag);
+    // }
 
     m_bottomMenu->setLayout(
         RowLayout::create()
@@ -146,11 +146,11 @@ bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
     m_topMenu->setPosition(0.f, 0.f);
     m_topMenu->setContentSize({ width, 30.f });
 
-    auto icon = event->icon();
-    icon->setPosition({ 20.f, 15.f });
-    m_topMenu->addChild(icon);
+    // auto icon = event->icon();
+    // icon->setPosition({ 20.f, 15.f });
+    // m_topMenu->addChild(icon);
 
-    m_name = CCLabelBMFont::create(event->desc().c_str(), "bigFont.fnt");
+    m_name = CCLabelBMFont::create(event->getName().c_str(), "bigFont.fnt");
     m_name->limitLabelWidth(width - 120.f, .5f, .1f);
     m_name->setAnchorPoint({ .0f, .5f });
     m_name->setPosition(40.f, 15.f);
@@ -169,16 +169,16 @@ bool HistoryNode::init(HistoryPopup* popup, EditorEvent* event, float width) {
     m_undoBtn->setID("undo-button");
     m_topMenu->addChild(m_undoBtn);
 
-    if (event->details().size()) {
-        auto detailsBtnSpr = CCSprite::createWithSpriteFrameName("edit_downBtn_001.png");
-        detailsBtnSpr->setScale(.725f);
-        m_detailsBtn = CCMenuItemSpriteExtra::create(
-            detailsBtnSpr, this, menu_selector(HistoryNode::onDetails)
-        );
-        m_detailsBtn->setPosition(width - 45.f, 15.f);
-        m_detailsBtn->setID("details-button");
-        m_topMenu->addChild(m_detailsBtn);
-    }
+    // if (event->details().size()) {
+    //     auto detailsBtnSpr = CCSprite::createWithSpriteFrameName("edit_downBtn_001.png");
+    //     detailsBtnSpr->setScale(.725f);
+    //     m_detailsBtn = CCMenuItemSpriteExtra::create(
+    //         detailsBtnSpr, this, menu_selector(HistoryNode::onDetails)
+    //     );
+    //     m_detailsBtn->setPosition(width - 45.f, 15.f);
+    //     m_detailsBtn->setID("details-button");
+    //     m_topMenu->addChild(m_detailsBtn);
+    // }
 
     this->addChild(m_topMenu);
     
@@ -329,7 +329,7 @@ HistoryPopup* HistoryPopup::create(History* history) {
 }
 
 void History::onEvent(EditorEvent* ev) {
-    log::info("{}", ev->toDiffString());
+    // log::info("{}", ev->toDiffString());
     // pop undone history
     if (m_undone) {
         m_events.erase(m_events.end() - m_undone, m_events.end());
@@ -338,7 +338,7 @@ void History::onEvent(EditorEvent* ev) {
     if (m_events.size() >= this->getMaxCount()) {
         m_events.erase(m_events.begin());
     }
-    m_events.emplace_back(ev->unique());
+    m_events.emplace_back(ev->clone());
     EditorUI::get()->updateButtons();
 }
 
