@@ -19,31 +19,141 @@
 using namespace geode::prelude;
 using namespace better_edit;
 
-bool EditorEvent::s_blockEvents = false;
+std::vector<GroupedEditorEvent> s_groupCollection = {};
+
+static std::unordered_set<ObjectKey> ALL_KEYS = {};
+
+void better_edit::addObjectKey(int key) {
+    ALL_KEYS.insert(static_cast<ObjectKey>(key));
+}
+
+void better_edit::removeObjectKey(int key) {
+    ALL_KEYS.erase(static_cast<ObjectKey>(key));
+}
+
+StateValue StateValue::from(GameObject* obj, ObjectKey key) {
+    auto res = StateValue();
+    res.key = key;
+    // todo
+}
+
+StateValue::List StateValue::all(GameObject* obj) {
+    auto res = StateValue::List();
+    res.reserve(ALL_KEYS.size());
+    for (auto& key : ALL_KEYS) {
+        res.push_back(StateValue::from(obj, key));
+    }
+    return res;
+}
+
+bool StateValue::operator==(StateValue const& other) const {
+    return other.key == this->key && other.value == this->value;
+}
+
+bool StateValue::operator!=(StateValue const& other) const {
+    return other.key != this->key || other.value != this->value;
+}
 
 ChangedState::ChangedState(
     StateValue const& from,
     StateValue const& to
-) : from(from), to(to) {}
-
-BlockEventsHandle::BlockEventsHandle() {
-    EditorEvent::s_blockEvents = true;
-}
-
-BlockEventsHandle::~BlockEventsHandle() {
-    EditorEvent::s_blockEvents = false;
-}
-
-EditorEvent::EditorEvent(Type const& type) : m_event(type) {}
-
-BlockEventsHandle EditorEvent::block() {
-    return BlockEventsHandle();
-}
-
-void EditorEvent::post(Type const& type) {
-    if (!s_blockEvents) {
-        EditorEvent(type).Event::post();
+) : from(from), to(to) {
+    if (from.value.index() != to.value.index()) {
+        throw std::runtime_error("ChangedState::ChangedState: `from` and `to` types don't match");
     }
+    if (from.key != to.key) {
+        throw std::runtime_error("ChangedState::ChangedState: `from` and `to` keys don't match");
+    }
+}
+
+ObjectKeyMap ObjectKeyMap::from(GameObject* obj, StateValue::List const& previous) {
+    auto map = ObjectKeyMap();
+    map.m_object = obj;
+    for (auto& p : previous) {
+        auto n = StateValue::from(obj, p.key);
+        if (n != p) {
+            map.insert(p.key, { p, n });
+        }
+    }
+    return map;
+}
+
+bool ObjectKeyMap::contains(ObjectKey key) const {
+    for (auto& change : m_changes) {
+        if (change.from.key == key) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ObjectKeyMap::insert(ObjectKey key, ChangedState const& state) {
+    if (!this->contains(key)) {
+        m_changes.push_back(state);
+    }
+}
+
+size_t ObjectKeyMap::size() const {
+    return m_changes.size();
+}
+
+void EditorEvent::post() {
+    if (s_groupCollection.size()) {
+        s_groupCollection.back()->push(*this);
+    } else {
+        Event::post();
+    }
+}
+
+std::string GroupedEditorEvent::getName() const {
+    return m_name;
+}
+
+ObjectsPlacedEvent ObjectsPlacedEvent::from(std::vector<GameObject*> const& objs) {
+    auto ev = ObjectsPlacedEvent();
+    for (auto& obj : objs) {
+        ev.m_objects.push_back({ obj, obj->getPosition() });
+    }
+    return ev;
+}
+
+std::string ObjectsPlacedEvent::getName() const {
+    return fmt::format("Placed {} objects", m_objects.size());
+}
+
+ObjectsRemovedEvent ObjectsRemovedEvent::from(std::vector<GameObject*> const& objs) {
+    auto ev = ObjectsRemovedEvent();
+    for (auto& obj : objs) {
+        ev.m_objects.push_back(obj);
+    }
+    return ev;
+}
+
+std::string ObjectsRemovedEvent::getName() const {
+    return fmt::format("Deleted {} objects", m_objects.size());
+}
+
+ObjectsSelectedEvent ObjectsSelectedEvent::from(std::vector<GameObject*> const& objs, bool selected) {
+    auto ev = ObjectsSelectedEvent();
+    ev.m_selected = selected;
+    for (auto& obj : objs) {
+        ev.m_objects.push_back(obj);
+    }
+    return ev;
+}
+
+std::string ObjectsSelectedEvent::getName() const {
+    return fmt::format("{} {} objects", (m_selected ? "Selected" : "Deselected"), m_objects.size());
+}
+
+ObjectsEditedEvent ObjectsEditedEvent::from(std::vector<ObjectKeyMap> const& objs) {
+    auto ev = ObjectsEditedEvent();
+    ev.m_objects = objs;
+    return ev;
+}
+
+std::string ObjectsEditedEvent::getName() const {
+    return fmt::format("Edited {} objects", m_objects.size());
 }
 
 ListenerResult EditorFilter::handle(utils::MiniFunction<Callback> fn, EditorEvent* event) {

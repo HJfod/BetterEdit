@@ -24,26 +24,41 @@ using namespace better_edit;
 
 static int TRACKING_HOOK_PRIORITY = 999;
 
+template <class F>
+void detectEdits(F func, GameObject* target, CCArray* targets) {
+    std::vector<StateValue::List> states;
+    for (auto& obj : iterTargets(target, targets)) {
+        states.push_back(StateValue::all(obj));
+    }
+    func(target, targets);
+    size_t i = 0;
+    std::vector<ObjectKeyMap> res;
+    for (auto& obj : iterTargets(target, targets)) {
+        res.push_back(ObjectKeyMap::from(obj, states.at(i++)));
+    }
+    ObjectsEditedEvent::from(res).post();
+}
+
 class $modify(EditorPauseLayer) {
     void saveLevel() {
-        auto _ = EditorEvent::block();
+        auto _ = Collect();
         EditorPauseLayer::saveLevel();
     }
 
     void onSaveAndPlay(CCObject* sender) {
-        auto _ = EditorEvent::block();
+        auto _ = Collect();
         EditorPauseLayer::onSaveAndPlay(sender);
     }
 
     void onExitEditor(CCObject* sender) {
-        auto _ = EditorEvent::block();
+        auto _ = Collect();
         EditorPauseLayer::onExitEditor(sender);
     }
 };
 
 class $modify(PlayLayer) {
     bool init(GJGameLevel* level) {
-        auto _ = EditorEvent::block();
+        auto _ = Collect();
         return PlayLayer::init(level);
     }
 };
@@ -60,82 +75,47 @@ class $modify(LevelEditorLayer) {
 
     void addSpecial(GameObject* obj) {
         {
-            auto _ = EditorEvent::block();
+            auto _ = Collect();
             LevelEditorLayer::addSpecial(obj);
         }
-        EditorEvent::post(EditorEvent::ObjectPlaced { obj, obj->getPosition() });
+        ObjectsPlacedEvent::from({ obj }).post();
     }
 
     CCArray* createObjectsFromString(gd::string str, bool undo) {
         CCArray* objs;
         {
-            auto _ = EditorEvent::block();
+            auto _ = Collect();
             objs = LevelEditorLayer::createObjectsFromString(str, undo);
         }
-        std::vector<EditorEvent::ObjectPlaced> events = {};
-        for (auto& obj : CCArrayExt<GameObject>(objs)) {
-            events.push_back(EditorEvent::ObjectPlaced { obj, obj->getPosition() });
-        }
-        EditorEvent::post(events);
+        ObjectsPlacedEvent::from(ccArrayToVector<GameObject*>(objs)).post();
         return objs;
     }
 
     void createObjectsFromSetup(gd::string str) {
-        auto _ = EditorEvent::block();
+        auto _ = Collect();
         LevelEditorLayer::createObjectsFromSetup(str);
     }
 
     void removeSpecial(GameObject* obj) {
         {
-            auto _ = EditorEvent::block();
+            auto _ = Collect();
             LevelEditorLayer::removeSpecial(obj);
         }
-        EditorEvent::post(EditorEvent::ObjectRemoved { obj });
+        ObjectsRemovedEvent::from({ obj }).post();
     }
 
     void pasteAtributeState(GameObject* target, CCArray* targets) {
-        std::vector<ObjState> states;
-        for (auto& obj : iterTargets(target, targets)) {
-            states.push_back(ObjState::from(obj));
-        }
-        LevelEditorLayer::pasteAtributeState(target, targets);
-        size_t i = 0;
-        auto bubble = Bubble<ObjPropsChanged>();
-        for (auto& obj : iterTargets(target, targets)) {
-            Bubble<ObjPropsChanged>::push(obj, Transform { states.at(i++), ObjState::from(obj) });
-        }
+        detectEdits(LevelEditorLayer::pasteAtributeState, target, targets);
     }
 
     void pasteColorState(GameObject* target, CCArray* targets) {
-        std::vector<ObjColorState> olds;
-        for (auto& obj : iterTargets(target, targets)) {
-            olds.push_back(ObjColorState::from(obj));
-        }
-        LevelEditorLayer::pasteColorState(target, targets);
-        auto bubble = Bubble<ObjColored>();
-        size_t i = 0;
-        for (auto& obj : iterTargets(target, targets)) {
-            Bubble<ObjColored>::push(
-                obj, Transform { olds.at(i++), ObjColorState::from(obj) }
-            );
-        }
+        detectEdits(LevelEditorLayer::pasteColorState, target, targets);
     }
-};
-
-struct FreeMoveData {
-    CCPoint pos;
-    float angle;
-    float scale;
-    bool flipX;
-    bool flipY;
 };
 
 class $modify(EditorUI) {
     std::vector<std::pair<CCPoint, float>> originalScales;
-    std::vector<FreeMoveData> freeMoveStart;
-    bool freeMoveFlippedX;
-    bool freeMoveFlippedY;
-    std::unique_ptr<Bubble<ObjTransformed>> freeMoveBubble;
+    std::vector<StateValue> freeMoveStart;
 
     static void onModify(auto& self) {
         (void)self.setHookPriority("EditorUI::onDuplicate", TRACKING_HOOK_PRIORITY);
@@ -163,43 +143,35 @@ class $modify(EditorUI) {
     }
 
     void onDuplicate(CCObject* sender) {
-        std::vector<GameObject*> src;
-        for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
-            src.push_back(obj);
-        }
-        BLOCKED_CALL(EditorUI::onDuplicate(sender));
-        auto bubble = Bubble<ObjPasted>();
-        size_t i = 0;
-        for (auto obj : iterTargets(m_selectedObject, m_selectedObjects)) {
-            Bubble<ObjPasted>::push(obj, src.at(i++));
-        }
+        auto c = Collect("Copied Objects");
+        EditorUI::onDuplicate(sender);
+        c.post();
     }
 
     bool onCreate() {
-        auto b1 = Bubble<ObjSelected>();
-        auto b2 = Bubble<ObjDeselected>();
-        auto b = EditorUI::onCreate();
-        b1.cancel();
-        b2.cancel();
-        return b;
+        // block selection events
+        auto _ = Collect<ObjectsSelectedEvent>();
+        return EditorUI::onCreate();
     }
 
     void onDelete(CCObject* sender) {
-        auto b2 = Bubble<ObjDeselected>();
+        auto _ = Collect<ObjectsSelectedEvent>();
         EditorUI::onDelete(sender);
-        b2.cancel();
     }
 
     void onDeleteSelected(CCObject* sender) {
-        auto bubble1 = Bubble<ObjRemoved>();
-        auto bubble2 = Bubble<ObjDeselected>();
+        auto _ = Collect<ObjectsSelectedEvent>();
+        auto c = Collect<ObjectsRemovedEvent>();
         EditorUI::onDeleteSelected(sender);
-        bubble2.cancel();
+        c.post();
     }
 
     void deleteObject(GameObject* obj, bool filter) {
-        BLOCKED_CALL(EditorUI::deleteObject(obj, filter));
-        Bubble<ObjRemoved>::push(obj);
+        {
+            auto _ = Collect();
+            EditorUI::deleteObject(obj, filter);
+        }
+        ObjectsRemovedEvent::from({ obj }).post();
     }
 
     void moveObject(GameObject* obj, CCPoint to) {
