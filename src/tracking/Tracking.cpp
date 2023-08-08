@@ -33,16 +33,20 @@ void better_edit::removeObjectKey(int key) {
 
 StateValue StateValue::from(GameObject* obj, ObjectKey key) {
     auto res = StateValue();
-    res.key = key;
+    res.m_key = key;
     // todo
 }
 
 void StateValue::assign(GameObject* obj) const {
-    switch (this->key) {
+    switch (m_key) {
         case ObjectKey::X: {
             
         } break;
     }
+}
+
+ObjectKey StateValue::getKey() const {
+    return m_key;
 }
 
 StateValue::List StateValue::all(GameObject* obj) {
@@ -55,22 +59,23 @@ StateValue::List StateValue::all(GameObject* obj) {
 }
 
 bool StateValue::operator==(StateValue const& other) const {
-    return other.key == this->key && other.value == this->value;
+    return other.m_key == m_key && other.m_value == m_value;
 }
 
 bool StateValue::operator!=(StateValue const& other) const {
-    return other.key != this->key || other.value != this->value;
+    return other.m_key != m_key || other.m_value != m_value;
+}
+
+bool StateValue::isSameState(StateValue const& other) const {
+    return other.m_key == m_key && other.m_value.index() == m_value.index();
 }
 
 ChangedState::ChangedState(
     StateValue const& from,
     StateValue const& to
 ) : from(from), to(to) {
-    if (from.value.index() != to.value.index()) {
-        throw std::runtime_error("ChangedState::ChangedState: `from` and `to` types don't match");
-    }
-    if (from.key != to.key) {
-        throw std::runtime_error("ChangedState::ChangedState: `from` and `to` keys don't match");
+    if (from.isSameState(to)) {
+        throw std::runtime_error("ChangedState::ChangedState: `from` and `to` don't refer to the same state");
     }
 }
 
@@ -78,9 +83,9 @@ ObjectKeyMap ObjectKeyMap::from(GameObject* obj, StateValue::List const& previou
     auto map = ObjectKeyMap();
     map.m_object = obj;
     for (auto& p : previous) {
-        auto n = StateValue::from(obj, p.key);
+        auto n = StateValue::from(obj, p.getKey());
         if (n != p) {
-            map.insert(p.key, { p, n });
+            map.insert(p.getKey(), { p, n });
         }
     }
     return map;
@@ -88,7 +93,7 @@ ObjectKeyMap ObjectKeyMap::from(GameObject* obj, StateValue::List const& previou
 
 bool ObjectKeyMap::contains(ObjectKey key) const {
     for (auto& change : m_changes) {
-        if (change.from.key == key) {
+        if (change.from.getKey() == key) {
             return true;
         }
     }
@@ -107,18 +112,30 @@ size_t ObjectKeyMap::size() const {
 
 void EditorEvent::post() {
     if (s_groupCollection.size()) {
-        s_groupCollection.back()->push(*this);
+        s_groupCollection.back()->push(this);
     } else {
         Event::post();
     }
+}
+
+GroupedEditorEvent GroupedEditorEvent::from(
+    std::vector<ClonedPtr<EditorEvent>> const& events,
+    std::string const& name
+) {
+    auto ret = GroupedEditorEvent();
+    ret.m_name = name;
+    for (auto& ev : events) {
+        ret.m_events.push_back(ev);
+    }
+    return ret;
 }
 
 std::string GroupedEditorEvent::getName() const {
     return m_name;
 }
 
-std::unique_ptr<EditorEvent> GroupedEditorEvent::clone() const {
-    return std::make_unique<GroupedEditorEvent>(*this);
+EditorEvent* GroupedEditorEvent::clone() const {
+    return new GroupedEditorEvent(*this);
 }
 
 void GroupedEditorEvent::undo() const {
@@ -145,8 +162,8 @@ std::string ObjectsPlacedEvent::getName() const {
     return fmt::format("Placed {} objects", m_objects.size());
 }
 
-std::unique_ptr<EditorEvent> ObjectsPlacedEvent::clone() const {
-    return std::make_unique<ObjectsPlacedEvent>(*this);
+EditorEvent* ObjectsPlacedEvent::clone() const {
+    return new ObjectsPlacedEvent(*this);
 }
 
 void ObjectsPlacedEvent::undo() const {
@@ -185,8 +202,8 @@ std::string ObjectsRemovedEvent::getName() const {
     return fmt::format("Deleted {} objects", m_objects.size());
 }
 
-std::unique_ptr<EditorEvent> ObjectsRemovedEvent::clone() const {
-    return std::make_unique<ObjectsRemovedEvent>(*this);
+EditorEvent* ObjectsRemovedEvent::clone() const {
+    return new ObjectsRemovedEvent(*this);
 }
 
 void ObjectsRemovedEvent::undo() const {
@@ -224,8 +241,8 @@ std::string ObjectsSelectedEvent::getName() const {
     return fmt::format("Selected {} objects", m_objects.size());
 }
 
-std::unique_ptr<EditorEvent> ObjectsSelectedEvent::clone() const {
-    return std::make_unique<ObjectsSelectedEvent>(*this);
+EditorEvent* ObjectsSelectedEvent::clone() const {
+    return new ObjectsSelectedEvent(*this);
 }
 
 void ObjectsSelectedEvent::undo() const {
@@ -260,8 +277,8 @@ std::string ObjectsDeselectedEvent::getName() const {
     return fmt::format("Deselected {} objects", m_objects.size());
 }
 
-std::unique_ptr<EditorEvent> ObjectsDeselectedEvent::clone() const {
-    return std::make_unique<ObjectsDeselectedEvent>(*this);
+EditorEvent* ObjectsDeselectedEvent::clone() const {
+    return new ObjectsDeselectedEvent(*this);
 }
 
 void ObjectsDeselectedEvent::undo() const {
@@ -294,8 +311,8 @@ std::string ObjectsEditedEvent::getName() const {
     return fmt::format("Edited {} objects", m_objects.size());
 }
 
-std::unique_ptr<EditorEvent> ObjectsEditedEvent::clone() const {
-    return std::make_unique<ObjectsEditedEvent>(*this);
+EditorEvent* ObjectsEditedEvent::clone() const {
+    return new ObjectsEditedEvent(*this);
 }
 
 void ObjectsEditedEvent::undo() const {
