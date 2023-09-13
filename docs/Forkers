@@ -1,0 +1,39 @@
+# A lot of the ideas I had for BE 5
+
+This is an unorganized dump of many of the ideas I had for BE 5. Any contributors / forkers are free to implement these.
+
+## Quick Trigger Input
+
+When you select a trigger, opens a bunch of little inputs above it for quickly changing things like target ID, move amount, etc.. Also includes being able to adjust duration by dragging a handle at the end of the duration line
+
+## Git
+
+Actually really simple: with undo history, be able to start new branches and merge into the original. Would make megacollabs way easier by letting people start another branch, work on it to add their part, and then auto-merge
+
+## Soft saving but good
+
+Just dump new tracking events into a file.
+
+## Individual saving
+
+Save levels as individual .gmd files instead of CCLocalLevels. This requires assigning each level an unique ID, but you can just use Geode `CCNode::setID` for this since `GJGameLevel` inherits `CCNode` lol. Then just load the ID from disk or generate a new one based on the name (add number on the end if same name already exists or smth).
+
+```
+%localappdata%/GeometryDash/
+    levels/
+        SomeUniqueID/
+            data.gmd
+        Other/
+            data.gmd
+        ...
+```
+
+## Backups
+
+For this to work, you need to first impl individual saving. Then just add a `backups` dir to the level dir and dump `.gmd` files there
+
+## Rotate trigger warning label if center Group ID has more than one object
+
+.
+
+todo more
