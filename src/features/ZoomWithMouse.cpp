@@ -1,5 +1,5 @@
 #include <Geode/Bindings.hpp>
-#include <Geode/Modify.hpp>
+#include <Geode/modify/EditorUI.hpp>
 #include <Geode/Loader.hpp>
 #include <numbers>
 
@@ -34,15 +34,14 @@ class $modify(EditorUI) {
 
             this->updateZoom(zoom);
 
-        #ifdef GEODE_IS_WINDOWS
-            // move screen toward mouse
+            // move screen toward mouse (WIP)
             if (Mod::get()->getSettingValue<bool>("mouse-move-on-zoom")) {
                 auto winSize = CCDirector::get()->getWinSize();
                 auto winSizePx = CCDirector::get()->getOpenGLView()->getViewPortRect();
 
                 auto ratioW = winSize.width  / winSizePx.size.width;
                 auto ratioH = winSize.height / winSizePx.size.height;
-                auto mpos = CCDirector::get()->getOpenGLView()->getMousePosition();
+                auto mpos = geode::cocos::getMousePos();
 
                 // the mouse position is stored from the top-.left while cocos 
                 // coordinates are from the bottom-left
@@ -64,7 +63,6 @@ class $modify(EditorUI) {
                 );
                 this->constrainGameLayerPosition();
             }
-        #endif
 
             // ground width is not automatically updated
             m_editorLayer->m_groundLayer->updateGroundWidth();
@@ -79,10 +77,14 @@ class $modify(EditorUI) {
                     objLayer->getPositionX() - y * mult
                 );
             }
-            // otherwise move vertically as is vanilla
+            // otherwise move as is in vanilla
             else {
                 objLayer->setPositionY(
                     objLayer->getPositionY() + y * mult
+                );
+                // add support for the horizontal trackpad scrolling on mac
+                objLayer->setPositionX(
+                    objLayer->getPositionX() + x * mult
                 );
             }
 
