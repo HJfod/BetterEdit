@@ -6,7 +6,7 @@ using namespace geode::prelude;
 std::string clip;
 
 struct DeleteClipboard {
-    void warning() {
+    void warning(CCObject*) {
         geode::createQuickPopup(
             "Warning",
             "Are you sure you would like to delete your copied objects?",
@@ -30,7 +30,10 @@ class $modify(EditorUI) {
 
         this->updateButtons();
 
-        auto ref = this->getChildByID("editor-buttons-menu")->getChildByID("paste-button");
+        /*
+            TODO: put the clear button somewhere normal
+        */
+        /*auto ref = this->getChildByID("editor-buttons-menu")->getChildByID("paste-button");
         auto spr = CircleButtonSprite::createWithSpriteFrameName("GJ_deleteIcon_001.png");
 
         auto menu = CCMenu::create();
@@ -41,12 +44,12 @@ class $modify(EditorUI) {
         deleteBtn->m_baseScale = .375f;
         deleteBtn->setID("clear-paste-button"_spr);
         menu->addChild(deleteBtn);
-        this->getChildByID("editor-buttons-menu")->addChild(menu);
+        this->getChildByID("editor-buttons-menu")->addChild(menu);*/
 
         return true;
     }
 
-    void destructor() {
+    void destructor() { // can crash randomly cuz geode can't seem to hook destructors properly?
         clip = m_clipboard;
 
         EditorUI::~EditorUI();

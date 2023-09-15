@@ -44,12 +44,14 @@ public:
             m_target->selectObject(m_start * time + m_color * it);
         }
     }
-    virtual void isDone() override {
-        CCActionInterval::isDone();
+    virtual bool isDone() override {
+        auto ret = CCActionInterval::isDone();
         if (m_target) {
             m_target->selectObject({255, 255, 255});
-            m_target->m_bIsSelected = false;
+            m_target->m_isSelected = false;
         }
+
+        return ret;
     }
     static auto create(float d, const ccColor3B dest) {
         auto ret = new ObjectPulseAction;
@@ -65,13 +67,15 @@ class $modify(EffectGameObject) {
     void triggerObject(GJBaseGameLayer* layer) {
         EffectGameObject::triggerObject(layer);
 
+        // TODO: make it an option (and work)
+
         constexpr int TAG = 400123;
-        // this doesnt even work properly, i hate cocos
-        if (auto action = self->getActionByTag(TAG)) {
-            self->stopAction(action);
+
+        if (auto action = getActionByTag(TAG)) {
+            stopAction(action);
         }
         auto action = ObjectPulseAction::create(.3f, {255, 0, 0});
         action->setTag(TAG);
-        self->runAction(action);
+        runAction(action);
     }
 };

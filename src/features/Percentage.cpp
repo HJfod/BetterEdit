@@ -57,7 +57,12 @@ class $modify(SliderUI, EditorUI) {
             m_positionSlider->addChild(perLabel);
         }   
         auto thumbPos = m_positionSlider->m_touchLogic->m_thumb->getPosition();
-        perLabel->setString(fmt::format(Mod::get()->getSettingValue<bool>("use-time-for-percentage") ? "{:.0f} sec" : "{:.0f}%", calcPercentage()).c_str());
+
+        // C++20 doesn't allow dynamic format str
+        //perLabel->setString(fmt::format(Mod::get()->getSettingValue<bool>("use-time-for-percentage") ? "{:.0f} sec" : "{:.0f}%", calcPercentage()).c_str());
+        auto percStr = Mod::get()->getSettingValue<bool>("use-time-for-percentage") ? fmt::format("{:.0f} sec", calcPercentage()) : fmt::format("{:.0f}%", calcPercentage());
+        perLabel->setString(percStr.c_str());
+
         perLabel->setPosition(thumbPos.x, thumbPos.y - 25.f);
         perLabel->setOpacity(255);
         perLabel->stopAllActions();
@@ -84,9 +89,9 @@ class $modify(SliderUI, EditorUI) {
         if (max == 0.f) return 0.f;
         auto winSize = CCDirector::get()->getWinSize();
         auto pos = m_editorLayer->m_objectLayer->convertToNodeSpace(winSize / 2);
-
+        
         if (Mod::get()->getSettingValue<bool>("use-time-for-percentage"))
-            return LevelTools::timeForXPos(pos.x, CCArray::create(), 1);
+            return m_editorLayer->timeForXPos(pos.x);
 
         return pos.x / max * 100;
     }

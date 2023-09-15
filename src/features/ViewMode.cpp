@@ -5,7 +5,7 @@ using namespace geode::prelude;
 
 static constexpr const int ZOOMLABEL_TAG = 6976;
 
-class $modify(EditorUI) {
+/*class $modify(EditorUI) {
     bool init(LevelEditorLayer* lel) {
         if (EditorUI::init(lel)) return false;
 
@@ -24,7 +24,7 @@ class $modify(EditorUI) {
 
         toggleBtn = CCMenuItemSpriteExtra::create()
 
-        this->m_pSwipeBtn->getParent()->addChild(
+        this->m_swipeBtn->getParent()->addChild(
             CCNodeConstructor<CCMenuItemSpriteExtra*>()
                 .fromNode(
                     CCMenuItemSpriteExtra::create(
@@ -77,4 +77,4 @@ class $modify(EditorUI) {
             this->showUI(false);
         }
     }
-}
+};*/
