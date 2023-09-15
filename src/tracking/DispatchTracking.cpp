@@ -530,7 +530,7 @@ class $modify(SetGroupIDLayer) {
     bool init(GameObject* obj, CCArray* objs) {
         if (!SetGroupIDLayer::init(obj, objs))
             return false;
-        
+
         if (obj) {
             m_fields->states = { ObjState::from(obj) }; 
         }
@@ -546,7 +546,6 @@ class $modify(SetGroupIDLayer) {
     }
 
     void onClose(CCObject* sender) {
-        SetGroupIDLayer::onClose(sender);
         auto bubble = Bubble<ObjPropsChanged>();
         size_t i = 0;
         for (auto obj : iterTargets(m_targetObject, m_targetObjects)) {
@@ -558,6 +557,7 @@ class $modify(SetGroupIDLayer) {
             }
             i += 1;
         }
+        SetGroupIDLayer::onClose(sender);
     }
 };
 

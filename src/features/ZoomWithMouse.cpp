@@ -43,13 +43,6 @@ class $modify(EditorUI) {
                 auto ratioH = winSize.height / winSizePx.size.height;
                 auto mpos = geode::cocos::getMousePos();
 
-                // the mouse position is stored from the top-.left while cocos 
-                // coordinates are from the bottom-left
-                mpos.y = winSizePx.size.height - mpos.y;
-
-                mpos.x *= ratioW;
-                mpos.y *= ratioH;
-
                 // relative to window centre
                 mpos = mpos - winSize / 2;
 
@@ -61,6 +54,7 @@ class $modify(EditorUI) {
                 objLayer->setPosition(
                     objLayer->getPosition() - mpos / std::max(zoom, 5.f)
                 );
+
                 this->constrainGameLayerPosition();
             }
 
@@ -83,9 +77,12 @@ class $modify(EditorUI) {
                     objLayer->getPositionY() + y * mult
                 );
                 // add support for the horizontal trackpad scrolling on mac
+                // causes the editor to move sideways when scrolling on windows
+                #ifdef GEODE_IS_MACOS
                 objLayer->setPositionX(
                     objLayer->getPositionX() + x * mult
                 );
+                #endif
             }
 
             // call original but make it not do anything other than update 
