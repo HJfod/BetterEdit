@@ -1,3 +1,10 @@
+# v5.0.0-alpha.8
+
+ - Add Global Clipboard
+ - Add Clear Clipboard
+ - Fix trackpad horizontal scrolling on Mac
+ - Add Use time instead of Percentage 
+
 # v5.0.0-alpha.7
 
  - Add customizable keybinds support through Custom Keybinds dependency

@@ -13,6 +13,18 @@
 			"name": "Zoom Towards Cursor",
 			"description": "When enabled, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen. Not currently supported on MacOS"
 		},
+		"rotate-saws-in-editor": {
+			"type": "bool",
+			"default": true,
+			"name": "Rotate Saws in Editor",
+			"description": "When enabled, saws will rotate while playtesting in the editor"
+		},
+		"enable-global-clipboard": {
+			"type": "bool",
+			"default": true,
+			"name": "Global Clipboard",
+			"description": "When enabled, keeps copied objects when switching levels"
+		},
 		"show-zoom-text": {
 			"type": "bool",
 			"default": true,
@@ -24,6 +36,12 @@
 			"default": true,
 			"name": "Show Percentage",
 			"description": "When enabled, flashes the current percentage in the position slider when you move around the editor"
+		},
+		"use-time-for-percentage": {
+			"type": "bool",
+			"default": true,
+			"name": "Use Time instead of Percentage",
+			"description": "When enabled along with Show Percentage, shows the current level time in the editor instead of the percentage."
 		},
 		"enable-new-undo": {
 			"type": "bool",
