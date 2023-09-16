@@ -328,7 +328,7 @@ HistoryPopup* HistoryPopup::create(History* history) {
 }
 
 void History::onEvent(EditorEvent* ev) {
-    log::info("{}", ev->toDiffString());
+    //log::info("{}", ev->toDiffString());
     // pop undone history
     if (m_undone) {
         m_events.erase(m_events.end() - m_undone, m_events.end());

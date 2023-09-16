@@ -6,8 +6,13 @@
 #include <Geode/utils/cocos.hpp>
 #include <hjfod.custom-keybinds/include/Keybinds.hpp>
 
+#include "VisibilityToggle.hpp"
+#include "RotateSaws.hpp"
+
 using namespace geode::prelude;
 using namespace keybinds;
+
+constexpr const int VIEWBUTTONBAR_TAG = 0x234592;
 
 struct $modify(EditorUI) {
     CCNode* viewModeBtn;
@@ -53,18 +58,51 @@ struct $modify(EditorUI) {
             return ListenerResult::Propagate;
         }, "view-mode"_spr);
 
+        /*
+            Create buttons
+        */
+        auto btns = CCArray::create();
+
+        btns->addObject(VisibilityToggle::create(
+            "tab-view.png"_spr,
+            []() -> bool {
+                return shouldRotateSaw();
+            },
+            [&](bool s, auto p) -> void {
+                onRotateSaws(p);
+            }
+        ));
+
+        auto buttonBar = EditButtonBar::create(
+            btns,
+            { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f },
+            m_tabsArray->count(), false,
+            GameManager::sharedState()->getIntGameVariable("0049"),
+            GameManager::sharedState()->getIntGameVariable("0050")
+        );
+        buttonBar->setTag(VIEWBUTTONBAR_TAG);
+        buttonBar->setVisible(m_selectedTab == 4);
+
+        addChild(buttonBar, 10);
+
         return true;
     }
 
     void showUI(bool show) {
         EditorUI::showUI(show);
         m_fields->viewModeBtn->setVisible(show);
+        showVisibilityTab(show);
     }
 
     void toggleMode(CCObject* sender) {
         EditorUI::toggleMode(sender);
         this->resetUI();
         this->updateModeSprites();
+
+        auto viewBtnBar = getChildByTag(VIEWBUTTONBAR_TAG);
+
+        if(viewBtnBar != nullptr)
+            viewBtnBar->setVisible(m_selectedMode == 4);
     }
 
     void updateModeSprite(CCNode* node, int tag, const char* spr) {
@@ -93,6 +131,30 @@ struct $modify(EditorUI) {
         this->updateModeSprite(m_deleteModeBtn, 1, "tab-delete.png"_spr);
         this->updateModeSprite(m_editModeBtn, 3, "tab-edit.png"_spr);
         this->updateModeSprite(m_fields->viewModeBtn, 4, "tab-view.png"_spr);
+    }
+
+    void showVisibilityTab(bool show) {
+        typeinfo_cast<EditButtonBar*>(getChildByTag(VIEWBUTTONBAR_TAG))
+            ->setVisible(show && m_selectedMode == 4);
+
+        m_buildModeBtn->getParent()->getChildByTag(4)
+            ->setVisible(show);
+    }
+
+    void updateVisibilityTab() {
+        //if (BetterEdit::getDisableVisibilityTab())
+        //    return;
+        
+        auto bbar = as<EditButtonBar*>(getChildByTag(VIEWBUTTONBAR_TAG));
+
+        if (!bbar) return;
+        
+        bbar->reloadItemsInNormalSize();
+        
+        CCObject* btn;
+        CCARRAY_FOREACH(bbar->m_buttonArray, btn) {
+            typeinfo_cast<VisibilityToggle*>(btn)->updateState();
+        }
     }
 };
 

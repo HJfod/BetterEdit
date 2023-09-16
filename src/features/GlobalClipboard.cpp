@@ -1,5 +1,8 @@
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/GameManager.hpp>
+
+#include <other/BEShared.hpp>
 
 using namespace geode::prelude;
 
@@ -49,9 +52,12 @@ class $modify(EditorUI) {
         return true;
     }
 
-    void destructor() { // can crash randomly cuz geode can't seem to hook destructors properly?
-        clip = m_clipboard;
-
-        EditorUI::~EditorUI();
-    }
+    // void destructor() { // can crash randomly cuz geode can't seem to hook destructors properly?
+    //     clip = m_clipboard;
+    //     EditorUI::~EditorUI();
+    // }
 };
+
+BE_EDITOREXIT() {
+    clip = EditorUI::get()->m_clipboard;
+}

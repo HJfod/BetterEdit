@@ -91,7 +91,7 @@ class $modify(SliderUI, EditorUI) {
         auto pos = m_editorLayer->m_objectLayer->convertToNodeSpace(winSize / 2);
         
         if (Mod::get()->getSettingValue<bool>("use-time-for-percentage"))
-            return m_editorLayer->timeForXPos(pos.x);
+            return m_editorLayer->timeForXPos(pos.x); // it's void in the bindings lol change it to float
 
         return pos.x / max * 100;
     }

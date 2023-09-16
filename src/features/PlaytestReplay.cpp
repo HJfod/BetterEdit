@@ -4,6 +4,8 @@
 #include <Geode/binding/PlayerObject.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 
+#include <other/BEShared.hpp>
+
 using namespace geode::prelude;
 
 struct ButtonPushed {
@@ -142,12 +144,12 @@ struct $modify(ReplayUI, EditorUI) {
 };
 
 struct $modify(LevelEditorLayer) {
-    void destructor() {
-        LevelEditorLayer::~LevelEditorLayer();
-        RECORDED_DATA.clear();
-        REPLAY_INDEX = 0;
-        RECORDING = Replay::None;
-    }
+    // void destructor() {
+    //     LevelEditorLayer::~LevelEditorLayer();
+    //     RECORDED_DATA.clear();
+    //     REPLAY_INDEX = 0;
+    //     RECORDING = Replay::None;
+    // }
 
     void update(float dt) {
         LevelEditorLayer::update(dt);
@@ -167,3 +169,9 @@ struct $modify(LevelEditorLayer) {
         }
     }
 };
+
+BE_EDITOREXIT() {
+    RECORDED_DATA.clear();
+    REPLAY_INDEX = 0;
+    RECORDING = Replay::None;
+}

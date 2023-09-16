@@ -7,6 +7,7 @@
 #include <Geode/modify/GameObject.hpp>
 #include <MoreTabs.hpp>
 #include <other/Utils.hpp>
+#include <other/BEShared.hpp>
 #undef min
 #undef max
 
@@ -178,10 +179,10 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
         }
     }
 
-    void destructor() {
-        PlaytestHerePopup::hide();
-        LevelEditorLayer::~LevelEditorLayer();
-    }
+    // void destructor() {
+    //     PlaytestHerePopup::hide();
+    //     LevelEditorLayer::~LevelEditorLayer();
+    // }
 
     void handleAction(bool idk, CCArray* idk2) {
         LevelEditorLayer::handleAction(idk, idk2);
@@ -215,6 +216,10 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
         }
     }
 };
+
+BE_EDITOREXIT() {
+    PlaytestHerePopup::hide();
+}
 
 void PlaytestHerePopup::onPlaytest(CCObject*) {
     this->select();

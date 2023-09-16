@@ -37,16 +37,13 @@ public:
             m_target = nullptr;
         }
     }
-    virtual void step(float time) {
-        CCActionInterval::step(time);
-        if (m_target) {
-            const float it = 1.f - time;
-            m_target->selectObject(m_start * time + m_color * it);
-        }
+    virtual void update(float time) {
+        const float it = 1.f - time;
+        m_target->selectObject(m_start * time + m_color * it);
     }
     virtual bool isDone() override {
         auto ret = CCActionInterval::isDone();
-        if (m_target) {
+        if (m_target && ret) {
             m_target->selectObject({255, 255, 255});
             m_target->m_isSelected = false;
         }
@@ -67,7 +64,7 @@ class $modify(EffectGameObject) {
     void triggerObject(GJBaseGameLayer* layer) {
         EffectGameObject::triggerObject(layer);
 
-        // TODO: make it an option (and work)
+        // TODO: make it an option in the edit tab
 
         constexpr int TAG = 400123;
 

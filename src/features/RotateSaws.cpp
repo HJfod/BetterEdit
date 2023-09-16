@@ -53,12 +53,12 @@ void beginRotateSaw(GameObject* obj) {
     CCAction* r;
     switch (obj->m_objectID) {
         // the big invisible saw, for some reason
-        case 0xba: r = obj->runAction(CCRotateBy::create(300.0f, 0)); break;
+        case 0xba: r = obj->createRotateAction(300.0f, 0); break;
         // the big reaper saw
-        case 0x653: r = obj->runAction(CCRotateBy::create(720.0f, -1)); break;
+        case 0x653: r = obj->createRotateAction(720.0f, -1); break;
         // the small reaper saw
-        case 0x654: r = obj->runAction(CCRotateBy::create(1080.0f, -1)); break;
-        default: r = obj->runAction(CCRotateBy::create(360.0f, 0)); break;
+        case 0x654: r = obj->createRotateAction(1080.0f, -1); break;
+        default: r = obj->createRotateAction(360.0f, 0); break;
     }
     r->setTag(ROTATEACTION_TAG);
     g_startRotations[obj] = obj->getRotation();
@@ -70,8 +70,7 @@ void beginRotateSaw(GameObject* obj) {
 void beginRotations(LevelEditorLayer* self) {
     for (auto obj : CCArrayExt<GameObject*>(self->m_objects)) {
         if (objectIsSaw(obj))
-            if (obj->m_myAction)
-                beginRotateSaw(obj);
+            beginRotateSaw(obj);
     }
 }
 
@@ -89,8 +88,7 @@ void stopRotateSaw(GameObject* obj) {
 void stopRotations(LevelEditorLayer* self) {
     for (auto obj : CCArrayExt<GameObject*>(self->m_objects)) {
         if (objectIsSaw(obj))
-            if (obj->m_myAction)
-                stopRotateSaw(obj);
+            stopRotateSaw(obj);
     }
 
     g_startRotations.clear();
@@ -111,7 +109,23 @@ void pauseRotations(LevelEditorLayer* self) {
                 obj->stopActionByTag(ROTATEACTION_TAG);
     }
 }
-/*
+
+void onRotateSaws(CCObject* pSender) {
+    bool toggled = !typeinfo_cast<CCMenuItemToggler*>(pSender)->isToggled();
+
+    geode::Mod::get()->setSettingValue<bool>("rotate-saws-in-editor", toggled);
+
+    if(toggled)  
+        beginRotations(LevelEditorLayer::get());
+
+    else 
+        stopRotations(LevelEditorLayer::get());
+}
+
+bool shouldRotateSaw() {
+    return Mod::get()->getSettingValue<bool>("rotate-saws-in-editor");
+}
+
 class $modify(LevelEditorLayer) {
     void onPlaytest() {
         LevelEditorLayer::onPlaytest();
@@ -134,10 +148,10 @@ class $modify(LevelEditorLayer) {
             pauseRotations(this);
     }
 
-    void onStopPlaytest() {
+    /*void onStopPlaytest() { // why does it crash idk I'll fix later
         LevelEditorLayer:onStopPlaytest();
 
         if (geode::Mod::get()->getSettingValue<bool>("rotate-saws-in-editor"))
             stopRotations(this);
-    }
-};*/
+    }*/
+};

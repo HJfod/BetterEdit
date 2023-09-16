@@ -12,3 +12,4 @@ void beginRotateSaw(GameObject* obj);
 void stopRotateSaw(GameObject* obj);
 bool shouldRotateSaw();
 void enableRotations(bool);
+void onRotateSaws(cocos2d::CCObject*);
