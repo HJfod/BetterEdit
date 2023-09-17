@@ -9,7 +9,7 @@ static ButtonSprite* createEditBtnSprite(
 ) {
     auto sprOff = ButtonSprite::create(
         CCSprite::createWithSpriteFrameName(file),
-        0x32, true, 0x32, sel ? "GJ_button_02.png" : "GJ_button_01.png", 1.0f
+        0x32, 0, 0x32, 1, true, sel ? "GJ_button_02.png" : "GJ_button_01.png", true
     );
     sprOff->m_subSprite->setScale(1.25f);
 

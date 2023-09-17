@@ -19,6 +19,12 @@
 			"name": "Rotate Saws in Editor",
 			"description": "When enabled, saws will rotate while playtesting in the editor"
 		},
+		"hide-ldm": {
+			"type": "bool",
+			"default": false,
+			"name": "Hide LDM objects",
+			"description": "When enabled, LDM objects will be hidden in the editor"
+		},
 		"enable-global-clipboard": {
 			"type": "bool",
 			"default": true,
@@ -70,7 +76,8 @@
 			"UISheet": [
 				"resources/*.png",
 				"resources/history/*.png",
-				"resources/objs/*.png"
+				"resources/objs/*.png",
+				"resources/visibility/*.png"
 			]
 		}
 	},

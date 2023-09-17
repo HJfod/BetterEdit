@@ -1,4 +1,5 @@
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/EditorPauseLayer.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
@@ -14,7 +15,7 @@ using namespace keybinds;
 
 constexpr const int VIEWBUTTONBAR_TAG = 0x234592;
 
-struct $modify(EditorUI) {
+struct $modify(VisibilityTabUI, EditorUI) {
     CCNode* viewModeBtn;
 
     bool init(LevelEditorLayer* lel) {
@@ -64,7 +65,7 @@ struct $modify(EditorUI) {
         auto btns = CCArray::create();
 
         btns->addObject(VisibilityToggle::create(
-            "tab-view.png"_spr,
+            "v_rotate.png"_spr,
             []() -> bool {
                 return shouldRotateSaw();
             },
@@ -73,6 +74,15 @@ struct $modify(EditorUI) {
             }
         ));
 
+        btns->addObject(VisibilityToggle::create(
+            "v_ldm.png"_spr,
+            []() -> bool { return Mod::get()->getSettingValue<bool>("hide-ldm"); },
+            [&](bool b, auto) -> void { Mod::get()->setSettingValue<bool>("hide-ldm", b); }
+        ));
+
+        /*
+            Button bar
+        */
         auto buttonBar = EditButtonBar::create(
             btns,
             { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f },
@@ -145,16 +155,28 @@ struct $modify(EditorUI) {
         //if (BetterEdit::getDisableVisibilityTab())
         //    return;
         
-        auto bbar = as<EditButtonBar*>(getChildByTag(VIEWBUTTONBAR_TAG));
+        auto bbar = static_cast<EditButtonBar*>(getChildByTag(VIEWBUTTONBAR_TAG));
 
         if (!bbar) return;
-        
-        bbar->reloadItemsInNormalSize();
+
+        //bbar->reloadItemsInNormalSize(); // broken?
+        bbar->reloadItems(
+            GameManager::sharedState()->getIntGameVariable("0049"),
+            GameManager::sharedState()->getIntGameVariable("0050")
+        );
         
         CCObject* btn;
         CCARRAY_FOREACH(bbar->m_buttonArray, btn) {
             typeinfo_cast<VisibilityToggle*>(btn)->updateState();
         }
+    }
+};
+
+class $modify(EditorPauseLayer) {
+    void onResume(CCObject* pSender) {
+        EditorPauseLayer::onResume(pSender);
+
+        static_cast<VisibilityTabUI*>(EditorUI::get())->updateVisibilityTab();
     }
 };
 

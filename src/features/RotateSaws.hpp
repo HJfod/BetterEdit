@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Geode/DefaultInclude.hpp>
-#include <Geode/modify/LevelEditorLayer.hpp>
 
 bool objectIsSaw(GameObject* obj);
 void beginRotations(LevelEditorLayer* self);

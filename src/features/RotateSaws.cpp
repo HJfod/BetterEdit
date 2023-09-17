@@ -1,5 +1,8 @@
 #include "RotateSaws.hpp"
 
+#include <Geode/modify/LevelEditorLayer.hpp>
+#include <Geode/modify/EditorPauseLayer.hpp>
+
 using namespace geode::prelude;
 
 static constexpr const int ROTATEACTION_TAG = 0x42069;
@@ -130,28 +133,54 @@ class $modify(LevelEditorLayer) {
     void onPlaytest() {
         LevelEditorLayer::onPlaytest();
 
-        if (geode::Mod::get()->getSettingValue<bool>("rotate-saws-in-editor"))
+        if (!shouldRotateSaw())
             beginRotations(this);
     }
 
     void onResumePlaytest() {
-        LevelEditorLayer:onResumePlaytest();
+        LevelEditorLayer::onResumePlaytest();
 
-        if (geode::Mod::get()->getSettingValue<bool>("rotate-saws-in-editor"))
+        if (!shouldRotateSaw())
             resumeRotations(this);
     }
 
     void onPausePlaytest() {
-        LevelEditorLayer:onPausePlaytest();
+        LevelEditorLayer::onPausePlaytest();
 
-        if (geode::Mod::get()->getSettingValue<bool>("rotate-saws-in-editor"))
+        if (!shouldRotateSaw())
             pauseRotations(this);
     }
 
-    /*void onStopPlaytest() { // why does it crash idk I'll fix later
-        LevelEditorLayer:onStopPlaytest();
+    void onStopPlaytest() {
+        LevelEditorLayer::onStopPlaytest();
 
-        if (geode::Mod::get()->getSettingValue<bool>("rotate-saws-in-editor"))
+        if (!shouldRotateSaw())
             stopRotations(this);
-    }*/
+    }
+
+    void addSpecial(GameObject* obj) {
+        LevelEditorLayer::addSpecial(obj);
+
+        if(shouldRotateSaw() && objectIsSaw(obj))
+            beginRotateSaw(obj);
+    }
+
+    void removeObject(GameObject* obj, bool p1) {
+        LevelEditorLayer::removeObject(obj, p1);
+
+        if(shouldRotateSaw() && objectIsSaw(obj))
+            stopRotateSaw(obj);
+    }
+};
+
+class $modify(EditorPauseLayer) {
+    void saveLevel() {
+        if(shouldRotateSaw())
+            stopRotations(m_editorLayer);
+
+        EditorPauseLayer::saveLevel();
+
+        if(shouldRotateSaw())
+            beginRotations(m_editorLayer);
+    }
 };
