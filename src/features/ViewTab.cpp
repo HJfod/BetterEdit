@@ -1,5 +1,9 @@
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
+#include <Geode/modify/GameObject.hpp>
+#include <Geode/modify/DrawGridLayer.hpp>
+#include <Geode/modify/FMODAudioEngine.hpp>
+
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
@@ -14,6 +18,36 @@ using namespace geode::prelude;
 using namespace keybinds;
 
 constexpr const int VIEWBUTTONBAR_TAG = 0x234592;
+constexpr const int VISIBILITYTABUI_PRIO = 3456;
+
+class $modify(GameObjectExtra, GameObject) {
+    bool m_objectHidden = false;
+    
+    bool m_actualVisible = true;
+    bool m_callFromExtra = false;
+
+    void updatePresence() {
+        if(this->m_highDetail)
+            this->m_fields->m_objectHidden = Mod::get()->getSettingValue<bool>("hide-ldm");
+        
+        // update visibility
+        this->m_fields->m_callFromExtra = true;
+        setVisible(m_bVisible);
+        this->m_fields->m_callFromExtra = false;
+    }
+
+    void setVisible(bool visible) {
+        if(!this->m_fields->m_callFromExtra)
+            this->m_fields->m_actualVisible = visible;
+
+        if(this->m_fields->m_objectHidden)
+            visible = false;
+
+        else visible = this->m_fields->m_actualVisible;
+
+        GameObject::setVisible(visible);
+    }
+};
 
 struct $modify(VisibilityTabUI, EditorUI) {
     CCNode* viewModeBtn;
@@ -64,21 +98,24 @@ struct $modify(VisibilityTabUI, EditorUI) {
         */
         auto btns = CCArray::create();
 
-        btns->addObject(VisibilityToggle::create(
-            "v_rotate.png"_spr,
-            []() -> bool {
-                return shouldRotateSaw();
-            },
-            [&](bool s, auto p) -> void {
-                onRotateSaws(p);
-            }
-        ));
+        #define _SettingG(set) Mod::get()->getSettingValue<bool>(set)
+        #define _SettingS(set, val) Mod::get()->setSettingValue<bool>(set, val)
+        #define ViewTabBtn(sprite, _getter, _setter) \
+            btns->addObject(VisibilityToggle::create(GEODE_CONCAT(sprite, _spr), []() -> bool _getter, [&](bool b, auto p) -> void _setter))
 
-        btns->addObject(VisibilityToggle::create(
-            "v_ldm.png"_spr,
-            []() -> bool { return Mod::get()->getSettingValue<bool>("hide-ldm"); },
-            [&](bool b, auto) -> void { Mod::get()->setSettingValue<bool>("hide-ldm", b); }
-        ));
+        ViewTabBtn("v_rotate.png", { return shouldRotateSaw(); }, { onRotateSaws(p); });
+        ViewTabBtn("v_ldm.png", { return _SettingG("hide-ldm"); }, { static_cast<VisibilityTabUI*>(EditorUI::get())->toggleLDM(b); });
+        ViewTabBtn("v_pulse.png", { return _SettingG("editor-pulse"); }, { _SettingS("editor-pulse", b); });
+        ViewTabBtn("v_prevmode.png", { return GameManager::sharedState()->getGameVariable("0036"); }, { GameManager::sharedState()->setGameVariable("0036", b); LevelEditorLayer::get()->updateEditorMode(); });
+        ViewTabBtn("v_bpm_line.png", { return GameManager::sharedState()->m_showSongMarkers; }, { GameManager::sharedState()->m_showSongMarkers = b; });
+        ViewTabBtn("v_pos_line.png", { return _SettingG("pos-line"); }, { _SettingS("pos-line", b); });
+        ViewTabBtn("v_dur_line.png", { return GameManager::sharedState()->getGameVariable("0058"); }, { GameManager::sharedState()->setGameVariable("0058", b); LevelEditorLayer::get()->updateOptions(); });
+        ViewTabBtn("v_eff_line.png", { return GameManager::sharedState()->getGameVariable("0043"); }, { GameManager::sharedState()->setGameVariable("0043", b); LevelEditorLayer::get()->updateOptions(); });
+        ViewTabBtn("v_grnd.png", { return GameManager::sharedState()->getGameVariable("0037"); }, { GameManager::sharedState()->setGameVariable("0037", b); LevelEditorLayer::get()->updateOptions(); LevelEditorLayer::get()->m_groundLayer->setVisible(b); });
+        ViewTabBtn("v_grid.png", { return GameManager::sharedState()->getGameVariable("0038"); }, { GameManager::sharedState()->setGameVariable("0038", b); LevelEditorLayer::get()->updateOptions(); });
+        ViewTabBtn("v_portal_borders.png", { return _SettingG("portal-lines"); }, { _SettingS("portal-lines", b); });
+        ViewTabBtn("v_highlight.png", { return _SettingG("highlight-triggers"); }, { _SettingS("highlight-triggers", b); });
+        ViewTabBtn("v_dash.png", { return _SettingG("dash-lines"); }, { _SettingS("dash-lines", b); });
 
         /*
             Button bar
@@ -94,6 +131,9 @@ struct $modify(VisibilityTabUI, EditorUI) {
         buttonBar->setVisible(m_selectedTab == 4);
 
         addChild(buttonBar, 10);
+
+        // other
+        updateLDM();
 
         return true;
     }
@@ -170,6 +210,43 @@ struct $modify(VisibilityTabUI, EditorUI) {
             typeinfo_cast<VisibilityToggle*>(btn)->updateState();
         }
     }
+
+    void toggleLDM(bool toggled) {
+        Mod::get()->setSettingValue<bool>("hide-ldm", toggled);
+        updateLDM();
+    }
+
+    void updateLDM() {
+        // update every object in the level (oh god)
+        for(auto& obj : CCArrayExt<GameObjectExtra*>(m_editorLayer->getAllObjects()))
+            obj->updatePresence();
+    }
+
+    void selectObject(GameObject* obj, bool filter) {
+        if(!static_cast<GameObjectExtra*>(obj)->m_fields->m_objectHidden)
+            EditorUI::selectObject(obj, filter);
+    }
+
+    void selectObjects(CCArray* objs, bool ignoreFilters) {
+        // filter out LDM objects
+        if(objs) {
+            size_t objCount = objs->count();
+            for(size_t i = 0; i < objCount; i++) {
+                auto obj = static_cast<GameObjectExtra*>(objs->objectAtIndex(i));
+
+                if(obj->m_fields->m_objectHidden)
+                    objs->removeObjectAtIndex(i, false);
+                    i--; objCount--;
+            }
+        }
+
+        EditorUI::selectObjects(objs, ignoreFilters);
+    }
+
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("EditorUI::selectObject", VISIBILITYTABUI_PRIO);
+        (void)self.setHookPriority("EditorUI::selectObjects", VISIBILITYTABUI_PRIO);
+    }
 };
 
 class $modify(EditorPauseLayer) {
@@ -177,6 +254,17 @@ class $modify(EditorPauseLayer) {
         EditorPauseLayer::onResume(pSender);
 
         static_cast<VisibilityTabUI*>(EditorUI::get())->updateVisibilityTab();
+    }
+};
+
+class $modify(DrawGridLayer) {
+    void draw() {
+        bool origBool = m_editor->m_previewMode;
+        m_editor->m_previewMode = Mod::get()->getSettingValue<bool>("pos-line");
+        
+        DrawGridLayer::draw();
+
+        m_editor->m_previewMode = origBool;
     }
 };
 

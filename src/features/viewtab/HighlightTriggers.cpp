@@ -64,15 +64,16 @@ class $modify(EffectGameObject) {
     void triggerObject(GJBaseGameLayer* layer) {
         EffectGameObject::triggerObject(layer);
 
-        // TODO: make it an option in the edit tab
+        if(Mod::get()->getSettingValue<bool>("highlight-triggers")) {
+            constexpr int TAG = 400123;
+    
+            if (auto action = getActionByTag(TAG)) {
+                stopAction(action);
+            }
 
-        constexpr int TAG = 400123;
-
-        if (auto action = getActionByTag(TAG)) {
-            stopAction(action);
+            auto action = ObjectPulseAction::create(.3f, {255, 0, 0});
+            action->setTag(TAG);
+            runAction(action);
         }
-        auto action = ObjectPulseAction::create(.3f, {255, 0, 0});
-        action->setTag(TAG);
-        runAction(action);
     }
 };

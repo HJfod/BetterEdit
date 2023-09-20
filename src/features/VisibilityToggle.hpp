@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
+#include <Geode/modify/CCSprite.hpp>
 
 using namespace geode::prelude;
 

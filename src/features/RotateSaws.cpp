@@ -2,6 +2,7 @@
 
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
+#include <Geode/modify/SetupRotatePopup.hpp>
 
 using namespace geode::prelude;
 
@@ -182,5 +183,25 @@ class $modify(EditorPauseLayer) {
 
         if(shouldRotateSaw())
             beginRotations(m_editorLayer);
+    }
+};
+
+class $modify(SetupRotatePopup) {
+    void onClose(CCObject* pSender) {
+        if(shouldRotateSaw()) {
+            stopRotations(LevelEditorLayer::get());
+            beginRotations(LevelEditorLayer::get());
+        }
+
+        SetupRotatePopup::onClose(pSender);
+    }
+
+    void keyBackClicked() {
+        if(shouldRotateSaw()) {
+            stopRotations(LevelEditorLayer::get());
+            beginRotations(LevelEditorLayer::get());
+        }
+
+        SetupRotatePopup::keyBackClicked();
     }
 };
