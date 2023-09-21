@@ -6,6 +6,17 @@
 
 using namespace geode::prelude;
 
+void _UpdatePulsesInArray(CCArray* array, float pulse) {
+    CCObject* _obj;
+    CCARRAY_FOREACH(array, _obj) {
+        auto obj = typeinfo_cast<GameObject*>(_obj);
+
+        if(obj != nullptr && obj->m_useAudioScale)
+            obj->setRScale(pulse);
+    }
+}
+#define UpdatePulsesInArray(arr) _UpdatePulsesInArray(arr, pulse)
+
 class $modify(EditorUIPulse, EditorUI) {
     bool m_hasResetObjectsScale = true; 
 
@@ -19,57 +30,24 @@ class $modify(EditorUIPulse, EditorUI) {
             auto pulse = fmod->m_pulse1 + fmod->m_pulse2 + fmod->m_pulse3;
             pulse /= 3.f;
 
-            const auto f = [&](GameObject* obj) {
-                if (obj != nullptr && obj->m_useAudioScale) {
-                    obj->setRScale(pulse);
-                }
-            };
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeAddBottom->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeBottom2->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeBottom3->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeBottom4->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeBottom->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeAddBottom2->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeAddBottom3->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeAddBottom4->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNode->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeAddTop2->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeAddTop3->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeTop2->getChildren()))
-                f(obj);
-
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->m_batchNodeTop3->getChildren()))
-                f(obj);
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeAddBottom->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeBottom2->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeBottom3->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeBottom4->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeBottom->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeAddBottom2->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeAddBottom3->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeAddBottom4->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNode->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeAddTop2->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeAddTop3->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeTop2->getChildren());
+            UpdatePulsesInArray(m_editorLayer->m_batchNodeTop3->getChildren());
         }
         else if(!m_fields->m_hasResetObjectsScale) {
             m_fields->m_hasResetObjectsScale = true;
 
-            for(auto& obj : CCArrayExt<GameObject*>(m_editorLayer->getAllObjects()))
-                if(obj != nullptr && obj->m_useAudioScale)
-                    obj->setRScale(1.f);
+            _UpdatePulsesInArray(m_editorLayer->getAllObjects(), 1);
         }
     }
 
@@ -77,14 +55,21 @@ class $modify(EditorUIPulse, EditorUI) {
         if(!EditorUI::init(editor))
             return false;
 
+        // allow pulses in every layer
+        GameSoundManager::sharedManager()->enableMetering();
+
         schedule(schedule_selector(EditorUIPulse::updateObjectsPulse));
 
         return true;
     }
 };
 
+BE_EDITOREXIT() {
+    GameSoundManager::sharedManager()->disableMetering();
+}
+
 // allow pulses in every layer
-class $modify(FMODAudioEngine) {
+/*class $modify(FMODAudioEngine) {
     void update(float dt) {
         bool meteringOrig = m_metering;
 
@@ -95,4 +80,4 @@ class $modify(FMODAudioEngine) {
 
         m_metering = meteringOrig;
     }
-};
+};*/
