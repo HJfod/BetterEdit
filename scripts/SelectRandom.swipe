@@ -1,9 +1,0 @@
-@version 1.0
-@name "Deselect Random"
-
-objs = getSelectedObjects()
-for obj in objs {
-    if random() > 0.5 {
-        obj.deselect()
-    }
-}

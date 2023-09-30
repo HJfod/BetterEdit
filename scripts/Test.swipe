@@ -1,9 +1,0 @@
-
-@version 1.0
-@name "Swipe test"
-
-function vararg(named, x, y, args...) {
-    print("named: {}, x: {}, y: {}, argument0: {}, argument1: {}", argument0, argument1)
-}
-
-vararg("hi", 5, true, "six", y = 6, ball)

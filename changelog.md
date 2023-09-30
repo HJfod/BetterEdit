@@ -1,6 +1,9 @@
 # v5.0.0-alpha.8
 
- - Add the new color selection menu from v4 with even better features
+ - Add Global Clipboard
+ - Add Clear Clipboard
+ - Fix trackpad horizontal scrolling on Mac
+ - Add Use time instead of Percentage 
 
 # v5.0.0-alpha.7
 
