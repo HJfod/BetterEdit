@@ -32,7 +32,7 @@ VisibilityToggle* VisibilityToggle::create(
     )) {
         ret->m_pSetter = setter;
         ret->m_pGetter = getter;
-        //ret->updateState();
+        ret->updateState();
         ret->autorelease();
         return ret;
     }

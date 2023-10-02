@@ -11,7 +11,7 @@
 			"type": "bool",
 			"default": true,
 			"name": "Zoom Towards Cursor",
-			"description": "When enabled, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen. Not currently supported on MacOS"
+			"description": "When enabled and while holding down the CTRL key, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen"
 		},
 		"rotate-saws-in-editor": {
 			"type": "bool",
@@ -31,6 +31,12 @@
 			"name": "Show Zoom Text",
 			"description": "When enabled, flashes the current zoom level as text when you zoom in / out in the editor"
 		},
+		"new-color-menu": {
+			"type": "bool",
+			"default": true,
+			"name": "New Color Menu",
+			"description": "Changes the object color selection menu to show more channels aswell as previews for colors and special colors"
+		},
 		"show-percentage": {
 			"type": "bool",
 			"default": true,
@@ -39,7 +45,7 @@
 		},
 		"use-time-for-percentage": {
 			"type": "bool",
-			"default": true,
+			"default": false,
 			"name": "Use Time instead of Percentage",
 			"description": "When enabled along with Show Percentage, shows the current level time in the editor instead of the percentage."
 		},
