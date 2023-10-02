@@ -2,7 +2,7 @@
 
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
-//#include <Geode/modify/SetupRotatePopup.hpp>
+#include <Geode/modify/SetupRotatePopup.hpp>
 
 using namespace geode::prelude;
 
@@ -47,9 +47,23 @@ bool objectIsSaw(GameObject* obj) {
     return false;
 }
 
-CCAction* recreatedRotateAction(float f, int i) {
-    auto ret = CCRepeatForever::create(CCRotateBy::create(f, f));
-    return (CCAction*)ret;
+CCAction* recreatedRotateAction(GameObject* obj, float f, int i) {
+    if(obj->m_customRotateSpeed) {
+        i = 1;
+        f = obj->m_customRotateSpeed;
+    }
+    else if(!i) {
+        if(rand() % 2)
+            i = -1;
+
+        else i = 1;
+    }
+
+    return CCRepeatForever::create(CCRotateBy::create(1, f * i));
+}
+
+$execute {
+    srand(time(nullptr));
 }
 
 void beginRotateSaw(GameObject* obj) {
@@ -62,12 +76,12 @@ void beginRotateSaw(GameObject* obj) {
     CCAction* r;
     switch (obj->m_objectID) {
         // the big invisible saw, for some reason
-        case 0xba: r = recreatedRotateAction(300.0f, 0); break;
+        case 0xba: r = recreatedRotateAction(obj, 300.0f, 0); break;
         // the big reaper saw
-        case 0x653: r = recreatedRotateAction(720.0f, -1); break;
+        case 0x653: r = recreatedRotateAction(obj, 720.0f, -1); break;
         // the small reaper saw
-        case 0x654: r = recreatedRotateAction(1080.0f, -1); break;
-        default: r = recreatedRotateAction(360.0f, 0); break;
+        case 0x654: r = recreatedRotateAction(obj, 1080.0f, -1); break;
+        default: r = recreatedRotateAction(obj, 360.0f, 0); break;
     }
     r->setTag(ROTATEACTION_TAG);
     g_startRotations[obj] = obj->getRotation();
@@ -191,8 +205,6 @@ class $modify(EditorPauseLayer) {
     }
 };
 
-#ifdef GEODE_IS_WINDOWS
-
 class $modify(SetupRotatePopup) {
     void onClose(CCObject* pSender) {
         if(shouldRotateSaw()) {
@@ -212,5 +224,3 @@ class $modify(SetupRotatePopup) {
         SetupRotatePopup::keyBackClicked();
     }
 };
-
-#endif

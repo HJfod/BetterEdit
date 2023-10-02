@@ -17,13 +17,55 @@
 			"type": "bool",
 			"default": true,
 			"name": "Rotate Saws in Editor",
-			"description": "[WINDOWS ONLY] When enabled, saws will rotate while playtesting in the editor"
+			"description": "When enabled, saws will rotate while playtesting in the editor"
+		},
+		"hide-ldm": {
+			"type": "bool",
+			"default": false,
+			"name": "Hide LDM objects",
+			"description": "When enabled, LDM objects will be hidden in the editor"
+		},
+		"editor-pulse": {
+			"type": "bool",
+			"default": true,
+			"name": "Pulse objects in editor",
+			"description": "When enabled, objects will pulse in the editor"
+		},
+		"pos-line": {
+			"type": "bool",
+			"default": true,
+			"name": "Show position line",
+			"description": "When enabled, position line will be shown in the editor"
+		},
+		"portal-lines": {
+			"type": "bool",
+			"default": true,
+			"name": "Show portal lines",
+			"description": "When enabled, portal lines will be shown in the editor"
+		},
+		"color-gm-borders": {
+			"type": "bool",
+			"default": true,
+			"name": "Color portal borders",
+			"description": "When enabled, portal lines will be colored in the editor"
 		},
 		"highlight-triggers": {
 			"type": "bool",
 			"default": true,
 			"name": "Highlight triggers",
 			"description": "When enabled, activated triggers will be highlighted during playtest"
+		},
+		"dash-lines": {
+			"type": "bool",
+			"default": true,
+			"name": "Show dash orb trajectory",
+			"description": "When enabled, dash orb trajectories will be shown in the editor"
+		},
+		"enable-global-clipboard": {
+			"type": "bool",
+			"default": true,
+			"name": "Global Clipboard",
+			"description": "When enabled, keeps copied objects when switching levels"
 		},
 		"show-zoom-text": {
 			"type": "bool",

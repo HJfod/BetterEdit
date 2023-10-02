@@ -7,9 +7,9 @@ project(BetterEdit VERSION 4.6.0)
 file(GLOB SOURCES
 	src/Features/RotateSaws/*.cpp
 	src/Features/ZoomText/*.cpp
-	src/MoreTabs/*.cpp
-	src/Features/*.cpp
-	src/VisibilityToggle/*.cpp
+	src/Features/ViewTab/*.cpp
+	src/Features/MoreTabs/*.cpp
+	src/Features/VisibilityToggle/*.cpp
 	src/Other/*.cpp
 	src/Features/*.cpp
 	src/*.cpp

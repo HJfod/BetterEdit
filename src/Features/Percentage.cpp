@@ -93,6 +93,9 @@ class $modify(SliderUI, EditorUI) {
         if (Mod::get()->getSettingValue<bool>("use-time-for-percentage"))
             return m_editorLayer->timeForXPos(pos.x); // it's void in the bindings lol change it to float
 
-        return pos.x / max * 100;
+        float percent = pos.x / max * 100;
+        if(percent > 100) percent = 100;
+
+        return percent;
     }
 };
