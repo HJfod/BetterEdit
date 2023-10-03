@@ -45,7 +45,7 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
         
         DrawGridLayer::draw();
 
-        if(portalLines && g_guides2 != nullptr) {
+        if(portalLines && g_guides2 != nullptr && m_editor->m_playbackMode != PlaybackMode::Playing) {
             for(auto& portal : CCArrayExt<GameObject*>(g_guides2)) {
                 auto portalPoints = getPortalMinMax(portal); // X is min, Y is max
                 auto gridPosX = m_grid->convertToNodeSpace(CCPointZero).x;
