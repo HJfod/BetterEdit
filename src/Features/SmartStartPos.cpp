@@ -162,15 +162,6 @@ class $modify(LevelEditorLayer) {
     }
 
     void addSpecial(GameObject* g) {
-        startPoses.clear();
-        gamemodePortals.clear();
-        mirrorPortals.clear();
-        miniPortals.clear();
-        dualPortals.clear();
-        speedChanges.clear();
-        gravityPortals.clear();
-        willFlip.clear();
-
         LevelEditorLayer::addSpecial(g);
 
         if (!Mod::get()->getSettingValue<bool>("smart-startpos")) return;
