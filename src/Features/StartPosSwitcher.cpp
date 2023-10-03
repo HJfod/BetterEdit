@@ -5,7 +5,7 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/GameObject.hpp>
-#include <MoreTabs/MoreTabs.hpp>
+#include "MoreTabs/MoreTabs.hpp"
 #include <Other/Utils.hpp>
 #include <Other/BEShared.hpp>
 #undef min

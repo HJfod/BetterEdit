@@ -31,6 +31,18 @@
 			"name": "Pulse objects in editor",
 			"description": "When enabled, objects will pulse in the editor"
 		},
+		"smart-startpos": {
+			"type": "bool",
+			"default": true,
+			"name": "Smart StartPos",
+			"description": "When enabled, all StartPoses in the editor will be automatically set for you"
+		},
+		"playtest-lag-fix": {
+			"type": "bool",
+			"default": true,
+			"name": "Playtest Lag Fix",
+			"description": "When enabled, the lag when beginning a Playtest will not happen"
+		},
 		"pos-line": {
 			"type": "bool",
 			"default": true,

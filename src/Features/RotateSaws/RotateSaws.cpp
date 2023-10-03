@@ -2,7 +2,9 @@
 
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
+#ifdef GEODE_IS_WINDOWS
 #include <Geode/modify/SetupRotatePopup.hpp>
+#endif
 
 using namespace geode::prelude;
 
@@ -205,6 +207,8 @@ class $modify(EditorPauseLayer) {
     }
 };
 
+#ifdef GEODE_IS_WINDOWS
+
 class $modify(SetupRotatePopup) {
     void onClose(CCObject* pSender) {
         if(shouldRotateSaw()) {
@@ -224,3 +228,5 @@ class $modify(SetupRotatePopup) {
         SetupRotatePopup::keyBackClicked();
     }
 };
+
+#endif
