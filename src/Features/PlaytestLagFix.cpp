@@ -3,23 +3,22 @@
 
 using namespace geode::prelude;
 
-int smoothOut = 0;
-
 class $modify(LevelEditorLayer) {
-    void update(float dt) {
-        if (!Mod::get()->getSettingValue<bool>("playtest-lag-fix")) return LevelEditorLayer::update(dt);
+    bool m_playtestStarted = false;
 
-        float time = cocos2d::CCDirector::sharedDirector()->getAnimationInterval();
-        if (smoothOut != 0 && dt - time < 1) {
-            smoothOut --;
+    void update(float dt) {
+        if(m_fields->m_playtestStarted) {
+            dt = CCDirector::sharedDirector()->getAnimationInterval();
+            m_fields->m_playtestStarted = false;
         }
 
-        LevelEditorLayer::update(time);
+        LevelEditorLayer::update(dt);
     }
 
     void onPlaytest() {
-        if (Mod::get()->getSettingValue<bool>("playtest-lag-fix")) smoothOut = 2;
+        m_fields->m_playtestStarted = Mod::get()->getSettingValue<bool>("playtest-lag-fix");
 
         LevelEditorLayer::onPlaytest();
     }
 };
+
