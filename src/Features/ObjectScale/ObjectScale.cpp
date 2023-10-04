@@ -9,6 +9,7 @@ using namespace geode::prelude;
 
 class $modify(BetterScaleControl, GJScaleControl) {
     CCTextInputNode* m_textInput = nullptr;
+    Patch* m_absolutePositionPatch = nullptr;
 
     bool init() {
         if (!GJScaleControl::init()) {
@@ -46,6 +47,15 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
         Mod::get()->setSavedValue<bool>("scale-snap-enabled", scaleSnap);
         Mod::get()->setSavedValue<bool>("absolute-position-enabled", absolutePosition);
+
+        if (absolutePosition && m_fields->m_absolutePositionPatch == nullptr) {
+            m_fields->m_absolutePositionPatch = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x8f2f9), { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }).unwrap();
+            log::info("patched successfully!");
+        } else if (!absolutePosition && m_fields->m_absolutePositionPatch != nullptr) {
+            Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
+            m_fields->m_absolutePositionPatch = nullptr;
+            log::info("unpatched successfully!");
+        }
 
         auto menu = CCMenu::create();
         menu->setID("lock-menu"_spr);
@@ -87,10 +97,51 @@ class $modify(BetterScaleControl, GJScaleControl) {
         return true;
     }
 
+    void ccTouchMoved(CCTouch* touch, CCEvent* event) {
+        auto shouldSnap = Mod::get()->getSavedValue<bool>("scale-snap-enabled");
+        if (!shouldSnap) {
+            GJScaleControl::ccTouchMoved(touch, event);
+            return;
+        }
+        if (!m_touchID == touch->getID()) {
+            return;
+        }
+
+        m_slider->ccTouchMoved(touch, event);
+        float val = roundf((m_slider->m_touchLogic->m_thumb->getValue() * 1.5f + 0.5f) * 100) / 100;
+        log::info("slider value: {}, val: {}", m_slider->m_touchLogic->m_thumb->getValue(), val);
+
+        float snap = static_cast<float>(Mod::get()->getSettingValue<double>("scale-snap"));
+        val = roundf(val / snap) * snap;
+        log::info("new val {}", val);
+        if (val < 0.5f) {
+            val = 0.5f;
+        }
+
+        m_slider->setValue((val - 0.5f) / 1.5f);
+
+        if (m_delegate) {
+            m_delegate->scaleChanged(val);
+        }
+
+        m_value = val;
+
+        this->updateLabel(val);
+    }
+
     void onAbsolutePositionSwap(CCObject* sender) {
         log::info("swapping absolute position swap");
         bool enabled = !Mod::get()->getSavedValue<bool>("absolute-position-enabled");
         Mod::get()->setSavedValue("absolute-position-enabled", enabled);
+
+        if (enabled && m_fields->m_absolutePositionPatch == nullptr) {
+            m_fields->m_absolutePositionPatch = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x8f2f9), { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }).unwrap();
+            log::info("patched successfully!");
+        } else if (!enabled && m_fields->m_absolutePositionPatch != nullptr) {
+            log::info("unpatched successfully!");
+            Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
+            m_fields->m_absolutePositionPatch = nullptr;
+        }
 
         static_cast<LockButton*>(sender)->setLockedStatus(enabled);
     }
