@@ -26,4 +26,11 @@ class $modify(BEPauseLayer, EditorPauseLayer) {
     void onSettings(CCObject*) {
         openSettingsPopup(Mod::get());
     }
+
+    void keyDown(enumKeyCodes keyCode) {
+        EditorPauseLayer::keyDown(keyCode);
+        if (keyCode == enumKeyCodes::KEY_Escape) {
+            this->onResume(nullptr);
+        }
+    }
 };
