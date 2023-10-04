@@ -25,6 +25,12 @@
 			"name": "Hide LDM objects",
 			"description": "When enabled, LDM objects will be hidden in the editor"
 		},
+		"better-scaling": {
+			"type": "bool",
+			"name": "Better Scaling UI",
+			"description": "When enabled, adds keyboard input, absolute position and interval snapping to the scaling UI",
+			"default": true
+		},
 		"scale-snap": {
 			"type": "float",
 			"default": 0.25,

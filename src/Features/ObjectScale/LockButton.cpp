@@ -15,7 +15,7 @@ void LockButton::setLockedStatus(bool locked) {
         case SliderLockType::LockAbsolute:
             sprite = LockButton::createLockSprite(
                 locked ? "GJ_button_02.png" : "GJ_button_04.png",
-                locked ? "GJ_lock_001.png" : "GJ_lock_open_00snap 1.png"
+                locked ? "GJ_lock_001.png" : "GJ_lock_open_001.png"
             );
             break;
         case SliderLockType::LockSlider:
