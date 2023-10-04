@@ -37,15 +37,18 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
     }
 
     void draw() {
+        DrawGridLayer::draw();
+
+        drawPortalLines();
+    }
+
+    void drawPortalLines() {
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         bool portalLines = Mod::get()->getSettingValue<bool>("portal-lines");
 
-        if(g_portalDrawNode != nullptr)
-            g_portalDrawNode->clear();
-        
-        DrawGridLayer::draw();
+        g_portalDrawNode->clear();
 
-        if(portalLines && g_guides2 != nullptr) {
+        if(portalLines && g_guides2 != nullptr && m_editor->m_playbackMode != PlaybackMode::Playing) {
             for(auto& portal : CCArrayExt<GameObject*>(g_guides2)) {
                 auto portalPoints = getPortalMinMax(portal); // X is min, Y is max
                 auto gridPosX = m_grid->convertToNodeSpace(CCPointZero).x;
@@ -122,6 +125,8 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
             g_guides2->removeObject(obj, false);
         }
 
+        bool showBorders = Mod::get()->getSettingValue<bool>("portal-lines");
+
         // add every portal to new array
         for(auto& obj : CCArrayExt<GameObject*>(m_editor->getAllObjects())) {
             if( obj->m_objectID == 12
@@ -132,8 +137,13 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
             ||  obj->m_objectID == 745
             ||  obj->m_objectID == 1331
             ) {
-                if(obj->m_showGamemodeBorders)
-                    g_guides2->addObject(obj);
+                if(obj->m_showGamemodeBorders) {
+                    if(showBorders)
+                        g_guides2->addObject(obj);
+
+                    else
+                        m_guides->addObject(obj); // default
+                }
             }
         }
     }
@@ -150,6 +160,13 @@ class $modify(EditorUI) {
 class $modify(LevelEditorLayer) {
     void addSpecial(GameObject* obj) {
         LevelEditorLayer::addSpecial(obj);
+
+        if(!m_editorInitialising)
+            PortalLinesLayer::get()->updateGuides();
+    }
+
+    void removeObject(GameObject* obj, bool b) {
+        LevelEditorLayer::removeObject(obj, b);
 
         if(!m_editorInitialising)
             PortalLinesLayer::get()->updateGuides();
