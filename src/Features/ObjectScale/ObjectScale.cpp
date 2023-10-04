@@ -143,6 +143,15 @@ class $modify(BetterScaleControl, GJScaleControl) {
             m_fields->m_absolutePositionPatch = nullptr;
         }
 
+        std::string message = "";
+        if (enabled) {
+            message = "Absolute positioning enabled";
+        } else {
+            message = "Absolute positioning disabled";
+        }
+
+        Notification::create(message, CCSprite::createWithSpriteFrameName("GJ_completesIcon_001.png"))->show();
+
         static_cast<LockButton*>(sender)->setLockedStatus(enabled);
     }
 
@@ -150,6 +159,15 @@ class $modify(BetterScaleControl, GJScaleControl) {
         log::info("swapping slider snap swap");
         bool enabled = !Mod::get()->getSavedValue<bool>("scale-snap-enabled");
         Mod::get()->setSavedValue("scale-snap-enabled", enabled);
+
+        std::string message = "";
+        if (enabled) {
+            message = "Scale snap enabled";
+        } else {
+            message = "Scale snap disabled";
+        }
+
+        Notification::create(message, CCSprite::createWithSpriteFrameName("GJ_completesIcon_001.png"))->show();
 
         static_cast<LockButton*>(sender)->setLockedStatus(enabled);
     }
