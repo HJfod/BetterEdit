@@ -17,8 +17,6 @@ void _UpdatePulsesInArray(CCArray* array, float pulse) {
 }
 #define UpdatePulsesInArray(arr) _UpdatePulsesInArray(arr, pulse)
 
-#ifdef GEODE_IS_WINDOWS
-
 class $modify(EditorUIPulse, EditorUI) {
     bool m_hasResetObjectsScale = true; 
 
@@ -65,8 +63,6 @@ class $modify(EditorUIPulse, EditorUI) {
         return true;
     }
 };
-
-#endif
 
 BE_EDITOREXIT() {
     GameSoundManager::sharedManager()->disableMetering();

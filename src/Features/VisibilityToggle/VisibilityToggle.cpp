@@ -22,18 +22,18 @@ VisibilityToggle* VisibilityToggle::create(
     VisibilityToggle::Getter getter,
     VisibilityToggle::Setter setter
 ) {
-    auto ret = new VisibilityToggle;
+    auto ret = new (std::nothrow) VisibilityToggle;
 
     if (ret && ret->init(
         createEditBtnSprite(sprite, false),
         createEditBtnSprite(sprite, true),
         ret,
-        (SEL_MenuHandler)&VisibilityToggle::onToggle
+        menu_selector(VisibilityToggle::onToggle)
     )) {
         ret->m_pSetter = setter;
         ret->m_pGetter = getter;
         ret->updateState();
-        ret->autorelease();
+        ret->retain();
         return ret;
     }
 
@@ -58,4 +58,9 @@ VisibilityToggle* VisibilityToggle::create(
 
     CC_SAFE_DELETE(ret);
     return nullptr;
+}
+
+VisibilityToggle::~VisibilityToggle() {
+    this->release();
+    CCMenuItemToggler::~CCMenuItemToggler();
 }
