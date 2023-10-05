@@ -46,7 +46,8 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         bool portalLines = Mod::get()->getSettingValue<bool>("portal-lines");
 
-        g_portalDrawNode->clear();
+		if(g_portalDrawNode != nullptr)
+			g_portalDrawNode->clear();
 
         if(portalLines && g_guides2 != nullptr && m_editor->m_playbackMode != PlaybackMode::Playing) {
             for(auto& portal : CCArrayExt<GameObject*>(g_guides2)) {
