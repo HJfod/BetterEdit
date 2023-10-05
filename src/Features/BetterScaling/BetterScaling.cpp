@@ -8,14 +8,6 @@
 
 using namespace geode::prelude;
 
-bool g_betterScaleEnabled = Mod::get()->getSettingValue<bool>("better-scaling");
-
-$execute {
-    listenForSettingChanges<bool>("better-scaling", [](bool value) {
-        g_betterScaleEnabled = value;
-    });
-}
-
 class $modify(BetterScaleControl, GJScaleControl) {
     CCTextInputNode* m_textInput = nullptr;
     CCScale9Sprite* m_textInputSprite = nullptr;
