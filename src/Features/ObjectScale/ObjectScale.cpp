@@ -429,23 +429,20 @@ class $modify(ScaleEditorUI, EditorUI) {
             return false;
         }
 
+        auto position = input->getParent()->convertToWorldSpace(input->getPosition());
+
         auto nodeSize = input->getScaledContentSize();
-        nodeSize.width *= 2.0f;
-        nodeSize.height *= 1.5f;
 
         auto inputRect = CCRect {
-            m_scaleControl->getPositionX() + input->getPositionX() - nodeSize.width / 2,
-            (m_scaleControl->getPositionY() + input->getPositionY() - nodeSize.height / 2) + 12.5f,
+            position.x - nodeSize.width / 2,
+            position.y - nodeSize.height / 2,
             nodeSize.width,
             nodeSize.height
         };
 
-        auto pos = GameManager::sharedState()
-            ->getEditorLayer()
-            ->getObjectLayer()
-            ->convertTouchToNodeSpace(touch);
-        
-        if (inputRect.containsPoint(pos)) {
+        auto location = touch->getLocation();
+
+        if (inputRect.containsPoint(location)) {
             input->getTextField()->attachWithIME();
             return true;
         } 
