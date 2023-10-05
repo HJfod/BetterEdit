@@ -10,8 +10,6 @@ using namespace geode::prelude;
 CCArray* g_guides2 = nullptr;
 CCDrawNode* g_portalDrawNode = nullptr;
 
-#ifdef GEODE_IS_WINDOWS
-
 class $modify(PortalLinesLayer, DrawGridLayer) {
     bool init(CCNode* grid, LevelEditorLayer* editor) {
         if(!DrawGridLayer::init(grid, editor))
@@ -197,5 +195,3 @@ BE_EDITOREXIT() {
         g_portalDrawNode = nullptr;
     }
 }
-
-#endif

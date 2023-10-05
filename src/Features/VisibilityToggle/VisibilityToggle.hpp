@@ -29,6 +29,7 @@ class VisibilityToggle : public CCMenuItemToggler {
         void onToggle(CCObject*);
     
     public:
+        ~VisibilityToggle();
         void updateState();
         VisibilityToggle* invokeSetter();
 
