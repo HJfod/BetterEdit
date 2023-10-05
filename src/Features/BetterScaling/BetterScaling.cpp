@@ -168,7 +168,12 @@ class $modify(BetterScaleControl, GJScaleControl) {
         float val = roundf((m_slider->m_touchLogic->m_thumb->getValue() * 1.5f + 0.5f) * 100) / 100;
 
         float snap = static_cast<float>(Mod::get()->getSettingValue<double>("scale-snap"));
-        val = roundf(val / snap) * snap;
+        float snappedVal = roundf(val / snap) * snap;
+        if (val == 0.5f && snap > 0.5f) {
+            val = 0.5f;
+        } else {
+            val = snappedVal;
+        }
 
         m_slider->setValue((val - 0.5f) / 1.5f);
 
