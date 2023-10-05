@@ -6,7 +6,7 @@ This is the branch for the v5 version of BetterEdit, which is only for [Geode](h
 
 BetterEdit 5 is currently available as an alpha version on both **Windows and Mac**. Android support is planned in the future.
 
-If you'd like to try the next generation of BetterEdit out for yourself, you can get the latest binary from [releases](https://github.com/HJfod/BetterEdit/releases/tag/v5.0.0-alpha) (download `BetterEdit.geode`).
+If you'd like to try the next generation of BetterEdit out for yourself, you can get the latest binary from [releases](https://github.com/HJfod/BetterEdit/releases/latest) (download `BetterEdit.geode`).
 
 If you would like to report any issues or suggest features, feel free to use the [issues](https://github.com/HJfod/BetterEdit/issues) tab.
 

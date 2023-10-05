@@ -1,3 +1,6 @@
-BetterEdit takes a lot of time and effort to develope, so if you'd like to monetarily support my work, [I have a PayPal](https://www.paypal.me/hjfod).
+BetterEdit is developed by HJFod, ninXout, Catto, and Flame. Donations are much appreciated and individual links can be found below!
 
-In the future, there will also likely be released a paid **BetterEdit Pro** with extra features.
+ - [HJFod](https://www.paypal.me/hjfod)
+ - [Catto](https://bmc.link/cattodev)
+
+ninXout and Flame are not accepting donations at this time.

@@ -1,3 +1,3 @@
-#include <Geode/DefaultInclude.hpp>
+#include <Geode/Geode.hpp>
 
-using namespace geode::prelude;
+// the edit is now better :D

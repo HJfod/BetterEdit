@@ -2,16 +2,16 @@ cmake_minimum_required(VERSION 3.3.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(BetterEdit VERSION 5.0.0)
+project(BetterEdit VERSION 4.6.0)
 
 file(GLOB SOURCES
-	src/features/backups/*.cpp
-	src/features/history/*.cpp
-	src/features/*.cpp
-	src/tracking/*.cpp
-	src/script/*.cpp
-	src/other/*.cpp
-	src/ui/*.cpp
+	src/Features/RotateSaws/*.cpp
+	src/Features/ZoomText/*.cpp
+	src/Features/ViewTab/*.cpp
+	src/Features/MoreTabs/*.cpp
+	src/Features/VisibilityToggle/*.cpp
+	src/Other/*.cpp
+	src/Features/*.cpp
 	src/*.cpp
 )
 
@@ -19,15 +19,9 @@ file(GLOB SOURCES
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 
-target_include_directories(${PROJECT_NAME}
-	PUBLIC "include"
-    PRIVATE "src"
+target_include_directories(${PROJECT_NAME} PUBLIC
+    src
 )
-
-option(CLIPPER2_UTILS "Build utilities" Off)
-option(CLIPPER2_EXAMPLES "Build examples" Off)
-option(CLIPPER2_TESTS "Build tests" Off)
-add_subdirectory(src/external/Clipper2)
 
 if (NOT DEFINED ENV{GEODE_SDK})
     message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")
@@ -35,16 +29,6 @@ else()
     message(STATUS "Found Geode: $ENV{GEODE_SDK}")
 endif()
 
-set(GEODE_LINK_NIGHTLY On)
 add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/pro")
-	add_subdirectory(pro)
-endif()
-
-if (PROJECT_IS_TOP_LEVEL)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE HJFOD_BETTEREDIT_EXPORTING)
-endif()
-
-target_link_libraries(${PROJECT_NAME} Clipper2)
 setup_geode_mod(${PROJECT_NAME})

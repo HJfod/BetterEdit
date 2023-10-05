@@ -1,9 +1,9 @@
 {
-	"geode": "1.0.0",
-	"version": "v5.0.0-alpha.8",
-	"id": "hjfod.betteredit",
+	"geode": "1.3.4",
+	"version": "v1.0.0",
+	"id": "be_team.betteredit",
 	"name": "BetterEdit",
-	"developer": "HJfod",
+	"developer": "BE Team",
 	"description": "The ultimate editor improvement mod",
 	"repository": "https://github.com/hjfod/BetterEdit",
 	"settings": {
@@ -11,7 +11,73 @@
 			"type": "bool",
 			"default": true,
 			"name": "Zoom Towards Cursor",
-			"description": "When enabled, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen. Not currently supported on MacOS"
+			"description": "When enabled and while holding down the CTRL key, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen"
+		},
+		"rotate-saws-in-editor": {
+			"type": "bool",
+			"default": true,
+			"name": "Rotate Saws in Editor",
+			"description": "When enabled, saws will rotate while playtesting in the editor"
+		},
+		"hide-ldm": {
+			"type": "bool",
+			"default": false,
+			"name": "Hide LDM objects",
+			"description": "When enabled, LDM objects will be hidden in the editor"
+		},
+		"editor-pulse": {
+			"type": "bool",
+			"default": true,
+			"name": "Pulse objects in editor",
+			"description": "When enabled, objects will pulse in the editor"
+		},
+		"smart-startpos": {
+			"type": "bool",
+			"default": true,
+			"name": "Smart StartPos",
+			"description": "When enabled, all StartPoses in the editor will be automatically set for you"
+		},
+		"playtest-lag-fix": {
+			"type": "bool",
+			"default": true,
+			"name": "Playtest Lag Fix",
+			"description": "When enabled, the lag when beginning a Playtest will not happen"
+		},
+		"pos-line": {
+			"type": "bool",
+			"default": true,
+			"name": "Show position line",
+			"description": "When enabled, position line will be shown in the editor"
+		},
+		"portal-lines": {
+			"type": "bool",
+			"default": true,
+			"name": "Show portal lines",
+			"description": "When enabled, portal lines will be shown in the editor"
+		},
+		"color-gm-borders": {
+			"type": "bool",
+			"default": true,
+			"name": "Color portal borders",
+			"description": "When enabled, portal lines will be colored in the editor"
+		},
+		"highlight-triggers": {
+			"type": "bool",
+			"default": true,
+			"name": "Highlight triggers",
+			"description": "When enabled, activated triggers will be highlighted during playtest"
+		},
+		"dash-lines": {
+			"type": "bool",
+			"default": true,
+			"name": "Show dash orb trajectory",
+			"description": "When enabled, dash orb trajectories will be shown in the editor"
+		},
+		"enable-global-clipboard": {
+			"type": "bool",
+			"default": true,
+			"name": "Global Clipboard",
+			"description": "When enabled, keeps copied objects when switching levels"
 		},
 		"show-zoom-text": {
 			"type": "bool",
@@ -19,35 +85,23 @@
 			"name": "Show Zoom Text",
 			"description": "When enabled, flashes the current zoom level as text when you zoom in / out in the editor"
 		},
-		"show-percentage": {
-			"type": "bool",
-			"default": true,
-			"name": "Show Percentage",
-			"description": "When enabled, flashes the current percentage in the position slider when you move around the editor"
-		},
-		"enable-new-undo": {
-			"type": "bool",
-			"default": true,
-			"name": "Better Undo",
-			"description": "When enabled, allows undoing any action taken in the editor, like modifying object colors"
-		},
-		"selection-preview": {
-			"type": "bool",
-			"default": true,
-			"name": "Selection Preview",
-			"description": "Shows which objects are about to be selected when using Swipe"
-		},
 		"new-color-menu": {
 			"type": "bool",
 			"default": true,
 			"name": "New Color Menu",
 			"description": "Changes the object color selection menu to show more channels aswell as previews for colors and special colors"
 		},
-		"auto-show-grid": {
+		"show-percentage": {
 			"type": "bool",
 			"default": true,
-			"name": "Show Grid on Size Change",
-			"description": "Automatically show the grid when its size is changed or it is locked"
+			"name": "Show Percentage",
+			"description": "When enabled, flashes the current percentage in the position slider when you move around the editor"
+		},
+		"use-time-for-percentage": {
+			"type": "bool",
+			"default": false,
+			"name": "Use Time instead of Percentage",
+			"description": "When enabled along with Show Percentage, shows the current level time in the editor instead of the percentage."
 		},
 		"developer-mode": {
 			"type": "bool",
@@ -64,7 +118,8 @@
 			"UISheet": [
 				"resources/*.png",
 				"resources/history/*.png",
-				"resources/objs/*.png"
+				"resources/objs/*.png",
+				"resources/visibility/*.png"
 			]
 		}
 	},
@@ -75,18 +130,13 @@
 	"dependencies": [
 		{
 			"id": "hjfod.gmd-api",
-			"version": "v1.0.0",
+			"version": "v1.0.2",
 			"required": true
 		},
 		{
-			"id": "hjfod.custom-keybinds",
-			"version": "v1.0.0",
+			"id": "geode.custom-keybinds",
+			"version": "v1.2.2",
 			"required": true
-		},
-		{
-			"id": "geode.mouse-api",
-			"version": "v1.0.0",
-			"required": false
 		}
 	]
 }
