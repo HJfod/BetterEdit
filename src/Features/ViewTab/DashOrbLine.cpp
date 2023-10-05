@@ -22,8 +22,6 @@ float mdistf(float pct1X, float pct1Y, float pct2X, float pct2Y, float pct3X, fl
 CCArray* g_dashOrbs = nullptr;
 CCArray* g_dashOrbEnds = nullptr;
 
-#ifdef GEODE_IS_WINDOWS
-
 class $modify(DashOrbLineLayer, DrawGridLayer) {
     bool init(CCNode* grid, LevelEditorLayer* editor) {
         if(!DrawGridLayer::init(grid, editor))
@@ -139,5 +137,3 @@ BE_EDITOREXIT() {
         g_dashOrbEnds = nullptr;
     }
 }
-
-#endif
