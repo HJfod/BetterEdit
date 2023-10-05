@@ -10,7 +10,8 @@ using namespace geode::prelude;
 class $modify(BetterScaleControl, GJScaleControl) {
     CCTextInputNode* m_textInput = nullptr;
     CCScale9Sprite* m_textInputSprite = nullptr;
-    Patch* m_absolutePositionPatch = nullptr;
+    // TODO find a way to do absolute position without patches
+    // Patch* m_absolutePositionPatch = nullptr;
     InputScaleDelegate* m_inputScaleDelegate = nullptr;
 
     bool m_scalingUILoaded = false;
@@ -59,18 +60,19 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
         bool scaleSnap = Mod::get()->getSavedValue<bool>("scale-snap-enabled", false);
         bool absolutePosition = Mod::get()->getSavedValue<bool>("absolute-position-enabled", false);
+        // TODO absolute positioning
+        absolutePosition = false;
 
         Mod::get()->setSavedValue<bool>("scale-snap-enabled", scaleSnap);
         Mod::get()->setSavedValue<bool>("absolute-position-enabled", absolutePosition);
 
-        if (absolutePosition && m_fields->m_absolutePositionPatch == nullptr) {
-            m_fields->m_absolutePositionPatch = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x8f2f9), { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }).unwrap();
-            log::info("patched successfully!");
-        } else if (!absolutePosition && m_fields->m_absolutePositionPatch != nullptr) {
-            Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
-            m_fields->m_absolutePositionPatch = nullptr;
-            log::info("unpatched successfully!");
-        }
+        // TODO find a way to do absolute position without patches
+        // if (absolutePosition && m_fields->m_absolutePositionPatch == nullptr) {
+        //     m_fields->m_absolutePositionPatch = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x8f2f9), { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }).unwrap();
+        // } else if (!absolutePosition && m_fields->m_absolutePositionPatch != nullptr) {
+        //     Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
+        //     m_fields->m_absolutePositionPatch = nullptr;
+        // }
 
         auto menu = CCMenu::create();
         menu->setID("lock-menu"_spr);
@@ -118,21 +120,22 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
         if (m_fields->m_textInput) {
             m_fields->m_textInput->removeFromParentAndCleanup(true);
-            m_fields->m_inputScaleDelegate = nullptr;
+            m_fields->m_textInput = nullptr;
         }
         if (m_fields->m_textInputSprite) {
             m_fields->m_textInputSprite->removeFromParentAndCleanup(true);
-            m_fields->m_inputScaleDelegate = nullptr;
+            m_fields->m_textInputSprite = nullptr;
         }
         if (m_fields->m_inputScaleDelegate) {
+            log::info("removing delegate");
             m_fields->m_inputScaleDelegate->removeFromParentAndCleanup(true);
             m_fields->m_inputScaleDelegate = nullptr;
-        }
-
-        if (m_fields->m_absolutePositionPatch) {
-            Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
-            m_fields->m_absolutePositionPatch = nullptr;
-        }
+        } 
+        // TODO absolute positioning
+        // if (m_fields->m_absolutePositionPatch) {
+        //     Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
+        //     m_fields->m_absolutePositionPatch = nullptr;
+        // }
 
         auto menu = this->getChildByID("lock-menu"_spr);
         if (menu) {
@@ -159,14 +162,9 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
         m_slider->ccTouchMoved(touch, event);
         float val = roundf((m_slider->m_touchLogic->m_thumb->getValue() * 1.5f + 0.5f) * 100) / 100;
-        log::info("slider value: {}, val: {}", m_slider->m_touchLogic->m_thumb->getValue(), val);
 
         float snap = static_cast<float>(Mod::get()->getSettingValue<double>("scale-snap"));
         val = roundf(val / snap) * snap;
-        log::info("new val {}", val);
-        if (val < 0.5f) {
-            val = 0.5f;
-        }
 
         m_slider->setValue((val - 0.5f) / 1.5f);
 
@@ -180,18 +178,18 @@ class $modify(BetterScaleControl, GJScaleControl) {
     }
 
     void onAbsolutePositionSwap(CCObject* sender) {
-        log::info("swapping absolute position swap");
+        Notification::create("Absolute positioning is temporarily unavailable", CCSprite::createWithSpriteFrameName("diffIcon_03_btn_001.png"))->show();
+        return;
         bool enabled = !Mod::get()->getSavedValue<bool>("absolute-position-enabled");
         Mod::get()->setSavedValue("absolute-position-enabled", enabled);
 
-        if (enabled && m_fields->m_absolutePositionPatch == nullptr) {
-            m_fields->m_absolutePositionPatch = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x8f2f9), { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }).unwrap();
-            log::info("patched successfully!");
-        } else if (!enabled && m_fields->m_absolutePositionPatch != nullptr) {
-            log::info("unpatched successfully!");
-            Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
-            m_fields->m_absolutePositionPatch = nullptr;
-        }
+        // TODO absolute positioning
+        // if (enabled && m_fields->m_absolutePositionPatch == nullptr) {
+        //     m_fields->m_absolutePositionPatch = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x8f2f9), { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }).unwrap();
+        // } else if (!enabled && m_fields->m_absolutePositionPatch != nullptr) {
+        //     Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
+        //     m_fields->m_absolutePositionPatch = nullptr;
+        // }
 
         std::string message = "";
         if (enabled) {
@@ -206,7 +204,6 @@ class $modify(BetterScaleControl, GJScaleControl) {
     }
 
     void onSliderSnapSwap(CCObject* sender) {
-        log::info("swapping slider snap swap");
         bool enabled = !Mod::get()->getSavedValue<bool>("scale-snap-enabled");
         Mod::get()->setSavedValue("scale-snap-enabled", enabled);
 
@@ -224,15 +221,8 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
     void loadValues(GameObject* object, CCArray* objects) {
         if (!Mod::get()->getSettingValue<bool>("better-scaling")) {
-            if (m_fields->m_scalingUILoaded) {
-                this->revertScalingUI();
-            }
-
             GJScaleControl::loadValues(object, objects);
             return;
-        }
-        if (!m_fields->m_scalingUILoaded) {
-            this->setupScalingUI();
         }
 
         GJScaleControl::loadValues(object, objects);
@@ -251,10 +241,11 @@ class $modify(BetterScaleControl, GJScaleControl) {
     }
 
     void updateLabel(float value) {
-        if (!Mod::get()->getSettingValue<bool>("better-scaling") && !m_fields->m_scalingUILoaded) {
+        if (!Mod::get()->getSettingValue<bool>("better-scaling")) {
             GJScaleControl::updateLabel(value);
             return;
         }
+
         GJScaleControl::updateLabel(value);
 
         std::stringstream ss;
@@ -266,6 +257,10 @@ class $modify(BetterScaleControl, GJScaleControl) {
             m_fields->m_textInput->setString(s);
         }
     }
+
+    bool betterScaleEnabled() {
+        return !Mod::get()->getSettingValue<bool>("better-scaling") && !m_fields->m_scalingUILoaded;
+    }
 };
 
 class $modify(ScaleEditorUI, EditorUI) {
@@ -275,26 +270,36 @@ class $modify(ScaleEditorUI, EditorUI) {
     bool m_betterScalingActivated = false;
 
     void activateScaleControl(CCObject* sender) {
-        auto setting = Mod::get()->getSetting("better-scaling");
-        EditorUI::activateScaleControl(sender);
-
-        if (m_scaleControl->getChildByID("lock-menu"_spr) == nullptr) {
+        auto scaleControl = reinterpret_cast<BetterScaleControl*>(m_scaleControl);
+        if (scaleControl->betterScaleEnabled()) {
             m_fields->m_betterScalingActivated = false;
+            log::info("no");
         } else {
             m_fields->m_betterScalingActivated = true;
+            log::info("yes");
         }
-
-        if (!Mod::get()->getSettingValue<bool>("better-scaling") && !m_fields->m_betterScalingActivated) {
-            return;
-        }
-        auto pos = CCDirector::sharedDirector()->getWinSize() / 2;
-        pos.height += 50.0f;
-        pos = m_editorLayer->m_objectLayer->convertToNodeSpace(pos);
-        m_scaleControl->setPosition(pos);
+        EditorUI::activateScaleControl(sender);
     }
 
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
-        if (!Mod::get()->getSettingValue<bool>("better-scaling") && !m_fields->m_betterScalingActivated) {
+        auto scaleControl = reinterpret_cast<BetterScaleControl*>(m_scaleControl);
+        auto betterScaling = Mod::get()->getSettingValue<bool>("better-scaling");
+
+        if (!betterScaling && scaleControl->m_fields->m_scalingUILoaded) {
+            scaleControl->revertScalingUI();
+            m_fields->m_betterScalingActivated = false;
+        }
+
+        if (betterScaling && !scaleControl->m_fields->m_scalingUILoaded) {
+            scaleControl->setupScalingUI();
+            scaleControl->updateLabel(scaleControl->m_value);
+            m_fields->m_betterScalingActivated = true;
+        }
+        if (!m_fields->m_betterScalingActivated) {
+            return EditorUI::ccTouchBegan(touch, event);
+        }
+
+        if (!scaleControl->isVisible()) {
             return EditorUI::ccTouchBegan(touch, event);
         }
 
@@ -310,10 +315,9 @@ class $modify(ScaleEditorUI, EditorUI) {
 
     void ccTouchEnded(CCTouch* touch, CCEvent* event) {
         EditorUI::ccTouchEnded(touch, event);
-        if (!Mod::get()->getSettingValue<bool>("better-scaling") && !m_fields->m_betterScalingActivated) {
+        if (!m_fields->m_betterScalingActivated) {
             return;
         }
-        log::info("touch ended");
 
         if (!m_fields->m_isTouchingAbsoluteLock && !m_fields->m_isTouchingScaleSnap) {
             return;
@@ -327,7 +331,6 @@ class $modify(ScaleEditorUI, EditorUI) {
         }
 
         if (this->mouseIsHoveringNode(delegate->m_snapLock, touch->getLocation())) {
-            log::info("deselect snap lock");
             delegate->m_snapLock->unselected();
 
             if (m_fields->m_isTouchingScaleSnap) {
@@ -336,7 +339,6 @@ class $modify(ScaleEditorUI, EditorUI) {
         }
 
         if (this->mouseIsHoveringNode(delegate->m_absoluteLock, touch->getLocation())) {
-            log::info("deselect absolute lock");
             delegate->m_absoluteLock->unselected();
             if (m_fields->m_isTouchingAbsoluteLock) {
                 delegate->m_absoluteLock->activate();
@@ -349,7 +351,7 @@ class $modify(ScaleEditorUI, EditorUI) {
 
     void ccTouchMoved(CCTouch* touch, CCEvent* event) {
         EditorUI::ccTouchMoved(touch, event);
-        if (!Mod::get()->getSettingValue<bool>("better-scaling") && !m_fields->m_betterScalingActivated) {
+        if (!m_fields->m_betterScalingActivated) {
             return;
         }
 
@@ -393,25 +395,21 @@ class $modify(ScaleEditorUI, EditorUI) {
         auto delegate = static_cast<InputScaleDelegate*>(this->m_scaleControl->getChildByID("input-delegate"_spr));
         auto input = static_cast<CCTextInputNode*>(this->m_scaleControl->getChildByID("scale-input"_spr));
         if (!delegate) {
-            log::info("no delegate");
             return false;
         }
         if (m_scaleControl == nullptr || !m_scaleControl->isVisible()) {
-            log::info("scale control is hidden");
             return false;
         }
 
-        if (this->mouseIsHoveringNode(delegate->m_absoluteLock, touch->getLocation())) {
-            log::info("clicked absolute lock");
-            delegate->m_absoluteLock->selected();
-            m_fields->m_isTouchingAbsoluteLock = true;
+        if (this->mouseIsHoveringNode(delegate->m_snapLock, touch->getLocation())) {
+            delegate->m_snapLock->selected();
+            m_fields->m_isTouchingScaleSnap = true;
             return true;
         }
 
-        if (this->mouseIsHoveringNode(delegate->m_snapLock, touch->getLocation())) {
-            log::info("clicked snap lock");
-            delegate->m_snapLock->selected();
-            m_fields->m_isTouchingScaleSnap = true;
+        if (this->mouseIsHoveringNode(delegate->m_absoluteLock, touch->getLocation())) {
+            delegate->m_absoluteLock->selected();
+            m_fields->m_isTouchingAbsoluteLock = true;
             return true;
         }
 

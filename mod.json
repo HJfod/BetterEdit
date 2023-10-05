@@ -45,6 +45,12 @@
 				"slider-step": 0.01
 			}
 		},
+		"center-scale-on-screen": {
+			"type": "bool",
+			"default": false,
+			"name": "Center Scaling UI",
+			"description": "When enabled, displays the scaling UI in the center of the screen, instead of displaying it above the selected object"
+		},
 		"editor-pulse": {
 			"type": "bool",
 			"default": true,
