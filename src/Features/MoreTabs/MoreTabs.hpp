@@ -30,6 +30,7 @@ public:
     int addEditTab(const char* icon, CCNode* content);
 
     EditButtonBar* getCreateTab(int tag) const;
+    void switchEditTab(int tag);
 
     void nextTab();
     void prevTab();

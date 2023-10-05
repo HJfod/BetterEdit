@@ -131,6 +131,16 @@ EditButtonBar* MoreTabs::getCreateTab(int tag) const {
     return static_cast<EditButtonBar*>(m_ui->m_createButtonBars->objectAtIndex(tag));
 }
 
+void MoreTabs::switchEditTab(int tag) {
+    if (m_ui->m_selectedMode == 3) {
+        m_selectedEditTab = tag - 1;
+        if (m_selectedEditTab >= static_cast<int>(m_editTabs.size()) || m_selectedEditTab < 0) {
+            m_selectedEditTab = 0;
+        }
+        this->updateMode();
+    }
+}
+
 void MoreTabs::nextTab() {
     if (m_ui->m_selectedMode == 3) {
         m_selectedEditTab += 1;

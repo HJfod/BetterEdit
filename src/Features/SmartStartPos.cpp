@@ -12,94 +12,106 @@ class $modify(LevelEditorLayer) {
         willFlip.resize(startPoses.size());
         size_t index = 0;
         for (StartPosObject* startPos : startPoses) {
-            for (size_t i = 0; i < gravityPortals.size(); i++)
-            {
-                if (gravityPortals[i]->getPositionX() - 10 > startPos->getPositionX())
-                    break;
-                if (gravityPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-                    startPos->m_levelSettings->m_isFlipped = gravityPortals[i]->m_objectID == 11;
-            }
-
-            startPos->m_levelSettings->m_startDual = LevelEditorLayer::get()->m_levelSettings->m_startDual;
-            for (size_t i = 0; i < dualPortals.size(); i++)
-            {
-                if (dualPortals[i]->getPositionX() - 10 > startPos->getPositionX())
-                    break;
-                if (dualPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-                    startPos->m_levelSettings->m_startDual = dualPortals[i]->m_objectID == 286;
-            }
-            startPos->m_levelSettings->m_startMode = LevelEditorLayer::get()->m_levelSettings->m_startMode;
-            for (size_t i = 0; i < gamemodePortals.size(); i++)
-            {
-                if (gamemodePortals[i]->getPositionX() - 10 > startPos->getPositionX())
-                    break;
-                if (gamemodePortals[i]->getPositionX() - 10 < startPos->getPositionX())
-                {
-                    switch (gamemodePortals[i]->m_objectID)
-                    {
-                    case 12:
-                        startPos->m_levelSettings->m_startMode = (int)IconType::Cube;
-                        break;
-                    case 13:
-                        startPos->m_levelSettings->m_startMode = (int)IconType::Ship;
-                        break;
-                    case 47:
-                        startPos->m_levelSettings->m_startMode = (int)IconType::Ball;
-                        break;
-                    case 111:
-                        startPos->m_levelSettings->m_startMode = (int)IconType::Ufo;
-                        break;
-                    case 660:
-                        startPos->m_levelSettings->m_startMode = (int)IconType::Wave;
-                        break;
-                    case 745:
-                        startPos->m_levelSettings->m_startMode = (int)IconType::Robot;
-                        break;
-                    case 1331:
-                        startPos->m_levelSettings->m_startMode = (int)IconType::Spider;
-                        break;
-                    }
-                }
-            }
-
-            startPos->m_levelSettings->m_startMini = LevelEditorLayer::get()->m_levelSettings->m_startMini;
-            for (size_t i = 0; i < miniPortals.size(); i++)
-            {
-                if (miniPortals[i]->getPositionX() - 10 > startPos->getPositionX())
-                    break;
-                if (miniPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-                    startPos->m_levelSettings->m_startMini = miniPortals[i]->m_objectID == 101;
-            }
-
-            startPos->m_levelSettings->m_startSpeed = LevelEditorLayer::get()->m_levelSettings->m_startSpeed;
-            for (size_t i = 0; i < speedChanges.size(); i++)
-            {
-                if (speedChanges[i]->getPositionX() - 50 > startPos->getPositionX())
-                    break;
-                if (speedChanges[i]->getPositionX() - 50 < startPos->getPositionX())
-                {
-                    switch (speedChanges[i]->m_objectID)
-                    {
-                    case 200:
-                        startPos->m_levelSettings->m_startSpeed = Speed::Slow;
-                        break;
-                    case 201:
-                        startPos->m_levelSettings->m_startSpeed = Speed::Normal;
-                        break;
-                    case 202:
-                        startPos->m_levelSettings->m_startSpeed = Speed::Fast;
-                        break;
-                    case 203:
-                        startPos->m_levelSettings->m_startSpeed = Speed::Faster;
-                        break;
-                    case 1334:
-                        startPos->m_levelSettings->m_startSpeed = Speed::Fastest;
-                        break;
-                    }
-                }
-            }
+            setupStartPos(startPos);
             index++;
         }
+    }
+
+    void setupStartPos(StartPosObject* startPos) {
+        for (size_t i = 0; i < gravityPortals.size(); i++)
+        {
+            if (gravityPortals[i]->getPositionX() - 10 > startPos->getPositionX())
+                break;
+            if (gravityPortals[i]->getPositionX() - 10 < startPos->getPositionX())
+                startPos->m_levelSettings->m_isFlipped = gravityPortals[i]->m_objectID == 11;
+        }
+
+        startPos->m_levelSettings->m_startDual = LevelEditorLayer::get()->m_levelSettings->m_startDual;
+        for (size_t i = 0; i < dualPortals.size(); i++)
+        {
+            if (dualPortals[i]->getPositionX() - 10 > startPos->getPositionX())
+                break;
+            if (dualPortals[i]->getPositionX() - 10 < startPos->getPositionX())
+                startPos->m_levelSettings->m_startDual = dualPortals[i]->m_objectID == 286;
+        }
+        startPos->m_levelSettings->m_startMode = LevelEditorLayer::get()->m_levelSettings->m_startMode;
+        for (size_t i = 0; i < gamemodePortals.size(); i++)
+        {
+            if (gamemodePortals[i]->getPositionX() - 10 > startPos->getPositionX())
+                break;
+            if (gamemodePortals[i]->getPositionX() - 10 < startPos->getPositionX())
+            {
+                switch (gamemodePortals[i]->m_objectID)
+                {
+                case 12:
+                    startPos->m_levelSettings->m_startMode = (int)IconType::Cube;
+                    break;
+                case 13:
+                    startPos->m_levelSettings->m_startMode = (int)IconType::Ship;
+                    break;
+                case 47:
+                    startPos->m_levelSettings->m_startMode = (int)IconType::Ball;
+                    break;
+                case 111:
+                    startPos->m_levelSettings->m_startMode = (int)IconType::Ufo;
+                    break;
+                case 660:
+                    startPos->m_levelSettings->m_startMode = (int)IconType::Wave;
+                    break;
+                case 745:
+                    startPos->m_levelSettings->m_startMode = (int)IconType::Robot;
+                    break;
+                case 1331:
+                    startPos->m_levelSettings->m_startMode = (int)IconType::Spider;
+                    break;
+                }
+            }
+        }
+
+        startPos->m_levelSettings->m_startMini = LevelEditorLayer::get()->m_levelSettings->m_startMini;
+        for (size_t i = 0; i < miniPortals.size(); i++)
+        {
+            if (miniPortals[i]->getPositionX() - 10 > startPos->getPositionX())
+                break;
+            if (miniPortals[i]->getPositionX() - 10 < startPos->getPositionX())
+                startPos->m_levelSettings->m_startMini = miniPortals[i]->m_objectID == 101;
+        }
+
+        startPos->m_levelSettings->m_startSpeed = LevelEditorLayer::get()->m_levelSettings->m_startSpeed;
+        for (size_t i = 0; i < speedChanges.size(); i++)
+        {
+            if (speedChanges[i]->getPositionX() - 50 > startPos->getPositionX())
+                break;
+            if (speedChanges[i]->getPositionX() - 50 < startPos->getPositionX())
+            {
+                switch (speedChanges[i]->m_objectID)
+                {
+                case 200:
+                    startPos->m_levelSettings->m_startSpeed = Speed::Slow;
+                    break;
+                case 201:
+                    startPos->m_levelSettings->m_startSpeed = Speed::Normal;
+                    break;
+                case 202:
+                    startPos->m_levelSettings->m_startSpeed = Speed::Fast;
+                    break;
+                case 203:
+                    startPos->m_levelSettings->m_startSpeed = Speed::Faster;
+                    break;
+                case 1334:
+                    startPos->m_levelSettings->m_startSpeed = Speed::Fastest;
+                    break;
+                }
+            }
+        }
+    }
+
+    void objectMoved(GameObject* object) {
+        if (object->m_objectID != 31) {
+            return;
+        }
+
+        setupStartPos(static_cast<StartPosObject*>(object));
     }
 
     bool init(GJGameLevel* gj) {

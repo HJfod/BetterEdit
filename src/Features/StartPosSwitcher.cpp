@@ -364,6 +364,11 @@ class $modify(MyEditorUI, EditorUI) {
         return true;
     }
 
+    void selectObject(GameObject* obj, bool filter) {
+        EditorUI::selectObject(obj, filter);
+        MoreTabs::get(this)->switchEditTab(1);
+    }
+
     void moveObject(GameObject* obj, CCPoint pos) {
         EditorUI::moveObject(obj, pos);
         PlaytestHerePopup::move();
