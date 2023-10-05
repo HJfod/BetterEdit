@@ -14,7 +14,6 @@ class $modify(BetterScaleControl, GJScaleControl) {
     // TODO find a way to do absolute position without patches
     // Patch* m_absolutePositionPatch = nullptr;
     InputScaleDelegate* m_inputScaleDelegate = nullptr;
-    bool m_hasSliderBypass = false;
 
     bool m_scalingUILoaded = false;
 
@@ -170,14 +169,8 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
         float snap = static_cast<float>(Mod::get()->getSettingValue<double>("scale-snap"));
 
-        if (val < 0.5f || val > 2.0f) {
-            m_fields->m_hasSliderBypass = true;
-        } else {
-            m_fields->m_hasSliderBypass = false;
-        }
-
         float snappedVal = roundf(val / snap) * snap;
-        if (val == 0.5f && snap > 0.5f && !m_fields->m_hasSliderBypass) {
+        if (val == 0.5f && snap > 0.5f) {
             val = 0.5f;
         } else {
             val = snappedVal;
