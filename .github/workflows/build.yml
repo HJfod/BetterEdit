@@ -9,7 +9,9 @@ on:
 env:
   GEODE_SDK: ${{ github.workspace }}/sdk
   GEODE_VERSION: nightly
-  CLI_VERSION: v2.4.0
+  CLI_VERSION: v2.5.0
+  MOD_NAME: betteredit
+  MOD_ID: be_team.betteredit
 
 jobs:
   build:
@@ -17,131 +19,31 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - name: "Windows"
-          bin_folder: "windows"
-          os: windows-2019
-          extra_flags: '-T host=x64 -A win32'
-          out_paths: |
-            ./build/Release/*.dll
-            ./build/Release/*.lib
-          platform_suffix: 'win'
-          cli_setup: ''
-          cli_name: 'geode.exe'
+          - name: Windows
+            os: windows-latest
           
-        - name: "macOS"
-          bin_folder: "macos"
-          os: macos-latest
-          extra_flags: "-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13"
-          out_paths: './build/*.dylib'
-          platform_suffix: 'mac'
-          cli_setup: 'chmod a+rwx ./geode'
-          cli_name: 'geode'
-          
-    name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+          - name: macOS
+            os: macos-latest
+    name: ${{matrix.config.name}}
+    runs-on: ${{matrix.config.os}}
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        repository: geode-sdk/geode
-        path: ${{ env.GEODE_SDK }}
-     
-    - uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x86
-      
-    - name: Download Geode SDK binaries
-      run: |
-        cd ${{ github.workspace }}/sdk
-        mkdir bin
-        mkdir bin/nightly
-        cd bin/nightly
-        curl -L https://github.com/geode-sdk/geode/releases/download/${{ env.GEODE_VERSION }}/geode-${{ env.GEODE_VERSION }}-${{ matrix.config.platform_suffix }}.zip -o geode-sdk.zip
-        tar -xf geode-sdk.zip
-            
-    - name: Download and Unzip CLI
-      run: |
-        mkdir ${{ github.workspace }}/cli
-        cd ${{ github.workspace }}/cli
-        curl -L https://github.com/geode-sdk/cli/releases/download/${{ env.CLI_VERSION }}/geode-cli-${{ env.CLI_VERSION }}-${{ matrix.config.platform_suffix }}.zip -o geode-cli.zip
-        tar -xf geode-cli.zip
-        ${{ matrix.config.cli_setup }}
-        mkdir ${{ github.workspace }}/profile
-        mkdir ${{ github.workspace }}/profile/geode
-        mkdir ${{ github.workspace }}/profile/geode/mods
-        ./${{ matrix.config.cli_name }} profile add --name GithubActions ${{ github.workspace }}/profile
-      
-      # Mac for some reason returns a 403 when updating index through CLI
-    - name: Manually download index
-      uses: actions/checkout@v3
-      with:
-        repository: geode-sdk/mods
-        path: ${{ github.workspace }}/profile/geode/index/geode-sdk_mods
-
-    - name: Configure CMake
-      run: |
-        cd ${{ github.workspace }}
-        cmake -B build ${{ matrix.config.extra_flags }} -DCLI_PATH=${{ github.workspace }}/cli -DGEODE_DONT_INSTALL_MODS=On -DGEODE_DONT_UPDATE_INDEX=On
-    
-    - name: Build
-      run: |
-        cd ${{ github.workspace }}/build
-        cmake --build . --config Release
-    
-    - uses: actions/upload-artifact@v3
-      with:
-        name: "build-${{ matrix.config.bin_folder }}"
-        path: "${{ matrix.config.out_paths }}"
-        
-        
-  package:
-    name: "Package both builds"
-    # would use linux but theres no cli build for it
-    runs-on: windows-2019
-    needs: ['build']
-    
-    steps:          
       - uses: actions/checkout@v3
+
+      - name: Build the mod
+        uses: geode-sdk/build-geode-mod@main
         with:
-          submodules: recursive
+          combine: true
+  package:
+    name: Package builds
+    runs-on: ubuntu-latest
+    needs: ['build']
+
+    steps:
+      - uses: geode-sdk/build-geode-mod@combine
+        id: build
       
-      - name: Download and Unzip CLI
-        run: |
-          curl -L https://github.com/geode-sdk/cli/releases/download/${{ env.CLI_VERSION }}/geode-cli-${{ env.CLI_VERSION }}-win.zip -o geode-cli.zip
-          tar -xf geode-cli.zip
-        
-      - uses: actions/download-artifact@v3
-        with:
-          name: build-windows
-          
-      - uses: actions/download-artifact@v3
-        with:
-          name: build-macos
-          
-      - name: Display structure of downloaded files
-        run: ls -R
-      
-      - name: Merge
-        shell: bash
-        run: |
-          ./geode.exe package new .
-         
       - uses: actions/upload-artifact@v3
         with:
           name: Build Output
-          path: "*.geode"
-          
-      - uses: geekyeggo/delete-artifact@v2
-        with:
-            name: build-windows
-            failOnError: false
-          
-      - uses: geekyeggo/delete-artifact@v2
-        with:
-            name: build-macos
-            failOnError: false
+          path: ${{steps.build.outputs.build-output}}
