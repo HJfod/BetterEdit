@@ -151,7 +151,8 @@ struct $modify(VisibilityTabUI, EditorUI) {
         ViewTabBtn("v_rotate.png", { return shouldRotateSaw(); }, { onRotateSaws(p); });
         ViewTabBtn("v_ldm.png", { return _SettingG("hide-ldm"); }, { static_cast<VisibilityTabUI*>(EditorUI::get())->toggleLDM(b); });
         ViewTabBtn("v_pulse.png", { return _SettingG("editor-pulse"); }, { _SettingS("editor-pulse", b); });
-        ViewTabBtn("v_prevmode.png", { return GameManager::sharedState()->getGameVariable("0036"); }, { GameManager::sharedState()->setGameVariable("0036", b); LevelEditorLayer::get()->updateEditorMode(); });
+        ViewTabBtn("v_prevmode.png", { return GameManager::sharedState()->getGameVariable("0036"); }, { GameManager::sharedState()->setGameVariable("0036", b); LevelEditorLayer::get()->resetMovingObjects();
+            LevelEditorLayer::get()->m_editorUI->onStopPlaytest(p); LevelEditorLayer::get()->updateEditorMode(); });
         ViewTabBtn("v_bpm_line.png", { return GameManager::sharedState()->m_showSongMarkers; }, { GameManager::sharedState()->m_showSongMarkers = b; });
         ViewTabBtn("v_pos_line.png", { return _SettingG("pos-line"); }, { _SettingS("pos-line", b); });
         ViewTabBtn("v_dur_line.png", { return GameManager::sharedState()->getGameVariable("0058"); }, { GameManager::sharedState()->setGameVariable("0058", b); LevelEditorLayer::get()->updateOptions(); });
