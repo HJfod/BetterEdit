@@ -8,11 +8,14 @@
 
 using namespace geode::prelude;
 
+struct AbsolutePositioningParams {
+    CCArrayExt<GameObject*> objects;
+    float scale;
+};
+
 class $modify(BetterScaleControl, GJScaleControl) {
     CCTextInputNode* m_textInput = nullptr;
     CCScale9Sprite* m_textInputSprite = nullptr;
-    // TODO find a way to do absolute position without patches
-    // Patch* m_absolutePositionPatch = nullptr;
     InputScaleDelegate* m_inputScaleDelegate = nullptr;
 
     bool m_scalingUILoaded = false;
@@ -71,17 +74,8 @@ class $modify(BetterScaleControl, GJScaleControl) {
         if (!Mod::get()->hasSavedValue("absolute-position-enabled")) {
             Mod::get()->setSavedValue<bool>("absolute-position-enabled", absolutePosition);
         } else {
-            // TODO absolute position
-            // absolutePosition = Mod::get()->getSavedValue<bool>("absolute-position-enabled");
+            absolutePosition = Mod::get()->getSavedValue<bool>("absolute-position-enabled");
         }
-
-        // TODO find a way to do absolute position without patches
-        // if (absolutePosition && m_fields->m_absolutePositionPatch == nullptr) {
-        //     m_fields->m_absolutePositionPatch = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x8f2f9), { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }).unwrap();
-        // } else if (!absolutePosition && m_fields->m_absolutePositionPatch != nullptr) {
-        //     Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
-        //     m_fields->m_absolutePositionPatch = nullptr;
-        // }
 
         auto menu = CCMenu::create();
         menu->setID("lock-menu"_spr);
@@ -139,11 +133,6 @@ class $modify(BetterScaleControl, GJScaleControl) {
             m_fields->m_inputScaleDelegate->removeFromParentAndCleanup(true);
             m_fields->m_inputScaleDelegate = nullptr;
         } 
-        // TODO absolute positioning
-        // if (m_fields->m_absolutePositionPatch) {
-        //     Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
-        //     m_fields->m_absolutePositionPatch = nullptr;
-        // }
 
         auto menu = this->getChildByID("lock-menu"_spr);
         if (menu) {
@@ -188,18 +177,8 @@ class $modify(BetterScaleControl, GJScaleControl) {
     }
 
     void onAbsolutePositionSwap(CCObject* sender) {
-        Notification::create("Absolute positioning is temporarily unavailable", CCSprite::createWithSpriteFrameName("diffIcon_03_btn_001.png"))->show();
-        return;
         bool enabled = !Mod::get()->getSavedValue<bool>("absolute-position-enabled");
         Mod::get()->setSavedValue("absolute-position-enabled", enabled);
-
-        // TODO absolute positioning
-        // if (enabled && m_fields->m_absolutePositionPatch == nullptr) {
-        //     m_fields->m_absolutePositionPatch = Mod::get()->patch(reinterpret_cast<void*>(base::get() + 0x8f2f9), { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }).unwrap();
-        // } else if (!enabled && m_fields->m_absolutePositionPatch != nullptr) {
-        //     Mod::get()->unpatch(m_fields->m_absolutePositionPatch).unwrap();
-        //     m_fields->m_absolutePositionPatch = nullptr;
-        // }
 
         std::string message = "";
         if (enabled) {
@@ -294,6 +273,36 @@ class $modify(ScaleEditorUI, EditorUI) {
             }
         }
         EditorUI::activateScaleControl(sender);
+    }
+
+    void scaleObjects(CCArray* objects, float scale, CCPoint point) {
+        bool absolutePositioning = Mod::get()->getSavedValue<bool>("absolute-position-enabled");
+        if (!absolutePositioning) {
+            EditorUI::scaleObjects(objects, scale, point);
+            return;
+        }
+
+        if (!this->getActionByTag(0xBEEE2)) {
+            // This feels SUPER sketchy but it works
+            auto array = CCArrayExt<GameObject*>(objects);
+            auto params = new AbsolutePositioningParams( {array, scale} );
+            auto action = CCSequence::create(
+                CCDelayTime::create(0.f),
+                CCCallFuncND::create(this, callfuncND_selector(ScaleEditorUI::absoluteScale), params),
+                nullptr
+            );
+            action->setTag(0xBEEE2);
+            this->runAction(action);
+        }
+    }
+
+    void absoluteScale(CCNode* node, void* params) {
+        auto coolParams = static_cast<AbsolutePositioningParams*>(params);
+
+        for (auto object : coolParams->objects) {
+            object->setScale(coolParams->scale);
+        }
+        delete params;
     }
 
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
