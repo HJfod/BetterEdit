@@ -1,9 +1,21 @@
 # v5.0.0-alpha.8
 
- - Add Global Clipboard
- - Add Clear Clipboard
- - Fix trackpad horizontal scrolling on Mac
- - Add Use time instead of Percentage 
+ - Rewrote BetterEdit from the ground up (again)
+ - Added Rotate Saws
+ - Added New Color Select Menu
+ - Added Playtest Lag Fix
+ - Added Smart StartPos
+ - Added Dash Orb Line
+ - Added Editor Pulsing
+ - Added Highlight Triggers
+ - Added Portal Line Colors
+ - Fixed View Tab
+ - Fixed crash when exiting the editor
+ - Fixed crash when playing a level with any object above 2.0
+ - Added Zoom With Mouse to mac
+ - Added Time instead of Percentage
+ - Added StartPos Switcher
+ - Added Extra Object Info
 
 # v5.0.0-alpha.7
 
