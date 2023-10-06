@@ -25,6 +25,32 @@
 			"name": "Hide LDM objects",
 			"description": "When enabled, LDM objects will be hidden in the editor"
 		},
+		"better-scaling": {
+			"type": "bool",
+			"name": "Better Scaling UI",
+			"description": "When enabled, adds keyboard input, absolute position and interval snapping to the scaling UI",
+			"default": true
+		},
+		"scale-snap": {
+			"type": "float",
+			"default": 0.25,
+			"name": "Scale Snap",
+			"max": 1,
+			"min": 0.01,
+			"description": "Determines by how much should object scale change when in snap mode",
+			"control": {
+				"input": true,
+				"arrows": false,
+				"slider": true,
+				"slider-step": 0.01
+			}
+		},
+		"center-scale-on-screen": {
+			"type": "bool",
+			"default": false,
+			"name": "Center Scaling UI",
+			"description": "When enabled, displays the scaling UI in the center of the screen, instead of displaying it above the selected object"
+		},
 		"editor-pulse": {
 			"type": "bool",
 			"default": true,

@@ -10,6 +10,7 @@ file(GLOB SOURCES
 	src/Features/ViewTab/*.cpp
 	src/Features/MoreTabs/*.cpp
 	src/Features/VisibilityToggle/*.cpp
+	src/Features/BetterScaling/*.cpp
 	src/Other/*.cpp
 	src/Features/*.cpp
 	src/*.cpp
