@@ -106,6 +106,8 @@ protected:
     void onPlayInGame(CCObject*) {
         this->select();
         m_editor->m_editorUI->onPause(nullptr);
+        EditorPauseLayer::get()->setVisible(false);
+        EditorPauseLayer::get()->onSaveAndPlay(nullptr);
     }
 
 public:
@@ -362,6 +364,16 @@ class $modify(MyEditorUI, EditorUI) {
         );
 
         return true;
+    }
+
+    void deleteObject(GameObject* obj, bool filter) {
+        EditorUI::deleteObject(obj, filter);
+        PlaytestHerePopup::hide();
+    }
+
+    void selectObjects(CCArray* objects, bool ignoreFilters) {
+        EditorUI::selectObjects(objects, ignoreFilters);
+        PlaytestHerePopup::hide();
     }
 
     void selectObject(GameObject* obj, bool filter) {
