@@ -7,6 +7,9 @@
 
 using namespace geode::prelude;
 
+// Credit to mat for creating this
+// https://github.com/matcool/geode-mods/blob/main/rgb-color-input/
+
 class $modify(ColorSelectPopup) {
     FLAlertLayer* m_alertLayer = nullptr;
     RGBInputWidget* m_rgbWidget = nullptr;
@@ -36,8 +39,8 @@ class $modify(ColorSelectPopup) {
         return true;
     }
 
-    void updateColorValue() {
-        ColorSelectPopup::updateColorValue();
+    void colorValueChanged(ccColor3B color) {
+        ColorSelectPopup::colorValueChanged(color);
         if (!Mod::get()->getSettingValue<bool>("rgb-color-input")) {
             return;
         }
@@ -76,11 +79,11 @@ class $modify(SetupPulsePopup) {
         m_colorPicker->setPositionX(m_colorPicker->getPositionX() + 3.7f);
         m_fields->m_rgbWidget->setPosition({ center.width - 132.0f, center.height + 32.0f});
 
-        auto squareWidth = this->m_currentColorSpr->getScaledContentSize().width;
+        auto squareWidth = m_currentColorSpr->getScaledContentSize().width;
         auto xPos = m_fields->m_rgbWidget->getPositionX() - squareWidth / 2.0f;
 
-        this->m_currentColorSpr->setPosition({ xPos + 20.0f, center.height + 85.0f });
-        this->m_prevColorSpr->setPosition({ xPos + 20.0f + squareWidth, center.height + 85.0f });
+        m_currentColorSpr->setPosition({ xPos + 20.0f, center.height + 85.0f });
+        m_prevColorSpr->setPosition({ xPos + 20.0f + squareWidth, center.height + 85.0f });
         m_fields->m_rgbWidget->setID("rgb-color-input"_spr);
 
         m_fields->m_alertLayer->addChild(m_fields->m_rgbWidget);
@@ -89,8 +92,8 @@ class $modify(SetupPulsePopup) {
         return true;
     }
 
-    void updateColorValue() {
-        SetupPulsePopup::updateColorValue();
+    void colorValueChanged(ccColor3B color) {
+        SetupPulsePopup::colorValueChanged(color);
         if (!Mod::get()->getSettingValue<bool>("rgb-color-input")) {
             return;
         }

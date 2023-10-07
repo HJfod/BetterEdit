@@ -4,6 +4,9 @@
 
 using namespace geode::prelude;
 
+// Credit to mat for creating this
+// https://github.com/matcool/geode-mods/blob/main/rgb-color-input/
+
 class RGBInputWidget : public CCLayer, public TextInputDelegate {
 protected:
     ColorSelectPopup* m_colorSelect = nullptr;

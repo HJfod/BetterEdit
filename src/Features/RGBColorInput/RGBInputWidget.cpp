@@ -1,5 +1,8 @@
 #include "RGBInputWidget.hpp"
 
+// Credit to mat for creating this
+// https://github.com/matcool/geode-mods/blob/main/rgb-color-input/
+
 bool RGBInputWidget::init(ColorSelectPopup* colorSelect, SetupPulsePopup* setupPulse) {
     m_colorSelect = colorSelect;
     m_setupPulse = setupPulse;
