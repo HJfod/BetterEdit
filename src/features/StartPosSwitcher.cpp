@@ -220,7 +220,7 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
     }
 };
 
-BE_EDITOREXIT() {
+$onEditorExit {
     PlaytestHerePopup::hide();
 }
 

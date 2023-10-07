@@ -186,7 +186,7 @@ class $modify(LevelEditorLayer) {
     }
 };
 
-BE_EDITOREXIT() {
+$onEditorExit {
     if (g_guides2) {
         for(auto& obj : CCArrayExt<GameObject*>(g_guides2))
             g_guides2->removeObject(obj, false);

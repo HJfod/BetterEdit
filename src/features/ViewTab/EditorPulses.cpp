@@ -69,6 +69,6 @@ class $modify(EditorUIPulse, EditorUI) {
     }
 };
 
-BE_EDITOREXIT() {
+$onEditorExit {
     GameSoundManager::sharedManager()->disableMetering();
 }

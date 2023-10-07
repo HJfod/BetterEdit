@@ -120,7 +120,7 @@ class $modify(LevelEditorLayer) {
     }
 };
 
-BE_EDITOREXIT() {
+$onEditorExit {
     auto self = DashOrbLineLayer::get();
 
     #define CLEAR_ARRAY(array)                          \
