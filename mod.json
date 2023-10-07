@@ -51,6 +51,12 @@
 			"name": "Center Scaling UI",
 			"description": "When enabled, displays the scaling UI in the center of the screen, instead of displaying it above the selected object"
 		},
+		"rgb-color-input": {
+			"type": "bool",
+			"default": true,
+			"name": "RGB + HEX Color Input",
+			"description": "Adds a widget that allows RGB and HEX input in color edit, color trigger and pulse trigger"
+		},
 		"editor-pulse": {
 			"type": "bool",
 			"default": true,
