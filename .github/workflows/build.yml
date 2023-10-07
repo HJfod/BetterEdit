@@ -3,15 +3,9 @@ name: Build Geode Mod
 on:
   workflow_dispatch:
   push:
-    branches:
-      - "main"
-
-env:
-  GEODE_SDK: ${{ github.workspace }}/sdk
-  GEODE_VERSION: nightly
-  CLI_VERSION: v2.5.0
-  MOD_NAME: betteredit
-  MOD_ID: be_team.betteredit
+    branches-ignore:
+      - "v4"
+      - "v4-min"
 
 jobs:
   build:
