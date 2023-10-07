@@ -28,6 +28,7 @@ class $modify(ColorSelectPopup) {
         } else {
             m_fields->m_rgbWidget->setPosition({center.width + 127.f, center.height - 90.f});
         }
+        m_fields->m_rgbWidget->setID("rgb-color-input"_spr);
         m_fields->m_alertLayer->addChild(m_fields->m_rgbWidget);
 
         m_fields->m_rgbWidget->setVisible(!m_copyColor);
@@ -80,6 +81,7 @@ class $modify(SetupPulsePopup) {
 
         this->m_currentColorSpr->setPosition({ xPos + 20.0f, center.height + 85.0f });
         this->m_prevColorSpr->setPosition({ xPos + 20.0f + squareWidth, center.height + 85.0f });
+        m_fields->m_rgbWidget->setID("rgb-color-input"_spr);
 
         m_fields->m_alertLayer->addChild(m_fields->m_rgbWidget);
         m_fields->m_rgbWidget->setVisible(m_pulseMode == 0);

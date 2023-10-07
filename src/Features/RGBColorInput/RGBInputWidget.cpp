@@ -65,6 +65,7 @@ bool RGBInputWidget::init(ColorSelectPopup* colorSelect, SetupPulsePopup* setupP
     bg->setZOrder(-1);
     bg->setPositionY(hexYPos);
     bg->setOpacity(opacity);
+    bg->setID("hex-input-bg"_spr);
     this->addChild(bg);
 
     // Red BG
@@ -74,6 +75,7 @@ bool RGBInputWidget::init(ColorSelectPopup* colorSelect, SetupPulsePopup* setupP
     bg->setZOrder(-1);
     bg->setPositionX(redXPos);
     bg->setOpacity(opacity);
+    bg->setID("red-input-bg"_spr);
     this->addChild(bg);
 
     // Green BG
@@ -82,6 +84,7 @@ bool RGBInputWidget::init(ColorSelectPopup* colorSelect, SetupPulsePopup* setupP
     bg->setScale(1.0f / bgScale);
     bg->setZOrder(-1);
     bg->setOpacity(opacity);
+    bg->setID("green-input-bg"_spr);
     this->addChild(bg);
 
     // Blue BG
@@ -91,6 +94,7 @@ bool RGBInputWidget::init(ColorSelectPopup* colorSelect, SetupPulsePopup* setupP
     bg->setZOrder(-1);
     bg->setPositionX(blueXPos);
     bg->setOpacity(opacity);
+    bg->setID("blue-input-bg"_spr);
     this->addChild(bg);
 
     return true;
