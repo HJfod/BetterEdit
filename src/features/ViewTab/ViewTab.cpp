@@ -21,35 +21,36 @@ constexpr const int VISIBILITYTABUI_PRIO = 3456;
 
 class $modify(GameObjectExtra, GameObject) {
     bool m_objectHidden = false;
-    
     bool m_actualVisible = true;
     bool m_callFromExtra = false;
 
     void updatePresence() {
-        if(this->m_highDetail)
-            this->m_fields->m_objectHidden = Mod::get()->getSettingValue<bool>("hide-ldm");
+        if (m_highDetail) {
+            m_fields->m_objectHidden = Mod::get()->getSettingValue<bool>("hide-ldm");
+        }
         
         // update visibility
-        this->m_fields->m_callFromExtra = true;
+        m_fields->m_callFromExtra = true;
         setVisible(m_bVisible);
-        this->m_fields->m_callFromExtra = false;
+        m_fields->m_callFromExtra = false;
     }
 
     void setVisible(bool visible) {
-        if(!this->m_fields->m_callFromExtra)
-            this->m_fields->m_actualVisible = visible;
+        if (!m_fields->m_callFromExtra) {
+            m_fields->m_actualVisible = visible;
+        }
 
-        if(this->m_fields->m_objectHidden)
+        if (m_fields->m_objectHidden) {
             visible = false;
+        }
 
-        else visible = this->m_fields->m_actualVisible;
+        else visible = m_fields->m_actualVisible;
 
         GameObject::setVisible(visible);
     }
 };
 
-void updateVisibilityTab() {
-    //TODO: move this tag shit to string ids lmao
+static void updateVisibilityTab() {
     auto bbar = static_cast<EditButtonBar*>(EditorUI::get()->getChildByID("view-tab"_spr));
 
     if (!bbar) return;
@@ -247,9 +248,6 @@ struct $modify(VisibilityTabUI, EditorUI) {
             }
         );
 
-        /*
-            Button bar
-        */
         auto buttonBar = EditButtonBar::create(
             btns,
             { CCDirector::sharedDirector()->getWinSize().width / 2, 86.0f },
@@ -258,12 +256,12 @@ struct $modify(VisibilityTabUI, EditorUI) {
             GameManager::sharedState()->getIntGameVariable("0050")
         );
         buttonBar->setID("view-tab"_spr);
-        buttonBar->setVisible(m_selectedTab == 4);
+        buttonBar->setVisible(m_selectedMode == 4);
 
-        addChild(buttonBar, 10);
+        this->addChild(buttonBar, 10);
 
         // other
-        updateLDM();
+        this->updateLDM();
 
         return true;
     }
@@ -279,10 +277,9 @@ struct $modify(VisibilityTabUI, EditorUI) {
         this->resetUI();
         this->updateModeSprites();
 
-        auto viewBtnBar = getChildByID("view-tab"_spr);
-
-        if(viewBtnBar != nullptr)
+        if (auto viewBtnBar = getChildByID("view-tab"_spr)) {
             viewBtnBar->setVisible(m_selectedMode == 4);
+        }
     }
 
     void showVisibilityTab(bool show) {
@@ -295,33 +292,35 @@ struct $modify(VisibilityTabUI, EditorUI) {
 
     void toggleLDM(bool toggled) {
         Mod::get()->setSettingValue<bool>("hide-ldm", toggled);
-        updateLDM();
+        this->updateLDM();
     }
 
     void updateLDM() {
         // update every object in the level (oh god)
-        for(auto& obj : CCArrayExt<GameObjectExtra*>(m_editorLayer->getAllObjects()))
+        for (auto& obj : CCArrayExt<GameObjectExtra*>(m_editorLayer->getAllObjects())) {
             obj->updatePresence();
+        }
     }
 
     void selectObject(GameObject* obj, bool filter) {
-        if(!static_cast<GameObjectExtra*>(obj)->m_fields->m_objectHidden)
+        if (!static_cast<GameObjectExtra*>(obj)->m_fields->m_objectHidden) {
             EditorUI::selectObject(obj, filter);
+        }
     }
 
     void selectObjects(CCArray* objs, bool ignoreFilters) {
         // filter out LDM objects
-        if(objs) {
+        if (objs) {
             size_t objCount = objs->count();
-            for(size_t i = 0; i < objCount; i++) {
+            for (size_t i = 0; i < objCount; i++) {
                 auto obj = static_cast<GameObjectExtra*>(objs->objectAtIndex(i));
-
-                if(obj->m_fields->m_objectHidden)
+                if (obj->m_fields->m_objectHidden) {
                     objs->removeObjectAtIndex(i, false);
-                    i--; objCount--;
+                }
+                i -= 1;
+                objCount -= 1;
             }
         }
-
         EditorUI::selectObjects(objs, ignoreFilters);
     }
 
