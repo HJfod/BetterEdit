@@ -7,13 +7,6 @@ on:
       - "v4"
       - "v4-min"
 
-env:
-  GEODE_SDK: ${{ github.workspace }}/sdk
-  GEODE_VERSION: nightly
-  CLI_VERSION: v2.5.0
-  MOD_NAME: betteredit
-  MOD_ID: be_team.betteredit
-
 jobs:
   build:
     strategy:
