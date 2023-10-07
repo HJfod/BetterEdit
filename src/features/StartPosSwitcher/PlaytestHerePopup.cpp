@@ -1,7 +1,5 @@
 #include "PlaytestHerePopup.hpp"
 
-struct StartPosLevel;
-
 bool PlaytestHerePopup::init(LevelEditorLayer* lel, StartPosObject* startPos, std::function<void(StartPosKind)> callback) {
     if (!CCNode::init())
         return false;
