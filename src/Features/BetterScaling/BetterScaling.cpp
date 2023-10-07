@@ -14,11 +14,11 @@ struct AbsolutePositioningParams {
 };
 
 class $modify(BetterScaleControl, GJScaleControl) {
-    CCTextInputNode* m_textInput = nullptr;
-    CCScale9Sprite* m_textInputSprite = nullptr;
-    InputScaleDelegate* m_inputScaleDelegate = nullptr;
+    CCTextInputNode* textInput = nullptr;
+    CCScale9Sprite* textInputSprite = nullptr;
+    InputScaleDelegate* inputScaleDelegate = nullptr;
 
-    bool m_scalingUILoaded = false;
+    bool scalingUILoaded = false;
 
     bool init() {
         if (!GJScaleControl::init()) {
@@ -47,7 +47,7 @@ class $modify(BetterScaleControl, GJScaleControl) {
         sprite->setContentSize({ 115.0f, 75.0f });
         sprite->setPosition(m_label->getPosition());
         sprite->setID("scale-input-sprite"_spr);
-        m_fields->m_textInputSprite = sprite;
+        m_fields->textInputSprite = sprite;
 
         auto input = CCTextInputNode::create(40.0f, 30.0f, "1.00", "bigFont.fnt");
         input->setPosition(m_label->getPosition());
@@ -60,7 +60,7 @@ class $modify(BetterScaleControl, GJScaleControl) {
         input->setID("scale-input"_spr);
         input->setMouseEnabled(true);
         input->setTouchEnabled(true);
-        m_fields->m_textInput = input;
+        m_fields->textInput = input;
 
         bool scaleSnap = false;
         bool absolutePosition = false;
@@ -107,7 +107,7 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
         auto delegate = InputScaleDelegate::create(this, absoluteLockButton, sliderSnapButton);
         delegate->setID("input-delegate"_spr);
-        m_fields->m_inputScaleDelegate = delegate;
+        m_fields->inputScaleDelegate = delegate;
         input->setDelegate(delegate);
 
         this->addChild(delegate);
@@ -115,23 +115,23 @@ class $modify(BetterScaleControl, GJScaleControl) {
         this->addChild(input);
         this->addChild(menu);
 
-        m_fields->m_scalingUILoaded = true;
+        m_fields->scalingUILoaded = true;
     }
 
     void revertScalingUI() {
         m_label->setVisible(true);
 
-        if (m_fields->m_textInput) {
-            m_fields->m_textInput->removeFromParentAndCleanup(true);
-            m_fields->m_textInput = nullptr;
+        if (m_fields->textInput) {
+            m_fields->textInput->removeFromParentAndCleanup(true);
+            m_fields->textInput = nullptr;
         }
-        if (m_fields->m_textInputSprite) {
-            m_fields->m_textInputSprite->removeFromParentAndCleanup(true);
-            m_fields->m_textInputSprite = nullptr;
+        if (m_fields->textInputSprite) {
+            m_fields->textInputSprite->removeFromParentAndCleanup(true);
+            m_fields->textInputSprite = nullptr;
         }
-        if (m_fields->m_inputScaleDelegate) {
-            m_fields->m_inputScaleDelegate->removeFromParentAndCleanup(true);
-            m_fields->m_inputScaleDelegate = nullptr;
+        if (m_fields->inputScaleDelegate) {
+            m_fields->inputScaleDelegate->removeFromParentAndCleanup(true);
+            m_fields->inputScaleDelegate = nullptr;
         } 
 
         auto menu = this->getChildByID("lock-menu"_spr);
@@ -139,7 +139,7 @@ class $modify(BetterScaleControl, GJScaleControl) {
             menu->removeFromParentAndCleanup(true);
         }
 
-        m_fields->m_scalingUILoaded = false;
+        m_fields->scalingUILoaded = false;
     }
 
     void ccTouchMoved(CCTouch* touch, CCEvent* event) {
@@ -224,8 +224,8 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
         std::string s = ss.str();
 
-        if (m_fields->m_textInput != nullptr) {
-            m_fields->m_textInput->setString(s);
+        if (m_fields->textInput != nullptr) {
+            m_fields->textInput->setString(s);
         }
     }
 
@@ -242,33 +242,33 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
         std::string s = ss.str();
 
-        if (m_fields->m_textInput != nullptr) {
-            m_fields->m_textInput->setString(s);
+        if (m_fields->textInput != nullptr) {
+            m_fields->textInput->setString(s);
         }
     }
 
     bool betterScaleEnabled() {
-        return Mod::get()->getSettingValue<bool>("better-scaling") && m_fields->m_scalingUILoaded;
+        return Mod::get()->getSettingValue<bool>("better-scaling") && m_fields->scalingUILoaded;
     }
 };
 
 class $modify(ScaleEditorUI, EditorUI) {
-    bool m_isTouchingScaleSnap = false;
-    bool m_isTouchingAbsoluteLock = false;
-    bool m_isTouchingInput = false;
-    bool m_betterScalingActivated = false;
+    bool isTouchingScaleSnap = false;
+    bool isTouchingAbsoluteLock = false;
+    bool isTouchingInput = false;
+    bool betterScalingActivated = false;
 
     void activateScaleControl(CCObject* sender) {
         auto scaleControl = reinterpret_cast<BetterScaleControl*>(m_scaleControl);
         auto betterScaleEnabled = Mod::get()->getSettingValue<bool>("better-scaling");
         if (!betterScaleEnabled) {
-            m_fields->m_betterScalingActivated = false;
-            if (scaleControl->m_fields->m_scalingUILoaded) {
+            m_fields->betterScalingActivated = false;
+            if (scaleControl->m_fields->scalingUILoaded) {
                 scaleControl->revertScalingUI();
             }
         } else {
-            m_fields->m_betterScalingActivated = true;
-            if (!scaleControl->m_fields->m_scalingUILoaded) {
+            m_fields->betterScalingActivated = true;
+            if (!scaleControl->m_fields->scalingUILoaded) {
                 scaleControl->setupScalingUI();
             }
         }
@@ -309,7 +309,7 @@ class $modify(ScaleEditorUI, EditorUI) {
         auto scaleControl = reinterpret_cast<BetterScaleControl*>(m_scaleControl);
         auto input = static_cast<CCTextInputNode*>(m_scaleControl->getChildByID("scale-input"_spr));
 
-        if (!m_fields->m_betterScalingActivated) {
+        if (!m_fields->betterScalingActivated) {
             return EditorUI::ccTouchBegan(touch, event);
         }
 
@@ -318,7 +318,7 @@ class $modify(ScaleEditorUI, EditorUI) {
         }
 
         if (this->mouseIsHoveringNode(input, touch->getLocation())) {
-            m_isTouchingInput = true;
+            m_fields->isTouchingInput = true;
             return EditorUI::ccTouchBegan(touch, event);
         }
 
@@ -330,24 +330,24 @@ class $modify(ScaleEditorUI, EditorUI) {
 
     void ccTouchEnded(CCTouch* touch, CCEvent* event) {
         EditorUI::ccTouchEnded(touch, event);
-        if (!m_fields->m_betterScalingActivated) {
+        if (!m_fields->betterScalingActivated) {
             return;
         }
     
         auto delegate = static_cast<InputScaleDelegate*>(this->m_scaleControl->getChildByID("input-delegate"_spr));
         if (!delegate) {
-            m_fields->m_isTouchingAbsoluteLock = false;
-            m_fields->m_isTouchingScaleSnap = false;
+            m_fields->isTouchingAbsoluteLock = false;
+            m_fields->isTouchingScaleSnap = false;
             return;
         }
 
         if (this->touchedScaleInput(touch, event)) {
-            m_fields->m_isTouchingAbsoluteLock = false;
-            m_fields->m_isTouchingScaleSnap = false;
+            m_fields->isTouchingAbsoluteLock = false;
+            m_fields->isTouchingScaleSnap = false;
             return;
         }
 
-        if (!m_fields->m_isTouchingAbsoluteLock && !m_fields->m_isTouchingScaleSnap) {
+        if (!m_fields->isTouchingAbsoluteLock && !m_fields->isTouchingScaleSnap) {
             return;
         }
 
@@ -361,18 +361,18 @@ class $modify(ScaleEditorUI, EditorUI) {
             delegate->m_absoluteLock->activate();
         }
 
-        m_fields->m_isTouchingInput = false;
-        m_fields->m_isTouchingAbsoluteLock = false;
-        m_fields->m_isTouchingScaleSnap = false;
+        m_fields->isTouchingInput = false;
+        m_fields->isTouchingAbsoluteLock = false;
+        m_fields->isTouchingScaleSnap = false;
     }
 
     void ccTouchMoved(CCTouch* touch, CCEvent* event) {
         EditorUI::ccTouchMoved(touch, event);
-        if (!m_fields->m_betterScalingActivated) {
+        if (!m_fields->betterScalingActivated) {
             return;
         }
 
-        if (!m_fields->m_isTouchingAbsoluteLock && !m_fields->m_isTouchingScaleSnap) {
+        if (!m_fields->isTouchingAbsoluteLock && !m_fields->isTouchingScaleSnap) {
             return;
         }
 
@@ -427,13 +427,13 @@ class $modify(ScaleEditorUI, EditorUI) {
 
         if (this->mouseIsHoveringNode(delegate->m_snapLock, touch->getLocation())) {
             delegate->m_snapLock->selected();
-            m_fields->m_isTouchingScaleSnap = true;
+            m_fields->isTouchingScaleSnap = true;
             return true;
         }
 
         if (this->mouseIsHoveringNode(delegate->m_absoluteLock, touch->getLocation())) {
             delegate->m_absoluteLock->selected();
-            m_fields->m_isTouchingAbsoluteLock = true;
+            m_fields->isTouchingAbsoluteLock = true;
             return true;
         }
 
@@ -458,7 +458,7 @@ class $modify(ScaleEditorUI, EditorUI) {
             return true;
         }
         
-        m_isTouchingInput = false;
+        m_fields->isTouchingInput = false;
         input->getTextField()->detachWithIME();
         return false;
     }

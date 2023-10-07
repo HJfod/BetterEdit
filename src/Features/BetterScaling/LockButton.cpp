@@ -5,7 +5,7 @@ bool LockButton::init(CCSprite* sprite, CCObject* target, SEL_MenuHandler menuHa
         return false;
     }
 
-    this->m_lockType = lockType;
+    m_lockType = lockType;
     return true;
 }
 

@@ -14,9 +14,9 @@ public:
     virtual void textChanged(CCTextInputNode* input) override;
 
     bool init(GJScaleControl* c, LockButton* absoluteLockButton, LockButton* snapLockButton) {
-        this->m_scaleControl = c;
-        this->m_absoluteLock = absoluteLockButton;
-        this->m_snapLock = snapLockButton;
+        m_scaleControl = c;
+        m_absoluteLock = absoluteLockButton;
+        m_snapLock = snapLockButton;
         return true;
     }
 

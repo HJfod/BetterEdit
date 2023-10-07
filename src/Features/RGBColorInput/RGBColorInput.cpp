@@ -11,8 +11,8 @@ using namespace geode::prelude;
 // https://github.com/matcool/geode-mods/blob/main/rgb-color-input/
 
 class $modify(ColorSelectPopup) {
-    FLAlertLayer* m_alertLayer = nullptr;
-    RGBInputWidget* m_rgbWidget = nullptr;
+    FLAlertLayer* alertLayer = nullptr;
+    RGBInputWidget* rgbWidget = nullptr;
 
     bool init(EffectGameObject* object, CCArray* objects, ColorAction* colorAction) {
         if (!ColorSelectPopup::init(object, objects, colorAction)) {
@@ -23,18 +23,18 @@ class $modify(ColorSelectPopup) {
             return true;
         }
 
-        m_fields->m_alertLayer = static_cast<FLAlertLayer*>(getChildOfType<CCLayer>(this, 0));
-        m_fields->m_rgbWidget = RGBInputWidget::create(this, nullptr);
+        m_fields->alertLayer = static_cast<FLAlertLayer*>(getChildOfType<CCLayer>(this, 0));
+        m_fields->rgbWidget = RGBInputWidget::create(this, nullptr);
         auto center = CCDirector::sharedDirector()->getWinSize() / 2;
         if (m_isColorTrigger) {
-            m_fields->m_rgbWidget->setPosition({center.width - 155.f, center.height + 29.f});
+            m_fields->rgbWidget->setPosition({center.width - 155.f, center.height + 29.f});
         } else {
-            m_fields->m_rgbWidget->setPosition({center.width + 127.f, center.height - 90.f});
+            m_fields->rgbWidget->setPosition({center.width + 127.f, center.height - 90.f});
         }
-        m_fields->m_rgbWidget->setID("rgb-color-input"_spr);
-        m_fields->m_alertLayer->addChild(m_fields->m_rgbWidget);
+        m_fields->rgbWidget->setID("rgb-color-input"_spr);
+        m_fields->alertLayer->addChild(m_fields->rgbWidget);
 
-        m_fields->m_rgbWidget->setVisible(!m_copyColor);
+        m_fields->rgbWidget->setVisible(!m_copyColor);
 
         return true;
     }
@@ -44,8 +44,8 @@ class $modify(ColorSelectPopup) {
         if (!Mod::get()->getSettingValue<bool>("rgb-color-input")) {
             return;
         }
-        if (m_fields->m_rgbWidget) {
-            m_fields->m_rgbWidget->updateLabels(true, true);
+        if (m_fields->rgbWidget) {
+            m_fields->rgbWidget->updateLabels(true, true);
         }
     }
 
@@ -54,15 +54,15 @@ class $modify(ColorSelectPopup) {
         if (!Mod::get()->getSettingValue<bool>("rgb-color-input")) {
             return;
         }
-        if (m_fields->m_rgbWidget) {
-            m_fields->m_rgbWidget->setVisible(!m_copyColor);
+        if (m_fields->rgbWidget) {
+            m_fields->rgbWidget->setVisible(!m_copyColor);
         }
     }
 };
 
 class $modify(SetupPulsePopup) {
-    RGBInputWidget* m_rgbWidget = nullptr;
-    FLAlertLayer* m_alertLayer = nullptr;
+    RGBInputWidget* rgbWidget = nullptr;
+    FLAlertLayer* alertLayer = nullptr;
     bool init(EffectGameObject* object, CCArray* objects) {
         if (!SetupPulsePopup::init(object, objects)) {
             return false;
@@ -72,22 +72,22 @@ class $modify(SetupPulsePopup) {
             return true;
         }
 
-        m_fields->m_alertLayer = static_cast<FLAlertLayer*>(getChildOfType<CCLayer>(this, 0));
-        m_fields->m_rgbWidget = RGBInputWidget::create(nullptr, this);
+        m_fields->alertLayer = static_cast<FLAlertLayer*>(getChildOfType<CCLayer>(this, 0));
+        m_fields->rgbWidget = RGBInputWidget::create(nullptr, this);
         auto center = CCDirector::sharedDirector()->getWinSize() / 2;
 
         m_colorPicker->setPositionX(m_colorPicker->getPositionX() + 3.7f);
-        m_fields->m_rgbWidget->setPosition({ center.width - 132.0f, center.height + 32.0f});
+        m_fields->rgbWidget->setPosition({ center.width - 132.0f, center.height + 32.0f});
 
         auto squareWidth = m_currentColorSpr->getScaledContentSize().width;
-        auto xPos = m_fields->m_rgbWidget->getPositionX() - squareWidth / 2.0f;
+        auto xPos = m_fields->rgbWidget->getPositionX() - squareWidth / 2.0f;
 
         m_currentColorSpr->setPosition({ xPos + 20.0f, center.height + 85.0f });
         m_prevColorSpr->setPosition({ xPos + 20.0f + squareWidth, center.height + 85.0f });
-        m_fields->m_rgbWidget->setID("rgb-color-input"_spr);
+        m_fields->rgbWidget->setID("rgb-color-input"_spr);
 
-        m_fields->m_alertLayer->addChild(m_fields->m_rgbWidget);
-        m_fields->m_rgbWidget->setVisible(m_pulseMode == 0);
+        m_fields->alertLayer->addChild(m_fields->rgbWidget);
+        m_fields->rgbWidget->setVisible(m_pulseMode == 0);
 
         return true;
     }
@@ -97,8 +97,8 @@ class $modify(SetupPulsePopup) {
         if (!Mod::get()->getSettingValue<bool>("rgb-color-input")) {
             return;
         }
-        if (m_fields->m_rgbWidget) {
-            m_fields->m_rgbWidget->updateLabels(true, true);
+        if (m_fields->rgbWidget) {
+            m_fields->rgbWidget->updateLabels(true, true);
         }
     }
 
@@ -107,8 +107,8 @@ class $modify(SetupPulsePopup) {
         if (!Mod::get()->getSettingValue<bool>("rgb-color-input")) {
             return;
         }
-        if (m_fields->m_rgbWidget) {
-            m_fields->m_rgbWidget->setVisible(m_pulseMode == 0);
+        if (m_fields->rgbWidget) {
+            m_fields->rgbWidget->setVisible(m_pulseMode == 0);
         }
     }
 };
