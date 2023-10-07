@@ -256,6 +256,9 @@ struct $modify(VisibilityTabUI, EditorUI) {
             GameManager::sharedState()->getIntGameVariable("0050")
         );
         buttonBar->setID("view-tab"_spr);
+        // Need to set a tag too so GD doesn't accidentally grab this tab 
+        // when doing getChildByTag for its tabs
+        buttonBar->setTag(-1);
         buttonBar->setVisible(m_selectedMode == 4);
 
         this->addChild(buttonBar, 10);
@@ -269,7 +272,7 @@ struct $modify(VisibilityTabUI, EditorUI) {
     void showUI(bool show) {
         EditorUI::showUI(show);
         m_fields->viewModeBtn->setVisible(show);
-        showVisibilityTab(show);
+        this->showVisibilityTab(show);
     }
 
     void toggleMode(CCObject* sender) {
