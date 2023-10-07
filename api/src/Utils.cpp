@@ -1,4 +1,4 @@
-#include "Utils.hpp"
+#include <Utils.hpp>
 #include <Geode/binding/EditorUI.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/OBB2D.hpp>
@@ -6,7 +6,7 @@
 #include <Geode/modify/GameObject.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
 
-std::string zLayerToString(ZLayer z) {
+std::string editor_api::zLayerToString(ZLayer z) {
     switch (z) {
         case ZLayer::B4:      return "B4";
         case ZLayer::B3:      return "B3";
@@ -20,7 +20,7 @@ std::string zLayerToString(ZLayer z) {
     return "Unknown";
 }
 
-CCArrayExt<GameObject> iterTargets(GameObject* target, CCArray* targets) {
+CCArrayExt<GameObject> editor_api::iterTargets(GameObject* target, CCArray* targets) {
     if (target) {
         return CCArrayExt<GameObject>(CCArray::createWithObject(target));
     }
@@ -38,7 +38,7 @@ CCArrayExt<GameObject> iterTargets(GameObject* target, CCArray* targets) {
     }
 }
 
-CCArrayExt<GameObject> iterSelected(EditorUI* ui) {
+CCArrayExt<GameObject> editor_api::iterSelected(EditorUI* ui) {
     return iterTargets(ui->m_selectedObject, ui->m_selectedObjects);
 }
 
@@ -64,7 +64,7 @@ static void recursiveAddNear(EditorUI* ui, GameObject* fromObj, std::vector<Game
     }
 }
 
-CCArray* selectStructure(EditorUI* ui, GameObject* from) {
+CCArray* editor_api::selectStructure(EditorUI* ui, GameObject* from) {
     if (!from) return CCArray::create();
     std::vector<GameObject*> nearby;
     auto pos = from->getPosition();
@@ -94,7 +94,7 @@ CCArray* selectStructure(EditorUI* ui, GameObject* from) {
     return arr;
 }
 
-CCArray* selectStructure(EditorUI* ui, CCArray* from) {
+CCArray* editor_api::selectStructure(EditorUI* ui, CCArray* from) {
     CCArray* res = CCArray::create();
     for (auto fr : CCArrayExt<GameObject>(from)) {
         for (auto obj : CCArrayExt<GameObject>(selectStructure(ui, fr))) {
@@ -106,7 +106,7 @@ CCArray* selectStructure(EditorUI* ui, CCArray* from) {
     return res;
 }
 
-ButtonSprite* createEditorButtonSprite(const char* top, const char* bg) {
+ButtonSprite* editor_api::createEditorButtonSprite(const char* top, const char* bg) {
     return ButtonSprite::create(
         CCSprite::createWithSpriteFrameName(top),
         32, true, 32, bg, 1.f

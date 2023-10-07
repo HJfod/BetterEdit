@@ -1,0 +1,30 @@
+{
+	"geode": "1.3.4",
+	"version": "v1.0.0",
+	"id": "be_team.editorapi",
+	"name": "EditorAPI",
+	"developer": "BE Team",
+	"description": "Utilities for working with the editor for modders",
+	"repository": "https://github.com/hjfod/BetterEdit",
+	"settings": {},
+	"resources": {
+		"files": [],
+		"spritesheets": {}
+	},
+	"issues": {
+		"info": "Please post your issues on the <cy>BetterEdit GitHub repository</c>.",
+		"url": "https://github.com/hjfod/BetterEdit/issues/new"
+	},
+	"dependencies": [
+		{
+			"id": "geode.custom-keybinds",
+			"version": "v1.2.2",
+			"required": true
+		}
+	],
+	"api": {
+		"include": [
+			"include/*.hpp"
+		]
+	}
+}

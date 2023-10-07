@@ -9,7 +9,7 @@ class $modify(CenterScaleEditorUI, EditorUI) {
         if (Mod::get()->getSettingValue<bool>("center-scale-on-screen")) {
             auto position = CCDirector::sharedDirector()->getWinSize() / 2;
             position.height += 50.0f;
-            position = this->m_editorLayer->m_objectLayer->convertToNodeSpace(position);
+            position = m_editorLayer->m_objectLayer->convertToNodeSpace(position);
             m_scaleControl->setPosition(position);
         }
     }

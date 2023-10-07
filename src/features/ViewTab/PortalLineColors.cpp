@@ -1,6 +1,6 @@
 #include <Geode/utils/cocos.hpp>
 #include <Other/BEShared.hpp>
-
+#include <Geode/binding/GameObject.hpp>
 #include <Geode/modify/DrawGridLayer.hpp>
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
@@ -12,15 +12,15 @@ CCDrawNode* g_portalDrawNode = nullptr;
 
 class $modify(PortalLinesLayer, DrawGridLayer) {
     bool init(CCNode* grid, LevelEditorLayer* editor) {
-        if(!DrawGridLayer::init(grid, editor))
+        if (!DrawGridLayer::init(grid, editor))
             return false;
 
-        if(g_guides2 == nullptr) {
+        if (!g_guides2) {
             g_guides2 = CCArray::create();
             g_guides2->retain();
         }
 
-        if(g_portalDrawNode == nullptr) {
+        if (!g_portalDrawNode) {
             g_portalDrawNode = CCDrawNode::create();
             g_portalDrawNode->retain();
 
@@ -44,11 +44,11 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         bool portalLines = Mod::get()->getSettingValue<bool>("portal-lines");
 
-        if (g_portalDrawNode != nullptr) {
+        if (g_portalDrawNode) {
             g_portalDrawNode->clear();
         }
 
-        if(portalLines && g_guides2 != nullptr && m_editor->m_playbackMode != PlaybackMode::Playing) {
+        if (portalLines && g_guides2 && m_editor->m_playbackMode != PlaybackMode::Playing) {
             for(auto& portal : CCArrayExt<GameObject*>(g_guides2)) {
                 auto portalPoints = getPortalMinMax(portal); // X is min, Y is max
                 auto gridPosX = m_grid->convertToNodeSpace(CCPointZero).x;
@@ -63,8 +63,8 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
                 // line color
                 ccColor4F lineColor = ccc4FFromccc4B({0, 255, 255, 255});
 
-                if(Mod::get()->getSettingValue<bool>("color-gm-borders")) {
-                    switch(portal->m_objectID) {
+                if (Mod::get()->getSettingValue<bool>("color-gm-borders")) {
+                    switch (portal->m_objectID) {
                         case 12:  lineColor = ccc4FFromccc4B({88,  255, 100, 255}); break; // cube
                         case 13:  lineColor = ccc4FFromccc4B({255, 150, 255, 255}); break; // ship
                         case 47:  lineColor = ccc4FFromccc4B({255, 34,  0,   255}); break; // ball
@@ -76,21 +76,23 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
                 }
 
                 // bottom line
-                if(portalPoints.x >= -90 && portalPoints.x <= 2490) {
+                if (portalPoints.x >= -90 && portalPoints.x <= 2490) {
                     startPoint = CCPoint(startX, portalPoints.x);
                     endPoint = CCPoint(endX, portalPoints.x);
 
-                    if(g_portalDrawNode != nullptr)
+                    if (g_portalDrawNode) {
                         g_portalDrawNode->drawSegment(startPoint, endPoint, 1, lineColor);
+                    }
                 }
 
                 // top line
-                if(portalPoints.y >= -90 && portalPoints.y <= 2490) {
+                if (portalPoints.y >= -90 && portalPoints.y <= 2490) {
                     startPoint = CCPoint(startX, portalPoints.y);
                     endPoint = CCPoint(endX, portalPoints.y);
 
-                    if(g_portalDrawNode != nullptr)
+                    if (g_portalDrawNode) {
                         g_portalDrawNode->drawSegment(startPoint, endPoint, 1, lineColor);
+                    }
                 }
             }
         }
@@ -100,28 +102,30 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
     CCPoint getPortalMinMax(GameObject* portal) {
         float min, portalHeight;
 
-        if(portal->getType() == GameObjectType::BallPortal) {
+        if (portal->getType() == GameObjectType::BallPortal) {
             portalHeight = 260.f;
         }
         else {
             portalHeight = 320.f;
-            if(portal->getType() == GameObjectType::SpiderPortal)
+            if (portal->getType() == GameObjectType::SpiderPortal) {
                 portalHeight = 290.f;
+            }
         }
 
         min = floorf((portal->getPositionY() - portalHeight / 2 + 10) / 30) * 30;
-        if(min <= 90)
+        if (min <= 90) {
             min = 90.f;
+        }
 
         return { min, min + portalHeight - 20 };
     }  
 
     void updateGuides() {
         // reset
-        for(auto& obj : CCArrayExt<CCObject*>(m_guides)) {
+        for (auto& obj : CCArrayExt<CCObject*>(m_guides)) {
             m_guides->removeObject(obj, false);
         }
-        for(auto& obj : CCArrayExt<CCObject*>(g_guides2)) {
+        for (auto& obj : CCArrayExt<CCObject*>(g_guides2)) {
             g_guides2->removeObject(obj, false);
         }
 
@@ -129,7 +133,7 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
 
         // add every portal to new array
         for(auto& obj : CCArrayExt<GameObject*>(m_editor->getAllObjects())) {
-            if( obj->m_objectID == 12
+            if (obj->m_objectID == 12
             ||  obj->m_objectID == 13
             ||  obj->m_objectID == 47
             ||  obj->m_objectID == 111
@@ -137,12 +141,13 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
             ||  obj->m_objectID == 745
             ||  obj->m_objectID == 1331
             ) {
-                if(obj->m_showGamemodeBorders) {
-                    if(showBorders)
+                if (obj->m_showGamemodeBorders) {
+                    if (showBorders) {
                         g_guides2->addObject(obj);
-
-                    else
+                    }
+                    else {
                         m_guides->addObject(obj); // default
+                    }
                 }
             }
         }
@@ -152,7 +157,6 @@ class $modify(PortalLinesLayer, DrawGridLayer) {
 class $modify(EditorUI) {
     void onToggleGuide(CCObject* pSender) {
         EditorUI::onToggleGuide(pSender);
-
         PortalLinesLayer::get()->updateGuides();
     }
 };
@@ -160,20 +164,20 @@ class $modify(EditorUI) {
 class $modify(LevelEditorLayer) {
     void addSpecial(GameObject* obj) {
         LevelEditorLayer::addSpecial(obj);
-
-        if(!m_editorInitialising)
+        if (!m_editorInitialising) {
             PortalLinesLayer::get()->updateGuides();
+        }
     }
 
     void removeObject(GameObject* obj, bool b) {
         LevelEditorLayer::removeObject(obj, b);
-
-        if(!m_editorInitialising)
+        if (!m_editorInitialising) {
             PortalLinesLayer::get()->updateGuides();
+        }
     }
 
     bool init(GJGameLevel* level) {
-        if(!LevelEditorLayer::init(level))
+        if (!LevelEditorLayer::init(level))
             return false;
 
         PortalLinesLayer::get()->updateGuides();
@@ -182,8 +186,8 @@ class $modify(LevelEditorLayer) {
     }
 };
 
-BE_EDITOREXIT() {
-    if(g_guides2 != nullptr) {
+$onEditorExit {
+    if (g_guides2) {
         for(auto& obj : CCArrayExt<GameObject*>(g_guides2))
             g_guides2->removeObject(obj, false);
 
@@ -191,7 +195,7 @@ BE_EDITOREXIT() {
         g_guides2 = nullptr;
     }
 
-    if(g_portalDrawNode != nullptr) {
+    if (g_portalDrawNode) {
         g_portalDrawNode->removeFromParentAndCleanup(true);
         g_portalDrawNode = nullptr;
     }
