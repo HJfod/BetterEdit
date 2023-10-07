@@ -11,6 +11,7 @@ file(GLOB SOURCES
 	src/Features/MoreTabs/*.cpp
 	src/Features/VisibilityToggle/*.cpp
 	src/Features/BetterScaling/*.cpp
+	src/Features/RGBColorInput/*.cpp
 	src/Other/*.cpp
 	src/Features/*.cpp
 	src/*.cpp
