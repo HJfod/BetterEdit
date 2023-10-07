@@ -1,18 +1,18 @@
 #include "VisibilityToggle.hpp"
 
 void VisibilityToggle::onToggle(CCObject*) {
-    if (this->m_pSetter)
-        this->m_pSetter(!this->isToggled(), this);
+    if (m_pSetter)
+        m_pSetter(!this->isToggled(), this);
 }
 
 void VisibilityToggle::updateState() {
-    if (this->m_pGetter)
-        this->toggle(this->m_pGetter());
+    if (m_pGetter)
+        this->toggle(m_pGetter());
 }
 
 VisibilityToggle* VisibilityToggle::invokeSetter() {
-    if (this->m_pSetter)
-        this->m_pSetter(this->m_pGetter(), this);
+    if (m_pSetter)
+        m_pSetter(m_pGetter(), this);
 
     return this;
 }

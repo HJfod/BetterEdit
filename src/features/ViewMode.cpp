@@ -44,7 +44,7 @@ class $modify(ViewEditorUI, EditorUI) {
         m_fields->toggleBtn->setContentSize(m_fields->toggleBtn->getScaledContentSize());
         m_fields->toggleBtn->setScale(.6f);
         // todo: STRING IDS
-        this->m_swipeBtn->getParent()->addChild(m_fields->toggleBtn);
+        m_swipeBtn->getParent()->addChild(m_fields->toggleBtn);
 
         m_fields->viewOnlyLabel = CCLabelBMFont::create("View-Only Mode", "bigFont.fnt");
         m_fields->viewOnlyLabel->setScale(.4f);
@@ -58,12 +58,12 @@ class $modify(ViewEditorUI, EditorUI) {
 
         m_fields->backButton = CCMenuItemSpriteExtra::create(backSprite, this, menu_selector(ViewEditorUI::onToggleShowUI));
         m_fields->backButton->setPosition(
-            this->m_playbackBtn->getPositionX(),
-            this->m_trashBtn->getPositionY()
+            m_playbackBtn->getPositionX(),
+            m_trashBtn->getPositionY()
         );
         m_fields->backButton->setVisible(false);
 
-        this->m_playbackBtn->getParent()->addChild(m_fields->backButton);
+        m_playbackBtn->getParent()->addChild(m_fields->backButton);
 
         return true;
     }

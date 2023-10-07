@@ -2,6 +2,9 @@
 
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
+#include <Geode/binding/GameObject.hpp>
+#include <Geode/binding/CCMenuItemToggler.hpp>
+#include <Geode/utils/cocos.hpp>
 #ifdef GEODE_IS_WINDOWS
 #include <Geode/modify/SetupRotatePopup.hpp>
 #endif
@@ -42,23 +45,26 @@ std::array<int, 100> g_sawIDs = {
 };
 
 bool objectIsSaw(GameObject* obj) {
-    for (auto id : g_sawIDs)
-        if (id == obj->m_objectID)
+    for (auto id : g_sawIDs) {
+        if (id == obj->m_objectID) {
             return true;
-    
+        }
+    }
     return false;
 }
 
 CCAction* recreatedRotateAction(GameObject* obj, float f, int i) {
-    if(obj->m_customRotateSpeed) {
+    if (obj->m_customRotateSpeed) {
         i = 1;
         f = obj->m_customRotateSpeed;
     }
-    else if(!i) {
-        if(rand() % 2)
+    else if (!i) {
+        if (rand() % 2) {
             i = -1;
-
-        else i = 1;
+        }
+        else {
+            i = 1;
+        }
     }
 
     return CCRepeatForever::create(CCRotateBy::create(1, f * i));
@@ -94,8 +100,9 @@ void beginRotateSaw(GameObject* obj) {
 
 void beginRotations(LevelEditorLayer* self) {
     for (auto obj : CCArrayExt<GameObject*>(self->m_objects)) {
-        if (objectIsSaw(obj))
+        if (objectIsSaw(obj)) {
             beginRotateSaw(obj);
+        }
     }
 }
 
@@ -105,15 +112,17 @@ void stopRotateSaw(GameObject* obj) {
         obj->setRotation(g_startRotations[obj]);
         g_startRotations.erase(obj);
     }
-    if (obj->m_myAction)
+    if (obj->m_myAction) {
         obj->m_myAction->release();
+    }
     obj->m_myAction = nullptr;
 }
 
 void stopRotations(LevelEditorLayer* self) {
     for (auto obj : CCArrayExt<GameObject*>(self->m_objects)) {
-        if (objectIsSaw(obj))
+        if (objectIsSaw(obj)) {
             stopRotateSaw(obj);
+        }
     }
 
     g_startRotations.clear();
@@ -121,17 +130,21 @@ void stopRotations(LevelEditorLayer* self) {
 
 void resumeRotations(LevelEditorLayer* self) {
     for (auto obj : CCArrayExt<GameObject*>(self->m_objects)) {
-        if (objectIsSaw(obj))
-            if (obj->m_myAction)
+        if (objectIsSaw(obj)) {
+            if (obj->m_myAction) {
                 obj->runAction(obj->m_myAction);
+            }
+        }
     }
 }
 
 void pauseRotations(LevelEditorLayer* self) {
     for (auto obj : CCArrayExt<GameObject*>(self->m_objects)) {
-        if (objectIsSaw(obj))
-            if (obj->m_myAction)
+        if (objectIsSaw(obj)) {
+            if (obj->m_myAction) {
                 obj->stopActionByTag(ROTATEACTION_TAG);
+            }
+        }
     }
 }
 
@@ -140,11 +153,12 @@ void onRotateSaws(CCObject* pSender) {
 
     geode::Mod::get()->setSettingValue<bool>("rotate-saws-in-editor", toggled);
 
-    if(toggled)  
+    if (toggled) {  
         beginRotations(LevelEditorLayer::get());
-
-    else 
+    }
+    else { 
         stopRotations(LevelEditorLayer::get());
+    }
 }
 
 bool shouldRotateSaw() {
@@ -154,56 +168,56 @@ bool shouldRotateSaw() {
 class $modify(LevelEditorLayer) {
     void onPlaytest() {
         LevelEditorLayer::onPlaytest();
-
-        if (!shouldRotateSaw())
+        if (!shouldRotateSaw()) {
             beginRotations(this);
+        }
     }
 
     void onResumePlaytest() {
         LevelEditorLayer::onResumePlaytest();
-
-        if (!shouldRotateSaw())
+        if (!shouldRotateSaw()) {
             resumeRotations(this);
+        }
     }
 
     void onPausePlaytest() {
         LevelEditorLayer::onPausePlaytest();
-
-        if (!shouldRotateSaw())
+        if (!shouldRotateSaw()) {
             pauseRotations(this);
+        }
     }
 
     void onStopPlaytest() {
         LevelEditorLayer::onStopPlaytest();
-
-        if (!shouldRotateSaw())
+        if (!shouldRotateSaw()) {
             stopRotations(this);
+        }
     }
 
     void addSpecial(GameObject* obj) {
         LevelEditorLayer::addSpecial(obj);
-
-        if(shouldRotateSaw() && objectIsSaw(obj))
+        if (shouldRotateSaw() && objectIsSaw(obj)) {
             beginRotateSaw(obj);
+        }
     }
 
     void removeObject(GameObject* obj, bool p1) {
         LevelEditorLayer::removeObject(obj, p1);
-
-        if(shouldRotateSaw() && objectIsSaw(obj))
+        if (shouldRotateSaw() && objectIsSaw(obj)) {
             stopRotateSaw(obj);
+        }
     }    
 };
 
 class $modify(EditorPauseLayer) {
     void saveLevel() {
-        if(shouldRotateSaw())
+        if (shouldRotateSaw()) {
             stopRotations(m_editorLayer);
-
+        }
         EditorPauseLayer::saveLevel();
-
-        if(shouldRotateSaw())
+        if (shouldRotateSaw()) {
             beginRotations(m_editorLayer);
+        }
     }
 };
 
@@ -211,20 +225,18 @@ class $modify(EditorPauseLayer) {
 
 class $modify(SetupRotatePopup) {
     void onClose(CCObject* pSender) {
-        if(shouldRotateSaw()) {
+        if (shouldRotateSaw()) {
             stopRotations(LevelEditorLayer::get());
             beginRotations(LevelEditorLayer::get());
         }
-
         SetupRotatePopup::onClose(pSender);
     }
 
     void keyBackClicked() {
-        if(shouldRotateSaw()) {
+        if (shouldRotateSaw()) {
             stopRotations(LevelEditorLayer::get());
             beginRotations(LevelEditorLayer::get());
         }
-
         SetupRotatePopup::keyBackClicked();
     }
 };
