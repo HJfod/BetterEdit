@@ -17,7 +17,6 @@
 using namespace geode::prelude;
 using namespace keybinds;
 
-constexpr const int VIEWBUTTONBAR_TAG = 0x234592;
 constexpr const int VISIBILITYTABUI_PRIO = 3456;
 
 class $modify(GameObjectExtra, GameObject) {
@@ -51,7 +50,7 @@ class $modify(GameObjectExtra, GameObject) {
 
 void updateVisibilityTab() {
     //TODO: move this tag shit to string ids lmao
-    auto bbar = static_cast<EditButtonBar*>(EditorUI::get()->getChildByTag(VIEWBUTTONBAR_TAG));
+    auto bbar = static_cast<EditButtonBar*>(EditorUI::get()->getChildByID("view-tab"_spr));
 
     if (!bbar) return;
 
@@ -143,25 +142,110 @@ struct $modify(VisibilityTabUI, EditorUI) {
         */
         auto btns = CCArray::create();
 
-        #define _SettingG(set) Mod::get()->getSettingValue<bool>(set)
-        #define _SettingS(set, val) Mod::get()->setSettingValue<bool>(set, val)
-        #define ViewTabBtn(sprite, _getter, _setter) \
+        #define GET_SETTING(set) Mod::get()->getSettingValue<bool>(set)
+        #define SET_SETTING(set, val) Mod::get()->setSettingValue<bool>(set, val)
+        #define ADD_VIEW_TAB_BTN(sprite, _getter, _setter) \
             btns->addObject(VisibilityToggle::create(GEODE_CONCAT(sprite, _spr), []() -> bool _getter, [&](bool b, auto p) -> void _setter))
 
-        ViewTabBtn("v_rotate.png", { return shouldRotateSaw(); }, { onRotateSaws(p); });
-        ViewTabBtn("v_ldm.png", { return _SettingG("hide-ldm"); }, { static_cast<VisibilityTabUI*>(EditorUI::get())->toggleLDM(b); });
-        ViewTabBtn("v_pulse.png", { return _SettingG("editor-pulse"); }, { _SettingS("editor-pulse", b); });
-        ViewTabBtn("v_prevmode.png", { return GameManager::sharedState()->getGameVariable("0036"); }, { GameManager::sharedState()->setGameVariable("0036", b); LevelEditorLayer::get()->resetMovingObjects();
-            LevelEditorLayer::get()->m_editorUI->onStopPlaytest(p); LevelEditorLayer::get()->updateEditorMode(); });
-        ViewTabBtn("v_bpm_line.png", { return GameManager::sharedState()->m_showSongMarkers; }, { GameManager::sharedState()->m_showSongMarkers = b; });
-        ViewTabBtn("v_pos_line.png", { return _SettingG("pos-line"); }, { _SettingS("pos-line", b); });
-        ViewTabBtn("v_dur_line.png", { return GameManager::sharedState()->getGameVariable("0058"); }, { GameManager::sharedState()->setGameVariable("0058", b); LevelEditorLayer::get()->updateOptions(); });
-        ViewTabBtn("v_eff_line.png", { return GameManager::sharedState()->getGameVariable("0043"); }, { GameManager::sharedState()->setGameVariable("0043", b); LevelEditorLayer::get()->updateOptions(); });
-        ViewTabBtn("v_grnd.png", { return GameManager::sharedState()->getGameVariable("0037"); }, { GameManager::sharedState()->setGameVariable("0037", b); LevelEditorLayer::get()->updateOptions(); LevelEditorLayer::get()->m_groundLayer->setVisible(b); });
-        ViewTabBtn("v_grid.png", { return GameManager::sharedState()->getGameVariable("0038"); }, { GameManager::sharedState()->setGameVariable("0038", b); LevelEditorLayer::get()->updateOptions(); });
-        ViewTabBtn("v_portal_borders.png", { return _SettingG("portal-lines"); }, { _SettingS("portal-lines", b); });
-        ViewTabBtn("v_highlight.png", { return _SettingG("highlight-triggers"); }, { _SettingS("highlight-triggers", b); });
-        ViewTabBtn("v_dash.png", { return _SettingG("dash-lines"); }, { _SettingS("dash-lines", b); });
+        ADD_VIEW_TAB_BTN("v_rotate.png",
+            {
+                return shouldRotateSaw();
+            }, {
+                onRotateSaws(p);
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_ldm.png",
+            {
+                return GET_SETTING("hide-ldm");
+            }, {
+                static_cast<VisibilityTabUI*>(EditorUI::get())->toggleLDM(b);
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_pulse.png",
+            {
+                return GET_SETTING("editor-pulse");
+            }, {
+                SET_SETTING("editor-pulse", b);
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_prevmode.png",
+            {
+                return GameManager::sharedState()->getGameVariable("0036");
+            }, {
+                GameManager::sharedState()->setGameVariable("0036", b);
+                LevelEditorLayer::get()->resetMovingObjects();
+                LevelEditorLayer::get()->m_editorUI->onStopPlaytest(p);
+                LevelEditorLayer::get()->updateEditorMode();
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_bpm_line.png",
+            {
+                return GameManager::sharedState()->m_showSongMarkers;
+            }, {
+                GameManager::sharedState()->m_showSongMarkers = b;
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_pos_line.png",
+            {
+                return GET_SETTING("pos-line");
+            }, {
+                SET_SETTING("pos-line", b);
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_dur_line.png",
+            {
+                return GameManager::sharedState()->getGameVariable("0058");
+            }, {
+                GameManager::sharedState()->setGameVariable("0058", b);
+                LevelEditorLayer::get()->updateOptions();
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_eff_line.png",
+            {
+                return GameManager::sharedState()->getGameVariable("0043");
+            }, {
+                GameManager::sharedState()->setGameVariable("0043", b);
+                LevelEditorLayer::get()->updateOptions();
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_grnd.png",
+            {
+                return GameManager::sharedState()->getGameVariable("0037");
+            }, {
+                GameManager::sharedState()->setGameVariable("0037", b);
+                LevelEditorLayer::get()->updateOptions();
+                LevelEditorLayer::get()->m_groundLayer->setVisible(b);
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_grid.png",
+            {
+                return GameManager::sharedState()->getGameVariable("0038");
+            }, {
+                GameManager::sharedState()->setGameVariable("0038", b);
+                LevelEditorLayer::get()->updateOptions();
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_portal_borders.png",
+            {
+                return GET_SETTING("portal-lines");
+            }, {
+                SET_SETTING("portal-lines", b);
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_highlight.png",
+            {
+                return GET_SETTING("highlight-triggers");
+            }, {
+                SET_SETTING("highlight-triggers", b);
+            }
+        );
+        ADD_VIEW_TAB_BTN("v_dash.png",
+            {
+                return GET_SETTING("dash-lines");
+            }, {
+                SET_SETTING("dash-lines", b);
+            }
+        );
 
         /*
             Button bar
@@ -173,7 +257,7 @@ struct $modify(VisibilityTabUI, EditorUI) {
             GameManager::sharedState()->getIntGameVariable("0049"),
             GameManager::sharedState()->getIntGameVariable("0050")
         );
-        buttonBar->setTag(VIEWBUTTONBAR_TAG);
+        buttonBar->setID("view-tab"_spr);
         buttonBar->setVisible(m_selectedTab == 4);
 
         addChild(buttonBar, 10);
@@ -195,14 +279,14 @@ struct $modify(VisibilityTabUI, EditorUI) {
         this->resetUI();
         this->updateModeSprites();
 
-        auto viewBtnBar = getChildByTag(VIEWBUTTONBAR_TAG);
+        auto viewBtnBar = getChildByID("view-tab"_spr);
 
         if(viewBtnBar != nullptr)
             viewBtnBar->setVisible(m_selectedMode == 4);
     }
 
     void showVisibilityTab(bool show) {
-        typeinfo_cast<EditButtonBar*>(getChildByTag(VIEWBUTTONBAR_TAG))
+        typeinfo_cast<EditButtonBar*>(getChildByID("view-tab"_spr))
             ->setVisible(show && m_selectedMode == 4);
 
         m_buildModeBtn->getParent()->getChildByTag(4)
