@@ -3,8 +3,9 @@ name: Build Geode Mod
 on:
   workflow_dispatch:
   push:
-    branches:
-      - "main"
+    branches-ignore:
+      - "v4"
+      - "v4-min"
 
 env:
   GEODE_SDK: ${{ github.workspace }}/sdk
