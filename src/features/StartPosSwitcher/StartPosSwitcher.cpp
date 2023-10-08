@@ -21,18 +21,48 @@ using namespace editor_api;
 StartPosKind g_startPos = DefaultBehaviour();
 
 bool match(CCPoint const& pos) {
-    log::info("match called");
     if (std::holds_alternative<FromPoint>(g_startPos)) {
-        if (std::get<FromPoint>(g_startPos) == pos) {
-            log::info("matched!");
-        }
         return std::get<FromPoint>(g_startPos) == pos;
     }
     return false;
 }
 
-void updateActiveStartPos(StartPosKind startPos) {
-    g_startPos = startPos;
+/**
+ * Fetches the startpos that matches the given position. If objects is passed, it searches the objects, if not it tries to look in LevelEditorLayer and PlayLayer. 
+ * If none is found, returns nullptr.
+*/
+StartPosObject* getStartPosByPosition(CCPoint const& pos, CCArray* objects) {
+    if (!objects) {
+        auto levelEdit = LevelEditorLayer::get();
+        if (levelEdit) {
+            objects = levelEdit->m_objects;
+        }
+
+        auto playLayer = PlayLayer::get();
+        if (!objects && playLayer) {
+            objects = playLayer->m_objects;
+        }
+
+        if (!objects) {
+            return nullptr;
+        }
+    }
+
+    for (auto object : CCArrayExt<GameObject*>(objects)) {
+        auto editorUI = EditorUI::get();
+        if (object->m_objectID == 31) {
+            if (object->getPosition() == pos) {
+                return static_cast<StartPosObject*>(object);
+            }
+            // attention please... THE HACKIEST FIX!!
+            if (editorUI && object->getPosition() == editorUI->getGridSnappedPos(pos)) {
+                g_startPos = editorUI->getGridSnappedPos(pos);
+                return static_cast<StartPosObject*>(object);
+            }
+        }
+    }
+
+    return nullptr;
 }
 
 class $modify(PlayLayer) {
@@ -67,66 +97,46 @@ class $modify(PlayLayer) {
 };
 
 class $modify(StartPosSwitchLayer, LevelEditorLayer) {
-    bool init(GJGameLevel* level) {
-        if (!LevelEditorLayer::init(level)) {
-            return false;
-        }
-
-        g_startPos = DefaultBehaviour();
-        return true;
-    }
-
-    void addSpecial(GameObject* obj) {
-        LevelEditorLayer::addSpecial(obj);
-        if (obj->m_objectID == 31) {
-            if (match(obj->getPosition())) {
-                g_startPos = static_cast<StartPosObject*>(obj);
-            }
-        }
-    }
-
-    // void destructor() {
-    //     PlaytestHerePopup::hide();
-    //     LevelEditorLayer::~LevelEditorLayer();
-    // }
-
     void handleAction(bool idk, CCArray* idk2) {
         LevelEditorLayer::handleAction(idk, idk2);
         PlaytestHerePopup::move();
     }
 
     void setupLevelStart(LevelSettingsObject* obj) {
-        // selected start position
-        if (std::holds_alternative<FromObj>(g_startPos)) {
-            auto obj = std::get<FromObj>(g_startPos);
-            this->setStartPosObject(obj);
-            auto startPos = obj->getPosition();
-            m_player1->setStartPos(startPos);
+        if (std::holds_alternative<FromPoint>(g_startPos)) {
+            auto pos = std::get<FromPoint>(g_startPos);
+            auto startPos = getStartPosByPosition(pos, m_objects);
+            if (!startPos) {
+                Notification::create("Couldn't setup startpos switcher.", CCSprite::createWithSpriteFrameName("edit_delBtnSmall_001.png"))->show();
+                LevelEditorLayer::setupLevelStart(obj);
+                return;
+            }
+            this->setStartPosObject(startPos);
+            m_player1->setStartPos(startPos->getPosition());
             m_player1->resetObject();
-            m_player2->setStartPos(startPos);
+            m_player2->setStartPos(startPos->getPosition());
             m_player2->resetObject();
-            LevelEditorLayer::setupLevelStart(obj->m_levelSettings);
+
+            LevelEditorLayer::setupLevelStart(startPos->m_levelSettings);
+            return;
         }
-        // from level start
-        else if (std::holds_alternative<FromLevelStart>(g_startPos)) {
+        if (std::holds_alternative<FromLevelStart>(g_startPos)) {
             this->setStartPosObject(nullptr);
-            m_player1->setStartPos({ 0.f, 105.f });
+            m_player1->setStartPos(CCPointZero);
             m_player1->resetObject();
-            m_player2->setStartPos({ 0.f, 105.f });
+            m_player2->setStartPos(CCPointZero);
             m_player2->resetObject();
             LevelEditorLayer::setupLevelStart(m_levelSettings);
+            return;
         }
         // default behaviour
-        else {
-            LevelEditorLayer::setupLevelStart(obj);
-        }
+        LevelEditorLayer::setupLevelStart(obj);
     }
 };
 
 $onEditorExit {
     PlaytestHerePopup::hide();
 }
-
 
 class $modify(EditorPauseLayer) {
     bool init(LevelEditorLayer* lel) {
@@ -137,27 +147,54 @@ class $modify(EditorPauseLayer) {
 
         return true;
     }
+
+    void onSaveAndPlay(CCObject* sender) {
+        if (std::holds_alternative<FromPoint>(g_startPos)) {
+            auto startpos = getStartPosByPosition(std::get<FromPoint>(g_startPos), m_editorLayer->m_objects);
+        }
+        EditorPauseLayer::onSaveAndPlay(sender);
+    }
 };
 
-
 class $modify(MyEditorUI, EditorUI) {
+    StartPosButtonBar* buttonBar = nullptr;
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
             return false;
+
+        auto buttonBar = StartPosButtonBar::create(m_editorLayer, [](StartPosKind startPos) {
+                g_startPos = startPos;
+            });
+        buttonBar->setID("start-pos-button-bar"_spr);
+        m_fields->buttonBar = buttonBar;
         
         MoreTabs::get(this)->addEditTab(
             "start-pos-border.png"_spr,
-            StartPosButtonBar::create(m_editorLayer, [](StartPosKind startPos) {
-                g_startPos = startPos;
-            })
+            buttonBar
         );
 
+        if (std::holds_alternative<DefaultBehaviour>(g_startPos)) {
+            return true;
+        }
+        buttonBar->setStartPosCounters(g_startPos);
         return true;
+    }
+
+    void onCreateObject(int id) {
+        EditorUI::onCreateObject(id);
+        log::info("I guess this is id: {}", id);
     }
 
     void deleteObject(GameObject* obj, bool filter) {
         EditorUI::deleteObject(obj, filter);
         PlaytestHerePopup::hide();
+        if (obj->m_objectID == 31 && std::holds_alternative<FromPoint>(g_startPos)) {
+            auto pos = std::get<FromPoint>(g_startPos);
+            if (obj->getPosition() == pos) {
+                g_startPos = DefaultBehaviour();
+            }
+        }
+        m_fields->buttonBar->setStartPosCounters(g_startPos);
     }
 
     void selectObjects(CCArray* objects, bool ignoreFilters) {
@@ -171,8 +208,23 @@ class $modify(MyEditorUI, EditorUI) {
     }
 
     void moveObject(GameObject* obj, CCPoint pos) {
+        bool movedActiveStartPos = false;
+        if (!m_editorLayer->m_editorInitialising) {
+            if (obj->m_objectID == 31 && std::holds_alternative<FromPoint>(g_startPos)) {
+                auto position = std::get<FromPoint>(g_startPos);
+                if (position == obj->getPosition()) {
+                    movedActiveStartPos = true;
+                    log::info("active startPos: {}, {}", position.x, position.y);
+                }
+            }
+        }
         EditorUI::moveObject(obj, pos);
         PlaytestHerePopup::move();
+        if (movedActiveStartPos) {
+            g_startPos = obj->getPosition();
+            m_fields->buttonBar->setStartPosCounters(g_startPos);
+            log::info("startPos: {}, {}", obj->getPositionX(), obj->getPositionY());
+        }
     }
 
     void moveObjectCall(EditCommand cmd) {
@@ -194,8 +246,12 @@ class $modify(GameObject) {
             PlaytestHerePopup::show(
                 LevelEditorLayer::get(),
                 static_cast<StartPosObject*>(as<GameObject*>(this)),
-                [](StartPosKind startPos) {
+                [this](StartPosKind startPos) {
                     g_startPos = startPos;
+                    auto buttonBar = static_cast<StartPosButtonBar*>(LevelEditorLayer::get()->m_editorUI->getChildByID("start-pos-button-bar"_spr));
+                    if (buttonBar) {
+                        buttonBar->setStartPosCounters(startPos);
+                    }
                 }
             );
         }

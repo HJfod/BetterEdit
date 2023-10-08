@@ -22,9 +22,16 @@ bool StartPosButtonBar::init(LevelEditorLayer* lel, std::function<void(StartPosK
     );
     goToStartBtn->setPosition(
         m_obContentSize.width / 2 - 25.f,
-        m_obContentSize.height / 2
+        m_obContentSize.height / 2 + 10.f
     );
     this->addChild(goToStartBtn);
+
+    auto counterLabel = CCLabelBMFont::create("", "bigFont.fnt");
+    counterLabel->setScale(0.6f);
+    counterLabel->setPosition({ m_obContentSize.width / 2, m_obContentSize.height / 2 - 25.f });
+    m_counterLabel = counterLabel;
+    this->addChild(counterLabel);
+    this->setStartPosCounters(DefaultBehaviour());
 
     auto goToLastSpr = ButtonSprite::create(
         CCSprite::createWithSpriteFrameName("last-start-pos.png"_spr),
@@ -35,15 +42,16 @@ bool StartPosButtonBar::init(LevelEditorLayer* lel, std::function<void(StartPosK
     );
     goToLastBtn->setPosition(
         m_obContentSize.width / 2 + 25.f,
-        m_obContentSize.height / 2
+        m_obContentSize.height / 2 + 10.f
     );
     this->addChild(goToLastBtn);
 
     auto infoSpr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
+    infoSpr->setScale(0.7f);
     auto infoBtn = CCMenuItemSpriteExtra::create(
         infoSpr, this, menu_selector(StartPosButtonBar::onInfo)
     );
-    infoBtn->setPosition(m_obContentSize / 2 + ccp(60.f, 0.f));
+    infoBtn->setPosition(m_obContentSize / 2 + ccp(70.f, 10.f));
     this->addChild(infoBtn);
 
     return true;
@@ -61,25 +69,45 @@ void StartPosButtonBar::onInfo(CCObject*) {
 }
 
 void StartPosButtonBar::onGoToStart(CCObject*) {
-    if (m_callback) {
-        m_callback(FromLevelStart());
-    }
+    m_callback(FromLevelStart());
+    this->setStartPosCounters(FromLevelStart());
 }
 
 void StartPosButtonBar::onGoToLast(CCObject*) {
-    StartPosObject* last = nullptr;
-    for(auto* obj : cocos::CCArrayExt<StartPosObject>(m_editor->m_objects)) {
-        if (obj->m_objectID == 31) {
-            if (!last || last->getPositionX() < obj->getPositionX()) {
-                last = obj;
+    m_callback(DefaultBehaviour());
+    this->setStartPosCounters(DefaultBehaviour());
+}
+
+void StartPosButtonBar::setStartPosCounters(StartPosKind startPos) {
+    int totalStartPos = 0;
+    int activeIndex = 0;
+    if (!m_editor || !m_editor->m_objects) {
+        return;
+    }
+
+    for (auto object : CCArrayExt<GameObject*>(m_editor->m_objects)) {
+        if (object->m_objectID != 31) {
+            continue;
+        }
+
+        totalStartPos++;
+        if (std::holds_alternative<FromPoint>(startPos)) {
+            auto pos = std::get<FromPoint>(startPos);
+            if (object->getPosition() == pos) {
+                activeIndex = totalStartPos;
             }
         }
     }
-    if (last) {
-        log::info("calling last");
-        m_callback(last);
-    } else {
-        log::info("default");
-        m_callback(DefaultBehaviour());
+
+    if (std::holds_alternative<DefaultBehaviour>(startPos)) {
+        activeIndex = totalStartPos;
     }
+
+    if (std::holds_alternative<FromLevelStart>(startPos)) {
+        activeIndex = 0;
+    }
+
+    std::string str = std::to_string(activeIndex) + " / " + std::to_string(totalStartPos);
+
+    m_counterLabel->setString(str.c_str());
 }

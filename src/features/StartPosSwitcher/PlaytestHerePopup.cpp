@@ -49,17 +49,15 @@ bool PlaytestHerePopup::init(LevelEditorLayer* lel, StartPosObject* startPos, st
 
 void PlaytestHerePopup::onPlaytest(CCObject*) {
     this->select();
-    m_callback(m_startPos);
     m_editor->setStartPosObject(m_startPos);
     EditorUI::get()->onPlaytest(EditorUI::get()->m_playtestBtn);
 }
 
 void PlaytestHerePopup::onPlayInGame(CCObject*) {
     this->select();
-    log::info("startposition: {}, {}", m_startPos->getPositionX(), m_startPos->getPositionY());
     m_editor->m_editorUI->onPause(nullptr);
-    EditorPauseLayer::get()->setVisible(false);
     EditorPauseLayer::get()->onSaveAndPlay(nullptr);
+    EditorPauseLayer::get()->setVisible(false);
 }
 
 void PlaytestHerePopup::select() {
