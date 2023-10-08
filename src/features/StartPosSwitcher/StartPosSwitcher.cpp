@@ -36,38 +36,31 @@ void updateActiveStartPos(StartPosKind startPos) {
 }
 
 class $modify(PlayLayer) {
+    StartPosObject* activeStartPos = nullptr;
+    bool fromLevelStart = false;
 	void addObject(GameObject* obj) {
         if (std::holds_alternative<DefaultBehaviour>(g_startPos)) {
             PlayLayer::addObject(obj);
             return;
         }
-        StartPosObject* old = nullptr;
-        if (m_startPos) {
-            old = m_startPos;
-        }
 		PlayLayer::addObject(obj);
-        if (old) {
-            m_startPos = old;
-            m_playerStartPosition = old->getPosition();
-        }
         if (obj->m_objectID == 31) {
-            log::info("pos: {}, {}", obj->getPositionX(), obj->getPositionY());
-            log::info("active startpos: {}, {}", m_startPos->getPositionX(), m_startPos->getPositionY());
-            if (std::holds_alternative<FromObj>(g_startPos)) {
-                auto startpos = std::get<FromObj>(g_startPos);
-                log::info("global startpos: {}, {}", startpos->getPositionX(), startpos->getPositionY());
-            }
-            if (std::holds_alternative<FromPoint>(g_startPos)) {
-                auto coords = std::get<FromPoint>(g_startPos);
-                log::info("global startpos: {}, {}", coords.x, coords.y);
-            }
             if (match(obj->getPosition())) {
-                m_startPos = static_cast<StartPosObject*>(obj);
-                m_playerStartPosition = obj->getPosition();
+                m_fields->activeStartPos = static_cast<StartPosObject*>(obj);
             }
             if (std::holds_alternative<FromLevelStart>(g_startPos)) {
+                m_fields->fromLevelStart = true;
+            }
+
+            if (m_fields->fromLevelStart) {
                 m_startPos = nullptr;
-                m_playerStartPosition = CCPoint { 0, 105.f };
+                m_playerStartPosition = CCPointZero;
+                return;
+            }
+
+            if (m_fields->activeStartPos) {
+                m_startPos = m_fields->activeStartPos;
+                m_playerStartPosition = m_fields->activeStartPos->getPosition();
             }
         }
     }
@@ -84,7 +77,6 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
     }
 
     void addSpecial(GameObject* obj) {
-        log::info("add special");
         LevelEditorLayer::addSpecial(obj);
         if (obj->m_objectID == 31) {
             if (match(obj->getPosition())) {
