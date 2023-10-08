@@ -15,11 +15,20 @@ class $modify(LDMCountEditorPauseLayer, EditorPauseLayer) {
         auto menu = static_cast<CCMenu*>(this->getChildByID("info-menu"));
         auto objectCountLabel = static_cast<CCLabelBMFont*>(menu->getChildByID("object-count-label"));
 
+        auto objectCount = this->countValidObjects();
+
         std::string objectCountText = objectCountLabel->getString();
         std::stringstream ss;
         ss << std::string(objectCountLabel->getString());
-        int ldmCount = this->countLDMObjects();
-        float percentage = static_cast<float>(ldmCount) / this->countValidObjects() * 100;
+        int ldmCount;
+        float percentage;
+        if (countValidObjects == 0) {
+            ldmCount = 0;
+            percentage = 0.f;
+        } else {
+            ldmCount = this->countLDMObjects();
+            percentage = static_cast<float>(ldmCount) / objectCount * 100;
+        }
 
         ss << " | " << ldmCount << " LDM (" << std::fixed << std::setprecision(2) << percentage << "%)";
         objectCountLabel->setString(ss.str().c_str());
