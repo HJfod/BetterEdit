@@ -23,7 +23,7 @@ namespace editor_api {
 
         CCMenuItemToggler* createTab(const char* icon, CCObject* target, SEL_MenuHandler selector);
 
-        friend struct MoreTabsUI; 
+        friend struct ::MoreTabsUI; 
 
     public:
         int addCreateTab(const char* icon, EditButtonBar* content);
