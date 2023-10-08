@@ -1,8 +1,8 @@
 #include <Geode/utils/cocos.hpp>
 #include <Other/BEShared.hpp>
-
 #include <Geode/modify/DrawGridLayer.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
+#include <Geode/binding/GameObject.hpp>
 
 using namespace geode::prelude;
 
@@ -24,15 +24,15 @@ CCArray* g_dashOrbEnds = nullptr;
 
 class $modify(DashOrbLineLayer, DrawGridLayer) {
     bool init(CCNode* grid, LevelEditorLayer* editor) {
-        if(!DrawGridLayer::init(grid, editor))
+        if (!DrawGridLayer::init(grid, editor))
             return false;
 
-        if(g_dashOrbs == nullptr) {
+        if (!g_dashOrbs) {
             g_dashOrbs = CCArray::create();
             g_dashOrbs->retain();
         }
 
-        if(g_dashOrbEnds == nullptr) {
+        if (!g_dashOrbEnds) {
             g_dashOrbEnds = CCArray::create();
             g_dashOrbEnds->retain();
         }
@@ -47,13 +47,13 @@ class $modify(DashOrbLineLayer, DrawGridLayer) {
     void draw() {
         DrawGridLayer::draw();
 
-        if(!Mod::get()->getSettingValue<bool>("dash-lines"))
+        if (!Mod::get()->getSettingValue<bool>("dash-lines"))
             return;
 
         ccColor4B lineColor = {0, 0, 0, 0};
 
         for(auto& obj : CCArrayExt<GameObject*>(g_dashOrbs)) {
-            switch(obj->m_objectID) {
+            switch (obj->m_objectID) {
                 case 1704: // green dash orb
                     lineColor = {0, 255, 0, 255};
                     break;
@@ -74,7 +74,7 @@ class $modify(DashOrbLineLayer, DrawGridLayer) {
                 auto endPos = end->getPosition();
                 auto nlen = ccpDistance(endPos, objPos) - 15.f;
 
-                if(nlen < len) {
+                if (nlen < len) {
                     auto ldis = mdistf(pos.x, pos.y, objPos.x, objPos.y, endPos.x, endPos.y);
                     if (ldis < 60.f) {
                         len = nlen;
@@ -93,7 +93,7 @@ class $modify(DashOrbLineLayer, DrawGridLayer) {
     }
 
     void registerDashOrb(GameObject* obj) {
-        if ( obj->m_objectID == 1704 || obj->m_objectID == 1751)
+        if (obj->m_objectID == 1704 || obj->m_objectID == 1751)
             g_dashOrbs->addObject(obj);
 
         if (obj->m_objectID == 1829)
@@ -120,18 +120,21 @@ class $modify(LevelEditorLayer) {
     }
 };
 
-BE_EDITOREXIT() {
+$onEditorExit {
     auto self = DashOrbLineLayer::get();
 
-    #define CLEAR_ARRAY(array) for(auto& obj : CCArrayExt<CCObject*>(array)) array->removeObject(obj, false)
+    #define CLEAR_ARRAY(array)                          \
+        for (auto& obj : CCArrayExt<CCObject*>(array)) {\
+            array->removeObject(obj, false);            \
+        }
 
-    if(g_dashOrbs != nullptr) {
+    if (g_dashOrbs) {
         CLEAR_ARRAY(g_dashOrbs);
         g_dashOrbs->release();
         g_dashOrbs = nullptr;
     }
 
-    if(g_dashOrbEnds != nullptr) {
+    if (g_dashOrbEnds) {
         CLEAR_ARRAY(g_dashOrbEnds);
         g_dashOrbEnds->release();
         g_dashOrbEnds = nullptr;

@@ -13,7 +13,7 @@ void BESharedFuncs::addEditorExitFunc(std::function<void()> func) {
 class $modify(GameManager) {
     void returnToLastScene(GJGameLevel* level) {
         auto editor = LevelEditorLayer::get();
-        if(editor != nullptr && m_sceneEnum == 3) {
+        if (editor && m_sceneEnum == 3) {
             // run events
             for(auto& func : BESharedFuncs::editorExitEvents) {
                 func();

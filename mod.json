@@ -169,6 +169,11 @@
 			"id": "geode.custom-keybinds",
 			"version": "v1.2.2",
 			"required": true
+		},
+		{
+			"id": "be_team.editorapi",
+			"version": "v1.0.0",
+			"required": true
 		}
 	]
 }

@@ -5,13 +5,14 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/GameObject.hpp>
-#include "MoreTabs/MoreTabs.hpp"
-#include <Other/Utils.hpp>
+#include <MoreTabs.hpp>
+#include <Utils.hpp>
 #include <Other/BEShared.hpp>
 #undef min
 #undef max
 
 using namespace geode::prelude;
+using namespace editor_api;
 
 struct FromLevelStart {};
 struct DefaultBehaviour {};
@@ -219,7 +220,7 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
     }
 };
 
-BE_EDITOREXIT() {
+$onEditorExit {
     PlaytestHerePopup::hide();
 }
 

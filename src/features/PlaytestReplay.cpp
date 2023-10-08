@@ -176,7 +176,7 @@ struct $modify(LevelEditorLayer) {
     }
 };
 
-BE_EDITOREXIT() {
+$onEditorExit {
     RECORDED_DATA.clear();
     REPLAY_INDEX = 0;
     RECORDING = Replay::None;

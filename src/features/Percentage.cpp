@@ -72,13 +72,15 @@ class $modify(SliderUI, EditorUI) {
             nullptr
         ));
     }
+
 #ifdef GEODE_IS_WINDOWS
     float timeForXPos(float xPos) {
         return reinterpret_cast<float(__vectorcall*)(LevelEditorLayer*, float, float)>(
             geode::base::get() + 0x9c7d0
-            )(LevelEditorLayer::get(), 1907.0f, xPos);
+        )(LevelEditorLayer::get(), 1907.0f, xPos);
     }
 #endif
+
     float calcPercentage() {
         float max = 0.f;
         for (auto obj : CCArrayExt<GameObject>(m_editorLayer->m_objects)) {
@@ -94,7 +96,9 @@ class $modify(SliderUI, EditorUI) {
             return m_editorLayer->timeForXPos(pos.x); // it's void in the bindings lol change it to float
 
         float percent = pos.x / max * 100;
-        if(percent > 100) percent = 100;
+        if (percent > 100) {
+            percent = 100;
+        }
 
         return percent;
     }

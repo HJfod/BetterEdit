@@ -224,7 +224,7 @@ class $modify(BetterScaleControl, GJScaleControl) {
 
         std::string s = ss.str();
 
-        if (m_fields->textInput != nullptr) {
+        if (m_fields->textInput) {
             m_fields->textInput->setString(s);
         }
     }
@@ -334,7 +334,7 @@ class $modify(ScaleEditorUI, EditorUI) {
             return;
         }
     
-        auto delegate = static_cast<InputScaleDelegate*>(this->m_scaleControl->getChildByID("input-delegate"_spr));
+        auto delegate = static_cast<InputScaleDelegate*>(m_scaleControl->getChildByID("input-delegate"_spr));
         if (!delegate) {
             m_fields->isTouchingAbsoluteLock = false;
             m_fields->isTouchingScaleSnap = false;
@@ -376,7 +376,7 @@ class $modify(ScaleEditorUI, EditorUI) {
             return;
         }
 
-        auto delegate = static_cast<InputScaleDelegate*>(this->m_scaleControl->getChildByID("input-delegate"_spr));
+        auto delegate = static_cast<InputScaleDelegate*>(m_scaleControl->getChildByID("input-delegate"_spr));
         if (!delegate) {
             return;
         }
@@ -416,12 +416,12 @@ class $modify(ScaleEditorUI, EditorUI) {
     }
 
     bool touchedLockButton(CCTouch* touch, CCEvent* event) {
-        auto delegate = static_cast<InputScaleDelegate*>(this->m_scaleControl->getChildByID("input-delegate"_spr));
-        auto input = static_cast<CCTextInputNode*>(this->m_scaleControl->getChildByID("scale-input"_spr));
+        auto delegate = static_cast<InputScaleDelegate*>(m_scaleControl->getChildByID("input-delegate"_spr));
+        auto input = static_cast<CCTextInputNode*>(m_scaleControl->getChildByID("scale-input"_spr));
         if (!delegate) {
             return false;
         }
-        if (m_scaleControl == nullptr || !m_scaleControl->isVisible()) {
+        if (!m_scaleControl || !m_scaleControl->isVisible()) {
             return false;
         }
 
@@ -441,7 +441,7 @@ class $modify(ScaleEditorUI, EditorUI) {
     }
 
     bool touchedScaleInput(CCTouch* touch, CCEvent* event) {
-        auto input = static_cast<CCTextInputNode*>(this->m_scaleControl->getChildByID("scale-input"_spr));
+        auto input = static_cast<CCTextInputNode*>(m_scaleControl->getChildByID("scale-input"_spr));
         if (!m_scaleControl->isVisible()) {
             if (input) {
                 input->getTextField()->detachWithIME();

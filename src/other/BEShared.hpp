@@ -11,7 +11,7 @@ public:
 };
 
 // funny macro
-#define BE_EDITOREXIT() \
+#define $onEditorExit \
     void GEODE_CONCAT(editorExitEvent, __LINE__)(); \
     $execute { BESharedFuncs::addEditorExitFunc([] { GEODE_CONCAT(editorExitEvent, __LINE__)(); }); } \
     void GEODE_CONCAT(editorExitEvent, __LINE__)()
