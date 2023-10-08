@@ -18,22 +18,7 @@ class $modify(LevelEditorLayer) {
     }
 
     void setupStartPos(StartPosObject* startPos) {
-        for (size_t i = 0; i < gravityPortals.size(); i++)
-        {
-            if (gravityPortals[i]->getPositionX() - 10 > startPos->getPositionX())
-                break;
-            if (gravityPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-                startPos->m_levelSettings->m_isFlipped = gravityPortals[i]->m_objectID == 11;
-        }
-
-        startPos->m_levelSettings->m_startDual = LevelEditorLayer::get()->m_levelSettings->m_startDual;
-        for (size_t i = 0; i < dualPortals.size(); i++)
-        {
-            if (dualPortals[i]->getPositionX() - 10 > startPos->getPositionX())
-                break;
-            if (dualPortals[i]->getPositionX() - 10 < startPos->getPositionX())
-                startPos->m_levelSettings->m_startDual = dualPortals[i]->m_objectID == 286;
-        }
+        bool isBallOrSpider = false;
         startPos->m_levelSettings->m_startMode = LevelEditorLayer::get()->m_levelSettings->m_startMode;
         for (size_t i = 0; i < gamemodePortals.size(); i++)
         {
@@ -51,6 +36,7 @@ class $modify(LevelEditorLayer) {
                     break;
                 case 47:
                     startPos->m_levelSettings->m_startMode = (int)IconType::Ball;
+                    isBallOrSpider = true;
                     break;
                 case 111:
                     startPos->m_levelSettings->m_startMode = (int)IconType::Ufo;
@@ -63,9 +49,28 @@ class $modify(LevelEditorLayer) {
                     break;
                 case 1331:
                     startPos->m_levelSettings->m_startMode = (int)IconType::Spider;
+                    isBallOrSpider = true;
                     break;
                 }
             }
+        }
+        if (!isBallOrSpider) {
+            for (size_t i = 0; i < gravityPortals.size(); i++)
+            {
+                if (gravityPortals[i]->getPositionX() - 10 > startPos->getPositionX())
+                    break;
+                if (gravityPortals[i]->getPositionX() - 10 < startPos->getPositionX())
+                    startPos->m_levelSettings->m_isFlipped = gravityPortals[i]->m_objectID == 11;
+            }
+        }
+
+        startPos->m_levelSettings->m_startDual = LevelEditorLayer::get()->m_levelSettings->m_startDual;
+        for (size_t i = 0; i < dualPortals.size(); i++)
+        {
+            if (dualPortals[i]->getPositionX() - 10 > startPos->getPositionX())
+                break;
+            if (dualPortals[i]->getPositionX() - 10 < startPos->getPositionX())
+                startPos->m_levelSettings->m_startDual = dualPortals[i]->m_objectID == 286;
         }
 
         startPos->m_levelSettings->m_startMini = LevelEditorLayer::get()->m_levelSettings->m_startMini;
