@@ -154,6 +154,16 @@ class $modify(EditorPauseLayer) {
         }
         EditorPauseLayer::onSaveAndPlay(sender);
     }
+
+    void onExitEditor(CCObject* sender) {
+        EditorPauseLayer::onExitEditor(sender);
+        g_startPos = DefaultBehaviour();
+    }
+
+    void onSaveAndExit(CCObject* sender) {
+        EditorPauseLayer::onSaveAndExit(sender);
+        g_startPos = DefaultBehaviour();
+    }
 };
 
 class $modify(MyEditorUI, EditorUI) {
