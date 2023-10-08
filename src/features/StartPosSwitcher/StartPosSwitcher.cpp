@@ -199,11 +199,6 @@ class $modify(MyEditorUI, EditorUI) {
         return true;
     }
 
-    void onCreateObject(int id) {
-        EditorUI::onCreateObject(id);
-        log::info("I guess this is id: {}", id);
-    }
-
     void deleteObject(GameObject* obj, bool filter) {
         EditorUI::deleteObject(obj, filter);
         PlaytestHerePopup::hide();
@@ -233,7 +228,6 @@ class $modify(MyEditorUI, EditorUI) {
                 auto position = std::get<FromPoint>(g_startPos);
                 if (position == obj->getPosition()) {
                     movedActiveStartPos = true;
-                    log::info("active startPos: {}, {}", position.x, position.y);
                 }
             }
         }
@@ -242,7 +236,6 @@ class $modify(MyEditorUI, EditorUI) {
         if (movedActiveStartPos) {
             g_startPos = obj->getPosition();
             m_fields->buttonBar->setStartPosCounters(g_startPos);
-            log::info("startPos: {}, {}", obj->getPositionX(), obj->getPositionY());
         }
     }
 
