@@ -22,7 +22,7 @@ class $modify(LDMCountEditorPauseLayer, EditorPauseLayer) {
         ss << std::string(objectCountLabel->getString());
         int ldmCount;
         float percentage;
-        if (countValidObjects == 0) {
+        if (objectCount == 0) {
             ldmCount = 0;
             percentage = 0.f;
         } else {
