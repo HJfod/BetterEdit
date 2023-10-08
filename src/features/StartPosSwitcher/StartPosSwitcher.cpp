@@ -5,6 +5,7 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/modify/GameObject.hpp>
+#include <Geode/modify/GameManager.hpp>
 #include <MoreTabs.hpp>
 #include <Utils.hpp>
 #include <Other/BEShared.hpp>
@@ -137,6 +138,14 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
 $onEditorExit {
     PlaytestHerePopup::hide();
 }
+
+// In case $onEditorExit runs on save and play
+class $modify(GameManager) {
+    void returnToLastScene(GJGameLevel* level) {
+        GameManager::returnToLastScene(level);
+        g_startPos = DefaultBehaviour();
+    }
+};
 
 class $modify(EditorPauseLayer) {
     bool init(LevelEditorLayer* lel) {
