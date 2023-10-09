@@ -220,7 +220,7 @@ class $modify(LevelEditorLayer) {
 				speedChanges.push_back(g);
 				break;
 		}
-        if (LevelEditorLayer::get() && !LevelEditorLayer::get()->m_editorInitialising) {
+        if (LevelEditorLayer::get() && !LevelEditorLayer::get()->m_editorInitialising && g->m_objectID == 31) {
             this->setupStartPos(static_cast<StartPosObject*>(g));
         }
     }
