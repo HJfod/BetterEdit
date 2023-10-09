@@ -77,6 +77,24 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
         }
     }
 
+    void removeSpecial(GameObject* obj) {
+        LevelEditorLayer::removeSpecial(obj);
+
+        if (obj->m_objectID != 31) {
+            return;
+        }
+        PlaytestHerePopup::hide();
+        if (obj->m_objectID == 31) {
+            auto manager = StartPosManager::get();
+            if (obj->getPosition() == manager->getActive()) {
+                manager->clear();
+            }
+            manager->setStartPositions(m_objects);
+            auto buttonBar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
+            buttonBar->setStartPosCounters();
+        }
+    }
+
     void handleAction(bool idk, CCArray* idk2) {
         LevelEditorLayer::handleAction(idk, idk2);
         PlaytestHerePopup::move();
@@ -178,19 +196,6 @@ class $modify(MyEditorUI, EditorUI) {
         StartPosManager::get()->clear();
         StartPosManager::get()->setStartPositions(nullptr);
         m_fields->buttonBar->setStartPosCounters();
-    }
-
-    void deleteObject(GameObject* obj, bool filter) {
-        EditorUI::deleteObject(obj, filter);
-        PlaytestHerePopup::hide();
-        if (obj->m_objectID == 31) {
-            auto manager = StartPosManager::get();
-            if (obj->getPosition() == manager->getActive()) {
-                manager->clear();
-            }
-            manager->setStartPositions(m_editorLayer->m_objects);
-            m_fields->buttonBar->setStartPosCounters();
-        }
     }
 
     void selectObjects(CCArray* objects, bool ignoreFilters) {

@@ -64,11 +64,8 @@ void StartPosManager::sort() {
 
 void StartPosManager::setActive(CCPoint const& pos) {
     bool set = false;
-    log::info("setting: {}, {} as active...", pos.x, pos.y);
     for (auto startPos : m_positions) {
-        log::info("comparing to: {}, {}", startPos.x, startPos.y);
         if (startPos == pos) {
-            log::info("set!");
             m_active = pos;
             set = true;
             break;
@@ -76,7 +73,6 @@ void StartPosManager::setActive(CCPoint const& pos) {
     }
 
     if (!set) {
-        log::info("defaulting...");
         m_active = m_positions.at(m_positions.size() - 1);
     }
 }
@@ -89,22 +85,12 @@ void StartPosManager::addStartPos(CCPoint const& position) {
     }
     m_positions.push_back(position);
     this->sort();
-    for (auto pos : m_positions) {
-        log::info("pos: {}, {}", pos.x, pos.y);
-    }
-    log::info("active: {}, {}", m_active.x, m_active.y);
 }
 
 void StartPosManager::replaceStartPos(CCPoint const& before, CCPoint const& after) {
     if (!LevelEditorLayer::get() || LevelEditorLayer::get()->m_editorInitialising) {
         return;
     }
-
-    // log::info("before");
-    // for (auto pos : m_positions) {
-    //     log::info("pos: {}, {}", pos.x, pos.y);
-    // }
-    // log::info("active: {}, {}", m_active.x, m_active.y);
 
     for (auto& position : m_positions) {
         if (position == before) {
@@ -117,11 +103,6 @@ void StartPosManager::replaceStartPos(CCPoint const& before, CCPoint const& afte
     }
 
     this->sort();
-    // log::info("after");
-    // for (auto pos : m_positions) {
-    //     log::info("pos: {}, {}", pos.x, pos.y);
-    // }
-    // log::info("active: {}, {}", m_active.x, m_active.y);
 }
 
 StartPosObject* StartPosManager::getStartPosFromPoint(CCPoint const& point) {

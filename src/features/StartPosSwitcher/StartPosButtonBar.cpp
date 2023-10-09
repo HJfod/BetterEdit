@@ -28,7 +28,7 @@ bool StartPosButtonBar::init(LevelEditorLayer* lel) {
     auto counterLabel = CCLabelBMFont::create("", "bigFont.fnt");
     counterLabel->setScale(0.6f);
     counterLabel->setPosition({ m_obContentSize.width / 2, m_obContentSize.height / 2 - 25.f });
-    counterLabel->limitLabelWidth(80.0f, 0.6f, 0.4f);
+    counterLabel->limitLabelWidth(60.0f, 0.6f, 0.1f);
     counterLabel->setString("0 / 0");
     m_counterLabel = counterLabel;
     this->addChild(counterLabel);
@@ -131,6 +131,7 @@ void StartPosButtonBar::setStartPosCounters() {
     std::string str = std::to_string(m_activeIndex) + " / " + std::to_string(m_totalStartPositions);
 
     m_counterLabel->setString(str.c_str());
+    m_counterLabel->limitLabelWidth(60.0f, 0.6f, 0.1f);
 }
 
 void StartPosButtonBar::onNext(CCObject*) {
