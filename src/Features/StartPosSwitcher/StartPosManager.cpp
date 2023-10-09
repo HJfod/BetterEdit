@@ -17,6 +17,9 @@ StartPosManager* StartPosManager::get() {
 void StartPosManager::setStartPositions(CCArray* objects) {
     m_positions.clear();
     m_positions.push_back(CCPointZero);
+    if (!objects) {
+        return;
+    }
     for (auto object : CCArrayExt<GameObject*>(objects)) {
         if (object->m_objectID == 31) {
             auto skip = false;
@@ -30,6 +33,12 @@ void StartPosManager::setStartPositions(CCArray* objects) {
                 continue;
             }
             m_positions.push_back(object->getPosition());
+            auto editor = LevelEditorLayer::get();
+            if (m_active != CCPointZero && editor && !editor->m_editorInitialising) {
+                if (object->getPosition() == editor->m_editorUI->getGridSnappedPos(m_active)) {
+                    m_active = object->getPosition();
+                }
+            }
         }
     }
 
@@ -39,8 +48,12 @@ void StartPosManager::setStartPositions(CCArray* objects) {
         m_active = CCPointZero;
         return;
     }
+    if (m_initialized) {
+        return;
+    }
 
     m_active = m_positions.at(m_positions.size() - 1);
+    m_initialized = true;
 }
 
 void StartPosManager::sort() {
@@ -51,8 +64,11 @@ void StartPosManager::sort() {
 
 void StartPosManager::setActive(CCPoint const& pos) {
     bool set = false;
+    log::info("setting: {}, {} as active...", pos.x, pos.y);
     for (auto startPos : m_positions) {
+        log::info("comparing to: {}, {}", startPos.x, startPos.y);
         if (startPos == pos) {
+            log::info("set!");
             m_active = pos;
             set = true;
             break;
@@ -60,6 +76,7 @@ void StartPosManager::setActive(CCPoint const& pos) {
     }
 
     if (!set) {
+        log::info("defaulting...");
         m_active = m_positions.at(m_positions.size() - 1);
     }
 }
@@ -70,14 +87,24 @@ void StartPosManager::addStartPos(CCPoint const& position) {
             return;
         }
     }
-
+    m_positions.push_back(position);
     this->sort();
+    for (auto pos : m_positions) {
+        log::info("pos: {}, {}", pos.x, pos.y);
+    }
+    log::info("active: {}, {}", m_active.x, m_active.y);
 }
 
-void StartPosManager::moveStartPos(CCPoint const& before, CCPoint const& after) {
+void StartPosManager::replaceStartPos(CCPoint const& before, CCPoint const& after) {
     if (!LevelEditorLayer::get() || LevelEditorLayer::get()->m_editorInitialising) {
         return;
     }
+
+    // log::info("before");
+    // for (auto pos : m_positions) {
+    //     log::info("pos: {}, {}", pos.x, pos.y);
+    // }
+    // log::info("active: {}, {}", m_active.x, m_active.y);
 
     for (auto& position : m_positions) {
         if (position == before) {
@@ -85,19 +112,30 @@ void StartPosManager::moveStartPos(CCPoint const& before, CCPoint const& after) 
             break;
         }
     }
+    if (m_active == before) {
+        m_active = after;
+    }
 
     this->sort();
+    // log::info("after");
+    // for (auto pos : m_positions) {
+    //     log::info("pos: {}, {}", pos.x, pos.y);
+    // }
+    // log::info("active: {}, {}", m_active.x, m_active.y);
 }
 
 StartPosObject* StartPosManager::getStartPosFromPoint(CCPoint const& point) {
-    if (LevelEditorLayer::get() && !LevelEditorLayer::get()->m_editorInitialising) {
+    if (LevelEditorLayer::get()) {
         for (auto object : CCArrayExt<GameObject*>(LevelEditorLayer::get()->m_objects)) {
-            if (
-                object->m_objectID == 31 && 
-                object->getPosition() == point || 
-                object->getPosition() == LevelEditorLayer::get()->m_editorUI->getGridSnappedPos(point)
-            ) {
-                return static_cast<StartPosObject*>(object);
+            if (object->m_objectID == 31) {
+                if (object->getPosition() == point) {
+                    return static_cast<StartPosObject*>(object);
+                }
+
+                if (!LevelEditorLayer::get()->m_editorInitialising && object->getPosition() == LevelEditorLayer::get()->m_editorUI->getGridSnappedPos(point)) {
+                    this->replaceStartPos(point, LevelEditorLayer::get()->m_editorUI->getGridSnappedPos(point));
+                    return static_cast<StartPosObject*>(object);
+                }
             }
         }
 
@@ -140,4 +178,35 @@ void StartPosManager::previous() {
 void StartPosManager::clear() {
     m_active = CCPointZero;
     m_positions.clear();
+    m_initialized = false;
+}
+
+bool StartPosManager::isDefault() {
+    if (m_positions.size() == 0) {
+        return true;
+    }
+    return m_active == m_positions.at(m_positions.size() - 1);
+}
+
+bool StartPosManager::isLevelStart() {
+    if (m_positions.size() == 0) {
+        return false;
+    }
+    return m_active == m_positions.at(0);
+}
+
+CCPoint StartPosManager::getActive() {
+    return m_active;
+}
+
+std::vector<CCPoint> StartPosManager::getPositions() {
+    return m_positions;
+}
+
+void StartPosManager::setDefault() {
+    m_active = m_positions.at(m_positions.size() - 1);
+}
+
+void StartPosManager::setFirst() {
+    m_active = m_positions.at(0);
 }

@@ -1,12 +1,12 @@
 #include "PlaytestHerePopup.hpp"
 
-bool PlaytestHerePopup::init(LevelEditorLayer* lel, StartPosObject* startPos, std::function<void(StartPosKind)> callback) {
+bool PlaytestHerePopup::init(LevelEditorLayer* lel, StartPosObject* startPos, std::function<void()> callback) {
     if (!CCNode::init())
         return false;
 
-    m_callback = callback;    
     m_editor = lel;
     m_startPos = startPos;
+    m_callback = callback;
 
     this->setZOrder(0xB00B5);
 
@@ -49,17 +49,19 @@ bool PlaytestHerePopup::init(LevelEditorLayer* lel, StartPosObject* startPos, st
 
 void PlaytestHerePopup::onPlaytest(CCObject*) {
     this->select();
+    m_callback();
     m_editor->setStartPosObject(m_startPos);
     EditorUI::get()->onPlaytest(EditorUI::get()->m_playtestBtn);
 }
 
 void PlaytestHerePopup::onPlayInGame(CCObject*) {
     this->select();
+    m_callback();
     m_editor->m_editorUI->onPause(nullptr);
     EditorPauseLayer::get()->onSaveAndPlay(nullptr);
     EditorPauseLayer::get()->setVisible(false);
 }
 
 void PlaytestHerePopup::select() {
-    m_callback(m_startPos->getPosition());
+    StartPosManager::get()->setActive(m_startPos->getPosition());
 }

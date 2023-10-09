@@ -1,10 +1,9 @@
 #include "StartPosButtonBar.hpp"
 
-bool StartPosButtonBar::init(LevelEditorLayer* lel, std::function<void(StartPosKind)> changeCallback) {
+bool StartPosButtonBar::init(LevelEditorLayer* lel) {
     if (!CCMenu::init())
         return false;
     
-    m_callback = changeCallback;
     m_editor = lel;
 
     auto winSize = CCDirector::get()->getWinSize();
@@ -30,9 +29,10 @@ bool StartPosButtonBar::init(LevelEditorLayer* lel, std::function<void(StartPosK
     counterLabel->setScale(0.6f);
     counterLabel->setPosition({ m_obContentSize.width / 2, m_obContentSize.height / 2 - 25.f });
     counterLabel->limitLabelWidth(80.0f, 0.6f, 0.4f);
+    counterLabel->setString("0 / 0");
     m_counterLabel = counterLabel;
     this->addChild(counterLabel);
-    this->setStartPosCounters(DefaultBehaviour());
+    this->setStartPosCounters();
 
     auto goToLastSpr = ButtonSprite::create(
         CCSprite::createWithSpriteFrameName("last-start-pos.png"_spr),
@@ -87,61 +87,45 @@ void StartPosButtonBar::onInfo(CCObject*) {
 }
 
 void StartPosButtonBar::onGoToStart(CCObject*) {
-    m_callback(FromLevelStart());
-    this->setStartPosCounters(FromLevelStart());
+    StartPosManager::get()->setFirst();
+    this->setStartPosCounters();
 }
 
 void StartPosButtonBar::onGoToLast(CCObject*) {
-    m_callback(DefaultBehaviour());
-    this->setStartPosCounters(DefaultBehaviour());
+    StartPosManager::get()->setDefault();
+    this->setStartPosCounters();
 }
 
-void StartPosButtonBar::setStartPosCounters(StartPosKind startPos) {
+void StartPosButtonBar::setStartPosCounters() {
     m_totalStartPositions = 0;
     m_activeIndex = 0;
     if (!m_editor || !m_editor->m_objects) {
         return;
     }
 
-    CCArrayExt<StartPosObject*> startPositions;
+    m_totalStartPositions = StartPosManager::get()->getPositions().size() - 1;
+    auto active = StartPosManager::get()->getActive();
 
-    for (auto object : CCArrayExt<GameObject*>(m_editor->m_objects)) {
-        if (object->m_objectID != 31) {
-            continue;
-        }
+    bool found = false;
 
-        startPositions.push_back(static_cast<StartPosObject*>(object));
-        m_totalStartPositions++;
-    }
-
-    if (std::holds_alternative<FromPoint>(startPos) && m_activeIndex == 0) {
-        auto pos = std::get<FromPoint>(startPos);
-        std::sort(startPositions.begin(), startPositions.end(), [](StartPosObject* x, StartPosObject* y){
-            return x->getPositionX() < y->getPositionX();
-        });
-        int i = 0;
-        for (auto object : startPositions) {
-            i++;
-            if (object->getPosition() == pos || object->getPosition() == m_editor->m_editorUI->getGridSnappedPos(pos)) {
-                if (object->getPosition() == pos) {
-                    m_activeIndex = i;
-                    m_active = startPos;
-                } else if (!m_editor->m_editorInitialising && object->getPosition() == m_editor->m_editorUI->getGridSnappedPos(pos)) {
-                    m_activeIndex = i;
-                    m_active = startPos;
-                }
-            }
-        }
-    }
-
-    if (std::holds_alternative<DefaultBehaviour>(startPos)) {
+    if (StartPosManager::get()->isDefault()) {
         m_activeIndex = m_totalStartPositions;
-        m_active = startPos;
+        found = true;
     }
 
-    if (std::holds_alternative<FromLevelStart>(startPos)) {
+    if (StartPosManager::get()->isLevelStart() && !found) {
         m_activeIndex = 0;
-        m_active = startPos;
+        found = true;
+    }
+
+    if (!found) {
+        int i = 0;
+        for (auto pos : StartPosManager::get()->getPositions()) {
+            if (pos == active) {
+                m_activeIndex = i;
+            }
+            i++;
+        }
     }
 
     std::string str = std::to_string(m_activeIndex) + " / " + std::to_string(m_totalStartPositions);
@@ -153,102 +137,16 @@ void StartPosButtonBar::onNext(CCObject*) {
     if (m_activeIndex == m_totalStartPositions) {
         return;
     }
-    if (std::holds_alternative<DefaultBehaviour>(m_active)) {
-        return;
-    }
 
-    log::info("active: {}", m_activeIndex);
-    auto found = this->search(m_active, FindHigher);
-    m_callback(found);
-    this->setStartPosCounters(found);
+    StartPosManager::get()->next();
+    this->setStartPosCounters();
 }
 
 void StartPosButtonBar::onPrevious(CCObject*) {
     if (m_activeIndex == 0) {
         return;
     }
-    if (std::holds_alternative<FromLevelStart>(m_active)) {
-        return;
-    }
-    if (m_activeIndex == 1) {
-        m_active = FromLevelStart();
-        m_callback(m_active);
-        this->setStartPosCounters(m_active);
-    }
 
-    auto found = this->search(m_active, FindSmaller);
-    m_callback(found);
-    this->setStartPosCounters(found);
-}
-
-StartPosKind StartPosButtonBar::search(StartPosKind current, StartPositionSearchType searchType) {
-    std::vector<CCPoint> positions;
-
-    for (auto object : CCArrayExt<GameObject*>(m_editor->m_objects)) {
-        if (object->m_objectID == 31) {
-            switch (searchType) {
-                case StartPositionSearchType::FindHigher: {
-                    if (std::holds_alternative<DefaultBehaviour>(current)) {
-                        return current;
-                    }
-                    if (std::holds_alternative<FromLevelStart>(current)) {
-                        positions.push_back(object->getPosition());
-                        continue;
-                    }
-                    if (object->getPositionX() > std::get<FromPoint>(current).x) {
-                        positions.push_back(object->getPosition());
-                    }
-                } break;
-                case StartPositionSearchType::FindSmaller: {
-                    if (std::holds_alternative<FromLevelStart>(current)) {
-                        return current;
-                    }
-                    if (std::holds_alternative<DefaultBehaviour>(current)) {
-                        positions.push_back(object->getPosition());
-                        continue;
-                    }
-                    if (object->getPositionX() < std::get<FromPoint>(current).x) {
-                        positions.push_back(object->getPosition());
-                    }
-                } break;
-            }
-        }
-    }
-
-    for (auto pos : positions) {
-        log::info("position: {}, {}", pos.x, pos.y);
-    }
-
-    if (searchType == StartPositionSearchType::FindSmaller) {
-        positions.push_back(CCPointZero);
-    }
-
-    if (positions.size() == 0) {
-        return current;
-    }
-
-    switch (searchType) {
-        case StartPositionSearchType::FindHigher: {
-            std::sort(positions.begin(), positions.end(), [](CCPoint first, CCPoint second) {
-                return first.x < second.x;
-            });
-
-            return positions.at(0);
-        } break;
-        case StartPositionSearchType::FindSmaller: {
-            std::sort(positions.begin(), positions.end(), [](CCPoint first, CCPoint second) {
-                return first.x > second.x;
-            });
-
-            if (std::holds_alternative<DefaultBehaviour>(current) && positions.size() > 1) {
-                return positions.at(1);
-            }
-
-            if (positions.at(0) == CCPointZero) {
-                return FromLevelStart();
-            }
-            return positions.at(0);
-        } break;
-    }
-    return current;
+    StartPosManager::get()->previous();
+    this->setStartPosCounters();
 }

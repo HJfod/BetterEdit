@@ -2,7 +2,7 @@
 
 #include <Geode/Geode.hpp>
 
-#include "StartPosKind.hpp"
+#include "StartPosManager.hpp"
 
 using namespace geode::prelude;
 
@@ -11,12 +11,12 @@ protected:
     Ref<StartPosObject> m_startPos;
     LevelEditorLayer* m_editor;
     inline static PlaytestHerePopup* s_popup = nullptr;
-    std::function<void(StartPosKind)> m_callback;
+    std::function<void()> m_callback;
 
-    bool init(LevelEditorLayer*, StartPosObject*, std::function<void(StartPosKind)>);
+    bool init(LevelEditorLayer*, StartPosObject*, std::function<void()>);
 
     static PlaytestHerePopup* create(
-        LevelEditorLayer* lel, StartPosObject* startPos, std::function<void(StartPosKind)> callback
+        LevelEditorLayer* lel, StartPosObject* startPos, std::function<void()> callback
     ) {
         auto ret = new PlaytestHerePopup;
         if (ret && ret->init(lel, startPos, callback)) {
@@ -41,7 +41,7 @@ public:
         }
     }
 
-    static void show(LevelEditorLayer* lel, StartPosObject* startPos, std::function<void(StartPosKind)> callback) {
+    static void show(LevelEditorLayer* lel, StartPosObject* startPos, std::function<void()> callback) {
         PlaytestHerePopup::hide();
         PlaytestHerePopup::create(lel, startPos, callback);
         PlaytestHerePopup::move();
