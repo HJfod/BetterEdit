@@ -70,6 +70,7 @@ class $modify(PlayLayer) {
     StartPosObject* activeStartPos = nullptr;
     bool fromLevelStart = false;
 	void addObject(GameObject* obj) {
+        PlayLayer::addObject(obj);
         if (std::holds_alternative<DefaultBehaviour>(g_startPos)) {
             PlayLayer::addObject(obj);
             return;
@@ -98,6 +99,16 @@ class $modify(PlayLayer) {
 };
 
 class $modify(StartPosSwitchLayer, LevelEditorLayer) {
+    void addSpecial(GameObject* obj) {
+        LevelEditorLayer::addSpecial(obj);
+        if (!m_editorInitialising) {
+            auto bar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
+            if (bar) {
+                bar->setStartPosCounters(g_startPos);
+            }
+        }
+    }
+
     void handleAction(bool idk, CCArray* idk2) {
         LevelEditorLayer::handleAction(idk, idk2);
         PlaytestHerePopup::move();
@@ -109,6 +120,12 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
             auto startPos = getStartPosByPosition(pos, m_objects);
             if (!startPos) {
                 Notification::create("Couldn't setup startpos switcher.", CCSprite::createWithSpriteFrameName("edit_delBtnSmall_001.png"))->show();
+                g_startPos = DefaultBehaviour();
+                auto bar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
+                if (bar) {
+                    bar->setStartPosCounters(g_startPos);
+                }
+                
                 LevelEditorLayer::setupLevelStart(obj);
                 return;
             }
@@ -197,6 +214,12 @@ class $modify(MyEditorUI, EditorUI) {
         }
         buttonBar->setStartPosCounters(g_startPos);
         return true;
+    }
+
+    void onDeleteStartPos(CCObject* sender) {
+        EditorUI::onDeleteStartPos(sender);
+        g_startPos = DefaultBehaviour();
+        m_fields->buttonBar->setStartPosCounters(g_startPos);
     }
 
     void deleteObject(GameObject* obj, bool filter) {
