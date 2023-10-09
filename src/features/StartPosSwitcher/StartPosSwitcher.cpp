@@ -19,23 +19,21 @@
 using namespace geode::prelude;
 using namespace editor_api;
 
-struct RecalculateStartPosData {
-    CCPoint original;
-    CCPoint newPoint;
-};
+bool g_enteringLevel = false;
 
 class $modify(PlayLayer) {
     StartPosObject* activeStartPos = nullptr;
     bool fromLevelStart = false;
 	void addObject(GameObject* obj) {
+        g_enteringLevel = false;
         PlayLayer::addObject(obj);
         if (obj->m_objectID != 31) {
             return;
         }
-        if (StartPosManager::get()->isDefault()) {
+        if (StartPosManager::get()->isDefault() && !m_fields->activeStartPos) {
             return;
         }
-        if (StartPosManager::get()->isLevelStart()) {
+        if (StartPosManager::get()->isLevelStart() && !m_fields->activeStartPos) {
             m_startPos = nullptr;
             m_playerStartPosition = CCPointZero;
             return;
@@ -79,8 +77,10 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
 
     void removeSpecial(GameObject* obj) {
         LevelEditorLayer::removeSpecial(obj);
-
         if (obj->m_objectID != 31) {
+            return;
+        }
+        if (g_enteringLevel) {
             return;
         }
         PlaytestHerePopup::hide();
@@ -157,6 +157,7 @@ class $modify(EditorPauseLayer) {
 
     void onSaveAndPlay(CCObject* sender) {
         StartPosManager::get()->setStartPositions(m_editorLayer->m_objects);
+        g_enteringLevel = true;
         EditorPauseLayer::onSaveAndPlay(sender);
     }
 
@@ -251,12 +252,14 @@ class $modify(MyEditorUI, EditorUI) {
     // if we are free moving any startpos, update the manager and clear the map
     void ccTouchEnded(CCTouch* touch, CCEvent* event) {
         EditorUI::ccTouchEnded(touch, event);
-        for (const auto& kv : m_fields->startPosOriginals) {
-            StartPosManager::get()->replaceStartPos(kv.second, kv.first->getPosition());
+        if (m_fields->holding && !m_fields->startPosOriginals.empty()) {
+            for (const auto& kv : m_fields->startPosOriginals) {
+                StartPosManager::get()->replaceStartPos(kv.second, kv.first->getPosition());
+            }
+            m_fields->buttonBar->setStartPosCounters();
+            m_fields->startPosOriginals.clear();
+            m_fields->holding = false;
         }
-        m_fields->buttonBar->setStartPosCounters();
-        m_fields->startPosOriginals.clear();
-        m_fields->holding = false;
     }
 
     void moveObjectCall(EditCommand cmd) {
