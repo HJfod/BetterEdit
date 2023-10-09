@@ -220,7 +220,8 @@ class $modify(LevelEditorLayer) {
 				speedChanges.push_back(g);
 				break;
 		}
-
-        SSPsetup();
+        if (LevelEditorLayer::get() && !LevelEditorLayer::get()->m_editorInitialising) {
+            this->setupStartPos(static_cast<StartPosObject*>(g));
+        }
     }
 };
