@@ -235,6 +235,11 @@ class $modify(MyEditorUI, EditorUI) {
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
         auto ret = EditorUI::ccTouchBegan(touch, event);
         m_fields->holding = true;
+
+        // bad fix for bad bug :)
+        if (m_freeMoveEnabled) {
+            MoreTabs::get(this, false)->switchEditTab(1);
+        }
         return ret;
     }
 
