@@ -4,6 +4,12 @@
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/binding/EditButtonBar.hpp>
 #include <Geode/utils/cocos.hpp>
+#include <Geode/binding/CCMenuItemToggler.hpp>
+#include <Geode/binding/EditButtonBar.hpp>
+#include <Geode/binding/GameManager.hpp>
+#include <Geode/binding/CCMenuItemSpriteExtra.hpp>
+#include <Geode/modify/EditorUI.hpp>
+#include <geode.custom-keybinds/include/Keybinds.hpp>
 
 using namespace geode::prelude;
 

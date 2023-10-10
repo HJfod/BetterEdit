@@ -141,6 +141,7 @@ void StartPosButtonBar::onNext(CCObject*) {
 
     StartPosManager::get()->next();
     this->setStartPosCounters();
+    editor_api::moveGameLayerTo(m_editor->m_editorUI, StartPosManager::get()->getStartPosFromPoint(StartPosManager::get()->getActive()));
 }
 
 void StartPosButtonBar::onPrevious(CCObject*) {
@@ -150,4 +151,8 @@ void StartPosButtonBar::onPrevious(CCObject*) {
 
     StartPosManager::get()->previous();
     this->setStartPosCounters();
+    if (StartPosManager::get()->getActive() == CCPointZero) {
+        return;
+    }
+    editor_api::moveGameLayerTo(m_editor->m_editorUI, StartPosManager::get()->getStartPosFromPoint(StartPosManager::get()->getActive()));
 }
