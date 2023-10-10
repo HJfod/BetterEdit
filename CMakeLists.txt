@@ -11,6 +11,7 @@ file(GLOB SOURCES
 	src/features/MoreTabs/*.cpp
 	src/features/VisibilityToggle/*.cpp
 	src/features/BetterScaling/*.cpp
+	src/features/StartPosSwitcher/*.cpp
 	src/features/*.cpp
 	src/other/*.cpp
 	src/*.cpp

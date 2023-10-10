@@ -67,7 +67,7 @@
 			"type": "bool",
 			"default": true,
 			"name": "Smart StartPos",
-			"description": "When enabled, all StartPoses in the editor will be automatically set for you"
+			"description": "When enabled, all StartPoses in the editor will be automatically set for you. <cr>Does not set gravity for ball and spider gamemodes.</c>"
 		},
 		"playtest-lag-fix": {
 			"type": "bool",
