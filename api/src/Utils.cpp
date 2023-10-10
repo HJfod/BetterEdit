@@ -112,3 +112,46 @@ ButtonSprite* editor_api::createEditorButtonSprite(const char* top, const char* 
         32, true, 32, bg, 1.f
     );
 }
+
+void editor_api::moveGameLayerTo(EditorUI* ui, CCPoint const& pos, bool smooth, bool relative) {
+    constexpr int GAME_LAYER_MOVE_ACTION_TAG = -48237;
+    auto layer = ui->m_editorLayer->m_objectLayer;
+    // Stop any running movements
+    layer->stopActionByTag(GAME_LAYER_MOVE_ACTION_TAG);
+    auto a = CCEaseInOut::create(
+        CCMoveTo::create(
+            (smooth ? .4f : .0f),
+            (relative ? layer->getPosition() + pos : pos)
+        ),
+        2.f
+    );
+    a->setTag(GAME_LAYER_MOVE_ACTION_TAG);
+    layer->runAction(a);
+}
+
+void editor_api::moveGameLayerTo(EditorUI* ui, GameObject* obj, bool smooth) {
+    moveGameLayerTo(
+        ui,
+        (-obj->getPosition() + CCDirector::get()->getWinSize() / 2) *
+            ui->m_editorLayer->m_objectLayer->getScale(),
+        smooth,
+        false
+    );
+}
+
+void editor_api::moveGameLayerTo(EditorUI* ui, CCArray* objs, bool smooth) {
+    constexpr float WINDOW_EDGE_SIZE = 120.f;
+
+    auto layer = ui->m_editorLayer->m_objectLayer;
+    auto pos = ui->getGroupCenter(objs, false);
+    auto winSize = CCDirector::get()->getWinSize();
+
+    auto gpos = layer->convertToWorldSpace(pos);
+    auto npos = (-pos + winSize / 2) * layer->getScale();
+    auto opos = layer->getPosition();
+
+    // clamping so the position doesn't go past screen boundaries
+    auto mx = gpos.x < WINDOW_EDGE_SIZE || gpos.x > winSize.width  - WINDOW_EDGE_SIZE;
+    auto my = gpos.y < WINDOW_EDGE_SIZE || gpos.y > winSize.height - WINDOW_EDGE_SIZE;
+    moveGameLayerTo(ui, { (mx ? npos.x : opos.x), (my ? npos.y : opos.y) }, smooth, false);
+}
