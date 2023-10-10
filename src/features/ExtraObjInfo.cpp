@@ -127,12 +127,19 @@ std::string objectTypeToString(GameObjectType type) {
 }
 
 class $modify(EditorUI) {
+    CCPoint defaultObjectInfoPos;
+    CCPoint modifiedObjectInfoPos;
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel)) {
             return false;
         }
+        if (!Mod::get()->getSettingValue<bool>("extra-object-info")) {
+            return true;
+        }
+        m_fields->defaultObjectInfoPos = m_objectInfoLabel->getPosition();
         m_objectInfoLabel->setPositionY(m_objectInfoLabel->getPositionY() + 5.f);
         m_objectInfoLabel->setPositionX(90.0f);
+        m_fields->modifiedObjectInfoPos = m_objectInfoLabel->getPosition();
         return true;
     }
 
@@ -143,6 +150,12 @@ class $modify(EditorUI) {
 
     void moveObject(GameObject* g, CCPoint pos) {
         EditorUI::moveObject(g, pos);
+        if (
+            !Mod::get()->getSettingValue<bool>("extra-object-info") ||
+            !Mod::get()->getSettingValue<bool>("dynamic-object-info")
+        ) {
+            return;
+        }
         if (!m_editorLayer->m_editorInitialising) {
             this->updateObjectInfoLabel();
         }
@@ -150,6 +163,12 @@ class $modify(EditorUI) {
 
     void ccTouchEnded(CCTouch* touch, CCEvent* event) {
         EditorUI::ccTouchEnded(touch, event);
+        if (
+            !Mod::get()->getSettingValue<bool>("extra-object-info") || 
+            !Mod::get()->getSettingValue<bool>("dynamic-object-info")
+        ) {
+            return;
+        }
         if (m_selectedObject) {
             this->updateObjectInfoLabel();
         }
@@ -157,6 +176,12 @@ class $modify(EditorUI) {
 
     void ccTouchMoved(CCTouch* touch, CCEvent* event) {
         EditorUI::ccTouchMoved(touch, event);
+        if (
+            !Mod::get()->getSettingValue<bool>("extra-object-info") ||
+            !Mod::get()->getSettingValue<bool>("dynamic-object-info")
+        ) {
+            return;
+        }
         if (m_selectedObject) {
             this->updateObjectInfoLabel();
         }
@@ -172,6 +197,15 @@ class $modify(EditorUI) {
         ) {
             EditorUI::updateObjectInfoLabel();
             return;
+        }
+
+        if (!Mod::get()->getSettingValue<bool>("extra-object-info")) {
+            m_objectInfoLabel->setPosition(m_fields->defaultObjectInfoPos);
+            EditorUI::updateObjectInfoLabel();
+            return;
+        }
+        if (m_objectInfoLabel->getPosition() != m_fields->modifiedObjectInfoPos) {
+            m_objectInfoLabel->setPosition(m_fields->modifiedObjectInfoPos);
         }
 
         std::stringstream ss;

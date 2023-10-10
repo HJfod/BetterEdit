@@ -105,6 +105,18 @@
 			"name": "Show dash orb trajectory",
 			"description": "When enabled, dash orb trajectories will be shown in the editor"
 		},
+		"extra-object-info": {
+			"type": "bool",
+			"default": true,
+			"name": "Extra Object Info",
+			"description": "When enabled, will show additional object info when selected (needs \"Show Object Info\" to be enabled)"
+		},
+		"dynamic-object-info": {
+			"type": "bool",
+			"default": true,
+			"name": "Dynamic Object Info",
+			"description": "When enabled, will dynamically update shown object info when moving, scaling and rotating. \"Extra Object Info\" needs to enabled for this to work. (<cr>Might cause lag</c>)"
+		},
 		"enable-global-clipboard": {
 			"type": "bool",
 			"default": true,
