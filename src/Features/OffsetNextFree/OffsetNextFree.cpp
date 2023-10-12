@@ -10,7 +10,7 @@ using namespace geode::prelude;
 
 class $modify(LevelEditorLayer) {
     int getNextColorChannel() {
-        std::array<bool, 1100> usedColors = this->getUsedColors();
+        std::array<bool, 1000> usedColors = this->getUsedColors();
         auto offset = OffsetManager::get()->m_colorOffset;
         for (int i = 1; i < 1000; i++) {
             if (!usedColors[i] && i >= offset) {
@@ -44,8 +44,8 @@ class $modify(LevelEditorLayer) {
         return ret;
     }
 
-    std::array<bool, 1100> getUsedColors() {
-        std::array<bool, 1100> ret;
+    std::array<bool, 1000> getUsedColors() {
+        std::array<bool, 1000> ret;
         std::fill(ret.begin(), ret.end(), false);
         for (auto object : CCArrayExt<GameObject*>(m_objects)) {
             if (object->m_baseColor) {
