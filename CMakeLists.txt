@@ -12,6 +12,7 @@ file(GLOB SOURCES
 	src/features/VisibilityToggle/*.cpp
 	src/features/BetterScaling/*.cpp
 	src/features/StartPosSwitcher/*.cpp
+	src/features/OffsetNextFree/*.cpp
 	src/features/*.cpp
 	src/other/*.cpp
 	src/*.cpp
