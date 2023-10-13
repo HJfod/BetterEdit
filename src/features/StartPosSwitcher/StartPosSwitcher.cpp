@@ -22,31 +22,37 @@ using namespace editor_api;
 bool g_enteringLevel = false;
 
 class $modify(PlayLayer) {
-    StartPosObject* activeStartPos = nullptr;
-    bool fromLevelStart = false;
+    StartPosObject* customStart = nullptr;
+
 	void addObject(GameObject* obj) {
         g_enteringLevel = false;
         PlayLayer::addObject(obj);
-        if (obj->m_objectID != 31) {
+        if (StartPosManager::get()->isDefault()) {
             return;
         }
-        if (StartPosManager::get()->isDefault() && !m_fields->activeStartPos) {
-            return;
-        }
-        if (StartPosManager::get()->isLevelStart() && !m_fields->activeStartPos) {
+        if (StartPosManager::get()->isLevelStart()) {
             m_startPos = nullptr;
-            m_playerStartPosition = CCPointZero;
-            return;
+            m_playerStartPosition = ccp(0, 105.f);
         }
 
-        auto active = StartPosManager::get()->getActive();
-        if (obj->getPosition() == StartPosManager::get()->getActive() && !m_fields->activeStartPos) {
-            m_fields->activeStartPos = static_cast<StartPosObject*>(obj);
+        if (
+            obj->m_objectID == 31 &&
+            obj->getPosition() == StartPosManager::get()->getActive()
+        ) {
+            m_fields->customStart = static_cast<StartPosObject*>(obj);
         }
 
-        if (m_fields->activeStartPos) {
-            m_startPos = m_fields->activeStartPos;
-            m_playerStartPosition = m_fields->activeStartPos->getPosition();
+        if (m_fields->customStart) {
+            if (m_startPos != m_fields->customStart) {
+                if (m_fields->customStart) {
+                    m_fields->customStart->retain();
+                }
+                if (m_startPos) {
+                    m_startPos->release();
+                }
+                m_startPos = m_fields->customStart;
+                m_playerStartPosition = m_fields->customStart->getPosition();
+            }
         }
     }
 };
