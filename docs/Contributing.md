@@ -13,7 +13,7 @@ If you'd like to join the dev team, the easiest way is to just express your inte
 
 BetterEdit 5 is developed using [Geode](https://geode-sdk.org), making it a required installation for all contributors. Aside from the basic Geode toolkit, BE currently doesn't require any additional special tools, though this may change in the future.
 
-BetterEdit is split into two mods: BetterEdit and EditorAPI. The former is the mod you all know; it adds all the QoL features like Start Pos tools and better color selection menu. The latter is a general API mod that introduces a bunch of endpoints for adding stuff to the editor, such as new build tabs. This is where any features that other mods could depend on should go; BetterEdit should just be about using EditorAPI & other APIs to contribute its features.
+BetterEdit is split into two mods: **BetterEdit** and **EditorAPI**. The former is the mod you all know; it adds all the QoL features like Start Pos tools and better color selection menu. The latter is a general API mod that introduces a bunch of endpoints for adding stuff to the editor, such as new build tabs. This is where any features that other mods could depend on should go; BetterEdit should just be about using EditorAPI & other APIs to contribute its features.
 
 An overview of the BE codebase's structure:
 
@@ -35,9 +35,11 @@ However, some features may be logically distinct and not extractable into a shar
 
 ## Branches
 
-The development of BetterEdit is handled using branches, and every developer should use their own branches. In fact, **pushing directly to the `main` branch is disallowed**, and may only be done so through PRs that have succesfully passed [the build action](https://github.com/HJfod/BetterEdit/actions/workflows/build.yml). This is to ensure that the `main` branch always consists of code that has been tested and that succesfully builds - `main` should not be a development branch.
+The development of BetterEdit is handled using multiple development branches. In fact, **pushing directly to the `main` branch is disallowed**, and may only be done so through PRs that have succesfully passed [the build action](https://github.com/HJfod/BetterEdit/actions/workflows/build.yml). This is to ensure that the `main` branch always consists of code that has been tested and that succesfully builds - `main` should not be a development branch.
 
-**Branches should mainly be made per-feature or per-contribution**, and only contain changes relevant for that one contribution. For example, this document was developed on an `updated-docs` branch, which only added new Markdown files under `docs`.
+**Branches should mainly be made per-feature or per-contribution**, and only contain changes relevant for that one contribution. For example, this document was developed on an `updated-docs` branch, which only added new Markdown files under `docs`. **All development branches should be forks of `main`**, unless there is a good reason for a branch to be a fork of another development branch.
+
+You should generally avoid making branches with a bunch of unrelated features like [HJfod's branch](https://github.com/HJfod/BetterEdit/tree/__SECRET_HJFOD_BRANCH_DO_NOT_TOUCH_OR_YOU_WILL_BE_FIRED), although doing so can be fine if you're just trying stuff out, or if you're HJfod and are working on super secret and super awesome stuff.
 
 ## What features should I add?
 
@@ -75,9 +77,16 @@ Once you have a feature in mind that you believe fits all these standards, you c
  - Add a new source file for it under `src/features`, or a directory if it contains many files (for example `src/features/AutoColorTriggers.cpp` or `src/features/AutoColorTriggers/logic.cpp`)
  - Develope & test your feature
  - Add a new setting for the feature in [`mod.json`](https://github.com/HJfod/BetterEdit/blob/main/mod.json#L9) and make sure the feature is toggled by it
+ - Make sure to note your changes in [`changelog.md`](https://github.com/HJfod/BetterEdit/blob/main/changelog.md)
  - [Open a Pull Request](https://github.com/HJfod/BetterEdit/pulls) once you are confident your feature is **ready for production**
 
 Once you have opened your PR, other team members can test your branch and make sure it works as expected. Afterwards, if the build passes on all platforms, HJfod will merge it, or you may merge it yourself if you have the access to do so.
+
+## Making a new release
+
+Whenever you feel like it's time to make a new release, you should make a new branch bumping the version (if it has not already been bumped) and making sure the changelog is up-to-date, and then merge that branch to `main`. Afterwards, make a new release on Github and link it to the Discord server's [#releases channel](https://discord.com/channels/1087452688956006471/1087453005101678823). The release's description on Github should include a copy of the changelog for that release, as well as thank all new contributors on that release.
+
+When bumping the version, be careful to follow [semver](https://semver.org/) (particularly with EditorAPI - BetterEdit's versioning may be much more laxed, especially when it comes to major versions). If you're in doubt about how the version should be updated, ask HJfod.
 
 ## Code style guidelines
 
