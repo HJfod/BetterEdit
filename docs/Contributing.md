@@ -75,9 +75,16 @@ Once you have a feature in mind that you believe fits all these standards, you c
  - Add a new source file for it under `src/features`, or a directory if it contains many files (for example `src/features/AutoColorTriggers.cpp` or `src/features/AutoColorTriggers/logic.cpp`)
  - Develope & test your feature
  - Add a new setting for the feature in [`mod.json`](https://github.com/HJfod/BetterEdit/blob/main/mod.json#L9) and make sure the feature is toggled by it
+ - Make sure to note your changes in [`changelog.md`](https://github.com/HJfod/BetterEdit/blob/main/changelog.md)
  - [Open a Pull Request](https://github.com/HJfod/BetterEdit/pulls) once you are confident your feature is **ready for production**
 
 Once you have opened your PR, other team members can test your branch and make sure it works as expected. Afterwards, if the build passes on all platforms, HJfod will merge it, or you may merge it yourself if you have the access to do so.
+
+## Making a new release
+
+Whenever you feel like it's time to make a new release, you should make a new branch bumping the version (if it has not already been bumped) and making sure the changelog is up-to-date, and then merge that branch to `main`. Afterwards, make a new release on Github and link it to the Discord server's [#releases channel](https://discord.com/channels/1087452688956006471/1087453005101678823). The release's description on Github should include a copy of the changelog for that release, as well as thank all new contributors on that release.
+
+When bumping the version, be careful to follow [semver](https://semver.org/) (particularly with EditorAPI - BetterEdit's versioning may be much more laxed, especially when it comes to major versions). If you're in doubt about how the version should be updated, ask HJfod.
 
 ## Code style guidelines
 
