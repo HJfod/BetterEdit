@@ -8,7 +8,7 @@
 #include <Geode/modify/GameManager.hpp>
 #include <MoreTabs.hpp>
 #include <Utils.hpp>
-#include <Other/BEShared.hpp>
+#include <other/BEShared.hpp>
 #undef min
 #undef max
 

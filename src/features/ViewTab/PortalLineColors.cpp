@@ -1,5 +1,5 @@
 #include <Geode/utils/cocos.hpp>
-#include <Other/BEShared.hpp>
+#include <other/BEShared.hpp>
 #include <Geode/binding/GameObject.hpp>
 #include <Geode/modify/DrawGridLayer.hpp>
 #include <Geode/modify/EditorUI.hpp>
