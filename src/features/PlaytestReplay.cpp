@@ -4,7 +4,7 @@
 #include <Geode/binding/PlayerObject.hpp>
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 
-#include <Other/BEShared.hpp>
+#include <other/BEShared.hpp>
 
 using namespace geode::prelude;
 

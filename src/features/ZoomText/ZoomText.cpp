@@ -1,4 +1,5 @@
 #include "ZoomText.hpp"
+#include <Geode/modify/EditorUI.hpp>
 
 void showZoomText(EditorUI* ui) {
     if (Mod::get()->template getSettingValue<bool>("show-zoom-text")) {
