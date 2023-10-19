@@ -1,5 +1,3 @@
-#ifdef GEODE_IS_WINDOWS
-
 #include <Geode/Geode.hpp>
 #include <Geode/modify/ColorSelectPopup.hpp>
 #include <Geode/modify/SetupPulsePopup.hpp>
@@ -104,15 +102,14 @@ class $modify(SetupPulsePopup) {
         }
     }
 
-    void updatePulseMode() {
-        SetupPulsePopup::updatePulseMode();
+    void onSelectPulseMode(CCObject* sender) {
+        SetupPulsePopup::onSelectPulseMode(sender);
         if (!Mod::get()->getSettingValue<bool>("rgb-color-input")) {
             return;
         }
         if (m_fields->rgbWidget) {
             m_fields->rgbWidget->setVisible(m_pulseMode == 0);
+            m_fields->rgbWidget->updateLabels(true, true);
         }
     }
 };
-
-#endif
