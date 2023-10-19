@@ -1,6 +1,6 @@
 {
 	"geode": "1.3.4",
-	"version": "v5.0.0-alpha.9",
+	"version": "v5.0.0-alpha.10",
 	"id": "be_team.betteredit",
 	"name": "BetterEdit",
 	"developer": "BE Team",
@@ -54,7 +54,7 @@
 		"rgb-color-input": {
 			"type": "bool",
 			"default": true,
-			"name": "RGB + HEX Color Input",
+			"name": "RGB Color Input",
 			"description": "Adds a widget that allows RGB and HEX input in color edit, color trigger and pulse trigger"
 		},
 		"editor-pulse": {
