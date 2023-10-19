@@ -19,10 +19,6 @@ file(GLOB SOURCES
 	src/*.cpp
 )
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-endif()
-
 # Set up the mod binary
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
