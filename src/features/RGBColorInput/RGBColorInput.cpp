@@ -1,3 +1,5 @@
+#ifdef GEODE_IS_WINDOWS
+
 #include <Geode/Geode.hpp>
 #include <Geode/modify/ColorSelectPopup.hpp>
 #include <Geode/modify/SetupPulsePopup.hpp>
@@ -112,3 +114,5 @@ class $modify(SetupPulsePopup) {
         }
     }
 };
+
+#endif
