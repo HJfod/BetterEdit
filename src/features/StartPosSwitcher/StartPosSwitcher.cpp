@@ -114,14 +114,14 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
 
     void setupLevelStart(LevelSettingsObject* obj) {
         StartPosManager::get()->setStartPositions(m_objects);
-        if (!m_editorInitialising) {
+        if (m_editorInitialising) {
             return;
         }
         if (StartPosManager::get()->isLevelStart()) {
             this->setStartPosObject(nullptr);
-            m_player1->setStartPos(CCPointZero);
+            m_player1->setStartPos(CCPoint(0.0f, 105.f));
             m_player1->resetObject();
-            m_player2->setStartPos(CCPointZero);
+            m_player2->setStartPos(CCPoint(0.0f, 105.f));
             m_player2->resetObject();
             LevelEditorLayer::setupLevelStart(m_levelSettings);
             return;
