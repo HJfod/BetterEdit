@@ -63,9 +63,11 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
             return false;
         }
         StartPosManager::get()->setStartPositions(m_objects);
-        auto bar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
-        if (bar) {
-            bar->setStartPosCounters();
+        if (m_editorUI && m_editorUI->getChildren()) {
+            auto bar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
+            if (bar) {
+                bar->setStartPosCounters();
+            }
         }
 
         return true;
@@ -74,9 +76,11 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
         LevelEditorLayer::addSpecial(obj);
         if (!m_editorInitialising && obj->m_objectID == 31) {
             StartPosManager::get()->addStartPos(obj->getPosition());
-            auto bar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
-            if (bar) {
-                bar->setStartPosCounters();
+            if (m_editorUI && m_editorUI->getChildren()) {
+                auto bar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
+                if (bar) {
+                    bar->setStartPosCounters();
+                }
             }
         }
     }
@@ -96,8 +100,10 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
                 manager->clear();
             }
             manager->setStartPositions(m_objects);
-            auto buttonBar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
-            buttonBar->setStartPosCounters();
+            if (m_editorUI && m_editorUI->getChildren()) {
+                auto buttonBar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
+                buttonBar->setStartPosCounters();
+            }
         }
     }
 
@@ -108,6 +114,9 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
 
     void setupLevelStart(LevelSettingsObject* obj) {
         StartPosManager::get()->setStartPositions(m_objects);
+        if (!m_editorInitialising) {
+            return;
+        }
         if (StartPosManager::get()->isLevelStart()) {
             this->setStartPosObject(nullptr);
             m_player1->setStartPos(CCPointZero);
@@ -122,9 +131,11 @@ class $modify(StartPosSwitchLayer, LevelEditorLayer) {
         if (!startPos) {
             Notification::create("Couldn't setup Start Position switcher.", CCSprite::createWithSpriteFrameName("edit_delBtnSmall_001.png"))->show();
             StartPosManager::get()->setDefault();
-            auto bar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
-            if (bar) {
-                bar->setStartPosCounters();
+            if (m_editorUI && m_editorUI->getChildren()) {
+                auto bar = static_cast<StartPosButtonBar*>(m_editorUI->getChildByID("start-pos-button-bar"_spr));
+                if (bar) {
+                    bar->setStartPosCounters();
+                }
             }
             LevelEditorLayer::setupLevelStart(obj);
             return;
@@ -288,9 +299,12 @@ class $modify(GameObject) {
                 LevelEditorLayer::get(),
                 static_cast<StartPosObject*>(as<GameObject*>(this)),
                 [this]() {
-                    auto buttonBar = static_cast<StartPosButtonBar*>(LevelEditorLayer::get()->m_editorUI->getChildByID("start-pos-button-bar"_spr));
-                    if (buttonBar) {
-                        buttonBar->setStartPosCounters();
+                    auto editorUI = LevelEditorLayer::get()->m_editorUI;
+                    if (editorUI && editorUI->getChildren()) {
+                        auto buttonBar = static_cast<StartPosButtonBar*>(LevelEditorLayer::get()->m_editorUI->getChildByID("start-pos-button-bar"_spr));
+                        if (buttonBar) {
+                            buttonBar->setStartPosCounters();
+                        }
                     }
                 }
             );

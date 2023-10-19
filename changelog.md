@@ -1,3 +1,8 @@
+# v5.0.0-alpha.10
+
+ - Fix a crash that could happen when entering the editor
+ - Correctly enable RGB Color Input
+
 # v5.0.0-alpha.9
 
  - Fix preview mode screwing up moving objects on playtest pause

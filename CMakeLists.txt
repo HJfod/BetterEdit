@@ -13,6 +13,7 @@ file(GLOB SOURCES
 	src/features/BetterScaling/*.cpp
 	src/features/StartPosSwitcher/*.cpp
 	src/features/OffsetNextFree/*.cpp
+	src/features/RGBColorInput/*.cpp
 	src/features/*.cpp
 	src/other/*.cpp
 	src/*.cpp
@@ -33,6 +34,7 @@ endif()
 add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
 setup_geode_mod(${PROJECT_NAME} EXTERNALS be_team.editorapi:1.0.0)
+
 
 # Build EditorAPI alongside BetterEdit
 add_subdirectory(api)
