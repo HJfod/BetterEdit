@@ -1,3 +1,21 @@
+# v5.0.0-alpha.9
+
+ - Fix preview mode screwing up moving objects on playtest pause
+ - Port the scale UI from v4
+ - Automatically hide startpos popup when deleting a startpos
+ - Rewrote startpos switcher, should be more stable
+ - Add startpos counter and moving between start positions
+ - Play level button from startpos popup now works
+ - Port LDM Object count to pause menu
+ - Port RGB color input
+ - Move some common dependencies to a new mod, EditorAPI
+ - Fix View Tab dissapearing when returning to the editor
+ - Do not set gravity for ball and spider in smart startpos
+ - Make Extra Object Info dynamically update when changing object properties (Might cause lag)
+ - Make Extra Object Info toggleable
+ - Port next free offsets for colors and groups
+ - Various stability fixes
+
 # v5.0.0-alpha.8
 
  - Rewrote BetterEdit from the ground up (again)
