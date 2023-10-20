@@ -7,10 +7,6 @@
 
 using namespace geode::prelude;
 
-static constexpr const int ZOOMIN_TAG = 8001;
-static constexpr const int ZOOMOUT_TAG = 8002;
-static constexpr const int ZOOMINPUT_TAG = 8003;
-
 bool isFloat(std::string const& myString) {
     std::istringstream iss(myString);
     float f;
@@ -94,7 +90,7 @@ class $modify(EditorUI_CB, EditorUI) {
 
         updateGridNodeSize();
 
-        as<CCTextInputNode*>(getGridButtonParent()->getChildByTag(ZOOMINPUT_TAG))
+        as<CCTextInputNode*>(getGridButtonParent()->getChildByID("grid_zoom_input"_spr))
             ->setString(GridSizeDelegate::get()->getGridSizeString().c_str());        
     }
 
@@ -119,7 +115,7 @@ class $modify(EditorUI_CB, EditorUI) {
         );
 
         zoomInButton->setUserData(reinterpret_cast<void*>(1));
-        zoomInButton->setTag(ZOOMIN_TAG);
+        zoomInButton->setID("grid_zoom_in"_spr);
         zoomInButton->setPosition(getGridButtonPosition(1));
 
         KEYBIND_FOR_BUTTON(zoomInButton, "decrease-grid-size"_spr)
@@ -134,7 +130,7 @@ class $modify(EditorUI_CB, EditorUI) {
         zoomTextInput->setString(GridSizeDelegate::get()->getGridSizeString().c_str());
         
         zoomTextInput->setDelegate(d);
-        zoomTextInput->setTag(ZOOMINPUT_TAG);
+        zoomTextInput->setID("grid_zoom_input"_spr);
 
         zoomTextInput->setPosition(getGridButtonPosition(0));
 
@@ -150,7 +146,7 @@ class $modify(EditorUI_CB, EditorUI) {
         );
 
         zoomOutButton->setUserData(reinterpret_cast<void*>(0));
-        zoomOutButton->setTag(ZOOMOUT_TAG);
+        zoomOutButton->setID("grid_zoom_out"_spr);
         zoomOutButton->setPosition(getGridButtonPosition(-1));
 
         KEYBIND_FOR_BUTTON(zoomOutButton, "increase-grid-size"_spr)
