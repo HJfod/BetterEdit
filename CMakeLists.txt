@@ -14,6 +14,8 @@ file(GLOB SOURCES
 	src/features/StartPosSwitcher/*.cpp
 	src/features/OffsetNextFree/*.cpp
 	src/features/RGBColorInput/*.cpp
+	# src/features/EditTab/*.cpp
+	src/features/GridSize/*.cpp
 	src/features/*.cpp
 	src/other/*.cpp
 	src/*.cpp
