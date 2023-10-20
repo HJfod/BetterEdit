@@ -1,6 +1,6 @@
 #include "CustomEditMenu.hpp"
 #include "other/KeybindUtils.hpp"
-// #include "MoveInfoPopup.hpp"
+#include "MoveInfoPopup.hpp"
 
 #define ADD_GROUP_KEYBINDS(_bind_, _name_, _desc_)                  \
     BindManager::get()->registerBindable(BindableAction(            \
@@ -306,22 +306,15 @@ class $modify(CustomEditMenu, EditButtonBar) {
         leftBtn->setPosition(winSize.width / 2 - (m_fields->m_fWidth) / 2.f, 0.0f);
         m_fields->m_pMenu->addChild(leftBtn);
         
-        
+        CCSprite* infoSprite = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
+        infoSprite->setScale(0.6f);
+        infoSprite->setFlipX(true);
 
-        // m_fields->m_pMenu->addChild(CCNodeConstructor<CCMenuItemSpriteExtra*>()
-        //     .fromNode(CCMenuItemSpriteExtra::create(
-        //         CCNodeConstructor()
-        //             .fromFrameName("GJ_infoIcon_001.png")
-        //             .scale(.6f)
-        //             .flipX()
-        //             .done(),
-        //         this,
-        //         (SEL_MenuHandler)&CustomEditMenu::onInfo
-        //     ))
-        //     .udata(1)
-        //     .move(m_obPosition.x + m_fields->m_fWidth / 2 - 10.f, -35.f)
-        //     .done()
-        // );
+        CCMenuItemSpriteExtra* infoBtn = CCMenuItemSpriteExtra::create(infoSprite, this, (SEL_MenuHandler)&CustomEditMenu::onInfo);
+        infoBtn->setUserData(reinterpret_cast<void*>(1));
+        infoBtn->setPosition(winSize.width / 2 + (m_fields->m_fWidth) / 2.f - 10.f, -35.f);
+
+        m_fields->m_pMenu->addChild(infoBtn);
 
         m_fields->m_pMenu->setPosition(0, 60.f);
         addChild(m_fields->m_pMenu);
@@ -332,7 +325,7 @@ class $modify(CustomEditMenu, EditButtonBar) {
     }
 
     void onInfo(CCObject*) {
-        // TODO: MoveInfoPopup::create()->show();
+        TODO: MoveInfoPopup::create()->show();
     }
 
     static CustomEditMenu* create(EditorUI* ui) {
@@ -358,10 +351,10 @@ class $modify(EditorUI) {
 };
 
 $execute {
-    ADD_GROUP_KEYBINDS("move-obj-%s-unit"_spr, "Move Object %s Half a Unit", "Moves the Object %s Half a Unit");
+    ADD_GROUP_KEYBINDS("move-obj-%s-unit"_spr, "Move Object %s Quarter of a Unit", "Moves the Object %s Quarter a Unit");
     ADD_GROUP_KEYBINDS("move-obj-%s-eigth"_spr, "Move Object %s One-Eigth", "Moves the Object %s One-Eigth of a Standard Block");
     ADD_GROUP_KEYBINDS("move-obj-%s-quarter"_spr, "Move Object %s One-Quarter", "Moves the Object %s One-Quarter of a Standard Block");
     ADD_GROUP_KEYBINDS("move-obj-%s-half"_spr, "Move Object %s Half", "Moves the Object %s Half of a Standard Block");
     ADD_GROUP_KEYBINDS("move-obj-%s-big"_spr, "Move Object %s Big", "Moves the Object %s 5 Blocks");
-    ADD_GROUP_KEYBINDS("move-obj-%s-tiny"_spr, "Move Object %s Tiny", "Moves the Object %s One Unit");
+    ADD_GROUP_KEYBINDS("move-obj-%s-tiny"_spr, "Move Object %s Tiny", "Moves the Object %s Half a Unit");
 }
