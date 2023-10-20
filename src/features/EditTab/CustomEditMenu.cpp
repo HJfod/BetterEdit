@@ -137,7 +137,7 @@ class $modify(CustomEditMenu, EditButtonBar) {
         auto upBtn = createButton(
             CCString::createWithFormat("edit_upBtn%s_001.png", sprNum)->getCString(),
             sprText, up, sprScale, menu_selector(EditorUI::moveObjectCall),
-            CCString::createWithFormat(keybind, "up")->getCString()
+            keybind ? CCString::createWithFormat(keybind, "up")->getCString() : nullptr
         );
         upBtn->setPosition(center + CCPoint { 0.f, 12.f });
         upBtn->setVisible(m_fields->m_pMoveGroups->count() < 4);
@@ -147,7 +147,7 @@ class $modify(CustomEditMenu, EditButtonBar) {
         auto downBtn = createButton(
             CCString::createWithFormat("edit_downBtn%s_001.png", sprNum)->getCString(),
             sprText, down, sprScale, menu_selector(EditorUI::moveObjectCall),
-            CCString::createWithFormat(keybind, "down")->getCString()
+            keybind ? CCString::createWithFormat(keybind, "down")->getCString() : nullptr
         );
         downBtn->setPosition(center + CCPoint { 0.f, -12.f });
         downBtn->setVisible(m_fields->m_pMoveGroups->count() < 4);
@@ -157,7 +157,7 @@ class $modify(CustomEditMenu, EditButtonBar) {
         auto leftBtn = createButton(
             CCString::createWithFormat("edit_leftBtn%s_001.png", sprNum)->getCString(),
             sprText, left, sprScale, menu_selector(EditorUI::moveObjectCall),
-            CCString::createWithFormat(keybind, "left")->getCString()
+            keybind ? CCString::createWithFormat(keybind, "left")->getCString() : nullptr
         );
         leftBtn->setPosition(center + CCPoint { -24.f, 0.f });
         leftBtn->setVisible(m_fields->m_pMoveGroups->count() < 4);
@@ -167,7 +167,7 @@ class $modify(CustomEditMenu, EditButtonBar) {
         auto rightBtn = createButton(
             CCString::createWithFormat("edit_rightBtn%s_001.png", sprNum)->getCString(),
             sprText, right, sprScale, menu_selector(EditorUI::moveObjectCall),
-            CCString::createWithFormat(keybind, "right")->getCString()
+            keybind ? CCString::createWithFormat(keybind, "right")->getCString() : nullptr
         );
         rightBtn->setPosition(center + CCPoint { 24.f, 0.f });
         rightBtn->setVisible(m_fields->m_pMoveGroups->count() < 4);
@@ -179,7 +179,7 @@ class $modify(CustomEditMenu, EditButtonBar) {
 
     void addTransformButton(
         CustomEditCommand command, const char* spr, bool addToDict,
-        const char* keybind,
+        const char* keybind = nullptr,
         SEL_MenuHandler cb = menu_selector(EditorUI::transformObjectCall)
     ) {
         auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -244,20 +244,16 @@ class $modify(CustomEditMenu, EditButtonBar) {
         m_fields->m_fWidth = CCDirector::sharedDirector()->getWinSize().width - 240.0f;
 
         addTransformButton(
-            CustomEditCommand::FlipX, "edit_flipXBtn_001.png", true,
-            "robtop.geometry-dash/flip-x"
+            CustomEditCommand::FlipX, "edit_flipXBtn_001.png", true
         );
         addTransformButton(
-            CustomEditCommand::FlipY, "edit_flipYBtn_001.png", true,
-            "robtop.geometry-dash/flip-y"
+            CustomEditCommand::FlipY, "edit_flipYBtn_001.png", true
         );
         addTransformButton(
-            CustomEditCommand::RotateCW, "edit_cwBtn_001.png", true,
-            "robtop.geometry-dash/rotate-cw"
+            CustomEditCommand::RotateCW, "edit_cwBtn_001.png", true
         );
         addTransformButton(
-            CustomEditCommand::RotateCCW, "edit_ccwBtn_001.png", true,
-            "robtop.geometry-dash/rotate-ccw"
+            CustomEditCommand::RotateCCW, "edit_ccwBtn_001.png", true
         );
         addTransformButton(
             CustomEditCommand::RotateCW45, "edit_rotate45rBtn_001.png", true,
@@ -269,7 +265,7 @@ class $modify(CustomEditMenu, EditButtonBar) {
         );
         addTransformButton(
             CustomEditCommand::RotateFree, "edit_freeRotateBtn_001.png", true,
-            "robtop.geometry-dash/toggle-rotate",
+            nullptr,
             menu_selector(EditorUI::activateRotationControl)
         );
         addTransformButton(
@@ -282,8 +278,8 @@ class $modify(CustomEditMenu, EditButtonBar) {
             menu_selector(EditorUI::activateScaleControl)
         );
 
-        ADD_MOVE_GROUP(Small,   "",  nullptr, 1.0f, "robtop.geometry-dash/move-obj-%s-small");
-        ADD_MOVE_GROUP(,        "2", nullptr, 1.0f, "robtop.geometry-dash/move-obj-%s");
+        ADD_MOVE_GROUP(Small,   "",  nullptr, 1.0f, nullptr); // Don't double up on robtop's keybinds
+        ADD_MOVE_GROUP(,        "2", nullptr, 1.0f, nullptr);
         ADD_MOVE_GROUP(Tiny,    "",  nullptr, .8f,  "move-obj-%s-tiny"_spr);
         ADD_MOVE_GROUP(Big,     "3", nullptr, 1.0f, "move-obj-%s-big"_spr);
         ADD_MOVE_GROUP(Half,    "2", "1/2",   1.0f, "move-obj-%s-half"_spr);
