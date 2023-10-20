@@ -325,7 +325,7 @@ class $modify(CustomEditMenu, EditButtonBar) {
     }
 
     void onInfo(CCObject*) {
-        TODO: MoveInfoPopup::create()->show();
+        MoveInfoPopup::create()->show();
     }
 
     static CustomEditMenu* create(EditorUI* ui) {
