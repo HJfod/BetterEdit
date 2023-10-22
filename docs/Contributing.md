@@ -49,6 +49,7 @@ However, there are some restrictions on what features you can add:
 
  - All features must be strictly editor-related. This is not a general GD improvement mod
  - Not all features from v4 were good ideas, and 1:1 parity is *not* a goal
+ - Any form of AI autobuilder should **never** be a BetterEdit feature
 
 Alongside these restrictions on what features you can add, there are also some guidelines on *how* you should implement them:
 
