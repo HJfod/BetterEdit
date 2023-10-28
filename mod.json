@@ -147,6 +147,12 @@
 			"name": "Use Time instead of Percentage",
 			"description": "When enabled along with Show Percentage, shows the current level time in the editor instead of the percentage."
 		},
+		"scroll-input-nodes": {
+			"type": "bool",
+			"default": true,
+			"name": "Scroll Input Nodes",
+			"description": "When enabled, numeric inputs can be increased or decreased with the scroll wheel. Hold control for big and shift for small increase."
+		},
 		"developer-mode": {
 			"type": "bool",
 			"default": false,

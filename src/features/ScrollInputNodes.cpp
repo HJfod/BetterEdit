@@ -122,50 +122,55 @@ CCTextInputNode* getInputUnderMouse() {
 
 class $modify(CCMouseDispatcher) {
 	bool dispatchScrollMSG(float x, float y) {
-		auto input = getInputUnderMouse();
+        if (Mod::get()->getSettingValue<bool>("scroll-input-nodes")) {
+            auto input = getInputUnderMouse();
+            
+            if (!input) return CCMouseDispatcher::dispatchScrollMSG(x, y);
+            if (!input->isVisible()) return CCMouseDispatcher::dispatchScrollMSG(x, y);
 
-		if (!input) return CCMouseDispatcher::dispatchScrollMSG(x, y);
-		if (!input->isVisible()) return CCMouseDispatcher::dispatchScrollMSG(x, y);
+            int type = 0;
+            for (auto const& cf : std::string(input->m_allowedChars.c_str())) {
+                type |= isNumericChar(cf);
 
-		int type = 0;
-		for (auto const& cf : std::string(input->m_allowedChars.c_str())) {
-			type |= isNumericChar(cf);
+                if (type & ftNot)
+                    return true;
+            }
 
-			if (type & ftNot)
-				return true;
-		}
+            auto kb = CCDirector::sharedDirector()->getKeyboardDispatcher();
 
-		auto kb = CCDirector::sharedDirector()->getKeyboardDispatcher();
+            auto val = 0.0f;
 
-		auto val = 0.0f;
+            if (input->getString() && strlen(input->getString()))
+                try { val = std::stof(input->getString()); }
+                catch (...) {}
+            
+            float inc = INC_NORMAL;
 
-		if (input->getString() && strlen(input->getString()))
-			try { val = std::stof(input->getString()); }
-			catch (...) {}
-		
-		float inc = INC_NORMAL;
+            if (kb->getControlKeyPressed()) inc = INC_BIG;
+            if ((type & ftFloat) && kb->getShiftKeyPressed()) inc = INC_SMALL;
 
-		if (kb->getControlKeyPressed()) inc = INC_BIG;
-		if ((type & ftFloat) && kb->getShiftKeyPressed()) inc = INC_SMALL;
+            val += -(x / 12.0f) * inc;
 
-		val += -(x / 12.0f) * inc;
+            if (type & ftSigned) {
+                if (val < MIN_SIGNED) val = MIN_SIGNED;
+            } else
+                if (val < MIN_UNSIGNED) val = MIN_UNSIGNED;
+            
+            if (val > MAX_SIGNED)
+                val = MAX_SIGNED;
 
-		if (type & ftSigned) {
-			if (val < MIN_SIGNED) val = MIN_SIGNED;
-		} else
-			if (val < MIN_UNSIGNED) val = MIN_UNSIGNED;
-		
-		if (val > MAX_SIGNED)
-			val = MAX_SIGNED;
-
-		if (!(type & ftFloat))
-			val = std::roundf(val);
-		
-		input->setString(formatToString(val).c_str());
-		
-		if (input->m_delegate)
-			input->m_delegate->textChanged(input);
-		
-		return true;
+            if (!(type & ftFloat))
+                val = std::roundf(val);
+            
+            input->setString(formatToString(val).c_str());
+            
+            if (input->m_delegate)
+                input->m_delegate->textChanged(input);
+            
+            return true;
+        }
+        else {
+            return CCMouseDispatcher::dispatchScrollMSG(x, y);
+        }
 	}
 };
