@@ -1,3 +1,5 @@
-# BetterEdit 2.2
+# BetterEdit 
 
-Holy shit!!!
+A mod that makes the GD Editor, well, Better.
+
+## Heavily WIP!
