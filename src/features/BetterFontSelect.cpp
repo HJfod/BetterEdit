@@ -1,7 +1,5 @@
-
 #include <Geode/Bindings.hpp>
 #include <Geode/modify/SelectFontLayer.hpp>
-#include <Geode/Loader.hpp>
 
 using namespace geode::prelude;
 
@@ -39,6 +37,9 @@ class $modify (BetterSelectFontLayer, SelectFontLayer)
     {
         if (!SelectFontLayer::init(p0))
             return false;
+
+        if (!Mod::get()->getSettingValue<bool>("better-font-select"))
+            return true;
 
         //position old stuff and hide
 
@@ -106,8 +107,6 @@ class $modify (BetterSelectFontLayer, SelectFontLayer)
                 fntFile << i;
                 fntFile << ".fnt";
             }
-
-            log::info(fntFile.str());
 
             auto font = CCLabelBMFont::create(fntName.str().c_str(), fntFile.str().c_str());
             font->setAnchorPoint(ccp(0, 0.5f));

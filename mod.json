@@ -15,6 +15,29 @@
 			"default": true,
 			"name": "Zoom Towards Cursor",
 			"description": "When enabled and while holding down the CTRL key, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen"
+		},
+		"better-font-select": {
+			"type": "bool",
+			"default": true,
+			"name": "Better Font Select",
+			"description": "Replaces the old font select screen with a better one with scrolling"
+		},
+		"scale-factor": {
+			"type": "float",
+			"default": 1.00,
+			"max": 1.00,
+			"min": 0.1,
+			"name": "Scale Factor",
+			"description": "The factor the UI should be scaled by",
+			"control": {
+                "slider": true
+            }
+		},
+		"scale-pause": {
+			"type": "bool",
+			"default": true,
+			"name": "Scale Pause?",
+			"description": "Should it scale the pause menu"
 		}
 	}
 }
