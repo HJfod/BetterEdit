@@ -1,6 +1,9 @@
 {
 	"geode": "2.0.0",
 	"version": "v1.0.0",
+	"gd": {
+		"win": "2.204"
+	},
 	"id": "be_team.betteredit",
 	"name": "BetterEdit 2.2",
 	"developer": "BE Team",
