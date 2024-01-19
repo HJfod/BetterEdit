@@ -16,32 +16,32 @@ class $modify (EditorPauseLayer)
         float scale = Mod::get()->getSettingValue<double>("scale-factor");
         auto size = CCDirector::get()->getWinSize();
 
-        auto mainButtons = reinterpret_cast<CCMenu*>(this->getChildren()->objectAtIndex(0));
+        auto mainButtons = static_cast<CCMenu*>(this->getChildren()->objectAtIndex(0));
         mainButtons->setContentSize(ccp(0, 0));
         mainButtons->ignoreAnchorPointForPosition(false);
         mainButtons->setScale(scale);
 
-        auto objCount = reinterpret_cast<CCLabelBMFont*>(this->getChildren()->objectAtIndex(13));
+        auto objCount = static_cast<CCLabelBMFont*>(this->getChildren()->objectAtIndex(13));
         objCount->setPosition(ccp(objCount->getPositionX() * scale, size.height - ((size.height - objCount->getPositionY()) * scale) ));
         objCount->setScale(0.5f * scale);
 
-        auto length = reinterpret_cast<CCLabelBMFont*>(this->getChildren()->objectAtIndex(14));
+        auto length = static_cast<CCLabelBMFont*>(this->getChildren()->objectAtIndex(14));
         length->setPosition(ccp(length->getPositionX() * scale, size.height - ((size.height - length->getPositionY()) * scale) ));
         length->setScale(0.5f * scale);
 
-        auto buttons = reinterpret_cast<CCMenu*>(this->getChildren()->objectAtIndex(1));
+        auto buttons = static_cast<CCMenu*>(this->getChildren()->objectAtIndex(1));
 
-        auto lines = reinterpret_cast<CCMenuItemSpriteExtra*>(buttons->getChildren()->objectAtIndex(0));
+        auto lines = static_cast<CCMenuItemSpriteExtra*>(buttons->getChildren()->objectAtIndex(0));
         lines->setScale(scale);
         lines->m_baseScale = scale;
         lines->setPosition(lines->getPosition() * scale);
         
-        auto linesOff = reinterpret_cast<CCMenuItemSpriteExtra*>(buttons->getChildren()->objectAtIndex(2));
+        auto linesOff = static_cast<CCMenuItemSpriteExtra*>(buttons->getChildren()->objectAtIndex(2));
         linesOff->setScale(scale);
         linesOff->m_baseScale = scale;
         linesOff->setPosition(linesOff->getPosition() * scale);
 
-        auto bpm = reinterpret_cast<CCMenuItemSpriteExtra*>(buttons->getChildren()->objectAtIndex(1));
+        auto bpm = static_cast<CCMenuItemSpriteExtra*>(buttons->getChildren()->objectAtIndex(1));
         bpm->setScale(scale);
         bpm->m_baseScale = scale;
         bpm->setPosition(bpm->getPosition() * scale);
@@ -59,11 +59,11 @@ class $modify (EditorPauseLayer)
         {
             int v = 19 + i;
 
-            auto btn = reinterpret_cast<CCMenuItemToggler*>(buttons->getChildren()->objectAtIndex(v));
+            auto btn = static_cast<CCMenuItemToggler*>(buttons->getChildren()->objectAtIndex(v));
 
             vec.push_back(btn);
 
-            auto text = reinterpret_cast<CCLabelBMFont*>(this->getChildren()->objectAtIndex(2 + i));
+            auto text = static_cast<CCLabelBMFont*>(this->getChildren()->objectAtIndex(2 + i));
             text->setPosition(text->getPosition() * scale);
             text->setScale(text->getScale() * scale);
         }
@@ -77,7 +77,7 @@ class $modify (EditorPauseLayer)
 
         for (size_t i = 3; i < buttons->getChildrenCount(); i++)
         {
-            auto b = reinterpret_cast<CCMenuItemSpriteExtra*>(buttons->getChildren()->objectAtIndex(i));
+            auto b = static_cast<CCMenuItemSpriteExtra*>(buttons->getChildren()->objectAtIndex(i));
 
             b->setPosition(ccp(size.width / 2 - (((size.width / 2) - b->getPositionX()) * scale), (b->getPositionY() * scale)));
             b->m_baseScale = scale;

@@ -14,7 +14,7 @@ class $modify (BetterSelectFontLayer, SelectFontLayer)
 {
     void onSelect(CCObject* sender)
     {
-        int s = reinterpret_cast<CCNode*>(sender)->getTag();
+        int s = static_cast<CCNode*>(sender)->getTag();
 
         GameManager::sharedState()->m_levelEditorLayer->updateLevelFont(s);
 
@@ -43,19 +43,23 @@ class $modify (BetterSelectFontLayer, SelectFontLayer)
 
         //position old stuff and hide
 
-        reinterpret_cast<CCScale9Sprite*>(reinterpret_cast<CCLayer*>(this->getChildren()->objectAtIndex(0))->getChildren()->objectAtIndex(0))->setContentSize(ccp(400, 290));
-        reinterpret_cast<CCLayer*>(this->getChildren()->objectAtIndex(1))->setPositionY(290);
-        reinterpret_cast<CCLayer*>(this->getChildren()->objectAtIndex(2))->setVisible(false);
+        static_cast<CCScale9Sprite*>(static_cast<CCLayer*>(this->getChildren()->objectAtIndex(0))->getChildren()->objectAtIndex(0))->setContentSize(ccp(400, 290));
+        static_cast<CCLayer*>(this->getChildren()->objectAtIndex(1))->setPositionY(290);
+        static_cast<CCLayer*>(this->getChildren()->objectAtIndex(2))->setVisible(false);
 
-        auto butMenu = reinterpret_cast<CCMenu*>(reinterpret_cast<CCLayer*>(this->getChildren()->objectAtIndex(0))->getChildren()->objectAtIndex(1));
-        reinterpret_cast<CCNode*>(butMenu->getChildren()->objectAtIndex(0))->setPositionY(-45);
-        reinterpret_cast<CCNode*>(butMenu->getChildren()->objectAtIndex(1))->setPosition(ccp(-182, 200));
-        reinterpret_cast<CCNode*>(butMenu->getChildren()->objectAtIndex(2))->setVisible(false);
-        reinterpret_cast<CCNode*>(butMenu->getChildren()->objectAtIndex(3))->setVisible(false);
+        auto butMenu = static_cast<CCMenu*>(static_cast<CCLayer*>(this->getChildren()->objectAtIndex(0))->getChildren()->objectAtIndex(1));
+        static_cast<CCNode*>(butMenu->getChildren()->objectAtIndex(0))->setPositionY(-45);
+        static_cast<CCNode*>(butMenu->getChildren()->objectAtIndex(1))->setPosition(ccp(-182, 200));
+        static_cast<CCNode*>(butMenu->getChildren()->objectAtIndex(2))->setVisible(false);
+        static_cast<CCNode*>(butMenu->getChildren()->objectAtIndex(3))->setVisible(false);
 
         auto scroll = ScrollLayer::create(ccp(320, 210));
         scroll->setAnchorPoint(ccp(0, 0));
         scroll->setPosition(CCDirector::get()->getWinSize() / 2 - scroll->getContentSize() / 2 + ccp(0, 10));
+
+        auto bar = Scrollbar::create(scroll);
+        bar->setPosition(ccp(175, 10) + CCDirector::sharedDirector()->getWinSize() / 2);
+        this->addChild(bar);
 
         auto content = scroll->m_contentLayer;
 
