@@ -47,7 +47,7 @@ class $modify (EditorPauseLayer)
         bpm->setPosition(bpm->getPosition() * scale);
 
         auto toggleMenu = CCMenu::create();
-        toggleMenu->setID("toggle-menu"_spr);
+        toggleMenu->setID("toggle-menu");
         toggleMenu->setContentSize(ccp(0, 0));
         toggleMenu->setPosition(ccp(0, 0));
         toggleMenu->setScale(scale);

@@ -9,6 +9,13 @@
 	"developer": "BE Team",
 	"description": "The Ultimate Editor Mod",
 	"repository": "https://github.com/HJfod/BetterEdit",
+	"dependencies": [
+        {
+            "id": "geode.node-ids",
+            "version": "v1.1.0",
+            "importance": "required"
+        }
+    ],
 	"settings": {
 		"mouse-move-on-zoom": {
 			"type": "bool",
@@ -26,7 +33,7 @@
 			"type": "float",
 			"default": 1.00,
 			"max": 1.00,
-			"min": 0.1,
+			"min": 0.3,
 			"name": "Scale Factor",
 			"description": "The factor the UI should be scaled by",
 			"control": {
@@ -38,6 +45,12 @@
 			"default": true,
 			"name": "Scale Pause?",
 			"description": "Should it scale the pause menu"
+		},
+		"scale-build-tabs": {
+			"type": "bool",
+			"default": true,
+			"name": "Scale Build Tabs",
+			"description": "Should it scale the tabs above the object selection area?"
 		}
 	}
 }
