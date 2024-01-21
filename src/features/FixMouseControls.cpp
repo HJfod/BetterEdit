@@ -9,7 +9,9 @@
 
 using namespace geode::prelude;
 
-class $modify(EditorUI) {
+//this don't work anymore :(
+
+/*class $modify(EditorUI) {
     void scrollWheel(float y, float x) override {
         // this is used a lot so store it in a variable
         auto objLayer = m_editorLayer->m_objectLayer;
@@ -101,3 +103,4 @@ class $modify(EditorUI) {
         m_swipeStart = m_swipeStart + rel;
     }
 };
+*/
