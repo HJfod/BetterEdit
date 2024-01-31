@@ -12,8 +12,6 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - name: Windows
-          os: windows-latest
 
         - name: Android32
           os: ubuntu-latest
