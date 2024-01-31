@@ -3,7 +3,7 @@
 	"version": "v1.0.0",
 	"gd": {
 		"win": "2.204",
-		"android64": "2.205"
+		"android": "2.205"
 	},
 	"id": "be_team.betteredit",
 	"name": "BetterEdit 2.2",
