@@ -16,7 +16,7 @@ class $modify (BetterSelectFontLayer, SelectFontLayer)
     {
         int s = static_cast<CCNode*>(sender)->getTag();
 
-        // GameManager::sharedState()->m_levelEditorLayer->updateLevelFont(s);
+        GameManager::sharedState()->m_levelEditorLayer->updateLevelFont(s);
 
         for (size_t i = 0; i < SelFont::buttons.size(); i++)
         {
