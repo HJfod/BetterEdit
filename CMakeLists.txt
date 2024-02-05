@@ -22,3 +22,7 @@ endif()
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 setup_geode_mod(${PROJECT_NAME})
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pro/)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/pro)
+endif()

@@ -1,19 +1,20 @@
 {
 	"geode": "2.0.0",
-	"version": "v1.0.0",
+	"version": "v6.0.0-alpha.0",
 	"gd": {
 		"win": "2.204",
+		"mac": "2.200",
 		"android": "2.205"
 	},
-	"id": "be_team.betteredit",
-	"name": "BetterEdit 2.2",
-	"developer": "BE Team",
+	"id": "hjfod.betteredit",
+	"name": "BetterEdit",
+	"developers": ["HJfod", "TheSillyDoggo"],
 	"description": "The Ultimate Editor Mod",
 	"repository": "https://github.com/HJfod/BetterEdit",
 	"dependencies": [
         {
             "id": "geode.node-ids",
-            "version": "v1.1.0",
+            "version": "v1.1.4",
             "importance": "required"
         }
     ],
