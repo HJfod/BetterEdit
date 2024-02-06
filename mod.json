@@ -14,9 +14,14 @@
 	"dependencies": [
         {
             "id": "geode.node-ids",
-            "version": "v1.1.4",
+            "version": "v1.3.0",
             "importance": "required"
-        }
+        },
+		{
+			"id": "geode.custom-keybinds",
+			"version": "v1.4.0",
+			"importance": "required"
+		}
     ],
 	"settings": {
 		"mouse-move-on-zoom": {
