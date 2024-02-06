@@ -3,10 +3,8 @@
 
 using namespace geode::prelude;
 
-class $modify (EditorUI)
-{
-    bool init(LevelEditorLayer* p0)
-    {
+class $modify(EditorUI) {
+    bool init(LevelEditorLayer* p0) {
         if (!EditorUI::init(p0))
             return false;
 
@@ -18,7 +16,6 @@ class $modify (EditorUI)
         slider->setContentSize(ccp(0, 0));
         slider->setScale(scale);
         slider->setPositionY(size.height - (size.height - slider->getPositionY()) * scale);
-
         
         auto sliderO = this->getChildByID("position-slider");
         
@@ -114,14 +111,13 @@ class $modify (EditorUI)
         barMenu->setScale(scale);
         barMenu->setID("object-buttons");
 
-        for (size_t i = 0; i < this->getChildrenCount(); i++)
-        {
-            if (typeinfo_cast<EditButtonBar*>(this->getChildren()->objectAtIndex(i)))
+        for (size_t i = 0; i < this->getChildrenCount(); i++) {
+            if (typeinfo_cast<EditButtonBar*>(this->getChildren()->objectAtIndex(i))) {
                 bars.push_back(static_cast<EditButtonBar*>(this->getChildren()->objectAtIndex(i)));
+            }
         }
         
-        for (size_t i = 0; i < bars.size(); i++)
-        {
+        for (size_t i = 0; i < bars.size(); i++) {
             bars[i]->removeFromParentAndCleanup(false);            
             barMenu->addChild(bars[i]);
         }

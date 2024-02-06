@@ -35,24 +35,25 @@
 			"type": "float",
 			"default": 1.00,
 			"max": 1.00,
-			"min": 0.3,
+			"min": 0.6,
 			"name": "Scale Factor",
 			"description": "The factor the UI should be scaled by",
 			"control": {
-                "slider": true
+                "slider": true,
+				"slider-step": 0.025
             }
 		},
 		"scale-pause": {
 			"type": "bool",
 			"default": true,
-			"name": "Scale Pause?",
-			"description": "Should it scale the pause menu"
+			"name": "Scale Pause Menu",
+			"description": "Whether the editor pause menu should be scaled according to the scale factor aswell"
 		},
 		"scale-build-tabs": {
 			"type": "bool",
 			"default": true,
 			"name": "Scale Build Tabs",
-			"description": "Should it scale the tabs above the object selection area?"
+			"description": "Whether the tabs above the object selection area should be scaled according to the scale factor aswell"
 		},
 		"new-color-menu": {
 			"type": "bool",
