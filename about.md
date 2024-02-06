@@ -1,3 +1,12 @@
-# BetterEdit 2.2
+# BetterEdit 6
 
-WIP
+The ultimate editor improvement mod.
+
+<cr>Does not have all the features of BE 4 yet, but they're</c> <cy>coming soon!</c>
+
+## Features
+
+ * Better color selection menu
+ * Better font selection menu
+ * Scroll wheel improvements
+ * Custom UI scaling
