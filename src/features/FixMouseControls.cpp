@@ -9,9 +9,7 @@
 
 using namespace geode::prelude;
 
-//this don't work anymore :(
-
-/*class $modify(EditorUI) {
+class $modify(EditorUI) {
     void scrollWheel(float y, float x) override {
         // this is used a lot so store it in a variable
         auto objLayer = m_editorLayer->m_objectLayer;
@@ -35,34 +33,16 @@ using namespace geode::prelude;
             // zoom limit
             zoom = clamp(zoom, .1f, 10000000.f);
 
-            this->updateZoom(zoom);
-
-            // move screen toward mouse (WIP)
             if (Mod::get()->getSettingValue<bool>("mouse-move-on-zoom")) {
-                auto winSize = CCDirector::get()->getWinSize();
-                auto winSizePx = CCDirector::get()->getOpenGLView()->getViewPortRect();
-
-                auto ratioW = winSize.width  / winSizePx.size.width;
-                auto ratioH = winSize.height / winSizePx.size.height;
-                auto mpos = geode::cocos::getMousePos();
-
-                // relative to window centre
-                mpos = mpos - winSize / 2;
-
-                // if zooming out, go in reverse direction
-                if (y > .0f) {
-                    mpos = -mpos * .5f;
-                }
-
-                objLayer->setPosition(
-                    objLayer->getPosition() - mpos / std::max(zoom, 5.f)
-                );
-
-                this->constrainGameLayerPosition();
+                auto mousePos = getMousePos();
+                auto prevPos = objLayer->convertToNodeSpace(mousePos);
+                this->updateZoom(zoom);
+                auto newPos = objLayer->convertToWorldSpace(prevPos);
+                objLayer->setPosition(objLayer->getPosition() + mousePos - newPos);
             }
-
-            // ground width is not automatically updated
-            m_editorLayer->m_groundLayer->updateGroundWidth();
+            else {
+                this->updateZoom(zoom);
+            }
         }
         // otherwise move screen
         else {
@@ -103,4 +83,3 @@ using namespace geode::prelude;
         m_swipeStart = m_swipeStart + rel;
     }
 };
-*/
