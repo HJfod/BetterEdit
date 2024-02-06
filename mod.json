@@ -8,7 +8,7 @@
 	},
 	"id": "hjfod.betteredit",
 	"name": "BetterEdit",
-	"developers": ["HJfod", "TheSillyDoggo"],
+	"developers": ["HJfod", "TheSillyDoggo", "Fleym"],
 	"description": "The Ultimate Editor Mod",
 	"repository": "https://github.com/HJfod/BetterEdit",
 	"dependencies": [
