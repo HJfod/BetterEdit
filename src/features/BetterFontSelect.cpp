@@ -3,38 +3,31 @@
 
 using namespace geode::prelude;
 
-class SelFont
-{
-    public:
-        //this shits not working in fields :(
-        static inline std::vector<CCMenuItemToggler*> buttons = {};
+class SelFont {
+public:
+    //this shits not working in fields :(
+    static inline std::vector<CCMenuItemToggler*> buttons = {};
 };
 
-class $modify (BetterSelectFontLayer, SelectFontLayer)
-{
-    void onSelect(CCObject* sender)
-    {
+class $modify(BetterSelectFontLayer, SelectFontLayer) {
+    void onSelect(CCObject* sender) {
         int s = static_cast<CCNode*>(sender)->getTag();
 
-        GameManager::sharedState()->m_levelEditorLayer->updateLevelFont(s);
+        GameManager::get()->m_levelEditorLayer->updateLevelFont(s);
 
-        for (size_t i = 0; i < SelFont::buttons.size(); i++)
-        {
-            if (i != s)
-            {
+        for (size_t i = 0; i < SelFont::buttons.size(); i++) {
+            if (i != s) {
                 SelFont::buttons[i]->toggle(false);    
                 SelFont::buttons[i]->setEnabled(true);
             }
-            else
-            {
+            else {
                 SelFont::buttons[i]->toggle(true);
                 SelFont::buttons[i]->setEnabled(false);
             }
         }
     }
 
-    bool init(LevelEditorLayer* p0)
-    {
+    bool init(LevelEditorLayer* p0) {
         if (!SelectFontLayer::init(p0))
             return false;
 
@@ -63,8 +56,8 @@ class $modify (BetterSelectFontLayer, SelectFontLayer)
 
         auto content = scroll->m_contentLayer;
 
-        int fontCount = 60;
-        content->setContentSize(ccp(320, 30 * (fontCount)));
+        constexpr int FONT_COUNT = 60;
+        content->setContentSize(ccp(320, 30 * (FONT_COUNT)));
 
         int selectedFont = p0->m_levelSettings->m_fontIndex;
 
@@ -75,13 +68,12 @@ class $modify (BetterSelectFontLayer, SelectFontLayer)
 
         SelFont::buttons = {};
 
-        for (size_t i = 0; i < fontCount; i++)
-        {
+        for (size_t i = 0; i < FONT_COUNT; i++) {
             auto node = CCLayerColor::create();
             node->setColor({0, 0, 0});
             node->setOpacity((i % 2 == 0) ? 100 : 50);
             node->setContentSize(ccp(320, 30));
-            node->setPosition(ccp(0, 30 * fontCount - ((i + 1) * 30)));
+            node->setPosition(ccp(0, 30 * FONT_COUNT - ((i + 1) * 30)));
 
             auto menu = CCMenu::create();
             menu->setPosition(ccp(0, 0));
@@ -95,18 +87,15 @@ class $modify (BetterSelectFontLayer, SelectFontLayer)
 
             std::stringstream fntFile;
 
-            if (i == 0)
-            {
+            if (i == 0) {
                 fntFile << "bigFont.fnt";
             }
-            else if (i < 10)
-            {
+            else if (i < 10) {
                 fntFile << "gjFont0";
                 fntFile << i;
                 fntFile << ".fnt";
             }
-            else
-            {
+            else {
                 fntFile << "gjFont";
                 fntFile << i;
                 fntFile << ".fnt";
@@ -135,6 +124,8 @@ class $modify (BetterSelectFontLayer, SelectFontLayer)
         scroll->moveToTop();
 
         this->addChild(scroll);
+
+        handleTouchPriority(this);
 
         return true;
     }
