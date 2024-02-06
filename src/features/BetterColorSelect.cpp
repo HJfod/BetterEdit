@@ -28,6 +28,8 @@ std::string shortTextForColorIdx(int channel) {
         case 1010: return "";   // black
         case 1011: return "";   // white
         case 1012: return "Ltr";// lighter
+        case 1013: return "MG";
+        case 1014: return "MG2";
         default: return std::to_string(channel);
     }
 }
@@ -41,14 +43,15 @@ std::string longTextForColorIdx(int channel) {
     }
 }
 
-static std::array<int, 8> RECENT_COLOR_IDS {};
+static std::array<int, 15> RECENT_COLOR_IDS {};
 static constexpr std::array SPECIAL_CHANNEL_ORDER {
     0,    1005, 1006, 
-    1000, 1003, 1007,
-    1001, 1004, 1010, 
-    1009, 1002, 1011,
+    1000, 1001, 1013, 
+    1007, 1009, 1014,
+    1004, 1002, 1003,
+    1012, 1010, 1011,
 };
-static constexpr int CHANNELS_ON_PAGE = 20;
+static constexpr int CHANNELS_ON_PAGE = 35;
 
 class $modify(NewColorSelect, CustomizeObjectLayer) {
     int page = 0;
@@ -416,7 +419,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
 
         // add special color channels
         specialsMenu->setContentSize({ 90.f, 125.f });
-        specialsMenu->setPosition(winSize.width / 2 - 120.f, winSize.height / 2 - 7.5f);
+        specialsMenu->setPosition(winSize.width / 2 - 130.f, winSize.height / 2 - 7.5f);
         specialsMenu->setLayout(
             RowLayout::create()
                 ->setCrossAxisOverflow(false)
@@ -443,7 +446,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
 
         // add separator line between items. it's the special HJfod UI sauce cherry
         auto line = CCSprite::createWithSpriteFrameName("edit_vLine_001.png");
-        line->setPosition({ winSize.width / 2 - 67.5f, winSize.height / 2 - 7.5f });
+        line->setPosition({ winSize.width / 2 - 89.f, winSize.height / 2 - 7.5f });
         line->setScaleY(1.65f);
         line->setOpacity(100);
         line->setID("separator"_spr);
@@ -451,8 +454,8 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         m_colorTabNodes->addObject(line);
 
         // add new color buttons to channel menu
-        channelsMenu->setContentSize({ 160.f, 125.f });
-        channelsMenu->setPosition(winSize.width / 2 + 15.f, winSize.height / 2 - 7.5f);
+        channelsMenu->setContentSize({ 170.f, 125.f });
+        channelsMenu->setPosition(winSize.width / 2, winSize.height / 2 - 7.5f);
         channelsMenu->setLayout(
             RowLayout::create()
                 ->setCrossAxisOverflow(false)
@@ -501,7 +504,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
 
         // add second separator line between channels and recent
         auto line2 = CCSprite::createWithSpriteFrameName("edit_vLine_001.png");
-        line2->setPosition({ winSize.width / 2 + 97.5f, winSize.height / 2 - 7.5f });
+        line2->setPosition({ winSize.width / 2 + 89.f, winSize.height / 2 - 7.5f });
         line2->setScaleY(1.65f);
         line2->setOpacity(100);
         line2->setID("separator-2"_spr);
@@ -512,8 +515,8 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         auto recentMenu = CCMenu::create();
         recentMenu->ignoreAnchorPointForPosition(false);
         recentMenu->setID("recent-channels-menu"_spr);
-        recentMenu->setContentSize({ 60.f, 125.f });
-        recentMenu->setPosition(winSize.width / 2 + 135.f, winSize.height / 2 - 7.5f);
+        recentMenu->setContentSize({ 90.f, 125.f });
+        recentMenu->setPosition(winSize.width / 2 + 130.f, winSize.height / 2 - 7.5f);
         recentMenu->setLayout(
             RowLayout::create()
                 ->setCrossAxisOverflow(false)
