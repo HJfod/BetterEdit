@@ -1,4 +1,7 @@
-#include <Geode/Bindings.hpp>
+#include "Geode/cocos/sprite_nodes/CCSprite.h"
+#include <Geode/binding/EditorUI.hpp>
+#include <Geode/binding/Slider.hpp>
+#include <Geode/utils/cocos.hpp>
 #include <Geode/modify/EditorUI.hpp>
 
 using namespace geode::prelude;
@@ -11,18 +14,12 @@ class $modify(EditorUI) {
         float scale = Mod::get()->getSettingValue<double>("scale-factor");
         auto size = CCDirector::get()->getWinSize();
 
-        auto slider = reinterpret_cast<Slider*>(this->getChildren()->objectAtIndex(0));
+        auto slider = getChildOfType<Slider>(this, 0);
         slider->ignoreAnchorPointForPosition(false);
         slider->setContentSize(ccp(0, 0));
         slider->setScale(scale);
         slider->setPositionY(size.height - (size.height - slider->getPositionY()) * scale);
         
-        auto sliderO = this->getChildByID("position-slider");
-        
-        sliderO->setPositionY(size.height - (size.height - sliderO->getPositionY()) * scale);
-        sliderO->setContentSize(ccp(0, 0));
-        sliderO->setScale(scale);
-
         auto settingsMenu = this->getChildByID("settings-menu");
         
         settingsMenu->setPosition(size);
@@ -68,8 +65,9 @@ class $modify(EditorUI) {
         linkMenu->setScale(scale);
 
         // i am very sorry for using object indexes but no id
+        // doggo for the love of god at least use getChildOfType
 
-        auto objBG = static_cast<CCSprite*>(this->getChildren()->objectAtIndex(1));
+        auto objBG = getChildOfType<CCSprite>(this, 0);
         objBG->setScaleY(scale);
 
         auto objTabs = this->getChildByID("build-tabs-menu");
@@ -91,11 +89,11 @@ class $modify(EditorUI) {
         rightTabs->setPosition(ccp(rightTabs->getPositionX() + rightTabs->getContentSize().width / 2, 0));
         rightTabs->setScale(scale);
 
-        auto leftLine = static_cast<CCSprite*>(this->getChildren()->objectAtIndex(4));
+        auto leftLine = getChildOfType<CCSprite>(this, 1);
         leftLine->setScale(scale);
         leftLine->setPosition(leftLine->getPosition() * scale);
 
-        auto rightLine = static_cast<CCSprite*>(this->getChildren()->objectAtIndex(5));
+        auto rightLine = getChildOfType<CCSprite>(this, 2);
         rightLine->setScale(scale);
         rightLine->setPosition(ccp(size.width - (size.width - rightLine->getPositionX()) * scale, rightLine->getPositionY() * scale));
 
