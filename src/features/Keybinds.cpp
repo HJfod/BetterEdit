@@ -1,3 +1,8 @@
+#include <Geode/DefaultInclude.hpp>
+
+// todo: CustomKeybinds on Mac
+#ifdef GEODE_IS_WINDOWS
+
 #include <geode.custom-keybinds/include/Keybinds.hpp>
 #include <Geode/modify/EditorUI.hpp>
 
@@ -198,3 +203,5 @@ $execute {
         Category::EDITOR_MOVE, true
     });
 }
+
+#endif
