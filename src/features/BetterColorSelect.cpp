@@ -357,7 +357,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
 
         if (auto menu = m_mainLayer->getChildByID("page-menu"_spr)) {
             static_cast<CCLabelBMFont*>(menu->getChildByID("current-page"))
-                ->setString(fmt::format("Page {} / {}", page + 1, 1000 / CHANNELS_ON_PAGE).c_str());
+                ->setString(fmt::format("Page {} / {}", page + 1, ceil(1000.f / CHANNELS_ON_PAGE)).c_str());
         }
 
         this->highlightSelected(nullptr);
