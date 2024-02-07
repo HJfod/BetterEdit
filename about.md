@@ -10,4 +10,4 @@ The ultimate editor improvement mod.
  * Better font selection menu
  * Scroll wheel improvements
  * Custom UI scaling
- * Lots of new, fully customizable editor keybinds
+ * Lots of new, fully customizable editor keybinds (only on Windows for now)

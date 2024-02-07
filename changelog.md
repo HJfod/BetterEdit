@@ -5,4 +5,4 @@
  * Added better font selection menu
  * Added shift to scroll horizontally with the scroll wheel + control to zoom towards mouse
  * Added UI scaling
- * Add a lot of new keybinds
+ * Add a lot of new keybinds (currently only on Windows)
