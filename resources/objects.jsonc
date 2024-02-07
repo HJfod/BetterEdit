@@ -1,0 +1,48 @@
+{
+    "tags": [
+        // Solid objects you can interact with
+        "Solid",
+        // A whole block
+        "Block",
+        // A half-block (or spike)
+        "Slab",
+        // A mini block (or spike)
+        "Mini",
+        // Breakable objects (aka breakable blocks)
+        "Breakable",
+        // A slope
+        "Slope",
+        // Decoration objects
+        "Decoration",
+        // Interactive objects like orbs, portals, pickupable items
+        "Interactive",
+        // Coins, potions, etc.
+        "Pickupable",
+        // Portals
+        "Portal",
+        // Orbs
+        "Orb",
+        // All deadly objects
+        "Hazard",
+        // Spikes
+        "Spike",
+        // Sawblades
+        "Saw",
+        // Monsters
+        "Monster",
+        // This object connects to other objects
+        "Ground",
+        // This object floats
+        "Air",
+        // Trigger
+        "Trigger",
+        // Animated objects
+        "Animated"
+    ],
+    "objects": {
+        "1": {
+            "description": "Default block",
+            "tags": ["Solid", "Block"]
+        }
+    }
+}
