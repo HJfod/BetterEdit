@@ -7,6 +7,7 @@
 using namespace geode::prelude;
 
 class $modify(EditorUI) {
+    $override
     bool init(LevelEditorLayer* p0) {
         if (!EditorUI::init(p0))
             return false;

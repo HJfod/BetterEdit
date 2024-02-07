@@ -10,6 +10,7 @@ using namespace geode::prelude;
 using namespace keybinds;
 
 struct $modify(EditorUI) {
+    $override
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
             return false;

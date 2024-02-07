@@ -27,6 +27,7 @@ class $modify(BetterSelectFontLayer, SelectFontLayer) {
         }
     }
 
+    $override
     bool init(LevelEditorLayer* p0) {
         if (!SelectFontLayer::init(p0))
             return false;

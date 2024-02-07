@@ -137,9 +137,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
     void updateSpritesInMenu(CCNode* menu) {
         if (menu) {
             for (auto child : CCArrayExt<CCMenuItemSpriteExtra*>(menu->getChildren())) {
-                if (auto spr = static_cast<ColorChannelSprite*>(
-                    child->getChildByID("channel-sprite"_spr)
-                )) {
+                if (auto spr = static_cast<ColorChannelSprite*>(child->getChildByID("channel-sprite"_spr))) {
                     this->updateSprite(spr);
                 }
             }
@@ -149,9 +147,10 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
     void updateSprites() {
         this->updateSpritesInMenu(m_mainLayer->getChildByID("channels-menu"));
         this->updateSpritesInMenu(m_mainLayer->getChildByID("special-channels-menu"));
-        this->updateSpritesInMenu(m_mainLayer->getChildByID("recent-channels-menu"));
+        this->updateSpritesInMenu(m_mainLayer->getChildByID("recent-channels-menu"_spr));
     }
 
+    $override
     void onSelectColor(CCObject* sender) {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::onSelectColor(sender);
@@ -177,6 +176,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         }
     }
 
+    $override
     void highlightSelected(ButtonSprite* sprite) {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::highlightSelected(sprite);
@@ -184,9 +184,12 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         auto selected = this->getActiveMode(true);
         this->highlightSelectedInMenu(m_mainLayer->getChildByID("channels-menu"), selected);
         this->highlightSelectedInMenu(m_mainLayer->getChildByID("special-channels-menu"), selected);
-        this->highlightSelectedInMenu(m_mainLayer->getChildByID("recent-channels-menu"), selected);
+        this->highlightSelectedInMenu(m_mainLayer->getChildByID("recent-channels-menu"_spr), selected);
     }
 
+// todo: hooking this virtual crashes on Android? probably a TulipHook or loader issue
+#ifndef GEODE_IS_ANDROID
+    $override
     void colorSelectClosed(CCNode* target) {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::colorSelectClosed(target);
@@ -194,7 +197,9 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         CustomizeObjectLayer::colorSelectClosed(target);
         this->updateSprites();
     }
+#endif
 
+    $override
     void updateCustomColorLabels() {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::updateCustomColorLabels();
@@ -207,6 +212,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         m_customColorInput->m_textField->detachWithIME();
     }
 
+    $override
     void onUpdateCustomColor(CCObject* sender) {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::onUpdateCustomColor(sender);
@@ -290,6 +296,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         m_fields->modified = true;
     }
 
+    $override
     void textChanged(CCTextInputNode* input) {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::textChanged(input);
@@ -299,6 +306,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         m_fields->modified = true;
     }
 
+    $override
     void onClose(CCObject* sender) {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::onClose(sender);
@@ -359,6 +367,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         this->gotoPage(m_fields->page + sender->getTag());
     }
 
+    $override
     bool init(GameObject* obj, CCArray* objs) {
         if (!CustomizeObjectLayer::init(obj, objs))
             return false;

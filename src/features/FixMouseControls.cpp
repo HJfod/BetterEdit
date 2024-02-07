@@ -10,7 +10,8 @@
 using namespace geode::prelude;
 
 class $modify(EditorUI) {
-    void scrollWheel(float y, float x) override {
+    $override
+    virtual void scrollWheel(float y, float x) {
         // this is used a lot so store it in a variable
         auto objLayer = m_editorLayer->m_objectLayer;
 
