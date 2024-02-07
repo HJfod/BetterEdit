@@ -1,13 +1,14 @@
 
-#include <Geode/Bindings.hpp>
 #include <Geode/modify/EditorUI.hpp>
-#include <Geode/Loader.hpp>
+#include <Geode/loader/Mod.hpp>
 #include <numbers>
 
 #undef min
 #undef max
 
 using namespace geode::prelude;
+
+#ifdef GEODE_IS_DESKTOP
 
 class $modify(EditorUI) {
     $override
@@ -84,3 +85,5 @@ class $modify(EditorUI) {
         m_swipeStart = m_swipeStart + rel;
     }
 };
+
+#endif
