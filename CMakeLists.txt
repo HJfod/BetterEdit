@@ -9,6 +9,7 @@ project(BetterEdit VERSION 1.0.0)
 file(GLOB SOURCES
 	src/features/*.cpp
 	src/features/scaling/*.cpp
+	src/utils/*.cpp
 	src/*.cpp
 )
 
