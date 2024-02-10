@@ -35,5 +35,6 @@ class $modify(ScrollBackLayer, EditorPauseLayer) {
 
     void onResetScroll(CCObject*) {
         m_editorLayer->m_objectLayer->setPosition(ccp(0, 0));
+        m_editorLayer->m_editorUI->updateZoom(1.f);
     }
 };
