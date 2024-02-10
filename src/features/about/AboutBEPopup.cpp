@@ -58,7 +58,7 @@ bool AboutBEPopup::setup() {
 
     auto developedBy = CCLabelBMFont::create("Developed by", "goldFont.fnt");
     developedBy->setScale(.7f);
-    m_mainLayer->addChildAtPosition(developedBy, Anchor::Center, ccp(0, 80));
+    m_mainLayer->addChildAtPosition(developedBy, Anchor::Center, ccp(0, 85));
 
     auto hjfod = Dev {
         .name = "HJfod",
@@ -69,7 +69,7 @@ bool AboutBEPopup::setup() {
             { "geode.loader/gift.png", "https://ko-fi.com/hjfod" },
         }
     }.create(this, true);
-    m_mainLayer->addChildAtPosition(hjfod, Anchor::Center, ccp(0, 50));
+    m_mainLayer->addChildAtPosition(hjfod, Anchor::Center, ccp(0, 55));
 
     auto credits = CCLabelBMFont::create("Credits", "goldFont.fnt");
     credits->setScale(.6f);
