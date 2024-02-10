@@ -13,5 +13,8 @@ public:
     static AboutBEPopup* create();
 
     void onSettings(CCObject*);
+    void onReportBug(CCObject*);
+    void onSuggestFeature(CCObject*);
     void onSupport(CCObject*);
+    void onDevLink(CCObject* sender);
 };

@@ -15,55 +15,55 @@ struct $modify(EditorUI) {
         if (!EditorUI::init(lel))
             return false;
 
-        this->defineKeybind("rotate-45-ccw"_spr, [=]() {
+        this->defineKeybind("rotate-45-ccw"_spr, [this]() {
             this->transformObjectCall(EditCommand::RotateCCW45);
         });
-        this->defineKeybind("rotate-45-cw"_spr, [=]() {
+        this->defineKeybind("rotate-45-cw"_spr, [this]() {
             this->transformObjectCall(EditCommand::RotateCW45);
         });
-        this->defineKeybind("rotate-snap"_spr, [=]() {
+        this->defineKeybind("rotate-snap"_spr, [this]() {
             this->transformObjectCall(EditCommand::RotateSnap);
         });
-        this->defineKeybind("show-scale"_spr, [=]() {
+        this->defineKeybind("show-scale"_spr, [this]() {
             this->activateScaleControl(nullptr);
         });
-        this->defineKeybind("show-ui"_spr, [=]() {
+        this->defineKeybind("show-ui"_spr, [this]() {
             this->showUI(true);
         });
-        this->defineKeybind("hide-ui"_spr, [=]() {
+        this->defineKeybind("hide-ui"_spr, [this]() {
             this->showUI(false);
         });
-        this->defineKeybind("select-all"_spr, [=]() {
+        this->defineKeybind("select-all"_spr, [this]() {
             this->selectAll();
         });
-        this->defineKeybind("select-all-left"_spr, [=]() {
+        this->defineKeybind("select-all-left"_spr, [this]() {
             this->selectAllWithDirection(true);
         });
-        this->defineKeybind("select-all-right"_spr, [=]() {
+        this->defineKeybind("select-all-right"_spr, [this]() {
             this->selectAllWithDirection(false);
         });
-        this->defineKeybind("move-obj-half-left"_spr, [=] {
+        this->defineKeybind("move-obj-half-left"_spr, [this] {
             this->moveObjectCall(EditCommand::HalfLeft);
         });
-        this->defineKeybind("move-obj-half-right"_spr, [=] {
+        this->defineKeybind("move-obj-half-right"_spr, [this] {
             this->moveObjectCall(EditCommand::HalfRight);
         });
-        this->defineKeybind("move-obj-half-up"_spr, [=] {
+        this->defineKeybind("move-obj-half-up"_spr, [this] {
             this->moveObjectCall(EditCommand::HalfUp);
         });
-        this->defineKeybind("move-obj-half-down"_spr, [=] {
+        this->defineKeybind("move-obj-half-down"_spr, [this] {
             this->moveObjectCall(EditCommand::HalfDown);
         });
-        this->defineKeybind("move-obj-big-left"_spr, [=] {
+        this->defineKeybind("move-obj-big-left"_spr, [this] {
             this->moveObjectCall(EditCommand::BigLeft);
         });
-        this->defineKeybind("move-obj-big-right"_spr, [=] {
+        this->defineKeybind("move-obj-big-right"_spr, [this] {
             this->moveObjectCall(EditCommand::BigRight);
         });
-        this->defineKeybind("move-obj-big-up"_spr, [=] {
+        this->defineKeybind("move-obj-big-up"_spr, [this] {
             this->moveObjectCall(EditCommand::BigUp);
         });
-        this->defineKeybind("move-obj-big-down"_spr, [=] {
+        this->defineKeybind("move-obj-big-down"_spr, [this] {
             this->moveObjectCall(EditCommand::BigDown);
         });
         
