@@ -10,6 +10,7 @@ file(GLOB SOURCES
 	src/features/*.cpp
 	src/features/scaling/*.cpp
 	src/features/ZoomLevelText/*.cpp
+	src/features/about/*.cpp
 	src/utils/*.cpp
 	src/*.cpp
 )
