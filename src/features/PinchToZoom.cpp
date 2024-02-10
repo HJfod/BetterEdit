@@ -1,27 +1,40 @@
-
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/loader/Mod.hpp>
 #include <numbers>
-
-#undef min
-#undef max
 
 using namespace geode::prelude;
 
 #ifdef GEODE_IS_MOBILE
 
-// thank you camila icreate 🙏
+// thank you mat matcool
 
 class $modify(EditorUI) {
-    std::unordered_set<Ref<CCTouch>> touches;
+    std::unordered_set<Ref<CCTouch>> m_touches;
+    float m_initialDistance = 0.f;
+    float m_initialScale = 1.f;
+    CCPoint m_touchMidPoint;
 
     $override
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) override {
         if (!Mod::get()->getSettingValue<bool>("pinch-to-zoom")) {
             return EditorUI::ccTouchBegan(touch, event);
         }
-        if (m_fields->touches.size() == 1 || EditorUI::ccTouchBegan(touch, event)) {
-            m_fields->touches.insert(touch);
+        if (m_fields->m_touches.size() == 1) {
+            auto firstTouch = *m_fields->m_touches.begin();
+
+            auto firstLoc = firstTouch->getLocation();
+            auto secondLoc = touch->getLocation();
+
+            m_fields->m_touchMidPoint = (firstLoc + secondLoc) / 2.f;
+            // save current zoom level
+            m_fields->m_initialScale = m_editorLayer->m_objectLayer->getScale();
+            // distance between the two touches
+            m_fields->m_initialDistance = firstLoc.getDistance(secondLoc);
+
+            m_fields->m_touches.insert(touch);
+            return true;
+        } else if (EditorUI::ccTouchBegan(touch, event)) {
+            m_fields->m_touches.insert(touch);
             return true;
         }
         return false;
@@ -32,48 +45,35 @@ class $modify(EditorUI) {
         if (!Mod::get()->getSettingValue<bool>("pinch-to-zoom")) {
             return EditorUI::ccTouchMoved(touch, event);
         }
-        if (m_fields->touches.size() == 2) {
-            // thanks https://math.stackexchange.com/questions/4408515/calculate-coordinates-after-pinch-to-zoom-gesture!!
-
-            auto winSize = CCDirector::get()->getWinSize();
+        if (m_fields->m_touches.size() == 2) {
             auto objLayer = m_editorLayer->m_objectLayer;
 
-            auto it = m_fields->touches.begin();
-            auto a = *it;
-            auto b = *++it;
+            auto it = m_fields->m_touches.begin();
+            auto firstTouch = *it;
+            ++it;
+            auto secondTouch = *it;
 
-            auto aPrev = a->getPreviousLocationInView();
-            if (aPrev == CCPointZero) {
-                aPrev = a->getLocationInView();
+            auto firstLoc = firstTouch->getLocation();
+            auto secondLoc = secondTouch->getLocation();
+
+            auto center = (firstLoc + secondLoc) / 2.f;
+            auto distNow = firstLoc.getDistance(secondLoc);
+            
+            auto const mult = m_fields->m_initialDistance / distNow;
+            auto zoom = std::max(m_fields->m_initialScale / mult, 0.1f);
+            // safety measure, nan zoom can really mess up gd
+            if (std::isnan(zoom) || std::isinf(zoom)) {
+                this->updateZoom(1.f);
+                zoom = 1.f;
+            } else {
+                this->updateZoom(zoom);
             }
-            auto bPrev = b->getPreviousLocationInView();
-            if (bPrev == CCPointZero) {
-                bPrev = b->getLocationInView();
-            }
 
-            auto prevAspectDiv = fabsf(aPrev.x - bPrev.x);
-            if (fpclassify(prevAspectDiv) == FP_ZERO) {
-                return;
-            }
-            auto prevAspect = fabsf(aPrev.y - bPrev.y) / prevAspectDiv;
+            // pan the level if the center point moves
+            auto centerDiff = m_fields->m_touchMidPoint - center;
+            objLayer->setPosition(objLayer->getPosition() - centerDiff);
 
-            auto aNext = a->getLocationInView();
-            auto bNext = b->getLocationInView();
-
-            auto bMapped = ccp(bNext.x, fabsf(prevAspect * fabsf(aNext.x - bNext.x) - aNext.y));
-
-            auto zoomDiv = fabsf(aPrev.y - bPrev.y);
-            if (fpclassify(zoomDiv) == FP_ZERO) {
-                return;
-            }
-            auto zoom = fabsf(aNext.y - bMapped.y) / zoomDiv;
-
-            auto objPos = objLayer->getPosition();
-            this->updateZoom(objLayer->getScale() * zoom);
-            objLayer->setPosition(ccp(
-                aNext.x + zoom * (objPos.x - aPrev.x),
-                (winSize.height - aNext.y) + zoom * (objPos.y - (winSize.height - aPrev.y))
-            ));
+            m_fields->m_touchMidPoint = center;
         }
         else {
             EditorUI::ccTouchMoved(touch, event);
@@ -86,7 +86,7 @@ class $modify(EditorUI) {
             return EditorUI::ccTouchEnded(touch, event);
         }
         EditorUI::ccTouchEnded(touch, event);
-        m_fields->touches.erase(touch);
+        m_fields->m_touches.erase(touch);
     }
 
     $override
@@ -95,7 +95,7 @@ class $modify(EditorUI) {
             return EditorUI::ccTouchCancelled(touch, event);
         }
         EditorUI::ccTouchCancelled(touch, event);
-        m_fields->touches.erase(touch);
+        m_fields->m_touches.erase(touch);
     }
 };
 
