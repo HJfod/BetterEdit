@@ -29,13 +29,15 @@
 			"type": "bool",
 			"default": true,
 			"name": "Zoom Towards Cursor",
-			"description": "When enabled and while holding down the CTRL key, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen"
+			"description": "When enabled and while holding down the CTRL key, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen",
+			"platforms": ["windows", "macos"]
 		},
-		"better-font-select": {
+		"pinch-to-zoom": {
 			"type": "bool",
 			"default": true,
-			"name": "Better Font Select",
-			"description": "Replaces the old font select screen with a better one with scrolling"
+			"name": "Pinch to Zoom",
+			"description": "When enabled, you can use two fingers to zoom",
+			"platforms": ["android32", "android64"]
 		},
 		"scale-factor": {
 			"type": "float",
@@ -60,6 +62,12 @@
 			"default": true,
 			"name": "Scale Build Tabs",
 			"description": "Whether the tabs above the object selection area should be scaled according to the scale factor aswell"
+		},
+		"better-font-select": {
+			"type": "bool",
+			"default": true,
+			"name": "New Font Selection Menu",
+			"description": "Replaces the old font select screen with a better one with scrolling"
 		},
 		"new-color-menu": {
 			"type": "bool",

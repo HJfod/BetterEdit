@@ -17,6 +17,9 @@ class $modify(EditorUI) {
 
     $override
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) override {
+        if (!Mod::get()->getSettingValue<bool>("pinch-to-zoom")) {
+            return EditorUI::ccTouchBegan(touch, event);
+        }
         if (m_fields->touches.size() == 1 || EditorUI::ccTouchBegan(touch, event)) {
             m_fields->touches.insert(touch);
             return true;
@@ -26,6 +29,9 @@ class $modify(EditorUI) {
 
     $override
     void ccTouchMoved(CCTouch* touch, CCEvent* event) override {
+        if (!Mod::get()->getSettingValue<bool>("pinch-to-zoom")) {
+            return EditorUI::ccTouchMoved(touch, event);
+        }
         if (m_fields->touches.size() == 2) {
             // thanks https://math.stackexchange.com/questions/4408515/calculate-coordinates-after-pinch-to-zoom-gesture!!
 
@@ -76,12 +82,18 @@ class $modify(EditorUI) {
 
     $override
     void ccTouchEnded(CCTouch* touch, CCEvent* event) override {
+        if (!Mod::get()->getSettingValue<bool>("pinch-to-zoom")) {
+            return EditorUI::ccTouchEnded(touch, event);
+        }
         EditorUI::ccTouchEnded(touch, event);
         m_fields->touches.erase(touch);
     }
 
     $override
     void ccTouchCancelled(CCTouch* touch, CCEvent* event) override {
+        if (!Mod::get()->getSettingValue<bool>("pinch-to-zoom")) {
+            return EditorUI::ccTouchCancelled(touch, event);
+        }
         EditorUI::ccTouchCancelled(touch, event);
         m_fields->touches.erase(touch);
     }
