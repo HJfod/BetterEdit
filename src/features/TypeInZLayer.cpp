@@ -12,12 +12,12 @@ class $modify(EditorUI) {
         m_currentLayerLabel = EditableBMLabelProxy::replace(
             m_currentLayerLabel, 40.f, "Z",
             [this](auto str) {
-                // try {
-                //     m_editorLayer->m_currentLayer = std::stoi(str);
-                // }
-                // catch(...) {
-                //     m_editorLayer->m_currentLayer = -1;
-                // }
+                try {
+                    m_editorLayer->m_currentLayer = std::stoi(str);
+                }
+                catch(...) {
+                    m_editorLayer->m_currentLayer = -1;
+                }
             }
         );
         

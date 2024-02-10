@@ -48,7 +48,9 @@ void EditableBMLabelProxy::setString(const char* str) {
 void EditableBMLabelProxy::setString(const char* str, bool needUpdateLabel) {
     CCLabelBMFont::setString(str, needUpdateLabel);
     if (m_input && !m_ignoreLabelUpdate) {
+        m_ignoreLabelUpdate = true;
         m_input->setString(str);
+        m_ignoreLabelUpdate = false;
     }
 }
 
