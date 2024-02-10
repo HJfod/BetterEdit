@@ -44,18 +44,50 @@ std::string longTextForColorIdx(int channel) {
 }
 
 static std::array<int, 15> RECENT_COLOR_IDS {};
-static constexpr std::array SPECIAL_CHANNEL_ORDER {
+static constexpr std::array SPECIAL_CHANNEL_ORDER_SMALL {
     0,    1005, 1006, 
     1000, 1001, 1013, 
     1007, 1009, 1014,
     1004, 1002, 1003,
     1012, 1010, 1011,
 };
-static constexpr int CHANNELS_ON_PAGE = 35;
+static constexpr std::array SPECIAL_CHANNEL_ORDER_LARGE {
+    0,    1005, 1006, 1012,
+    1000, 1001, 1013, 1010,
+    1007, 1009, 1014, 1011,
+    1004, 1002, 1003,
+};
 
 class $modify(NewColorSelect, CustomizeObjectLayer) {
     int page = 0;
     bool modified = false;
+
+    static size_t getChannelsOnPage() {
+        if (Mod::get()->template getSettingValue<bool>("larger-color-menu")) {
+            return 20;
+        }
+        else {
+            return 35;
+        }
+    }
+
+    static size_t getRecentColorCount() {
+        if (Mod::get()->template getSettingValue<bool>("larger-color-menu")) {
+            return 4;
+        }
+        else {
+            return 15;
+        }
+    }
+
+    static auto getSpecialChannelOrder() {
+        if (Mod::get()->template getSettingValue<bool>("larger-color-menu")) {
+            return SPECIAL_CHANNEL_ORDER_LARGE;
+        }
+        else {
+            return SPECIAL_CHANNEL_ORDER_SMALL;
+        }
+    }
 
     void updateSprite(ColorChannelSprite* sprite) {
         auto channel = static_cast<int>(reinterpret_cast<intptr_t>(sprite->getUserData()));
@@ -217,6 +249,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::onUpdateCustomColor(sender);
         }
+        auto order = getSpecialChannelOrder();
         // recreate to avoid the default clamp of 10..999 without needing to patch
         m_customColorSelected = true;
         int i = m_customColorChannel;
@@ -228,18 +261,14 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
             }
             else if (i >= 1000) {
                 // loop around to normal channels
-                if (i == SPECIAL_CHANNEL_ORDER.back()) {
+                if (i == order.back()) {
                     i = 1;
                 }
                 else {
                     // find the current channel in special channels
-                    auto it = std::find(
-                        SPECIAL_CHANNEL_ORDER.begin(),
-                        SPECIAL_CHANNEL_ORDER.end(),
-                        i
-                    );
+                    auto it = std::find(order.begin(), order.end(), i);
                     // if it's invalid, just hop to start
-                    if (it == SPECIAL_CHANNEL_ORDER.end()) {
+                    if (it == order.end()) {
                         i = 1;
                     }
                     // otherwise get the next in sequence
@@ -258,15 +287,11 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
                     i = 1;
                 }
                 // first in order is default so we want second
-                else if (i != SPECIAL_CHANNEL_ORDER.at(1)) {
+                else if (i != order.at(1)) {
                     // find the current channel in special channels
-                    auto it = std::find(
-                        SPECIAL_CHANNEL_ORDER.begin(),
-                        SPECIAL_CHANNEL_ORDER.end(),
-                        i
-                    );
+                    auto it = std::find(order.begin(), order.end(), i);
                     // if it's invalid, just hop to start
-                    if (it == SPECIAL_CHANNEL_ORDER.end()) {
+                    if (it == order.end()) {
                         i = 1;
                     }
                     // otherwise get the previous in sequence
@@ -281,7 +306,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
                 }
                 // loop around to special colors
                 else {
-                    i = SPECIAL_CHANNEL_ORDER.back();
+                    i = order.back();
                 }
             }
         }
@@ -328,16 +353,17 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
 
     void gotoPageWithChannel(int channel) {
         if (0 < channel && channel < 1000) {
-            this->gotoPage((channel - 1) / CHANNELS_ON_PAGE);
+            this->gotoPage((channel - 1) / getChannelsOnPage());
         }
     }
 
     void gotoPage(int page) {
+        int channelsPerPage = getChannelsOnPage();
         if (page < 0) {
             page = 0;
         }
-        if (page > 999 / CHANNELS_ON_PAGE) {
-            page = 999 / CHANNELS_ON_PAGE;
+        if (page > 999 / channelsPerPage) {
+            page = 999 / channelsPerPage;
         }
         m_fields->page = page;
         auto channelsMenu = m_mainLayer->getChildByID("channels-menu");
@@ -347,8 +373,8 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         }
         channelsMenu->removeAllChildren();
 
-        for (int channel = 1; channel <= CHANNELS_ON_PAGE; channel++) {
-            auto c = channel + page * CHANNELS_ON_PAGE;
+        for (int channel = 1; channel <= channelsPerPage; channel++) {
+            auto c = channel + page * channelsPerPage;
             if (c < 1000) {
                 channelsMenu->addChild(this->createChannelButton(c));
             }
@@ -357,7 +383,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
 
         if (auto menu = m_mainLayer->getChildByID("page-menu"_spr)) {
             static_cast<CCLabelBMFont*>(menu->getChildByID("current-page"))
-                ->setString(fmt::format("Page {} / {}", page + 1, ceil(1000.f / CHANNELS_ON_PAGE)).c_str());
+                ->setString(fmt::format("Page {} / {}", page + 1, ceil(1000.f / channelsPerPage)).c_str());
         }
 
         this->highlightSelected(nullptr);
@@ -377,6 +403,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         }
 
         auto winSize = CCDirector::get()->getWinSize();
+        auto largeBtns = Mod::get()->template getSettingValue<bool>("larger-color-menu");
 
         // move the browse and copy paste menus to be inline with the popup because 
         // i will actually get diarrhea if they stay the way they are in vanilla
@@ -438,7 +465,12 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
                 ->setGap(4.f)
         );
 
-        for (auto channel : SPECIAL_CHANNEL_ORDER) {
+        if (largeBtns) {
+            specialsMenu->setContentSize({ 125.f, 125.f });
+            specialsMenu->setPositionX(winSize.width / 2 - 102.5f);
+        }
+
+        for (auto channel : getSpecialChannelOrder()) {
             specialsMenu->addChild(this->createChannelButton(channel));
         }
         specialsMenu->updateLayout();
@@ -453,15 +485,6 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         m_mainLayer->addChild(specialTitle);
         m_colorTabNodes->addObject(specialTitle);
 
-        // add separator line between items. it's the special HJfod UI sauce cherry
-        auto line = CCSprite::createWithSpriteFrameName("edit_vLine_001.png");
-        line->setPosition({ winSize.width / 2 - 89.f, winSize.height / 2 - 7.5f });
-        line->setScaleY(1.65f);
-        line->setOpacity(100);
-        line->setID("separator"_spr);
-        m_mainLayer->addChild(line);
-        m_colorTabNodes->addObject(line);
-
         // add new color buttons to channel menu
         channelsMenu->setContentSize({ 170.f, 125.f });
         channelsMenu->setPosition(winSize.width / 2, winSize.height / 2 - 7.5f);
@@ -475,6 +498,11 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         );
         channelsMenu->updateLayout();
 
+        if (largeBtns) {
+            channelsMenu->setContentSize({ 150.f, 125.f });
+            channelsMenu->setPositionX(winSize.width / 2 + 47.5f);
+        }
+
         auto pageMenu = CCMenu::create();
         pageMenu->setID("page-menu"_spr);
         pageMenu->ignoreAnchorPointForPosition(false);
@@ -482,7 +510,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
             channelsMenu->getPositionX(),
             channelsMenu->getPositionY() + 72.f
         );
-        pageMenu->setContentSize({ 150.f, 20.f });
+        pageMenu->setContentSize({ 150, 20 });
 
         auto pageTitle = CCLabelBMFont::create("Page 1/X", "bigFont.fnt");
         pageTitle->setID("current-page");
@@ -491,7 +519,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         pageMenu->addChild(pageTitle);
 
         auto lastPageSpr = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
-        lastPageSpr->setScale(.5f);
+        lastPageSpr->setScale(largeBtns ? .65f : .5f);
         auto lastPageBtn = CCMenuItemSpriteExtra::create(
             lastPageSpr, this, menu_selector(NewColorSelect::onPage)
         );
@@ -500,7 +528,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         pageMenu->addChild(lastPageBtn);
 
         auto nextPageSpr = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
-        nextPageSpr->setScale(.5f);
+        nextPageSpr->setScale(largeBtns ? .65f : .5f);
         auto nextPageBtn = CCMenuItemSpriteExtra::create(
             nextPageSpr, this, menu_selector(NewColorSelect::onPage)
         );
@@ -511,9 +539,24 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         m_mainLayer->addChild(pageMenu);
         m_colorTabNodes->addObject(pageMenu);
 
+        // add separator line between items. it's the special HJfod UI sauce
+        auto line = CCSprite::createWithSpriteFrameName("edit_vLine_001.png");
+        line->setPosition(ccp(
+            channelsMenu->getPositionX() - channelsMenu->getScaledContentSize().width / 2 - (largeBtns ? 7 : 4),
+            channelsMenu->getPositionY()
+        ));
+        line->setScaleY(1.65f);
+        line->setOpacity(100);
+        line->setID("separator"_spr);
+        m_mainLayer->addChild(line);
+        m_colorTabNodes->addObject(line);
+
         // add second separator line between channels and recent
         auto line2 = CCSprite::createWithSpriteFrameName("edit_vLine_001.png");
-        line2->setPosition({ winSize.width / 2 + 89.f, winSize.height / 2 - 7.5f });
+        line2->setPosition(ccp(
+            channelsMenu->getPositionX() + channelsMenu->getScaledContentSize().width / 2 + (largeBtns ? 7 : 4),
+            channelsMenu->getPositionY()
+        ));
         line2->setScaleY(1.65f);
         line2->setOpacity(100);
         line2->setID("separator-2"_spr);
@@ -537,8 +580,13 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         m_mainLayer->addChild(recentMenu);
         m_colorTabNodes->addObject(recentMenu);
 
-        for (auto channel : RECENT_COLOR_IDS) {
-            recentMenu->addChild(this->createChannelButton(channel, true));
+        if (largeBtns) {
+            recentMenu->setContentSize({ 30.f, 125.f });
+            recentMenu->setPositionX(winSize.width / 2 + 150.f);
+        }
+
+        for (size_t i = 0; i < getRecentColorCount(); i += 1) {
+            recentMenu->addChild(this->createChannelButton(RECENT_COLOR_IDS.at(i), true));
         }
         recentMenu->updateLayout();
 

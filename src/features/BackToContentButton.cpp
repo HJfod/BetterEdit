@@ -1,5 +1,4 @@
 
-#include <Geode/DefaultInclude.hpp>
 #include <Geode/modify/EditorPauseLayer.hpp>
 
 #undef min

@@ -45,7 +45,7 @@
 			"max": 1.00,
 			"min": 0.6,
 			"name": "Scale Factor",
-			"description": "The factor the UI should be scaled by",
+			"description": "The factor the UI should be scaled by. <cr>Requires re-entering the editor!</c>",
 			"control": {
                 "slider": true,
 				"slider-step": 0.025
@@ -74,6 +74,16 @@
 			"default": true,
 			"name": "New Color Menu",
 			"description": "Changes the object color selection menu to show more channels aswell as previews for colors and special colors"
+		},
+		"larger-color-menu": {
+			"type": "bool",
+			"default": {
+				"win": false,
+				"mac": false,
+				"android": true
+			},
+			"name": "Larger Color Menu",
+			"description": "If you're using the <cr>New Color Menu</c>, this makes the color channel buttons a bit larger"
 		},
 		"show-zoom-text": {
 			"type": "bool",
