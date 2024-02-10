@@ -12,3 +12,5 @@ For example:
  - Were you placing objects?
  - Were you editing colors?
  - Were you playtesting?
+
+**Please attach the latest crash report from `<GD folder>/geode/crashlogs`**
