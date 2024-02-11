@@ -1,5 +1,6 @@
 
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/CCTextInputNode.hpp>
 #include <utils/EditableBMLabelProxy.hpp>
 
 using namespace geode::prelude;
@@ -22,5 +23,16 @@ class $modify(EditorUI) {
         );
         
         return true;
+    }
+
+    void showUI(bool toggle) {
+        EditorUI::showUI(toggle);
+
+        // playtest no ui option
+        if(!GameManager::sharedState()->getGameVariable("0046")) {
+            toggle = true;
+        }
+
+        m_currentLayerLabel->setVisible(toggle);
     }
 };

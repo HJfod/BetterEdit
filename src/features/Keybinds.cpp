@@ -25,7 +25,9 @@ struct $modify(EditorUI) {
             this->transformObjectCall(EditCommand::RotateSnap);
         });
         this->defineKeybind("show-scale"_spr, [this]() {
-            this->activateScaleControl(nullptr);
+            if(auto scaleBtn = m_editButtonBar->m_buttonArray->objectAtIndex(m_editButtonBar->m_buttonArray->count() - 3)) {
+                this->activateScaleControl(scaleBtn);
+            }
         });
         this->defineKeybind("show-ui"_spr, [this]() {
             this->showUI(true);
