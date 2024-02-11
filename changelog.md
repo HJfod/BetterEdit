@@ -5,6 +5,9 @@
  * Add quarter & eighth block move keybinds
  * Fix crash when using the `Show Scale Control` keybind
  * Fix the layer input not being hidden during playtest
+ * Fix being able to zoom during playtesting, which would make Platformer mode not work
+ * Fix layer locking not being possible due to the layer input
+ * Other small bug fixes & improvements
 
 ## v6.0.0
 
