@@ -11,6 +11,7 @@ file(GLOB SOURCES
 	src/features/scaling/*.cpp
 	src/features/ZoomLevelText/*.cpp
 	src/features/about/*.cpp
+	src/editor/*.cpp
 	src/utils/*.cpp
 	src/*.cpp
 )
