@@ -1,6 +1,6 @@
 <h1>
   <picture>
-    <img alt="BetterEdit Logo" width="100" align="left" src="https://raw.githubusercontent.com/HJfod/BetterEdit/v6/logo.png">
+    <img alt="BetterEdit Logo" width="100" align="left" src="logo.png">
   </picture>
   BetterEdit | Heavily WIP!
   <br />
