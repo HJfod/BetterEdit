@@ -10,8 +10,6 @@ class $modify(EditorUI) {
         if (!EditorUI::init(lel))
             return false;
         
-        log::debug("m_lockedLayers: {0:x}", offsetof(LevelEditorLayer, m_lockedLayers));
-
         auto layerMenu = this->getChildByID("layer-menu");
         layerMenu->setContentSize({ 130, layerMenu->getContentSize().height });
 
