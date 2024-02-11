@@ -12,11 +12,11 @@ Report a bug in the mod &mdash; <i>Use the Crash report form to report crashes, 
 <div align="center">
   <table>
     <tr>
-      <th align="center">Name</th>
-      <th align="center">About</th>
-      <th align="center">Title</th>
-      <th align="center">Labels</th>
-      <th align="center">Assignees</th>
+      <th align="center"><code>name</code></th>
+      <th align="center"><code>about</code></th>
+      <th align="center"><code>title</code></th>
+      <th align="center"><code>labels</code></th>
+      <th align="center"><code>assignees</code></th>
     </tr>
     <tr>
       <td align="center">Bug Report</td>
