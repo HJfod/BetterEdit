@@ -17,5 +17,14 @@ public:
     void onSuggestFeature(CCObject*);
     void onSupport(CCObject*);
     void onChangelog(CCObject*);
+    void onSpecialThanks(CCObject*);
     void onDevLink(CCObject* sender);
+};
+
+class SpecialThanksPopup : public PopupWithCorners<> {
+protected:
+    bool setup() override;
+
+public:
+    static SpecialThanksPopup* create();
 };

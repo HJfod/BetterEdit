@@ -66,7 +66,7 @@ bool AboutBEPopup::setup() {
     m_mainLayer->addChildAtPosition(credits, Anchor::Center, ccp(0, 10));
 
     auto devs = CCNode::create();
-    devs->setContentSize({ 300.f, 90.f });
+    devs->setContentSize({ 325, 90 });
     devs->setAnchorPoint({ .5f, .5f });
     for (auto dev : {
         Dev {
@@ -80,6 +80,7 @@ bool AboutBEPopup::setup() {
         Dev {
             .name = "TheSillyDoggo",
             .links = {
+                { "gj_ytIcon_001.png", "https://www.youtube.com/@TheSillyDoggo" },
                 { "gj_twIcon_001.png", "https://twitter.com/TheSillyDoggo" },
                 { "geode.loader/github.png", "https://github.com/TheSillyDoggo" },
             }
@@ -91,10 +92,10 @@ bool AboutBEPopup::setup() {
             }
         },
         Dev {
-            .name = "Mat",
+            .name = "CattoDev",
             .links = {
-                { "gj_twIcon_001.png", "https://twitter.com/mat_4_4/" },
-                { "geode.loader/github.png", "https://github.com/matcool" },
+                { "gj_ytIcon_001.png", "https://youtube.com/@CattoGD" },
+                { "gj_twIcon_001.png", "https://twitter.com/cattodevgd/" },
             }
         },
     }) {
@@ -112,13 +113,14 @@ bool AboutBEPopup::setup() {
     // actions
 
     auto menu = CCMenu::create();
-    menu->setContentSize({ 300.f, 100.f });
+    menu->setContentSize({ 325, 100 });
     menu->ignoreAnchorPointForPosition(false);
 
     for (auto pair : std::initializer_list<std::pair<const char*, SEL_MenuHandler>> {
         { "Report a Bug", menu_selector(AboutBEPopup::onReportBug) },
         { "Suggest a Feature", menu_selector(AboutBEPopup::onSuggestFeature) },
         { "Changelog", menu_selector(AboutBEPopup::onChangelog) },
+        { "Special Thanks", menu_selector(AboutBEPopup::onSpecialThanks) },
         { "Support BE", menu_selector(AboutBEPopup::onSupport) },
     }) {
         auto spr = ButtonSprite::create(pair.first, "goldFont.fnt", "GJ_button_05.png");
@@ -228,6 +230,10 @@ void AboutBEPopup::onSettings(CCObject*) {
     openSettingsPopup(Mod::get());
 }
 
+void AboutBEPopup::onSpecialThanks(CCObject*) {
+    SpecialThanksPopup::create()->show();
+}
+
 void AboutBEPopup::onDevLink(CCObject* sender) {
     auto link = static_cast<CCString*>(static_cast<CCNode*>(sender)->getUserObject())->getCString();
     web::openLinkInBrowser(link);
@@ -236,6 +242,34 @@ void AboutBEPopup::onDevLink(CCObject* sender) {
 AboutBEPopup* AboutBEPopup::create() {
     auto ret = new AboutBEPopup();
     if (ret && ret->initAnchored(358.f, 270.f, "GJ_square02.png")) {
+        ret->autorelease();
+        return ret;
+    }
+    CC_SAFE_DELETE(ret);
+    return nullptr;
+}
+
+bool SpecialThanksPopup::setup() {
+    auto specialThanks = 
+        "# Special Thanks\n\n"
+        " * <cb>Mat</c>\n"
+        " * <co>Camila</c>\n"
+        " * <cp>Brittank88</c>\n"
+        " * <cr>TWICE - Scientist MV</c> & <cr>TWICE - What is Love? MV</c>\n"
+        " * <cy>RobTop</c>\n"
+        " * [And you!](https://www.youtube.com/watch?v=4TnAKurylA8)\n";
+
+    auto textArea = MDTextArea::create(specialThanks, ccp(250, 170));
+    m_mainLayer->addChildAtPosition(textArea, Anchor::Center);
+
+    this->addCorners(Corner::Gold, Corner::Gold);
+
+    return true;
+}
+
+SpecialThanksPopup* SpecialThanksPopup::create() {
+    auto ret = new SpecialThanksPopup();
+    if (ret && ret->initAnchored(280, 210, "GJ_square01.png")) {
         ret->autorelease();
         return ret;
     }
