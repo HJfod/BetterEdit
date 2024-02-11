@@ -190,7 +190,7 @@ void AboutBEPopup::onSupport(CCObject*) {
 
 void AboutBEPopup::onSuggestFeature(CCObject*) {
     createQuickPopup(
-        "Report a Bug",
+        "Suggest a Feature",
         "If you have an idea for a new BetterEdit feature, please open an "
         "Issue on the <cy>Github</c> with the <cp>Suggestion</c> label!\n\n"
         "Note that you need a <cb>Github Account</c> to post Issues.",
