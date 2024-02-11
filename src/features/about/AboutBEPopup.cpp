@@ -1,4 +1,5 @@
 #include "AboutBEPopup.hpp"
+#include "ChangelogPopup.hpp"
 #include <Geode/ui/GeodeUI.hpp>
 
 struct Dev {
@@ -39,22 +40,9 @@ bool AboutBEPopup::setup() {
     m_noElasticity = true;
 
     this->setTitle("About BetterEdit");
+    this->addCorners(Corner::Blue, Corner::Gold);
 
-    auto cornerBL = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
-    m_mainLayer->addChildAtPosition(cornerBL, Anchor::BottomLeft, ccp(25, 25));
-
-    auto cornerBR = CCSprite::createWithSpriteFrameName("dailyLevelCorner_001.png");
-    cornerBR->setFlipX(true);
-    m_mainLayer->addChildAtPosition(cornerBR, Anchor::BottomRight, ccp(-25, 25));
-
-    auto cornerTL = CCSprite::createWithSpriteFrameName("rewardCorner_001.png");
-    cornerTL->setFlipY(true);
-    m_mainLayer->addChildAtPosition(cornerTL, Anchor::TopLeft, ccp(25, -25));
-
-    auto cornerTR = CCSprite::createWithSpriteFrameName("rewardCorner_001.png");
-    cornerTR->setFlipY(true);
-    cornerTR->setFlipX(true);
-    m_mainLayer->addChildAtPosition(cornerTR, Anchor::TopRight, ccp(-25, -25));
+    // main dev
 
     auto developedBy = CCLabelBMFont::create("Developed by", "goldFont.fnt");
     developedBy->setScale(.7f);
@@ -70,6 +58,8 @@ bool AboutBEPopup::setup() {
         }
     }.create(this, true);
     m_mainLayer->addChildAtPosition(hjfod, Anchor::Center, ccp(0, 55));
+
+    // other devs
 
     auto credits = CCLabelBMFont::create("Credits", "goldFont.fnt");
     credits->setScale(.6f);
@@ -119,33 +109,28 @@ bool AboutBEPopup::setup() {
     );
     m_mainLayer->addChildAtPosition(devs, Anchor::Center, ccp(0, -20));
 
+    // actions
+
     auto menu = CCMenu::create();
     menu->setContentSize({ 300.f, 100.f });
     menu->ignoreAnchorPointForPosition(false);
 
-    auto reportBugSpr = ButtonSprite::create("Report a Bug", "goldFont.fnt", "GJ_button_05.png");
-    reportBugSpr->setScale(.55f);
-    auto reportBugBtn = CCMenuItemSpriteExtra::create(
-        reportBugSpr, this, menu_selector(AboutBEPopup::onReportBug)
-    );
-    menu->addChild(reportBugBtn);
-
-    auto suggestSpr = ButtonSprite::create("Suggest a Feature", "goldFont.fnt", "GJ_button_05.png");
-    suggestSpr->setScale(.55f);
-    auto suggestBtn = CCMenuItemSpriteExtra::create(
-        suggestSpr, this, menu_selector(AboutBEPopup::onSuggestFeature)
-    );
-    menu->addChild(suggestBtn);
-
-    auto supportSpr = ButtonSprite::create("Support BE", "goldFont.fnt", "GJ_button_05.png");
-    supportSpr->setScale(.55f);
-    auto supportBtn = CCMenuItemSpriteExtra::create(
-        supportSpr, this, menu_selector(AboutBEPopup::onSupport)
-    );
-    menu->addChild(supportBtn);
+    for (auto pair : std::initializer_list<std::pair<const char*, SEL_MenuHandler>> {
+        { "Report a Bug", menu_selector(AboutBEPopup::onReportBug) },
+        { "Suggest a Feature", menu_selector(AboutBEPopup::onSuggestFeature) },
+        { "Changelog", menu_selector(AboutBEPopup::onChangelog) },
+        { "Support BE", menu_selector(AboutBEPopup::onSupport) },
+    }) {
+        auto spr = ButtonSprite::create(pair.first, "goldFont.fnt", "GJ_button_05.png");
+        spr->setScale(.55f);
+        auto btn = CCMenuItemSpriteExtra::create(spr, this, pair.second);
+        menu->addChild(btn);
+    }
 
     menu->setLayout(RowLayout::create()->setGrowCrossAxis(true));
     m_mainLayer->addChildAtPosition(menu, Anchor::Center, ccp(0, -70));
+
+    // BE links
 
     auto linksMenu = CCMenu::create();
     linksMenu->setAnchorPoint({ .5f, .0f });
@@ -169,12 +154,12 @@ bool AboutBEPopup::setup() {
     linksMenu->setLayout(RowLayout::create());
     m_mainLayer->addChildAtPosition(linksMenu, Anchor::Bottom, ccp(0, 7));
 
-    auto spr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn02_001.png");
-    auto btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(AboutBEPopup::onSettings)
+    auto optionsBtn = CCMenuItemSpriteExtra::create(
+        CCSprite::createWithSpriteFrameName("GJ_optionsBtn02_001.png"),
+        this, menu_selector(AboutBEPopup::onSettings)
     );
-    btn->setID("settings"_spr);
-    m_buttonMenu->addChildAtPosition(btn, Anchor::TopRight, ccp(-3, -3));
+    optionsBtn->setID("settings"_spr);
+    m_buttonMenu->addChildAtPosition(optionsBtn, Anchor::TopRight, ccp(-3, -3));
 
     return true;
 }
@@ -233,6 +218,10 @@ void AboutBEPopup::onReportBug(CCObject*) {
             }
         }
     );
+}
+
+void AboutBEPopup::onChangelog(CCObject*) {
+    ChangelogPopup::create()->show();
 }
 
 void AboutBEPopup::onSettings(CCObject*) {

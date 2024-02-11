@@ -1,11 +1,11 @@
 #pragma once
 
 #include <Geode/DefaultInclude.hpp>
-#include <Geode/ui/Popup.hpp>
+#include <utils/PopupWithCorners.hpp>
 
 using namespace geode::prelude;
 
-class AboutBEPopup : public Popup<> {
+class AboutBEPopup : public PopupWithCorners<> {
 protected:
     bool setup() override;
 
@@ -16,5 +16,6 @@ public:
     void onReportBug(CCObject*);
     void onSuggestFeature(CCObject*);
     void onSupport(CCObject*);
+    void onChangelog(CCObject*);
     void onDevLink(CCObject* sender);
 };
