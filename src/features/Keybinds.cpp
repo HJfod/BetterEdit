@@ -155,7 +155,7 @@ $execute {
     BindManager::get()->registerBindable(BindableAction(
         "show-scale"_spr,
         "Show Scale Control",
-        "",
+        "Show the object scaling controls",
         {},
         Category::EDITOR_UI
     ));
