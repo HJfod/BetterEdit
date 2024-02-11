@@ -1,9 +1,9 @@
 ---
 name: Suggestion
-about: Suggest a new feature to be added
+about: Suggest a new feature to be added.
 title: ''
 labels: suggestion
-assignees: HJfod
+assignees: HJFod
 
 ---
 
