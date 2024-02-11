@@ -7,10 +7,13 @@ assignees: HJfod
 
 ---
 
-**What were you doing when the crash happened?**
+## Description
+*What were you doing when the crash happened?*
+
 For example:
  - Were you placing objects?
  - Were you editing colors?
  - Were you playtesting?
 
-**Please attach the latest crash report from `<GD folder>/geode/crashlogs`**
+## Crash Log
+*Please attach the latest crash log from `…/Geometry Dash/geode/crashlogs`*
