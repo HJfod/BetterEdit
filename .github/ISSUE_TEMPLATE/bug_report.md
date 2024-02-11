@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Use the Crash report form to report crashes, and the Suggestion form to suggest new features!
+about: Use the Crash Report form to report crashes, and the Suggestion form to suggest new features!
 title: ''
 labels: bug
 assignees: HJFod
