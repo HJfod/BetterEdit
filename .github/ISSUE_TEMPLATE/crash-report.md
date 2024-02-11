@@ -27,5 +27,9 @@ For example:
  - Were you editing colors?
  - Were you playtesting?
 
+…
+
 ## Crash Log
 *Please attach the latest crash log from `…/Geometry Dash/geode/crashlogs`*
+
+…
