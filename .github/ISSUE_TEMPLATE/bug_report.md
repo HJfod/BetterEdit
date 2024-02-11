@@ -22,8 +22,12 @@ Report a bug in the mod &mdash; <i>Use the Crash report form to report crashes, 
 ## Bug Description
 <i>A clear and concise description of what the bug is - is something not working as expected? Does something look off? Is the mod conflicting with another mod?</i>
 
+…
+
 ## Screenshots
 <i>If you have screenshots/videos, please include them!</i>
+
+…
 
 ## Platform
  * [ ] Windows
