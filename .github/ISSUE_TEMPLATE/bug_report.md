@@ -1,3 +1,12 @@
+---
+name: Bug Report
+about: Use the Crash Report form to report crashes, and the Suggestion form to suggest new features!
+title: ''
+labels: bug
+assignees: HJfod
+
+---
+
 <h1>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/HJfod/BetterEdit/assets/24266948/00ac7efc-08a3-4163-b88f-1eabd0307139">
@@ -9,29 +18,19 @@
 </h1>
 Report a bug in the mod &mdash; <i>Use the Crash report form to report crashes, and the Suggestion form to suggest new features!</i>
 <hr />
-<div align="center">
-  <table>
-    <tr>
-      <th align="center">Description</th>
-      <th align="center">Labels</th>
-      <th align="center">Assignees</th>
-    </tr>
-    <tr>
-      <td align="center">Report a bug in the mod.<br /><br /><i>Use the Crash report form to report crashes, and the Suggestion form to suggest new features!</i></td>
-      <td align="center">Bug</td>
-      <td align="center">HJFod</td>
-    </tr>
-  </table>
-</div>
-<hr />
 
 ## Bug Description
 <i>A clear and concise description of what the bug is - is something not working as expected? Does something look off? Is the mod conflicting with another mod?</i>
 
+… <!-- Replace this line with your own writing! -->
+
 ## Screenshots
 <i>If you have screenshots/videos, please include them!</i>
 
+… <!-- Replace this line with your own writing! -->
+
 ## Platform
+<!-- Please select one option only! -->
  * [ ] Windows
  * [ ] Mac
  * [ ] Android (32-bit)

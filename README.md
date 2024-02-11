@@ -64,7 +64,7 @@
     <tr>
       <td align="center">Crash</td>
       <td align="center"><a href=".github/ISSUE_TEMPLATE
-/crash-report.md">Crash Report Template</a></td>
+/crash_report.md">Crash Report Template</a></td>
     </tr>
     <tr>
       <td align="center">Feature Suggestion</td>
