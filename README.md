@@ -1,6 +1,6 @@
 <h1>
   <picture>
-    <img alt="BetterEdit Logo" width="100" align="left" src="https://raw.githubusercontent.com/HJfod/BetterEdit/v6/logo.png">
+    <img alt="BetterEdit Logo" width="100" align="left" src="logo.png">
   </picture>
   BetterEdit | Heavily WIP!
   <br />
@@ -58,15 +58,18 @@
     </tr>
     <tr>
       <td align="center">Bug</td>
-      <td align="center">Bug Report Template</td>
+      <td align="center"><a href=".github/ISSUE_TEMPLATE
+/bug_report.md">Bug Report Template</a></td>
     </tr>
     <tr>
       <td align="center">Crash</td>
-      <td align="center">Crash Report Template</td>
+      <td align="center"><a href=".github/ISSUE_TEMPLATE
+/crash-report.md">Crash Report Template</a></td>
     </tr>
     <tr>
       <td align="center">Feature Suggestion</td>
-      <td align="center">Suggestions Template</td>
+      <td align="center"><a href=".github/ISSUE_TEMPLATE
+/suggestion.md">Suggestions Template</a></td>
     </tr>
   </table>
   <strong>Please note that 'junk' issues will be ignored/closed without warning!</strong>
