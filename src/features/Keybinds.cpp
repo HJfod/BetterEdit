@@ -58,30 +58,30 @@ struct $modify(EditorUI) {
         this->defineKeybind("move-obj-half-down"_spr, [this] {
             this->moveObjectCall(EditCommand::HalfDown);
         });
-        this->defineKeybind("move-obj-quarter-left"_spr, [this] {
-            this->moveObjectCall(EditCommandExt::QuarterLeft);
-        });
-        this->defineKeybind("move-obj-quarter-right"_spr, [this] {
-            this->moveObjectCall(EditCommandExt::QuarterRight);
-        });
-        this->defineKeybind("move-obj-quarter-up"_spr, [this] {
-            this->moveObjectCall(EditCommandExt::QuarterUp);
-        });
-        this->defineKeybind("move-obj-quarter-down"_spr, [this] {
-            this->moveObjectCall(EditCommandExt::QuarterDown);
-        });
-        this->defineKeybind("move-obj-eighth-left"_spr, [this] {
-            this->moveObjectCall(EditCommandExt::EighthLeft);
-        });
-        this->defineKeybind("move-obj-eighth-right"_spr, [this] {
-            this->moveObjectCall(EditCommandExt::EighthRight);
-        });
-        this->defineKeybind("move-obj-eighth-up"_spr, [this] {
-            this->moveObjectCall(EditCommandExt::EighthUp);
-        });
-        this->defineKeybind("move-obj-eighth-down"_spr, [this] {
-            this->moveObjectCall(EditCommandExt::EighthDown);
-        });
+        // this->defineKeybind("move-obj-quarter-left"_spr, [this] {
+        //     this->moveObjectCall(EditCommandExt::QuarterLeft);
+        // });
+        // this->defineKeybind("move-obj-quarter-right"_spr, [this] {
+        //     this->moveObjectCall(EditCommandExt::QuarterRight);
+        // });
+        // this->defineKeybind("move-obj-quarter-up"_spr, [this] {
+        //     this->moveObjectCall(EditCommandExt::QuarterUp);
+        // });
+        // this->defineKeybind("move-obj-quarter-down"_spr, [this] {
+        //     this->moveObjectCall(EditCommandExt::QuarterDown);
+        // });
+        // this->defineKeybind("move-obj-eighth-left"_spr, [this] {
+        //     this->moveObjectCall(EditCommandExt::EighthLeft);
+        // });
+        // this->defineKeybind("move-obj-eighth-right"_spr, [this] {
+        //     this->moveObjectCall(EditCommandExt::EighthRight);
+        // });
+        // this->defineKeybind("move-obj-eighth-up"_spr, [this] {
+        //     this->moveObjectCall(EditCommandExt::EighthUp);
+        // });
+        // this->defineKeybind("move-obj-eighth-down"_spr, [this] {
+        //     this->moveObjectCall(EditCommandExt::EighthDown);
+        // });
         this->defineKeybind("move-obj-big-left"_spr, [this] {
             this->moveObjectCall(EditCommand::BigLeft);
         });
@@ -203,62 +203,62 @@ $execute {
         { Keybind::create(KEY_S, Modifier::Control | Modifier::Alt) },
         Category::EDITOR_MOVE, true
     });
-    BindManager::get()->registerBindable({
-        "move-obj-quarter-left"_spr,
-        "Move Object Quarter Left",
-        "Move Selected Object(s) quarter of a Block left (7.5 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-quarter-right"_spr,
-        "Move Object Quarter Right",
-        "Move Selected Object(s) quarter of a Block right (7.5 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-quarter-up"_spr,
-        "Move Object Quarter Up",
-        "Move Selected Object(s) quarter of a Block up (7.5 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-quarter-down"_spr,
-        "Move Object Quarter Down",
-        "Move Selected Object(s) quarter of a Block down (7.5 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-eighth-left"_spr,
-        "Move Object Eighth Left",
-        "Move Selected Object(s) eighth of a Block left (3.75 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-eighth-right"_spr,
-        "Move Object Eighth Right",
-        "Move Selected Object(s) eighth of a Block right (3.75 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-eighth-up"_spr,
-        "Move Object Eighth Up",
-        "Move Selected Object(s) eighth of a Block up (3.75 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-eighth-down"_spr,
-        "Move Object Eighth Down",
-        "Move Selected Object(s) eighth of a Block down (3.75 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
+    // BindManager::get()->registerBindable({
+    //     "move-obj-quarter-left"_spr,
+    //     "Move Object Quarter Left",
+    //     "Move Selected Object(s) quarter of a Block left (7.5 Units)",
+    //     {},
+    //     Category::EDITOR_MOVE, true
+    // });
+    // BindManager::get()->registerBindable({
+    //     "move-obj-quarter-right"_spr,
+    //     "Move Object Quarter Right",
+    //     "Move Selected Object(s) quarter of a Block right (7.5 Units)",
+    //     {},
+    //     Category::EDITOR_MOVE, true
+    // });
+    // BindManager::get()->registerBindable({
+    //     "move-obj-quarter-up"_spr,
+    //     "Move Object Quarter Up",
+    //     "Move Selected Object(s) quarter of a Block up (7.5 Units)",
+    //     {},
+    //     Category::EDITOR_MOVE, true
+    // });
+    // BindManager::get()->registerBindable({
+    //     "move-obj-quarter-down"_spr,
+    //     "Move Object Quarter Down",
+    //     "Move Selected Object(s) quarter of a Block down (7.5 Units)",
+    //     {},
+    //     Category::EDITOR_MOVE, true
+    // });
+    // BindManager::get()->registerBindable({
+    //     "move-obj-eighth-left"_spr,
+    //     "Move Object Eighth Left",
+    //     "Move Selected Object(s) eighth of a Block left (3.75 Units)",
+    //     {},
+    //     Category::EDITOR_MOVE, true
+    // });
+    // BindManager::get()->registerBindable({
+    //     "move-obj-eighth-right"_spr,
+    //     "Move Object Eighth Right",
+    //     "Move Selected Object(s) eighth of a Block right (3.75 Units)",
+    //     {},
+    //     Category::EDITOR_MOVE, true
+    // });
+    // BindManager::get()->registerBindable({
+    //     "move-obj-eighth-up"_spr,
+    //     "Move Object Eighth Up",
+    //     "Move Selected Object(s) eighth of a Block up (3.75 Units)",
+    //     {},
+    //     Category::EDITOR_MOVE, true
+    // });
+    // BindManager::get()->registerBindable({
+    //     "move-obj-eighth-down"_spr,
+    //     "Move Object Eighth Down",
+    //     "Move Selected Object(s) eighth of a Block down (3.75 Units)",
+    //     {},
+    //     Category::EDITOR_MOVE, true
+    // });
     BindManager::get()->registerBindable({
         "move-obj-big-left"_spr,
         "Move Object Big Left",

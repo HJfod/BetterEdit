@@ -1,4 +1,8 @@
 
+## v6.1.1
+
+ * Temporarily remove quarter & eighth block move keybinds as Geode is bugged and adding them caused moving objects to not work at all :/
+
 ## v6.1.0
 
  * Add in-game changelog popup
