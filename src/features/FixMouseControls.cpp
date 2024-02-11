@@ -13,6 +13,11 @@ using namespace geode::prelude;
 class $modify(EditorUI) {
     $override
     virtual void scrollWheel(float y, float x) {
+        // Disable scrolling during playtest
+        if (m_editorLayer->m_playbackMode == PlaybackMode::Playing) {
+            return;
+        }
+
         // this is used a lot so store it in a variable
         auto objLayer = m_editorLayer->m_objectLayer;
 

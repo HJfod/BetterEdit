@@ -19,7 +19,7 @@ class $modify(EditorUI) {
         if (!Mod::get()->getSettingValue<bool>("pinch-to-zoom")) {
             return EditorUI::ccTouchBegan(touch, event);
         }
-        if (m_fields->m_touches.size() == 1) {
+        if (m_editorLayer->m_playbackMode != PlaybackMode::Playing && m_fields->m_touches.size() == 1) {
             auto firstTouch = *m_fields->m_touches.begin();
 
             auto firstLoc = firstTouch->getLocation();
@@ -33,7 +33,8 @@ class $modify(EditorUI) {
 
             m_fields->m_touches.insert(touch);
             return true;
-        } else if (EditorUI::ccTouchBegan(touch, event)) {
+        }
+        else if (EditorUI::ccTouchBegan(touch, event)) {
             m_fields->m_touches.insert(touch);
             return true;
         }
@@ -45,7 +46,7 @@ class $modify(EditorUI) {
         if (!Mod::get()->getSettingValue<bool>("pinch-to-zoom")) {
             return EditorUI::ccTouchMoved(touch, event);
         }
-        if (m_fields->m_touches.size() == 2) {
+        if (m_editorLayer->m_playbackMode != PlaybackMode::Playing && m_fields->m_touches.size() == 2) {
             auto objLayer = m_editorLayer->m_objectLayer;
 
             auto it = m_fields->m_touches.begin();
@@ -65,7 +66,8 @@ class $modify(EditorUI) {
             if (std::isnan(zoom) || std::isinf(zoom)) {
                 this->updateZoom(1.f);
                 zoom = 1.f;
-            } else {
+            }
+            else {
                 this->updateZoom(zoom);
             }
 
