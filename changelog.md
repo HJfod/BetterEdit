@@ -2,6 +2,7 @@
 ## v6.1.0
 
  * Add in-game changelog popup
+ * Add quarter & eighth block move keybinds
  * Fix crash when using the `Show Scale Control` keybind
  * Fix the layer input not being hidden during playtest
 
