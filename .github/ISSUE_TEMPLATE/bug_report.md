@@ -12,12 +12,16 @@ Report a bug in the mod &mdash; <i>Use the Crash report form to report crashes, 
 <div align="center">
   <table>
     <tr>
-      <th align="center">Description</th>
+      <th align="center">Name</th>
+      <th align="center">About</th>
+      <th align="center">Title</th>
       <th align="center">Labels</th>
       <th align="center">Assignees</th>
     </tr>
     <tr>
-      <td align="center">Report a bug in the mod.<br /><br /><i>Use the Crash report form to report crashes, and the Suggestion form to suggest new features!</i></td>
+      <td align="center">Bug Report</td>
+      <td align="center">Use the Crash report form to report crashes, and the Suggestion form to suggest new features!</td>
+      <td align="center">''</td>
       <td align="center">Bug</td>
       <td align="center">HJFod</td>
     </tr>
