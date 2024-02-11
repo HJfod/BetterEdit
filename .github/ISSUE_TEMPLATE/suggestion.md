@@ -22,10 +22,10 @@ Suggest a new feature to be added.
 ## Feature Description
 
 ### How should it work?
-…
+… <!-- Replace this line with your own writing! -->
 
 ### What does it look/sound/act like?
-…
+… <!-- Replace this line with your own writing! -->
 
 ### What is its purpose?
-…
+… <!-- Replace this line with your own writing! -->
