@@ -9,25 +9,6 @@
 </h1>
 Report a bug in the mod &mdash; <i>Use the Crash report form to report crashes, and the Suggestion form to suggest new features!</i>
 <hr />
-<div align="center">
-  <table>
-    <tr>
-      <th align="center"><code>name</code></th>
-      <th align="center"><code>about</code></th>
-      <th align="center"><code>title</code></th>
-      <th align="center"><code>labels</code></th>
-      <th align="center"><code>assignees</code></th>
-    </tr>
-    <tr>
-      <td align="center">Bug Report</td>
-      <td align="center">Use the Crash report form to report crashes, and the Suggestion form to suggest new features!</td>
-      <td align="center">''</td>
-      <td align="center">Bug</td>
-      <td align="center">HJFod</td>
-    </tr>
-  </table>
-</div>
-<hr />
 
 ## Bug Description
 <i>A clear and concise description of what the bug is - is something not working as expected? Does something look off? Is the mod conflicting with another mod?</i>
@@ -41,3 +22,16 @@ Report a bug in the mod &mdash; <i>Use the Crash report form to report crashes, 
  * [ ] Android (32-bit)
  * [ ] Android (64-bit)
  * [ ] Linux
+
+<hr />
+
+<details>
+<summary><i>Issue Template Fields (Ignore)</i></summary>
+
+name: Bug Report
+description: Use the Crash report form to report crashes, and the Suggestion form to suggest new features!
+title: ''
+labels: bug
+assignees: HJFod
+
+</details>
