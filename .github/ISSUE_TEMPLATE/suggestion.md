@@ -7,5 +7,5 @@ assignees: HJfod
 
 ---
 
-**Feature description**
-How should it work? What does it look like? What is it used for?
+## Feature description
+*How should it work? What does it look like? What is it used for?*
