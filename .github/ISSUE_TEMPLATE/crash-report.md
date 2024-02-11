@@ -1,6 +1,6 @@
 ---
-name: Crash report
-about: Report a crash (mod closes unexpectedly)
+name: Crash Report
+about: Report a crash (I.e., when the mod/game closes unexpectedly).
 title: ''
 labels: crash
 assignees: HJfod
