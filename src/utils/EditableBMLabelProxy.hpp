@@ -2,6 +2,8 @@
 
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/utils/cocos.hpp>
+#include <Geode/ui/InputNode.hpp>
+#include <Geode/binding/TextInputDelegate.hpp>
 
 using namespace geode::prelude;
 

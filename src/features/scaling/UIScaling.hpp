@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Geode/DefaultInclude.hpp>
+#include <Geode/utils/cocos.hpp>
 
 using namespace geode::prelude;
 

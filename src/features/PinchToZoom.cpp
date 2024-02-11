@@ -1,5 +1,7 @@
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/loader/Mod.hpp>
+#include <Geode/utils/cocos.hpp>
 #include <numbers>
 
 using namespace geode::prelude;

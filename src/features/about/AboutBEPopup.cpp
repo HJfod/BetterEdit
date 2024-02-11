@@ -1,6 +1,8 @@
 #include "AboutBEPopup.hpp"
 #include "ChangelogPopup.hpp"
 #include <Geode/ui/GeodeUI.hpp>
+#include <Geode/ui/MDTextArea.hpp>
+#include <Geode/binding/ButtonSprite.hpp>
 
 struct Dev {
     const char* name;

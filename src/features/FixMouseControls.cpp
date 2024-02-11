@@ -1,6 +1,8 @@
 
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/loader/Mod.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/utils/cocos.hpp>
 #include <numbers>
 
 #undef min

@@ -1,4 +1,6 @@
 #include "ChangelogPopup.hpp"
+#include <Geode/utils/string.hpp>
+#include <Geode/ui/MDTextArea.hpp>
 
 static std::string parseChangelog(std::optional<VersionInfo> const& since) {
     auto changelog = Mod::get()->getMetadata().getChangelog().value_or(std::string());

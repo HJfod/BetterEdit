@@ -9,6 +9,7 @@
 #include <Geode/binding/CCTextInputNode.hpp>
 #include <Geode/binding/GJSpecialColorSelect.hpp>
 #include <Geode/utils/cocos.hpp>
+#include <Geode/utils/ranges.hpp>
 
 using namespace geode::prelude;
 

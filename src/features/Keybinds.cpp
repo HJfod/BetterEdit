@@ -6,6 +6,7 @@
 #include <geode.custom-keybinds/include/Keybinds.hpp>
 #include <Geode/modify/EditorUI.hpp>
 #include <utils/EditCommandExt.hpp>
+#include <Geode/binding/EditButtonBar.hpp>
 
 using namespace geode::prelude;
 using namespace keybinds;

@@ -2,6 +2,9 @@
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/modify/CCTextInputNode.hpp>
 #include <utils/EditableBMLabelProxy.hpp>
+#include <Geode/binding/CCMenuItemSpriteExtra.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/binding/GameManager.hpp>
 
 using namespace geode::prelude;
 
@@ -83,7 +86,7 @@ class $modify(EditorUI) {
         EditorUI::showUI(toggle);
 
         // playtest no ui option
-        if(!GameManager::sharedState()->getGameVariable("0046")) {
+        if (!GameManager::sharedState()->getGameVariable("0046")) {
             toggle = true;
         }
 

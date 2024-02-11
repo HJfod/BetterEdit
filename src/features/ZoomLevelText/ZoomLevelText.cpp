@@ -1,4 +1,5 @@
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
 #include "ZoomLevelText.hpp"
 
 void showZoomText(EditorUI* ui) {

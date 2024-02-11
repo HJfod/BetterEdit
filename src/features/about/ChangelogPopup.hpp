@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utils/PopupWithCorners.hpp>
+#include <Geode/utils/VersionInfo.hpp>
 
 using namespace geode::prelude;
 

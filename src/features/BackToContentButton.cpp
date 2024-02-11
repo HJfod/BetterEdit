@@ -1,5 +1,9 @@
 
 #include <Geode/modify/EditorPauseLayer.hpp>
+#include <Geode/binding/ButtonSprite.hpp>
+#include <Geode/binding/CCMenuItemSpriteExtra.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/binding/EditorUI.hpp>
 
 #undef min
 #undef max
