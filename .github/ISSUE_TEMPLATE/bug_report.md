@@ -1,3 +1,12 @@
+---
+name: Bug Report
+about: Use the Crash report form to report crashes, and the Suggestion form to suggest new features!
+title: ''
+labels: bug
+assignees: HJFod
+
+---
+
 <h1>
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/HJfod/BetterEdit/assets/24266948/00ac7efc-08a3-4163-b88f-1eabd0307139">
@@ -22,16 +31,3 @@ Report a bug in the mod &mdash; <i>Use the Crash report form to report crashes, 
  * [ ] Android (32-bit)
  * [ ] Android (64-bit)
  * [ ] Linux
-
-<hr />
-
-<details>
-<summary><i>Issue Template Fields (Ignore)</i></summary>
-
-name: Bug Report
-description: Use the Crash report form to report crashes, and the Suggestion form to suggest new features!
-title: ''
-labels: bug
-assignees: HJFod
-
-</details>
