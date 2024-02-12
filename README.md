@@ -34,9 +34,10 @@
   There are multiple ways to install BetterEdit, ordered by level of simplicity:
   <br /><br />
   <ol>
-    <li>Search for and install BetterEdit via <a href="https://github.com/geode-sdk/geode">Geode</a>'s in-game mod manager.</li>
-    <li>Navigate to this repository's <a href="https://github.com/HJfod/BetterEdit/releases/tag/v6.0.0">releases page</a> and manually download <code>hjfod.betteredit.geode</code> into <a href="https://github.com/geode-sdk/geode">Geode</a>'s mods folder (<i>located @ <code>&hellip;\Geometry Dash\geode\mods</code></i>).</li>
+    <li>Search for and install BetterEdit (and CustomKeybinds!) via <a href="https://github.com/geode-sdk/geode">Geode</a>'s in-game mod manager.</li>
+    <li>Navigate to this repository's <a href="https://github.com/HJfod/BetterEdit/releases/latest">releases page</a> and manually download <code>hjfod.betteredit.geode</code> into <a href="https://github.com/geode-sdk/geode">Geode</a>'s mods folder (<i>located @ <code>&hellip;\Geometry Dash\geode\mods</code></i>). Do the same for <a href="https://github.com/geode-sdk/CustomKeybinds/releases/latest">CustomKeybinds</a>.</li>
   </ol>
+  <strong>Please note that you must have at minimum <a href="https://github.com/geode-sdk/geode/releases/tag/v2.0.0-beta.17">Geode v2.0.0-beta.17</a> installed &mdash; you may need to manually use the installer again due to broken auto-updates on previous SDK versions.</strong>
 </span>
 
 <h2>

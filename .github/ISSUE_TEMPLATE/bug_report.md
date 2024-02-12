@@ -22,17 +22,17 @@ Report a bug in the mod &mdash; <i>Use the Crash report form to report crashes, 
 ## Bug Description
 <i>A clear and concise description of what the bug is - is something not working as expected? Does something look off? Is the mod conflicting with another mod?</i>
 
-… <!-- Replace this line with your own writing! -->
+… <!-- Replace this line with your writing! -->
 
 ## Screenshots
 <i>If you have screenshots/videos, please include them!</i>
 
-… <!-- Replace this line with your own writing! -->
+… <!-- Replace this line with your writing! -->
 
 ## Platform
-<!-- Please select one option only! -->
- * [ ] Windows
- * [ ] Mac
- * [ ] Android (32-bit)
- * [ ] Android (64-bit)
- * [ ] Linux
+<!-- Please select one option only, by placing an 'x' within one of the square bracket pairs! -->
+> * [ ] Windows
+> * [ ] Mac
+> * [ ] Android (32-bit)
+> * [ ] Android (64-bit)
+> * [ ] Linux
