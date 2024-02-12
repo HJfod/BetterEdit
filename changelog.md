@@ -3,6 +3,7 @@
 
  * Bring back quarter & eighth block move keybinds as the root issue was fixed in Geode Beta 18
  * Add automatic update checking on startup
+ * Add ability to copy Player Color channels in Copy Color (by [Alphalaneous](https://github.com/Alphalaneous))
  * Fix visual issues with layer locking
 
 ## v6.1.1

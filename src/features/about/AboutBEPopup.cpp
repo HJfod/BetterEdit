@@ -233,10 +233,21 @@ AboutBEPopup* AboutBEPopup::create() {
 
 bool SpecialThanksPopup::setup() {
     auto specialThanks = 
-        "# Special Thanks\n\n"
+        "# Donators\n\n"
+        " * Alphalaneous\n"
+        " * KontrollFreek\n"
+        " * Aikoyori\n"
+        " * Waaffel\n"
+        " * Rayden\n"
+        " * TDP9\n"
+        " * Olly\n"
+        " * SeeBeyond\n"
+        " * Brittank88\n"
+        "# Programming help\n\n"
         " * <cb>Mat</c>\n"
         " * <co>Camila</c>\n"
         " * <cp>Brittank88</c>\n"
+        " * <ca>Alphalaneous</c>\n"
         " * <cr>TWICE - Scientist MV</c> & <cr>TWICE - What is Love? MV</c>\n"
         " * <cy>RobTop</c>\n"
         " * [And you!](https://www.youtube.com/watch?v=4TnAKurylA8)\n";
