@@ -27,9 +27,9 @@ For example:
  - Were you editing colors?
  - Were you playtesting?
 
-… <!-- Replace this line with your own writing! -->
+… <!-- Replace this line with your writing! -->
 
 ## Crash Log
 *Please attach the latest crash log from `…/Geometry Dash/geode/crashlogs`*
 
-… <!-- Replace this line with your own writing! -->
+… <!-- Replace this line with your writing! -->
