@@ -1,14 +1,14 @@
 
-#include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/LevelEditorLayer.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 #include "ChangelogPopup.hpp"
 
 using namespace geode::prelude;
 
-class $modify(EditorUI) {
+class $modify(LevelEditorLayer) {
     $override
-    bool init(LevelEditorLayer* lel) {
-        if (!EditorUI::init(lel))
+    bool init(GJGameLevel* level, bool idk) {
+        if (!LevelEditorLayer::init(level, idk))
             return false;
 
         if (auto available = Mod::get()->hasAvailableUpdate()) {

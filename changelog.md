@@ -5,6 +5,7 @@
  * Add automatic update checking on startup
  * Add ability to copy Player Color channels in Copy Color (by [Alphalaneous](https://github.com/Alphalaneous))
  * Fix visual issues with layer locking
+ * Other small bug fixes & improvements
 
 ## v6.1.1
 
