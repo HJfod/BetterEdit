@@ -31,8 +31,8 @@ Report a bug in the mod &mdash; <i>Use the Crash report form to report crashes, 
 
 ## Platform
 <!-- Please select one option only! -->
- * [ ] Windows
- * [ ] Mac
- * [ ] Android (32-bit)
- * [ ] Android (64-bit)
- * [ ] Linux
+> * [ ] Windows
+> * [ ] Mac
+> * [ ] Android (32-bit)
+> * [ ] Android (64-bit)
+> * [ ] Linux
