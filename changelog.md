@@ -1,4 +1,9 @@
 
+## v6.2.0
+
+ * Bring back quarter & eighth block move keybinds as the root issue was fixed in Geode Beta 18
+ * Add automatic update checking on startup
+
 ## v6.1.1
 
  * Temporarily remove quarter & eighth block move keybinds as Geode is bugged and adding them caused moving objects to not work at all :/
