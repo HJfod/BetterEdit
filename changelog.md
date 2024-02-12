@@ -3,6 +3,7 @@
 
  * Bring back quarter & eighth block move keybinds as the root issue was fixed in Geode Beta 18
  * Add automatic update checking on startup
+ * Fix visual issues with layer locking
 
 ## v6.1.1
 

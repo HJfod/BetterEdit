@@ -50,29 +50,30 @@ class $modify(EditorUI) {
         auto lockBtn = static_cast<CCMenuItemSpriteExtra*>(
             this->getChildByID("layer-menu")->getChildByID("lock-layer"_spr)
         );
-        const char* sprite = "GJ_lock_001.png";
-        auto layerLocked = m_editorLayer->m_currentLayer >= 0 ?
+        const char* sprite = "GJ_lock_open_001.png";
+        auto onAll = m_editorLayer->m_currentLayer == -1;
+        auto layerLocked = !onAll ?
             m_editorLayer->isLayerLocked(m_editorLayer->m_currentLayer) : 
             false;
 
-        if (m_editorLayer->m_currentLayer == -1) {
+        if (onAll) {
             sprite = "GJ_lockGray_001.png";
         }
         else if (layerLocked) {
-            sprite = "GJ_lock_open_001.png";
+            sprite = "GJ_lock_001.png";
         }
 
         auto spr = CCSprite::createWithSpriteFrameName(sprite);
-        spr->setScale(.7f);
+        spr->setScale((layerLocked || onAll) ? .68f : .7f);
         spr->setPosition(lockBtn->getNormalImage()->getPosition());
         if (m_editorLayer->m_currentLayer == -1) {
             spr->setOpacity(120);
         }
         lockBtn->setNormalImage(spr);
-        spr->setAnchorPoint(layerLocked ? ccp(.52f, .2f) : ccp(.5f, .5f));
+        spr->setAnchorPoint((layerLocked || onAll) ? ccp(.47f, .48f) : ccp(.5f, .2f));
 
         lockBtn->setVisible(m_editorLayer->m_layerLockingEnabled);
-        m_currentLayerLabel->setColor(layerLocked ? ccc3(255, 205, 55) : ccc3(255, 255, 255));
+        m_currentLayerLabel->setColor(layerLocked ? ccc3(255, 150, 0) : ccc3(255, 255, 255));
     }
 
     $override
@@ -91,5 +92,12 @@ class $modify(EditorUI) {
         }
 
         m_currentLayerLabel->setVisible(toggle);
+
+        auto lockBtn = static_cast<CCMenuItemSpriteExtra*>(
+            this->getChildByID("layer-menu")->getChildByID("lock-layer"_spr)
+        );
+        if (lockBtn) {
+            lockBtn->setVisible(toggle);
+        }
     }
 };
