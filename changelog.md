@@ -1,4 +1,9 @@
 
+## v6.2.1
+
+ * Fix crash on mobile when typing in layer number
+ * Fix crash when re-entering editor
+
 ## v6.2.0
 
  * Bring back quarter & eighth block move keybinds as the root issue was fixed in Geode Beta 18

@@ -19,7 +19,7 @@ class $modify(TypeInUI, EditorUI) {
         auto layerLockSpr = CCSprite::createWithSpriteFrameName("GJ_lockGray_001.png");
         layerLockSpr->setScale(.75f);
         auto layerLockBtn = CCMenuItemSpriteExtra::create(
-            layerLockSpr, this, menu_selector(TypeInUI::onLockLayerReal)
+            layerLockSpr, this, menu_selector(TypeInUI::onLockLayer)
         );
         layerLockBtn->setID("lock-layer"_spr);
         layerMenu->insertBefore(layerLockBtn, nullptr);
