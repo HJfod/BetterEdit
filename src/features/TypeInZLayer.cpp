@@ -28,9 +28,7 @@ class $modify(TypeInUI, EditorUI) {
         m_currentLayerLabel = EditableBMLabelProxy::replace(
             m_currentLayerLabel, this, 40.f, "Z",
             [this](auto str) {
-                char* err;
-                auto num = std::strtol(str.c_str(), &err, 10);
-                m_editorLayer->m_currentLayer = *err ? -1 : num;
+                m_editorLayer->m_currentLayer = numFromString<int>(str).unwrapOr(-1);
             },
             [this](auto) {
                 this->updateLockBtn();
