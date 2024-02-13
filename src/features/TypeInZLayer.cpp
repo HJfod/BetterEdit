@@ -8,7 +8,7 @@
 
 using namespace geode::prelude;
 
-class $modify(EditorUI) {
+class $modify(TypeInUI, EditorUI) {
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
             return false;
@@ -19,7 +19,7 @@ class $modify(EditorUI) {
         auto layerLockSpr = CCSprite::createWithSpriteFrameName("GJ_lockGray_001.png");
         layerLockSpr->setScale(.75f);
         auto layerLockBtn = CCMenuItemSpriteExtra::create(
-            layerLockSpr, this, menu_selector(EditorUI::onLockLayer)
+            layerLockSpr, this, menu_selector(TypeInUI::onLockLayerReal)
         );
         layerLockBtn->setID("lock-layer"_spr);
         layerMenu->insertBefore(layerLockBtn, nullptr);
@@ -28,12 +28,9 @@ class $modify(EditorUI) {
         m_currentLayerLabel = EditableBMLabelProxy::replace(
             m_currentLayerLabel, this, 40.f, "Z",
             [this](auto str) {
-                try {
-                    m_editorLayer->m_currentLayer = std::stoi(str);
-                }
-                catch(...) {
-                    m_editorLayer->m_currentLayer = -1;
-                }
+                char* err;
+                auto num = std::strtol(str.c_str(), &err, 10);
+                m_editorLayer->m_currentLayer = *err ? -1 : num;
             },
             [this](auto) {
                 this->updateLockBtn();
