@@ -10,7 +10,7 @@ using namespace geode::prelude;
 class EditableBMLabelProxy : public CCLabelBMFont, TextInputDelegate {
 protected:
     Ref<InputNode> m_input = nullptr;
-    Ref<CCNode> m_inputParent = nullptr;
+    CCNode* m_inputParent = nullptr;
     std::function<void(std::string const&)> m_onSetValue = nullptr;
     std::function<void(std::string const&)> m_onUpdate = nullptr;
     bool m_ignoreLabelUpdate = false;
