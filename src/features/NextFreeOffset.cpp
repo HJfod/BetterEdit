@@ -7,6 +7,9 @@ using namespace geode::prelude;
 struct GroupIDAllocator {
     using ValueType = short;
 
+    static constexpr short MIN_VALUE = 1;
+    static constexpr short MAX_VALUE = 9999;
+
     static void init(std::span<GameObject*> const& objs, short upTo) {
         for (short v = 0; v < (upTo - 1); v += 1) {
             auto obj = objs[v / 10];
@@ -26,12 +29,6 @@ struct GroupIDAllocator {
     static size_t getObjectCountToAllocate(short upTo) {
         // https://stackoverflow.com/questions/2745074/fast-ceiling-of-an-integer-division-in-c-c
         return upTo / 10 + (upTo % 10 != 0);
-    }
-    static short getMaxValue() {
-        return 9999;
-    }
-    static short getMinValue() {
-        return 1;
     }
 };
 

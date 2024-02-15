@@ -1,4 +1,8 @@
 
+## v6.3.0
+
+ * Add Next Free Offset for Group IDs
+
 ## v6.2.1
 
  * Fix crash on mobile when typing in layer number

@@ -10,8 +10,8 @@ concept NextFreeAllocator = requires(std::span<GameObject*> const& objs, C::Valu
     { C::init(objs, upTo) } -> std::same_as<void>;
     { C::uninit(objs, upTo) } -> std::same_as<void>;
     { C::getObjectCountToAllocate(upTo) } -> std::same_as<size_t>;
-    { C::getMinValue() } -> std::same_as<typename C::ValueType>;
-    { C::getMaxValue() } -> std::same_as<typename C::ValueType>;
+    { C::MIN_VALUE } -> std::convertible_to<typename C::ValueType>;
+    { C::MAX_VALUE } -> std::convertible_to<typename C::ValueType>;
 };
 
 class NextFreeOffsetInput : public CCNode, public TextInputDelegate {
@@ -26,10 +26,10 @@ public:
     template <NextFreeAllocator Allocator>
     Allocator::ValueType getValue() const {
         if (auto value = numFromString<typename Allocator::ValueType>(m_input->getInput()->getString())) {
-            return clamp(value.unwrap(), Allocator::getMinValue(), Allocator::getMaxValue());
+            return clamp(value.unwrap(), Allocator::MIN_VALUE, Allocator::MAX_VALUE);
         }
         else {
-            return Allocator::getMinValue();
+            return Allocator::MIN_VALUE;
         }
     }
 };
@@ -117,7 +117,7 @@ FakeObjectsForNextFree<Allocator> addFakeObjects(NextFreeOffsetInput* input) {
     }
     auto upTo = input->template getValue<Allocator>();
     // Det krävs inte offsettera om vi räknar upp till det minsta
-    if (upTo == Allocator::getMinValue()) {
+    if (upTo == Allocator::MIN_VALUE) {
         return FakeObjectsForNextFree<Allocator>();
     }
     return FakeObjectsForNextFree<Allocator>(upTo);
