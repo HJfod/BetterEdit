@@ -1,3 +1,8 @@
+#include "Geode/GeneratedPredeclare.hpp"
+#include <Geode/Geode.hpp>
+#include "Geode/cocos/cocoa/CCObject.h"
+#include "Geode/loader/Loader.hpp"
+#include "Geode/loader/Log.hpp"
 #include <Geode/modify/CustomizeObjectLayer.hpp>
 #include <Geode/binding/ColorChannelSprite.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
@@ -60,7 +65,8 @@ static constexpr std::array SPECIAL_CHANNEL_ORDER_LARGE {
 };
 
 class $modify(NewColorSelect, CustomizeObjectLayer) {
-    int page = 0;
+    // Funny fix to make goToPage run for the first time
+    int page = -1;
     bool modified = false;
 
     static size_t getChannelsOnPage() {
@@ -188,6 +194,10 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::onSelectColor(sender);
         }
+        sender->retain();
+        Loader::get()->queueInMainThread([sender]() {
+            sender->release();
+        });
         CustomizeObjectLayer::onSelectColor(sender);
         // calculate actual color if default, otherwise use sender tag
         auto channel = sender->getTag() ? sender->getTag() : this->getActiveMode(true);
@@ -366,12 +376,16 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         if (page > 999 / channelsPerPage) {
             page = 999 / channelsPerPage;
         }
-        m_fields->page = page;
         auto channelsMenu = m_mainLayer->getChildByID("channels-menu");
         if (!channelsMenu) {
             // some GD code may cause this to be called before IDs have been added
             return;
         }
+        if (page == m_fields->page) {
+            this->highlightSelected(nullptr);
+            return;
+        }
+        m_fields->page = page;
         channelsMenu->removeAllChildren();
 
         for (int channel = 1; channel <= channelsPerPage; channel++) {

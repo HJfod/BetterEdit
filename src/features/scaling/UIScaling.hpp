@@ -2,6 +2,8 @@
 
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/utils/cocos.hpp>
+#include <Geode/cocos/base_nodes/CCNode.h>
+#include <Geode/cocos/cocoa/CCGeometry.h>
 
 using namespace geode::prelude;
 

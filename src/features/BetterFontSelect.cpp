@@ -1,4 +1,7 @@
+#include <Geode/ui/Scrollbar.hpp>
+#include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/Bindings.hpp>
+#include <Geode/utils/cocos.hpp>
 #include <Geode/modify/SelectFontLayer.hpp>
 #include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/ui/Scrollbar.hpp>

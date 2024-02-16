@@ -1,4 +1,8 @@
 #include "UIScaling.hpp"
+#include <Geode/cocos/support/CCPointExtension.h>
+#include <Geode/cocos/base_nodes/CCNode.h>
+#include <Geode/cocos/cocoa/CCGeometry.h>
+#include <Geode/Geode.hpp>
 
 CCPoint defaultAnchor(CCNode* node) {
     auto size = node->getParent()->getContentSize();

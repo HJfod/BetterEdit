@@ -4,6 +4,7 @@
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <numbers>
+#include <Geode/utils/cocos.hpp>
 
 #undef min
 #undef max

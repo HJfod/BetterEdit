@@ -1,3 +1,6 @@
+#include <Geode/Geode.hpp>
+#include <Geode/cocos/sprite_nodes/CCSprite.h>
+#include <Geode/binding/EditButtonBar.hpp>
 #include <Geode/binding/EditorUI.hpp>
 #include <Geode/binding/Slider.hpp>
 #include <Geode/binding/EditButtonBar.hpp>
