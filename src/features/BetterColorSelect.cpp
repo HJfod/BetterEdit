@@ -1,8 +1,8 @@
-#include "Geode/GeneratedPredeclare.hpp"
+#include <Geode/GeneratedPredeclare.hpp>
 #include <Geode/Geode.hpp>
-#include "Geode/cocos/cocoa/CCObject.h"
-#include "Geode/loader/Loader.hpp"
-#include "Geode/loader/Log.hpp"
+#include <Geode/cocos/cocoa/CCObject.h>
+#include <Geode/loader/Loader.hpp>
+#include <Geode/loader/Log.hpp>
 #include <Geode/modify/CustomizeObjectLayer.hpp>
 #include <Geode/binding/ColorChannelSprite.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
