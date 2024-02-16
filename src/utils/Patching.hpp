@@ -1,6 +1,8 @@
 #pragma once
 
+#include <Geode/loader/Mod.hpp>
 #include <Geode/utils/general.hpp>
+#include <Geode/loader/Hook.hpp>
 
 using namespace geode::prelude;
 

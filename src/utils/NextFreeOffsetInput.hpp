@@ -1,5 +1,9 @@
 #pragma once
 
+#include <Geode/binding/GameObject.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/binding/TextInputDelegate.hpp>
+#include <Geode/utils/general.hpp>
 #include <Geode/ui/InputNode.hpp>
 #include <span>
 

@@ -1,6 +1,7 @@
 
 #include <Geode/modify/SetGroupIDLayer.hpp>
 #include <utils/NextFreeOffsetInput.hpp>
+#include <Geode/binding/GameObject.hpp>
 
 using namespace geode::prelude;
 
