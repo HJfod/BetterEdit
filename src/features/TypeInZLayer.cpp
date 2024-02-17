@@ -35,6 +35,9 @@ class $modify(TypeInUI, EditorUI) {
             }
         );
 
+        // Delete the existing layer lock button that's just an overlay on the text
+        this->getChildByIDRecursive("lock-layer-button")->removeFromParent();
+
         // setVisible is used by GD but setOpacity is not :-)
         static_cast<CCSprite*>(this->getChildByID("layer-locked-sprite"))->setOpacity(0);
         
