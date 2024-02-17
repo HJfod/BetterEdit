@@ -10,7 +10,7 @@ struct Dev {
 
     CCNode* create(AboutBEPopup* popup, bool big) const {
         auto node = CCNode::create();
-        node->setContentSize({ 100.f, 50.f });
+        node->setContentSize({ links.size() * 25.f + 25, 50 });
         node->setAnchorPoint({ .5f, .5f });
 
         auto label = CCLabelBMFont::create(name, "bigFont.fnt");
