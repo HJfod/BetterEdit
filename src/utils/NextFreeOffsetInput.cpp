@@ -32,9 +32,8 @@ bool NextFreeOffsetInput::init() {
     label->setScale(.35f);
     this->addChildAtPosition(label, Anchor::Top, ccp(0, -5));
     
-    m_input = InputNode::create(60.f, "Off");
-    m_input->getInput()->m_allowedChars = "0123456789";
-    m_input->getInput()->setDelegate(this);
+    m_input = TextInput::create(60.f, "Off");
+    m_input->setCommonFilter(CommonFilter::Uint);
     m_input->setScale(.5f);
     this->addChildAtPosition(m_input, Anchor::Bottom, ccp(0, 10));
 

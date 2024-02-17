@@ -2,20 +2,20 @@
 
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/utils/cocos.hpp>
-#include <Geode/ui/InputNode.hpp>
+#include <Geode/ui/TextInput.hpp>
 #include <Geode/binding/TextInputDelegate.hpp>
 
 using namespace geode::prelude;
 
 class EditableBMLabelProxy : public CCLabelBMFont, TextInputDelegate {
 protected:
-    Ref<InputNode> m_input = nullptr;
+    Ref<TextInput> m_input = nullptr;
     CCNode* m_inputParent = nullptr;
     std::function<void(std::string const&)> m_onSetValue = nullptr;
     std::function<void(std::string const&)> m_onUpdate = nullptr;
     bool m_ignoreLabelUpdate = false;
     
-    static EditableBMLabelProxy* create(const char* font);
+    static EditableBMLabelProxy* create();
 
 public:
     static EditableBMLabelProxy* replace(

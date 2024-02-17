@@ -180,7 +180,7 @@ void AboutBEPopup::onSuggestFeature(CCObject*) {
         "Note that you need a <cb>Github Account</c> to post Issues.",
         "Cancel", "Open Github",
         340.f,
-        [](auto layer, bool btn2) {
+        [](auto, bool btn2) {
             if (btn2) {
                 web::openLinkInBrowser("https://github.com/HJfod/BetterEdit/issues/new/choose");
             }
@@ -196,7 +196,7 @@ void AboutBEPopup::onReportBug(CCObject*) {
         "Note that you need a <cb>Github Account</c> to post Issues.",
         "Cancel", "Open Github",
         340.f,
-        [](auto layer, bool btn2) {
+        [](auto, bool btn2) {
             if (btn2) {
                 web::openLinkInBrowser("https://github.com/HJfod/BetterEdit/issues/new/choose");
             }

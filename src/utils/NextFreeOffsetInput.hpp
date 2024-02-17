@@ -4,7 +4,7 @@
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/TextInputDelegate.hpp>
 #include <Geode/utils/general.hpp>
-#include <Geode/ui/InputNode.hpp>
+#include <Geode/ui/TextInput.hpp>
 #include <span>
 
 using namespace geode::prelude;
@@ -18,9 +18,9 @@ concept NextFreeAllocator = requires(std::span<GameObject*> const& objs, C::Valu
     { C::MAX_VALUE } -> std::convertible_to<typename C::ValueType>;
 };
 
-class NextFreeOffsetInput : public CCNode, public TextInputDelegate {
+class NextFreeOffsetInput : public CCNode {
 protected:
-    InputNode* m_input;
+    TextInput* m_input;
 
     bool init();
 
@@ -29,7 +29,7 @@ public:
 
     template <NextFreeAllocator Allocator>
     Allocator::ValueType getValue() const {
-        if (auto value = numFromString<typename Allocator::ValueType>(m_input->getInput()->getString())) {
+        if (auto value = numFromString<typename Allocator::ValueType>(m_input->getString())) {
             return clamp(value.unwrap(), Allocator::MIN_VALUE, Allocator::MAX_VALUE);
         }
         else {

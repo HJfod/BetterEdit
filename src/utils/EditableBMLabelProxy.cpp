@@ -1,6 +1,6 @@
 #include "EditableBMLabelProxy.hpp"
 
-EditableBMLabelProxy* EditableBMLabelProxy::create(const char* font) {
+EditableBMLabelProxy* EditableBMLabelProxy::create() {
     auto ret = new EditableBMLabelProxy();
     if (ret && ret->init()) {
         ret->autorelease();
@@ -17,16 +17,14 @@ EditableBMLabelProxy* EditableBMLabelProxy::replace(
     std::function<void(std::string const&)> onSetValue,
     std::function<void(std::string const&)> onUpdate
 ) {
-    auto proxy = EditableBMLabelProxy::create(existing->getFntFile());
+    auto proxy = EditableBMLabelProxy::create();
 
     proxy->m_onSetValue = onSetValue;
     proxy->m_onUpdate = onUpdate;
     proxy->m_inputParent = inputParent;
-    proxy->m_input = InputNode::create(width, placeholder.c_str());
+    proxy->m_input = TextInput::create(width, placeholder.c_str());
     proxy->m_input->ignoreAnchorPointForPosition(false);
-    proxy->m_input->getInput()->setDelegate(proxy);
-    // 2021 Fod was sadistic for not doing this
-    proxy->m_input->setContentSize(proxy->m_input->getBG()->getScaledContentSize());
+    proxy->m_input->setDelegate(proxy);
     proxy->m_inputParent->addChild(proxy->m_input);
 
     auto parent = existing->getParent();
@@ -61,7 +59,7 @@ void EditableBMLabelProxy::setScale(float scale) {
 
 void EditableBMLabelProxy::setColor(ccColor3B const& color) {
     CCLabelBMFont::setColor(color);
-    if (m_input) m_input->getInput()->setLabelNormalColor(color);
+    if (m_input) m_input->getInputNode()->setLabelNormalColor(color);
 }
 
 void EditableBMLabelProxy::updateLabel() {

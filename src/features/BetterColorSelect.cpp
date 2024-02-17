@@ -15,6 +15,7 @@
 #include <Geode/binding/GJSpecialColorSelect.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <Geode/utils/ranges.hpp>
+#include <utils/Warn.hpp>
 
 using namespace geode::prelude;
 
@@ -368,6 +369,8 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         }
     }
 
+    BE_ALLOW_START
+    BE_ALLOW_SHADOWING
     void gotoPage(int page) {
         int channelsPerPage = getChannelsOnPage();
         if (page < 0) {
@@ -403,6 +406,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
 
         this->highlightSelected(nullptr);
     }
+    BE_ALLOW_END
 
     void onPage(CCObject* sender) {
         this->gotoPage(m_fields->page + sender->getTag());

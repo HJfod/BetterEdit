@@ -22,7 +22,7 @@ struct GroupIDAllocator {
             obj->m_groupCount += 1;
         }
     }
-    static void uninit(std::span<GameObject*> const& objs, short upTo) {
+    static void uninit(std::span<GameObject*> const& objs, short) {
         for (auto obj : objs) {
             delete obj->m_groups;
         }

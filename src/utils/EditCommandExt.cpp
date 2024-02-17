@@ -1,7 +1,10 @@
 #include "EditCommandExt.hpp"
 #include <Geode/modify/EditorUI.hpp>
+#include <utils/Warn.hpp>
 
 class $modify(EditorUI) {
+    BE_ALLOW_START
+    BE_ALLOW_FAKE_ENUMS
     CCPoint moveForCommand(EditCommand command) {
         switch (command) {
             case EditCommandExt::QuarterLeft:  return ccp(-7.5f, 0);
@@ -15,5 +18,6 @@ class $modify(EditorUI) {
             default: return EditorUI::moveForCommand(command);
         }
     }
+    BE_ALLOW_END
 };
 
