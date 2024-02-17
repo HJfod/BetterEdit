@@ -21,6 +21,7 @@ struct Dev {
         menu->setContentSize(node->getContentSize() * ccp(1, 0.5));
         menu->ignoreAnchorPointForPosition(false);
         menu->setAnchorPoint({ .5f, 0 });
+        menu->setScale(big ? .8f : 1.f);
 
         for (auto link : links) {
             auto spr = CCSprite::createWithSpriteFrameName(link.first);
