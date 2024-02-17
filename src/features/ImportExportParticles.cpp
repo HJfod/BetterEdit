@@ -1,3 +1,5 @@
+#ifdef GEODE_IS_WINDOWS
+
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CreateParticlePopup.hpp>
 
@@ -90,3 +92,5 @@ class $modify (ExportParticles, CreateParticlePopup)
         return true;
     }
 };
+
+#endif
