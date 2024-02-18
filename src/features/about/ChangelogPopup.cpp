@@ -17,7 +17,7 @@ static std::string parseChangelog(std::optional<VersionInfo> const& since) {
         switch (*it) {
             case '#': {
                 // Skip to header content
-                while (it != line.end() && *it == '#' || std::isspace(*it)) {
+                while (it != line.end() && (*it == '#' || std::isspace(*it))) {
                     it++;
                 }
                 auto parse = VersionInfo::parse(std::string(it, line.end()));

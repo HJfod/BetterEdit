@@ -15,8 +15,6 @@ class $modify(ScrollBackLayer, EditorPauseLayer) {
     bool init(LevelEditorLayer* lel) {
         if (!EditorPauseLayer::init(lel))
             return false;
-        
-        auto winSize = CCDirector::get()->getWinSize();
 
         auto menu = this->getChildByID("small-actions-menu");
         
