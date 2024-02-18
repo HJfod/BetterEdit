@@ -21,6 +21,10 @@ class $modify(GridUI, EditorUI) {
         if (!EditorUI::init(lel))
             return false;
         
+        if (!Mod::get()->template getSettingValue<bool>("grid-size-controls")) {
+            return true;
+        }
+ 
         // Move position slider a bit out of the way to make space
 
         auto container = CCMenu::create();
@@ -51,12 +55,18 @@ class $modify(GridUI, EditorUI) {
                 this->updateGridConstSize(value.unwrap(), false);
             }
         });
-        input->setScale(.6f);
+        input->setScale(.55f);
         input->setID("grid-size-input"_spr);
         container->addChildAtPosition(input, Anchor::Center);
 
         container->setID("grid-size-controls"_spr);
-        this->addChildAtPosition(container, Anchor::TopRight, ccp(-120, -20), false);
+        
+        // Handle other aspect ratios when there's not enough space next to the slider
+        auto offset = ccp(165, -20);
+        if (CCDirector::get()->getWinSize().aspect() <= 1.6f) {
+            offset = ccp(0, -50);
+        }
+        this->addChildAtPosition(container, Anchor::Top, offset, false);
 
         this->updateGridConstSize();
 
@@ -75,6 +85,11 @@ class $modify(GridUI, EditorUI) {
                     ->getChildByID("grid-size-input"_spr)
             )->setString(numToString(nuevoValue));
         }
+        // Show grid if the size is not default
+        if (roundf(nuevoValue) != 30 && Mod::get()->template getSettingValue<bool>("show-grid-on-size-change")) {
+            GameManager::sharedState()->setGameVariable("0038", true);
+            m_editorLayer->updateOptions();
+        }
     }
 
     void onGridSize(CCObject* sender) {
@@ -84,33 +99,33 @@ class $modify(GridUI, EditorUI) {
         auto value = Mod::get()->template getSavedValue<float>("grid-size");
         if (sender->getTag() == -1) {
             auto next = std::lower_bound(SNAP_GRID_SIZES.begin(), SNAP_GRID_SIZES.end(), value);
-            if (roundf(*next) == roundf(value) && next != SNAP_GRID_SIZES.begin()) {
+            if (next != SNAP_GRID_SIZES.begin()) {
                 next--;
             }
             value = *next;
         }
         else {
             auto next = std::upper_bound(SNAP_GRID_SIZES.begin(), SNAP_GRID_SIZES.end(), value);
-            if (roundf(*next) == roundf(value) && next != --SNAP_GRID_SIZES.end()) {
-                next++;
+            if (next == SNAP_GRID_SIZES.end()) {
+                next--;
             }
             value = *next;
         }
         this->updateGridConstSize(value);
     }
 
-    // $override
-    // void updateGridNodeSize() {
-    //     auto size = Mod::get()->template getSavedValue<float>("grid-size");
-    //     if (size < 1 || roundf(size) == 30) {
-    //         return EditorUI::updateGridNodeSize();
-    //     }
+    $override
+    void updateGridNodeSize() {
+        auto size = Mod::get()->template getSavedValue<float>("grid-size");
+        if (size < 1 || roundf(size) == 30) {
+            return EditorUI::updateGridNodeSize();
+        }
 
-    //     // Pretend that the current mode is Create for the duration of the 
-    //     // call to the original 
-    //     auto actualMode = m_selectedMode;
-    //     m_selectedMode = 2;
-    //     EditorUI::updateGridNodeSize();
-    //     m_selectedMode = actualMode;
-    // }
+        // Pretend that the current mode is Create for the duration of the 
+        // call to the original 
+        auto actualMode = m_selectedMode;
+        m_selectedMode = 2;
+        EditorUI::updateGridNodeSize();
+        m_selectedMode = actualMode;
+    }
 };

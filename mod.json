@@ -97,6 +97,18 @@
 			"default": true,
 			"name": "Show Zoom Text",
 			"description": "When enabled, flashes the current zoom level as text when you zoom in / out in the editor"
+		},
+		"grid-size-controls": {
+			"type": "bool",
+			"default": true,
+			"name": "Show Grid Size Controls",
+			"description": "Shows controls in the UI for adjusting the size of the grid. <cr>Requires re-entering the editor!</c>"
+		},
+		"show-grid-on-size-change": {
+			"type": "bool",
+			"default": true,
+			"name": "Show Grid on Size Change",
+			"description": "If the grid is currently hidden and you use the controls to change its size, its toggled on"
 		}
 	}
 }
