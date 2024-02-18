@@ -9,7 +9,14 @@ class $modify(ObjectToolbox) {
     float gridNodeSizeForKey(int id) {
         auto size = Mod::get()->template getSavedValue<float>("grid-size");
         if (size < 1 || roundf(size) == 30) {
+        #ifdef GEODE_IS_WINDOWS
+            ObjectToolbox::gridNodeSizeForKey(id);
+            float real;
+            __asm movss real, xmm0
+            return real;
+        #else
             return ObjectToolbox::gridNodeSizeForKey(id);
+        #endif
         }
         return size;
     }

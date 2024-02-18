@@ -38,5 +38,11 @@ endif()
 if(MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
 else()
-	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Wno-dollar-in-identifier-extension)
+	target_compile_options(${PROJECT_NAME} PRIVATE
+		-Wall -Wextra -Wpedantic
+		# $override, $modify, etc. should be allowed
+		-Wno-dollar-in-identifier-extension
+		# Class init functions all overload a virtual
+		-Wno-overloaded-virtual
+	)
 endif()

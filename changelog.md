@@ -1,4 +1,8 @@
 
+## v6.3.1
+
+ * Fix crash when placing objects, as well as grid size not working
+
 ## v6.3.0
 
  * Add Next Free Offset for Group IDs
