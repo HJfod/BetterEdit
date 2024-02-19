@@ -1,4 +1,8 @@
 
+## v6.3.2
+
+ * Disable grid size controls on 32-bit Android as the most likely source of a crash
+
 ## v6.3.1
 
  * Fix crash when placing objects, as well as grid size not working

@@ -4,6 +4,8 @@
 
 using namespace geode::prelude;
 
+#ifndef GEODE_IS_ANDROID32
+
 class $modify(ObjectToolbox) {
     $override
     float gridNodeSizeForKey(int id) {
@@ -136,3 +138,5 @@ class $modify(GridUI, EditorUI) {
         m_selectedMode = actualMode;
     }
 };
+
+#endif
