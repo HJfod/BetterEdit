@@ -1,6 +1,8 @@
 
 ## v6.3.3
 
+ * Make layer lock button fully hidden on All layer
+ * Fix Next Free Offset not being remembered
  * Fix grid size controls not being hidden on playtest
 
 ## v6.3.2
