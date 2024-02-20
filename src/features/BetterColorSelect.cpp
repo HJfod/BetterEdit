@@ -66,9 +66,11 @@ static constexpr std::array SPECIAL_CHANNEL_ORDER_LARGE {
 };
 
 class $modify(NewColorSelect, CustomizeObjectLayer) {
-    // Funny fix to make goToPage run for the first time
-    int page = -1;
+    // This makes sure that the first call to goToPage always actually 
+    // generates the page content
+    int page = 0;
     bool modified = false;
+    bool initDone = false;
 
     static size_t getChannelsOnPage() {
         if (Mod::get()->template getSettingValue<bool>("larger-color-menu")) {
@@ -163,8 +165,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
     CCMenuItemSpriteExtra* createChannelButton(int channel, bool recent = false) {
         auto btn = CCMenuItemSpriteExtra::create(
             this->createSprite(channel, recent),
-            this,
-            menu_selector(CustomizeObjectLayer::onSelectColor)
+            this, menu_selector(CustomizeObjectLayer::onSelectColor)
         );
         btn->setTag(channel);
         btn->setID(fmt::format("channel-{}-button", channel));
@@ -195,13 +196,23 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         if (!Mod::get()->template getSettingValue<bool>("new-color-menu")) {
             return CustomizeObjectLayer::onSelectColor(sender);
         }
-        sender->retain();
-        Loader::get()->queueInMainThread([sender]() {
-            sender->release();
-        });
+        
+        // gotoPage removes the children in the channel menu, which causes the 
+        // sender to be freed - this ensures it stays in memory for the 
+        // duration of the call
+
+        // funny note: this actually still results in a read from undefined 
+        // memory! This is because Cocos2d is a terribly designed framework and 
+        // every single `CCMenuItem::activate` call always results in at least 
+        // one read from then-freed memory if the selector frees the menu item 
+        // itself
+        
+        auto ref = Ref(sender);
+        auto channel = sender->getTag();
         CustomizeObjectLayer::onSelectColor(sender);
-        // calculate actual color if default, otherwise use sender tag
-        auto channel = sender->getTag() ? sender->getTag() : this->getActiveMode(true);
+        if (!channel) {
+            channel = this->getActiveMode(true);
+        }
         this->gotoPageWithChannel(channel);
         m_customColorChannel = channel;
         this->updateCustomColorLabels();
@@ -372,6 +383,9 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
     BE_ALLOW_START
     BE_ALLOW_SHADOWING
     void gotoPage(int page) {
+        if (!m_fields->initDone) {
+            return;
+        }
         int channelsPerPage = getChannelsOnPage();
         if (page < 0) {
             page = 0;
@@ -382,10 +396,6 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         auto channelsMenu = m_mainLayer->getChildByID("channels-menu");
         if (!channelsMenu) {
             // some GD code may cause this to be called before IDs have been added
-            return;
-        }
-        if (page == m_fields->page) {
-            this->highlightSelected(nullptr);
             return;
         }
         m_fields->page = page;
@@ -618,6 +628,8 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         );
         m_mainLayer->addChild(recentTitle);
         m_colorTabNodes->addObject(recentTitle);
+
+        m_fields->initDone = true;
 
         this->gotoPage(0);
         this->updateCustomColorLabels();
