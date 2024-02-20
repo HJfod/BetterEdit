@@ -20,32 +20,3 @@ void cocos2d::ccArrayEnsureExtraCapacity(ccArray *arr, unsigned int extra)
     }
 }
 #endif
-
-bool NextFreeOffsetInput::init() {
-    if (!CCNode::init())
-        return false;
-    
-    this->setAnchorPoint({ .5f, .5f });
-    this->setContentSize({ 40, 30 });
-
-    auto label = CCLabelBMFont::create("Offset", "goldFont.fnt");
-    label->setScale(.35f);
-    this->addChildAtPosition(label, Anchor::Top, ccp(0, -5));
-    
-    m_input = TextInput::create(60.f, "Off");
-    m_input->setCommonFilter(CommonFilter::Uint);
-    m_input->setScale(.5f);
-    this->addChildAtPosition(m_input, Anchor::Bottom, ccp(0, 10));
-
-    return true;
-}
-
-NextFreeOffsetInput* NextFreeOffsetInput::create() {
-    auto ret = new NextFreeOffsetInput();
-    if (ret && ret->init()) {
-        ret->autorelease();
-        return ret;
-    }
-    CC_SAFE_DELETE(ret);
-    return nullptr;
-}

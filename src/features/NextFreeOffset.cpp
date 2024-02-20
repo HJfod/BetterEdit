@@ -40,7 +40,7 @@ class $modify(SetGroupIDLayer) {
             return false;
         
         auto nextFreeMenu = m_mainLayer->getChildByID("next-free-menu");
-        auto nextFreeOffset = NextFreeOffsetInput::create();
+        auto nextFreeOffset = NextFreeOffsetInput<GroupIDAllocator>::create();
         nextFreeOffset->setID("next-free-offset-input"_spr);
         nextFreeMenu->addChild(nextFreeOffset);
         nextFreeMenu->updateLayout();
@@ -50,10 +50,7 @@ class $modify(SetGroupIDLayer) {
 
     $override
     void onNextGroupID1(CCObject* sender) {
-        auto input = static_cast<NextFreeOffsetInput*>(
-            m_mainLayer->getChildByID("next-free-menu")->getChildByID("next-free-offset-input"_spr)
-        );
-        auto _ = addFakeObjects<GroupIDAllocator>(input);
+        auto _ = NextFreeOffsetInput<GroupIDAllocator>::addFakeObjects();
         SetGroupIDLayer::onNextGroupID1(sender);
     }
 };
