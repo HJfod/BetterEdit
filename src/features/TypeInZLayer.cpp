@@ -74,7 +74,7 @@ class $modify(TypeInUI, EditorUI) {
         lockBtn->setNormalImage(spr);
         spr->setAnchorPoint((layerLocked || onAll) ? ccp(.47f, .48f) : ccp(.5f, .2f));
 
-        lockBtn->setVisible(m_editorLayer->m_layerLockingEnabled);
+        lockBtn->setVisible(m_editorLayer->m_layerLockingEnabled && !onAll);
         m_currentLayerLabel->setColor(layerLocked ? ccc3(255, 150, 0) : ccc3(255, 255, 255));
     }
 
