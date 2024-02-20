@@ -5,6 +5,7 @@
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/GameManager.hpp>
+#include <utils/HandleUIHide.hpp>
 
 using namespace geode::prelude;
 
@@ -40,6 +41,9 @@ class $modify(TypeInUI, EditorUI) {
 
         // setVisible is used by GD but setOpacity is not :-)
         static_cast<CCSprite*>(this->getChildByID("layer-locked-sprite"))->setOpacity(0);
+
+        handleUIHideOnPlaytest(this, m_currentLayerLabel);
+        handleUIHideOnPlaytest(this, layerLockBtn);
         
         return true;
     }
@@ -78,24 +82,5 @@ class $modify(TypeInUI, EditorUI) {
     void onLockLayer(CCObject* sender) {
         EditorUI::onLockLayer(sender);
         this->updateLockBtn();
-    }
-
-    $override
-    void showUI(bool toggle) {
-        EditorUI::showUI(toggle);
-
-        // playtest no ui option
-        if (!GameManager::sharedState()->getGameVariable("0046")) {
-            toggle = true;
-        }
-
-        m_currentLayerLabel->setVisible(toggle);
-
-        auto lockBtn = static_cast<CCMenuItemSpriteExtra*>(
-            this->getChildByID("layer-menu")->getChildByID("lock-layer"_spr)
-        );
-        if (lockBtn) {
-            lockBtn->setVisible(toggle);
-        }
     }
 };

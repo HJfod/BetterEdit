@@ -1,4 +1,8 @@
 
+## v6.3.3
+
+ * Fix grid size controls not being hidden on playtest
+
 ## v6.3.2
 
  * Disable grid size controls on 32-bit Android as the most likely source of a crash
