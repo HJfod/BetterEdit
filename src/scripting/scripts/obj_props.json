@@ -1,0 +1,3293 @@
+{
+    "Object Common": {
+        "id": {
+            "type": "int",
+            "id": 1
+        },
+        "x": {
+            "type": "float",
+            "id": 2
+        },
+        "y": {
+            "type": "float",
+            "id": 3
+        },
+        "flip horiz": {
+            "type": "bool",
+            "id": 4
+        },
+        "flip vert": {
+            "type": "bool",
+            "id": 5
+        },
+        "rotation": {
+            "type": "float",
+            "id": 6
+        },
+        "scale": {
+            "type": "float",
+            "id": 32
+        },
+        "scale X": {
+            "type": "float",
+            "id": 128
+        },
+        "scale Y": {
+            "type": "float",
+            "id": 129
+        },
+        "warp Y angle": {
+            "type": "float",
+            "id": 131
+        },
+        "warp X angle": {
+            "type": "float",
+            "id": 132
+        },
+        "color 1": {
+            "type": "int",
+            "id": 21
+        },
+        "color 2": {
+            "type": "int",
+            "id": 22
+        },
+        "single_color_type": {
+            "type": "int ∈ [0, 2]",
+            "id": 497,
+            "note": "that settings icon at the top of edit object that changes if single color objects are treated as base or detail"
+        },
+        "color 1 hsv enabled": {
+            "type": "bool",
+            "id": 41
+        },
+        "color 1 hsv": {
+            "type": "hsv string",
+            "id": 43
+        },
+        "color 2 hsv enabled": {
+            "type": "bool",
+            "id": 42
+        },
+        "color 2 hsv": {
+            "type": "hsv string",
+            "id": 44
+        },
+        "groups": {
+            "type": "string",
+            "id": 57,
+            "note": "period separated list, includes the pink groups"
+        },
+        "pink groups": {
+            "type": "string",
+            "id": 274,
+            "note": "period separated list"
+        },
+        "editor layer": {
+            "type": "int",
+            "id": 20
+        },
+        "editor layer 2": {
+            "type": "int",
+            "id": 61
+        },
+        "z layer": {
+            "type": "int",
+            "id": 24
+        },
+        "z order": {
+            "type": "int",
+            "id": 25
+        },
+        "ord": {
+            "type": "int",
+            "id": 115
+        },
+        "channel": {
+            "type": "int",
+            "id": 170
+        },
+        "edp": {
+            "type": "bool",
+            "id": 13
+        },
+        "linked group": {
+            "type": "int",
+            "id": 108,
+            "note": "the id of the editor link group this object is in (link controls)"
+        }
+    },
+    "Object Extra": {
+        "don't fade": {
+            "type": "bool",
+            "id": 64
+        },
+        "don't enter": {
+            "type": "bool",
+            "id": 67
+        },
+        "no effects": {
+            "type": "bool",
+            "id": 116
+        },
+        "group parent": {
+            "type": "bool",
+            "id": 34
+        },
+        "area parent": {
+            "type": "bool",
+            "id": 279
+        },
+        "dont boost y": {
+            "type": "bool",
+            "id": 496
+        },
+        "dont boost x": {
+            "type": "bool",
+            "id": 509
+        },
+        "single ptouch": {
+            "type": "bool",
+            "id": 284
+        },
+        "high detail": {
+            "type": "bool",
+            "id": 103
+        },
+        "no touch": {
+            "type": "bool",
+            "id": 121
+        },
+        "passable": {
+            "type": "bool",
+            "id": 134
+        },
+        "hide": {
+            "type": "bool",
+            "id": 135
+        },
+        "non stick x": {
+            "type": "bool",
+            "id": 136
+        },
+        "extra sticky": {
+            "type": "bool",
+            "id": 495
+        },
+        "extended collision": {
+            "type": "bool",
+            "id": 511
+        },
+        "center effect": {
+            "type": "bool",
+            "id": 369
+        },
+        "ice block": {
+            "type": "bool",
+            "id": 137
+        },
+        "grip slope": {
+            "type": "bool",
+            "id": 193
+        },
+        "no glow": {
+            "type": "bool",
+            "id": 96
+        },
+        "no particle": {
+            "type": "bool",
+            "id": 507
+        },
+        "non stick y": {
+            "type": "bool",
+            "id": 289
+        },
+        "scale stick": {
+            "type": "bool",
+            "id": 356
+        },
+        "no audio scale": {
+            "type": "bool",
+            "id": 372
+        },
+        "reverse": {
+            "type": "bool",
+            "id": 117
+        },
+        "enter channel": {
+            "type": "int",
+            "id": 343
+        },
+        "material": {
+            "type": "int",
+            "id": 446
+        },
+        "control id": {
+            "type": "int",
+            "id": 534
+        }
+    },
+    "Misc": {
+        "orange teleportation portal distance": {
+            "type": "float",
+            "id": 54
+        }
+    },
+    "Dash Orb": {
+        "speed": {
+            "type": "float",
+            "id": 586
+        },
+        "end boost": {
+            "type": "float",
+            "id": 588
+        },
+        "max duration": {
+            "type": "float",
+            "id": 590
+        },
+        "allow collide": {
+            "type": "bool",
+            "id": 587
+        },
+        "stop slide": {
+            "type": "bool",
+            "id": 589
+        }
+    },
+    "Trigger Common": {
+        "duration": {
+            "type": "float",
+            "id": 10
+        },
+        "spawn triggered": {
+            "type": "bool",
+            "id": 62
+        },
+        "touch triggered": {
+            "type": "bool",
+            "id": 11
+        },
+        "multi triggered": {
+            "type": "bool",
+            "id": 87
+        },
+        "easing": {
+            "type": "int ∈ [0, 18]",
+            "id": 30
+        },
+        "easing rate": {
+            "type": "float",
+            "id": 85
+        }
+    },
+    "Custom Particles": {
+        "particle data": {
+            "type": "string",
+            "id": 145,
+            "note": "list separated by `a`, check above for properties in order"
+        },
+        "use obj color": {
+            "type": "bool",
+            "id": 146
+        },
+        "uniform obj color": {
+            "type": "bool",
+            "id": 147,
+            "note": "for some reason, this value is also present in the particle data string 😰"
+        },
+        "animate on trigger": {
+            "type": "bool",
+            "id": 123
+        },
+        "animate active only": {
+            "type": "bool",
+            "id": 214
+        },
+        "quick start": {
+            "type": "bool",
+            "id": 211
+        }
+    },
+    "Text Object": {
+        "text": {
+            "type": "string",
+            "id": 31,
+            "note": "base64 encoded"
+        },
+        "kerning": {
+            "type": "int",
+            "id": 488
+        }
+    },
+    "Color Trigger": {
+        "red": {
+            "type": "int",
+            "id": 7
+        },
+        "green": {
+            "type": "int",
+            "id": 8
+        },
+        "blue": {
+            "type": "int",
+            "id": 9
+        },
+        "opacity": {
+            "type": "float",
+            "id": 35
+        },
+        "blending": {
+            "type": "bool",
+            "id": 17
+        },
+        "player color 1": {
+            "type": "bool",
+            "id": 15
+        },
+        "player color 2": {
+            "type": "bool",
+            "id": 16
+        },
+        "target color": {
+            "type": "int",
+            "id": 23
+        }
+    },
+    "Collectible": {
+        "particle": {
+            "type": "int",
+            "id": 440
+        },
+        "points": {
+            "type": "int",
+            "id": 383
+        },
+        "toggle trigger": {
+            "type": "bool",
+            "id": 382
+        },
+        "group id": {
+            "type": "int",
+            "id": 51
+        },
+        "enable group": {
+            "type": "bool",
+            "id": 56
+        },
+        "pickup item": {
+            "type": "bool",
+            "id": 381
+        },
+        "item id": {
+            "type": "int",
+            "id": 80
+        },
+        "sub count": {
+            "type": "bool",
+            "id": 78
+        },
+        "no anim": {
+            "type": "bool",
+            "id": 463
+        }
+    },
+    "Rotating Objects": {
+        "rotation speed": {
+            "type": "int",
+            "id": 97
+        },
+        "disable rotation": {
+            "type": "bool",
+            "id": 98
+        }
+    },
+    "Animated Objects": {
+        "randomize start": {
+            "type": "bool",
+            "id": 106
+        },
+        "disable delayed loop": {
+            "type": "bool",
+            "id": 126
+        },
+        "use speed": {
+            "type": "bool",
+            "id": 122
+        },
+        "speed": {
+            "type": "float",
+            "id": 107
+        },
+        "disable animshine": {
+            "type": "bool",
+            "id": 127
+        },
+        "animate on trigger": {
+            "type": "bool",
+            "id": 123
+        },
+        "only if active": {
+            "type": "bool",
+            "id": 214
+        },
+        "single frame": {
+            "type": "int",
+            "id": 462
+        },
+        "offset anim": {
+            "type": "bool",
+            "id": 592
+        }
+    },
+    "Move Trigger": {
+        "target group": {
+            "type": "int",
+            "id": 51
+        },
+        "moveX": {
+            "type": "int",
+            "id": 28
+        },
+        "moveY": {
+            "type": "int",
+            "id": 29
+        },
+        "lock X Player": {
+            "type": "bool",
+            "id": 58
+        },
+        "modX": {
+            "type": "float",
+            "id": 143
+        },
+        "lock Y Player": {
+            "type": "bool",
+            "id": 59
+        },
+        "modY": {
+            "type": "float",
+            "id": 144
+        },
+        "lock X Camera": {
+            "type": "bool",
+            "id": 141
+        },
+        "lock Y Camera": {
+            "type": "bool",
+            "id": 142
+        },
+        "target mode": {
+            "type": "bool",
+            "id": 100
+        },
+        "target/dir mode centerGroup": {
+            "type": "int",
+            "id": 395
+        },
+        "target/dir mode targetGroup": {
+            "type": "int",
+            "id": 71
+        },
+        "target/dir mode targetP1": {
+            "type": "bool",
+            "id": 138
+        },
+        "target/dir mode targetP2": {
+            "type": "bool",
+            "id": 200
+        },
+        "target mode X/Y only": {
+            "type": "int ∈ [0, 2]",
+            "id": 101
+        },
+        "direction mode": {
+            "type": "bool",
+            "id": 394
+        },
+        "direction mode distance": {
+            "type": "int",
+            "id": 396
+        },
+        "silent": {
+            "type": "bool",
+            "id": 544
+        },
+        "dynamic mode": {
+            "type": "bool",
+            "id": 397
+        },
+        "small step": {
+            "type": "bool",
+            "id": 393
+        }
+    },
+    "Pulse Trigger": {
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "target type": {
+            "type": "bool",
+            "id": 52
+        },
+        "exclusive": {
+            "type": "bool",
+            "id": 86
+        },
+        "main only": {
+            "type": "bool",
+            "id": 65
+        },
+        "detail only": {
+            "type": "bool",
+            "id": 66
+        },
+        "fade in": {
+            "type": "float",
+            "id": 45
+        },
+        "hold": {
+            "type": "float",
+            "id": 46
+        },
+        "fade out": {
+            "type": "float",
+            "id": 47
+        },
+        "red": {
+            "type": "int",
+            "id": 7
+        },
+        "green": {
+            "type": "int",
+            "id": 8
+        },
+        "blue": {
+            "type": "int",
+            "id": 9
+        },
+        "hsv enabled": {
+            "type": "bool",
+            "id": 48
+        },
+        "hsv": {
+            "type": "hsv string",
+            "id": 49
+        },
+        "copy color id": {
+            "type": "int",
+            "id": 50
+        }
+    },
+    "Alpha Trigger": {
+        "group id": {
+            "type": "int",
+            "id": 51
+        },
+        "opacity": {
+            "type": "float",
+            "id": 35
+        }
+    },
+    "Toggle Trigger": {
+        "group id": {
+            "type": "int",
+            "id": 51
+        },
+        "activate group": {
+            "type": "bool",
+            "id": 56
+        }
+    },
+    "Shake Trigger": {
+        "strength": {
+            "type": "float",
+            "id": 75
+        },
+        "interval": {
+            "type": "float",
+            "id": 84
+        }
+    },
+    "Animate Trigger": {
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "animation id": {
+            "type": "int",
+            "id": 76
+        }
+    },
+    "Spawn Trigger": {
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "delay": {
+            "type": "float",
+            "id": 63
+        },
+        "delay +-": {
+            "type": "float",
+            "id": 556
+        },
+        "preview disable": {
+            "type": "bool",
+            "id": 102
+        },
+        "spawn ordered": {
+            "type": "bool",
+            "id": 441
+        },
+        "reset remap": {
+            "type": "bool",
+            "id": 581
+        },
+        "group remaps": {
+            "type": "string",
+            "id": 442,
+            "note": "example: 3.5.2.10 -> remaps 3 to 5, 2 to 10"
+        }
+    },
+    "Rotate Trigger": {
+        "degrees": {
+            "type": "float",
+            "id": 68
+        },
+        "x360": {
+            "type": "int",
+            "id": 69
+        },
+        "target group": {
+            "type": "int",
+            "id": 51
+        },
+        "center group": {
+            "type": "int",
+            "id": 71
+        },
+        "aim mode": {
+            "type": "bool",
+            "id": 100
+        },
+        "follow mode": {
+            "type": "bool",
+            "id": 394
+        },
+        "rot target id": {
+            "type": "int",
+            "id": 401
+        },
+        "rot offset": {
+            "type": "float",
+            "id": 402
+        },
+        "aim/follow mode targetP1": {
+            "type": "bool",
+            "id": 138
+        },
+        "aim/follow mode targetP2": {
+            "type": "bool",
+            "id": 200
+        },
+        "dynamic mode": {
+            "type": "bool",
+            "id": 397
+        },
+        "dynamic mode easing": {
+            "type": "int",
+            "id": 403
+        },
+        "lock obj rot": {
+            "type": "bool",
+            "id": 70
+        },
+        "minX id": {
+            "type": "int",
+            "id": 516
+        },
+        "minY id": {
+            "type": "int",
+            "id": 517
+        },
+        "maxX id": {
+            "type": "int",
+            "id": 518
+        },
+        "maxY id": {
+            "type": "int",
+            "id": 519
+        }
+    },
+    "Scale Trigger": {
+        "scale X": {
+            "type": "float",
+            "id": 150
+        },
+        "scale Y": {
+            "type": "float",
+            "id": 151
+        },
+        "div X": {
+            "type": "bool",
+            "id": 153
+        },
+        "div Y": {
+            "type": "bool",
+            "id": 154
+        },
+        "target group": {
+            "type": "int",
+            "id": 51
+        },
+        "center group": {
+            "type": "int",
+            "id": 71
+        },
+        "only move": {
+            "type": "bool",
+            "id": 133
+        },
+        "relative scale": {
+            "type": "bool",
+            "id": 577
+        },
+        "relative rot": {
+            "type": "bool",
+            "id": 452
+        }
+    },
+    "Follow Trigger": {
+        "X Mod": {
+            "type": "float",
+            "id": 72
+        },
+        "Y Mod": {
+            "type": "float",
+            "id": 73
+        },
+        "target group": {
+            "type": "int",
+            "id": 51
+        },
+        "follow group": {
+            "type": "int",
+            "id": 71
+        }
+    },
+    "Stop Trigger": {
+        "target ID": {
+            "type": "int",
+            "id": 51
+        },
+        "use control id": {
+            "type": "bool",
+            "id": 535
+        },
+        "stop/pause/resume": {
+            "type": "int ∈ [0, 2]",
+            "id": 580
+        }
+    },
+    "Keyframe Anim Trigger": {
+        "animation group id": {
+            "type": "int",
+            "id": 76
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "parent id": {
+            "type": "int",
+            "id": 71
+        },
+        "time mod": {
+            "type": "float",
+            "id": 520
+        },
+        "position X mod": {
+            "type": "float",
+            "id": 521
+        },
+        "position Y mod": {
+            "type": "float",
+            "id": 545
+        },
+        "rotation mod": {
+            "type": "float",
+            "id": 522
+        },
+        "scale X mod": {
+            "type": "float",
+            "id": 523
+        },
+        "scale Y mod": {
+            "type": "float",
+            "id": 546
+        }
+    },
+    "Follow Player Y Trigger": {
+        "speed": {
+            "type": "float",
+            "id": 90
+        },
+        "delay": {
+            "type": "float",
+            "id": 91
+        },
+        "offset": {
+            "type": "int",
+            "id": 92
+        },
+        "max speed": {
+            "type": "float",
+            "id": 105
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        }
+    },
+    "Advanced Follow Trigger": {
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "follow id": {
+            "type": "int",
+            "id": 71
+        },
+        "priority": {
+            "type": "int",
+            "id": 365
+        },
+        "X only": {
+            "type": "bool",
+            "id": 306
+        },
+        "Y only": {
+            "type": "bool",
+            "id": 307
+        },
+        "follow P1": {
+            "type": "bool",
+            "id": 138
+        },
+        "follow P2": {
+            "type": "bool",
+            "id": 200
+        },
+        "follow C": {
+            "type": "bool",
+            "id": 201
+        },
+        "rot offset": {
+            "type": "int",
+            "id": 340
+        },
+        "rot easing": {
+            "type": "int",
+            "id": 363
+        },
+        "rot deadZ": {
+            "type": "int",
+            "id": 364
+        },
+        "ignore disabled": {
+            "type": "bool",
+            "id": 336
+        },
+        "rotate dir": {
+            "type": "bool",
+            "id": 339
+        },
+        "init set add": {
+            "type": "int ∈ [0, 2]",
+            "id": 572
+        },
+        "exclusive": {
+            "type": "bool",
+            "id": 571
+        },
+        "page 2 1/2/3": {
+            "type": "int ∈ [0, 2]",
+            "id": 367
+        },
+        "delay": {
+            "type": "float",
+            "id": 292
+        },
+        "delay +-": {
+            "type": "float",
+            "id": 293
+        },
+        "max speed": {
+            "type": "float",
+            "id": 298
+        },
+        "max speed +-": {
+            "type": "float",
+            "id": 299
+        },
+        "max range": {
+            "type": "int",
+            "id": 308
+        },
+        "max range +-": {
+            "type": "int",
+            "id": 309
+        },
+        "max range unmarked?": {
+            "type": "int",
+            "id": 366
+        },
+        "easing": {
+            "type": "float",
+            "id": 361
+        },
+        "easing +-": {
+            "type": "float",
+            "id": 362
+        },
+        "start speed": {
+            "type": "float",
+            "id": 300
+        },
+        "start speed +-": {
+            "type": "float",
+            "id": 301
+        },
+        "start speed unmarked?": {
+            "type": "int",
+            "id": 560
+        },
+        "start dir": {
+            "type": "int",
+            "id": 563
+        },
+        "start dir +-": {
+            "type": "int",
+            "id": 564
+        },
+        "start dir unmarked?": {
+            "type": "int",
+            "id": 565
+        },
+        "acceleration": {
+            "type": "float",
+            "id": 334
+        },
+        "acceleration +-": {
+            "type": "float",
+            "id": 335
+        },
+        "friction": {
+            "type": "float",
+            "id": 558
+        },
+        "friction +-": {
+            "type": "float",
+            "id": 559
+        },
+        "near dist": {
+            "type": "float",
+            "id": 359
+        },
+        "near dist +-": {
+            "type": "float",
+            "id": 360
+        },
+        "near friction": {
+            "type": "float",
+            "id": 561
+        },
+        "near friction +-": {
+            "type": "float",
+            "id": 562
+        },
+        "near accel": {
+            "type": "float",
+            "id": 357
+        },
+        "near accel +-": {
+            "type": "float",
+            "id": 358
+        },
+        "steer force": {
+            "type": "float",
+            "id": 316
+        },
+        "steer force +-": {
+            "type": "float",
+            "id": 317
+        },
+        "steer force low": {
+            "type": "float",
+            "id": 318
+        },
+        "steer force low +-": {
+            "type": "float",
+            "id": 319
+        },
+        "steer force low checkbox": {
+            "type": "bool",
+            "id": 337
+        },
+        "speed range low": {
+            "type": "float",
+            "id": 322
+        },
+        "speed range low +-": {
+            "type": "float",
+            "id": 323
+        },
+        "steer force high": {
+            "type": "float",
+            "id": 320
+        },
+        "steer force high +-": {
+            "type": "float",
+            "id": 321
+        },
+        "steer force high checkbox": {
+            "type": "bool",
+            "id": 338
+        },
+        "speed range high": {
+            "type": "float",
+            "id": 324
+        },
+        "speed range high +-": {
+            "type": "float",
+            "id": 325
+        },
+        "slow dist": {
+            "type": "int",
+            "id": 359
+        },
+        "slow dist +-": {
+            "type": "int",
+            "id": 360
+        },
+        "break force": {
+            "type": "float",
+            "id": 326
+        },
+        "break force +-": {
+            "type": "float",
+            "id": 327
+        },
+        "break angle": {
+            "type": "int",
+            "id": 328
+        },
+        "break angle +-": {
+            "type": "int",
+            "id": 329
+        },
+        "break steer force": {
+            "type": "float",
+            "id": 330
+        },
+        "break steer force +-": {
+            "type": "float",
+            "id": 331
+        },
+        "break steer speed limit": {
+            "type": "float",
+            "id": 332
+        },
+        "break steer speed limit +-": {
+            "type": "float",
+            "id": 333
+        },
+        "target dir": {
+            "type": "bool",
+            "id": 305
+        }
+    },
+    "Edit Advanced Follow Trigger": {
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "X only": {
+            "type": "bool",
+            "id": 306
+        },
+        "Y only": {
+            "type": "bool",
+            "id": 307
+        },
+        "mod X": {
+            "type": "float",
+            "id": 566
+        },
+        "mod X +-": {
+            "type": "float",
+            "id": 567
+        },
+        "mod Y": {
+            "type": "float",
+            "id": 568
+        },
+        "mod Y +-": {
+            "type": "float",
+            "id": 569
+        },
+        "speed": {
+            "type": "float",
+            "id": 300
+        },
+        "speed +-": {
+            "type": "float",
+            "id": 301
+        },
+        "speed unmarked?": {
+            "type": "int",
+            "id": 560
+        },
+        "dir": {
+            "type": "int",
+            "id": 363
+        },
+        "dir +-": {
+            "type": "int",
+            "id": 364
+        },
+        "dir unmarked?": {
+            "type": "int",
+            "id": 565
+        },
+        "target control id": {
+            "type": "bool",
+            "id": 535
+        },
+        "redirect dir": {
+            "type": "bool",
+            "id": 570
+        }
+    },
+    "Retarget Advanced Follow Trigger": {
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "follow id": {
+            "type": "int",
+            "id": 71
+        },
+        "target control id": {
+            "type": "bool",
+            "id": 535
+        },
+        "follow P1": {
+            "type": "bool",
+            "id": 138
+        },
+        "follow P2": {
+            "type": "bool",
+            "id": 200
+        },
+        "follow C": {
+            "type": "bool",
+            "id": 201
+        }
+    },
+    "Keyframe Object": {
+        "group id": {
+            "type": "int",
+            "id": 51
+        },
+        "x360": {
+            "type": "int",
+            "id": 537
+        },
+        "spawn gid": {
+            "type": "int",
+            "id": 71
+        },
+        "spawn delay": {
+            "type": "float",
+            "id": 557
+        },
+        "curve": {
+            "type": "bool",
+            "id": 378
+        },
+        "cw/ccw": {
+            "type": "int ∈ [0, 2]",
+            "id": 536,
+            "note": "cw: 1, ccw: 2"
+        },
+        "time/even/dist": {
+            "type": "int ∈ [0, 2]",
+            "id": 379
+        },
+        "prox": {
+            "type": "bool",
+            "id": 377
+        },
+        "ref only": {
+            "type": "bool",
+            "id": 375
+        },
+        "auto layer": {
+            "type": "bool",
+            "id": 459
+        },
+        "preview art": {
+            "type": "bool",
+            "id": 380
+        },
+        "close loop": {
+            "type": "bool",
+            "id": 376
+        },
+        "anim id?": {
+            "type": "int",
+            "id": 373
+        },
+        "line opacity": {
+            "type": "float",
+            "id": 524
+        }
+    },
+    "Area Move Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing": {
+            "type": "int ∈ [0, 18]",
+            "id": 242
+        },
+        "easing rate": {
+            "type": "float",
+            "id": 243
+        },
+        "ease out": {
+            "type": "bool",
+            "id": 261
+        },
+        "easing2": {
+            "type": "int ∈ [0, 18]",
+            "id": 248
+        },
+        "easing2 rate": {
+            "type": "float",
+            "id": 249
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "dir buttons DIR": {
+            "type": "int ∈ [0, 2]",
+            "id": 262,
+            "note": "all, horiz, vert"
+        },
+        "dir buttons INWARDS": {
+            "type": "bool",
+            "id": 276
+        },
+        "dir buttons SINGLE ARROW": {
+            "type": "bool",
+            "id": 283,
+            "note": "seems to be true when DIR is all"
+        },
+        "DE AP": {
+            "type": "bool",
+            "id": 539
+        },
+        "ignore linked": {
+            "type": "bool",
+            "id": 281
+        },
+        "ignore gparent": {
+            "type": "bool",
+            "id": 280
+        },
+        "effect id": {
+            "type": "int",
+            "id": 225
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "center id": {
+            "type": "int",
+            "id": 71
+        },
+        "priority": {
+            "type": "int",
+            "id": 341
+        },
+        "center P1/P2/C/.../TR": {
+            "type": "int ∈ [-11, 0]",
+            "id": 538
+        },
+        "move dist": {
+            "type": "int",
+            "id": 218
+        },
+        "move dist +-": {
+            "type": "int",
+            "id": 219
+        },
+        "move angle": {
+            "type": "int",
+            "id": 231
+        },
+        "move angle +-": {
+            "type": "int",
+            "id": 232
+        },
+        "rfade": {
+            "type": "float",
+            "id": 288
+        },
+        "relative": {
+            "type": "bool",
+            "id": 287
+        },
+        "xy mode": {
+            "type": "bool",
+            "id": 241
+        },
+        "moveX": {
+            "type": "int",
+            "id": 237
+        },
+        "moveX +-": {
+            "type": "int",
+            "id": 238
+        },
+        "moveY": {
+            "type": "int",
+            "id": 239
+        },
+        "moveY +-": {
+            "type": "int",
+            "id": 240
+        }
+    },
+    "Area Rotate Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing": {
+            "type": "int ∈ [0, 18]",
+            "id": 242
+        },
+        "easing rate": {
+            "type": "float",
+            "id": 243
+        },
+        "ease out": {
+            "type": "bool",
+            "id": 261
+        },
+        "easing2": {
+            "type": "int ∈ [0, 18]",
+            "id": 248
+        },
+        "easing2 rate": {
+            "type": "float",
+            "id": 249
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "dir buttons DIR": {
+            "type": "int ∈ [0, 2]",
+            "id": 262,
+            "note": "all, horiz, vert"
+        },
+        "dir buttons INWARDS": {
+            "type": "bool",
+            "id": 276
+        },
+        "dir buttons SINGLE ARROW": {
+            "type": "bool",
+            "id": 283,
+            "note": "seems to be true when DIR is all"
+        },
+        "DE AP": {
+            "type": "bool",
+            "id": 539
+        },
+        "ignore linked": {
+            "type": "bool",
+            "id": 281
+        },
+        "ignore gparent": {
+            "type": "bool",
+            "id": 280
+        },
+        "effect id": {
+            "type": "int",
+            "id": 225
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "center id": {
+            "type": "int",
+            "id": 71
+        },
+        "priority": {
+            "type": "int",
+            "id": 341
+        },
+        "center P1/P2/C/.../TR": {
+            "type": "int ∈ [-11, 0]",
+            "id": 538
+        },
+        "rotation": {
+            "type": "float",
+            "id": 270
+        },
+        "rotation +-": {
+            "type": "float",
+            "id": 271
+        }
+    },
+    "Area Scale Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing": {
+            "type": "int ∈ [0, 18]",
+            "id": 242
+        },
+        "easing rate": {
+            "type": "float",
+            "id": 243
+        },
+        "ease out": {
+            "type": "bool",
+            "id": 261
+        },
+        "easing2": {
+            "type": "int ∈ [0, 18]",
+            "id": 248
+        },
+        "easing2 rate": {
+            "type": "float",
+            "id": 249
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "dir buttons DIR": {
+            "type": "int ∈ [0, 2]",
+            "id": 262,
+            "note": "all, horiz, vert"
+        },
+        "dir buttons INWARDS": {
+            "type": "bool",
+            "id": 276
+        },
+        "dir buttons SINGLE ARROW": {
+            "type": "bool",
+            "id": 283,
+            "note": "seems to be true when DIR is all"
+        },
+        "DE AP": {
+            "type": "bool",
+            "id": 539
+        },
+        "ignore linked": {
+            "type": "bool",
+            "id": 281
+        },
+        "ignore gparent": {
+            "type": "bool",
+            "id": 280
+        },
+        "effect id": {
+            "type": "int",
+            "id": 225
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "center id": {
+            "type": "int",
+            "id": 71
+        },
+        "priority": {
+            "type": "int",
+            "id": 341
+        },
+        "center P1/P2/C/.../TR": {
+            "type": "int ∈ [-11, 0]",
+            "id": 538
+        },
+        "scale X": {
+            "type": "float",
+            "id": 233
+        },
+        "scale X +-": {
+            "type": "float",
+            "id": 234
+        },
+        "scale Y": {
+            "type": "float",
+            "id": 235
+        },
+        "scale Y +-": {
+            "type": "float",
+            "id": 236
+        }
+    },
+    "Area Fade Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing2 rate": {
+            "type": "float",
+            "id": 249
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "dir buttons DIR": {
+            "type": "int ∈ [0, 2]",
+            "id": 262,
+            "note": "all, horiz, vert"
+        },
+        "dir buttons INWARDS": {
+            "type": "bool",
+            "id": 276
+        },
+        "dir buttons SINGLE ARROW": {
+            "type": "bool",
+            "id": 283,
+            "note": "seems to be true when DIR is all"
+        },
+        "DE AP": {
+            "type": "bool",
+            "id": 539
+        },
+        "ignore linked": {
+            "type": "bool",
+            "id": 281
+        },
+        "ignore gparent": {
+            "type": "bool",
+            "id": 280
+        },
+        "effect id": {
+            "type": "int",
+            "id": 225
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "center id": {
+            "type": "int",
+            "id": 71
+        },
+        "priority": {
+            "type": "int",
+            "id": 341
+        },
+        "center P1/P2/C/.../TR": {
+            "type": "int ∈ [-11, 0]",
+            "id": 538
+        },
+        "from opacity": {
+            "type": "float",
+            "id": 286
+        },
+        "to opacity": {
+            "type": "float",
+            "id": 275
+        }
+    },
+    "Area Tint Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing2 rate": {
+            "type": "float",
+            "id": 249
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "dir buttons DIR": {
+            "type": "int ∈ [0, 2]",
+            "id": 262,
+            "note": "all, horiz, vert"
+        },
+        "dir buttons INWARDS": {
+            "type": "bool",
+            "id": 276
+        },
+        "dir buttons SINGLE ARROW": {
+            "type": "bool",
+            "id": 283,
+            "note": "seems to be true when DIR is all"
+        },
+        "DE AP": {
+            "type": "bool",
+            "id": 539
+        },
+        "ignore linked": {
+            "type": "bool",
+            "id": 281
+        },
+        "ignore gparent": {
+            "type": "bool",
+            "id": 280
+        },
+        "effect id": {
+            "type": "int",
+            "id": 225
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "center id": {
+            "type": "int",
+            "id": 71
+        },
+        "priority": {
+            "type": "int",
+            "id": 341
+        },
+        "center P1/P2/C/.../TR": {
+            "type": "int ∈ [-11, 0]",
+            "id": 538
+        },
+        "color channel": {
+            "type": "int",
+            "id": 260
+        },
+        "tint": {
+            "type": "float",
+            "id": 265
+        },
+        "main only": {
+            "type": "bool",
+            "id": 65
+        },
+        "secondary only": {
+            "type": "bool",
+            "id": 66
+        },
+        "hsv on": {
+            "type": "bool",
+            "id": 278
+        },
+        "hsv": {
+            "type": "hsv string",
+            "id": 49
+        }
+    },
+    "Edit Area Move Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing": {
+            "type": "int ∈ [0, 18]",
+            "id": 242
+        },
+        "easing rate": {
+            "type": "float",
+            "id": 243
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "group/effect id": {
+            "type": "int",
+            "id": 51
+        },
+        "use eid": {
+            "type": "bool",
+            "id": 355
+        },
+        "move dist": {
+            "type": "int",
+            "id": 218
+        },
+        "move dist +-": {
+            "type": "int",
+            "id": 219
+        },
+        "move angle": {
+            "type": "int",
+            "id": 231
+        },
+        "move angle +-": {
+            "type": "int",
+            "id": 232
+        },
+        "rfade": {
+            "type": "float",
+            "id": 288
+        },
+        "xy mode": {
+            "type": "bool",
+            "id": 241
+        },
+        "moveX": {
+            "type": "int",
+            "id": 237
+        },
+        "moveX +-": {
+            "type": "int",
+            "id": 238
+        },
+        "moveY": {
+            "type": "int",
+            "id": 239
+        },
+        "moveY +-": {
+            "type": "int",
+            "id": 240
+        }
+    },
+    "Edit Area Rotate Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing": {
+            "type": "int ∈ [0, 18]",
+            "id": 242
+        },
+        "easing rate": {
+            "type": "float",
+            "id": 243
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "group/effect id": {
+            "type": "int",
+            "id": 51
+        },
+        "use eid": {
+            "type": "bool",
+            "id": 355
+        },
+        "rotation": {
+            "type": "float",
+            "id": 270
+        },
+        "rotation +-": {
+            "type": "float",
+            "id": 271
+        }
+    },
+    "Edit Area Scale Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing": {
+            "type": "int ∈ [0, 18]",
+            "id": 242
+        },
+        "easing rate": {
+            "type": "float",
+            "id": 243
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "group/effect id": {
+            "type": "int",
+            "id": 51
+        },
+        "use eid": {
+            "type": "bool",
+            "id": 355
+        },
+        "scale X": {
+            "type": "float",
+            "id": 233
+        },
+        "scale X +-": {
+            "type": "float",
+            "id": 234
+        },
+        "scale Y": {
+            "type": "float",
+            "id": 235
+        },
+        "scale Y +-": {
+            "type": "float",
+            "id": 236
+        }
+    },
+    "Edit Area Fade Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing": {
+            "type": "int ∈ [0, 18]",
+            "id": 242
+        },
+        "easing rate": {
+            "type": "float",
+            "id": 243
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "group/effect id": {
+            "type": "int",
+            "id": 51
+        },
+        "use eid": {
+            "type": "bool",
+            "id": 355
+        },
+        "to opacity": {
+            "type": "float",
+            "id": 275
+        }
+    },
+    "Edit Area Tint Trigger": {
+        "length": {
+            "type": "int",
+            "id": 222
+        },
+        "length +-": {
+            "type": "int",
+            "id": 223
+        },
+        "offset": {
+            "type": "int",
+            "id": 220
+        },
+        "offset +-": {
+            "type": "int",
+            "id": 221
+        },
+        "easing": {
+            "type": "int ∈ [0, 18]",
+            "id": 242
+        },
+        "easing rate": {
+            "type": "float",
+            "id": 243
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 252
+        },
+        "offset Y +-": {
+            "type": "int",
+            "id": 253
+        },
+        "mod front": {
+            "type": "float",
+            "id": 263
+        },
+        "mod back": {
+            "type": "float",
+            "id": 264
+        },
+        "deadzone": {
+            "type": "float",
+            "id": 282
+        },
+        "group/effect id": {
+            "type": "int",
+            "id": 51
+        },
+        "use eid": {
+            "type": "bool",
+            "id": 355
+        },
+        "tint": {
+            "type": "float",
+            "id": 265
+        },
+        "hsv on": {
+            "type": "bool",
+            "id": 278
+        },
+        "hsv": {
+            "type": "hsv string",
+            "id": 49
+        }
+    },
+    "Stop Area Trigger": {
+        "effect id": {
+            "type": "int",
+            "id": 51
+        }
+    },
+    "Background Trigger": {
+        "background": {
+            "type": "int ∈ [1, 59]",
+            "id": 533
+        }
+    },
+    "Ground Trigger": {
+        "ground": {
+            "type": "int ∈ [1, 22]",
+            "id": 533
+        }
+    },
+    "Middle Ground Trigger": {
+        "middle ground": {
+            "type": "int ∈ [0, 3]",
+            "id": 533
+        }
+    },
+    "Touch Trigger": {
+        "group id": {
+            "type": "int",
+            "id": 51
+        },
+        "hold mode": {
+            "type": "bool",
+            "id": 81
+        },
+        "p1/p2 only": {
+            "type": "int ∈ [0, 2]",
+            "id": 198
+        },
+        "toggle on/off": {
+            "type": "int ∈ [0, 2]",
+            "id": 82
+        },
+        "dual mode": {
+            "type": "bool",
+            "id": 89
+        }
+    },
+    "Count Trigger": {
+        "item id": {
+            "type": "int",
+            "id": 80
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "target count": {
+            "type": "int",
+            "id": 77
+        },
+        "activate group": {
+            "type": "bool",
+            "id": 56
+        },
+        "multi activate": {
+            "type": "bool",
+            "id": 104
+        }
+    },
+    "Instant Count Trigger": {
+        "item id": {
+            "type": "int",
+            "id": 80
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "target count": {
+            "type": "int",
+            "id": 77
+        },
+        "activate group": {
+            "type": "bool",
+            "id": 56
+        },
+        "equals/larger/smaller": {
+            "type": "int ∈ [0, 2]",
+            "id": 88
+        }
+    },
+    "Gradient Trigger": {
+        "blending": {
+            "type": "int ∈ [0, 3]",
+            "id": 174
+        },
+        "layer": {
+            "type": "int ∈ [1, 15]",
+            "id": 202
+        },
+        "U/BL": {
+            "type": "int",
+            "id": 203
+        },
+        "D/BR": {
+            "type": "int",
+            "id": 204
+        },
+        "L/TL": {
+            "type": "int",
+            "id": 205
+        },
+        "R/TR": {
+            "type": "int",
+            "id": 206
+        },
+        "vertex mode": {
+            "type": "bool",
+            "id": 207
+        },
+        "disable": {
+            "type": "bool",
+            "id": 208
+        },
+        "id": {
+            "type": "int",
+            "id": 209
+        },
+        "preview opacity": {
+            "type": "float",
+            "id": 456
+        },
+        "disable all": {
+            "type": "bool",
+            "id": 508
+        }
+    },
+    "Static Camera Trigger": {
+        "target group id": {
+            "type": "int",
+            "id": 71
+        },
+        "follow": {
+            "type": "bool",
+            "id": 212
+        },
+        "follow easing": {
+            "type": "float",
+            "id": 213
+        },
+        "smooth velocity": {
+            "type": "bool",
+            "id": 453
+        },
+        "smooth velocity modifier": {
+            "type": "float",
+            "id": 454
+        },
+        "exit instant": {
+            "type": "bool",
+            "id": 465
+        },
+        "exit static": {
+            "type": "bool",
+            "id": 110
+        }
+    },
+    "Camera Zoom Trigger": {
+        "zoom": {
+            "type": "float",
+            "id": 371
+        }
+    },
+    "Camera Rotate Trigger": {
+        "degrees": {
+            "type": "float",
+            "id": 68
+        },
+        "add": {
+            "type": "bool",
+            "id": 70
+        },
+        "snap360": {
+            "type": "bool",
+            "id": 394
+        }
+    },
+    "Camera Edge Trigger": {
+        "edge": {
+            "type": "int ∈ [0, 4]",
+            "id": 164
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        }
+    },
+    "Camera Mode Trigger": {
+        "free mode": {
+            "type": "bool",
+            "id": 111
+        },
+        "edit camera settings": {
+            "type": "bool",
+            "id": 112
+        },
+        "easing": {
+            "type": "int",
+            "id": 113
+        },
+        "padding": {
+            "type": "float",
+            "id": 114
+        },
+        "disable gridsnap": {
+            "type": "bool",
+            "id": 370
+        }
+    },
+    "Camera Guide": {
+        "zoom": {
+            "type": "float",
+            "id": 371
+        },
+        "offsetX": {
+            "type": "int",
+            "id": 28
+        },
+        "offsetY": {
+            "type": "int",
+            "id": 29
+        },
+        "preview opacity": {
+            "type": "float",
+            "id": 506
+        }
+    },
+    "Camera Offset Trigger": {
+        "offsetX": {
+            "type": "int",
+            "id": 28
+        },
+        "offsetY": {
+            "type": "int",
+            "id": 29
+        },
+        "x/y only": {
+            "type": "int ∈ [0, 2]",
+            "id": 101
+        }
+    },
+    "Song Trigger": {
+        "volume": {
+            "type": "float",
+            "id": 406
+        },
+        "speed": {
+            "type": "int",
+            "id": 404
+        },
+        "channel": {
+            "type": "int",
+            "id": 432
+        },
+        "loop": {
+            "type": "bool",
+            "id": 413
+        },
+        "start": {
+            "type": "int",
+            "id": 408
+        },
+        "fade in": {
+            "type": "int",
+            "id": 409
+        },
+        "end": {
+            "type": "int",
+            "id": 410
+        },
+        "fade out": {
+            "type": "int",
+            "id": 411
+        },
+        "prep": {
+            "type": "bool",
+            "id": 399
+        },
+        "load prep": {
+            "type": "bool",
+            "id": 400
+        },
+        "song": {
+            "type": "int",
+            "id": 392
+        }
+    },
+    "SFX Trigger": {
+        "sfx id": {
+            "type": "int",
+            "id": 392
+        },
+        "sound duration": {
+            "type": "float",
+            "id": 490,
+            "note": "affected by changing sfx, speed, start/end"
+        },
+        "speed": {
+            "type": "int",
+            "id": 404
+        },
+        "pitch": {
+            "type": "int",
+            "id": 405
+        },
+        "volume": {
+            "type": "float",
+            "id": 406
+        },
+        "reverb": {
+            "type": "bool",
+            "id": 407
+        },
+        "reverb type": {
+            "type": "int ∈ [0, 22]",
+            "id": 502
+        },
+        "reverb enable": {
+            "type": "bool",
+            "id": 503
+        },
+        "FFT": {
+            "type": "bool",
+            "id": 412
+        },
+        "loop": {
+            "type": "bool",
+            "id": 413
+        },
+        "pre load": {
+            "type": "bool",
+            "id": 433
+        },
+        "start": {
+            "type": "int",
+            "id": 408
+        },
+        "end": {
+            "type": "int",
+            "id": 410
+        },
+        "fade in": {
+            "type": "int",
+            "id": 409
+        },
+        "fade out": {
+            "type": "int",
+            "id": 411
+        },
+        "unique id": {
+            "type": "int",
+            "id": 416
+        },
+        "SFX group": {
+            "type": "int",
+            "id": 455
+        },
+        "is unique": {
+            "type": "bool",
+            "id": 415
+        },
+        "override": {
+            "type": "bool",
+            "id": 420
+        },
+        "min interval": {
+            "type": "float",
+            "id": 434
+        },
+        "ignore volume test": {
+            "type": "bool",
+            "id": 489
+        },
+        "group id 1": {
+            "type": "int",
+            "id": 51
+        },
+        "group id 2": {
+            "type": "int",
+            "id": 71
+        },
+        "P1": {
+            "type": "bool",
+            "id": 138
+        },
+        "P2": {
+            "type": "bool",
+            "id": 200
+        },
+        "CAM": {
+            "type": "bool",
+            "id": 428
+        },
+        "vol near": {
+            "type": "float",
+            "id": 421
+        },
+        "vol med": {
+            "type": "float",
+            "id": 422
+        },
+        "vol far": {
+            "type": "float",
+            "id": 423
+        },
+        "min dist": {
+            "type": "int",
+            "id": 424
+        },
+        "dist 2": {
+            "type": "int",
+            "id": 425
+        },
+        "dist 3": {
+            "type": "int",
+            "id": 426
+        },
+        "dir buttons": {
+            "type": "int ∈ [0, 6]",
+            "id": 458
+        }
+    },
+    "Pickup Trigger": {
+        "item id": {
+            "type": "int",
+            "id": 80
+        },
+        "count": {
+            "type": "int",
+            "id": 77
+        },
+        "override": {
+            "type": "bool",
+            "id": 139
+        },
+        "multiply/divide": {
+            "type": "int ∈ [0, 2]",
+            "id": 88
+        },
+        "modifier": {
+            "type": "float",
+            "id": 449
+        }
+    },
+    "Time Trigger": {
+        "start time": {
+            "type": "float",
+            "id": 467
+        },
+        "stop time": {
+            "type": "float",
+            "id": 473
+        },
+        "stop checked": {
+            "type": "bool",
+            "id": 474
+        },
+        "item id": {
+            "type": "int",
+            "id": 80
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "time mod": {
+            "type": "float",
+            "id": 470
+        },
+        "ignore timewarp": {
+            "type": "bool",
+            "id": 469
+        },
+        "start paused": {
+            "type": "bool",
+            "id": 471
+        },
+        "dont override": {
+            "type": "bool",
+            "id": 468
+        }
+    },
+    "Time Event Trigger": {
+        "item id": {
+            "type": "int",
+            "id": 80
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "target time": {
+            "type": "float",
+            "id": 473
+        },
+        "multi activate": {
+            "type": "bool",
+            "id": 475
+        }
+    },
+    "Time Control Trigger": {
+        "item id": {
+            "type": "int",
+            "id": 80
+        },
+        "start/stop": {
+            "type": "bool",
+            "id": 472
+        }
+    },
+    "Item Edit Trigger": {
+        "item id 1": {
+            "type": "int",
+            "id": 80
+        },
+        "item id 2": {
+            "type": "int",
+            "id": 95
+        },
+        "target item id": {
+            "type": "int",
+            "id": 51
+        },
+        "typ 1": {
+            "type": "int ∈ [0, 5]",
+            "id": 476
+        },
+        "typ 2": {
+            "type": "int ∈ [0, 5]",
+            "id": 477
+        },
+        "target typ": {
+            "type": "int ∈ [1, 3]",
+            "id": 478
+        },
+        "mod": {
+            "type": "float",
+            "id": 479
+        },
+        "assign op": {
+            "type": "int ∈ [0, 4]",
+            "id": 480
+        },
+        "op1": {
+            "type": "int ∈ [1, 4]",
+            "id": 481
+        },
+        "op2": {
+            "type": "int ∈ [3, 4]",
+            "id": 482
+        },
+        "abs/neg 1": {
+            "type": "int ∈ [0, 2]",
+            "id": 578
+        },
+        "abs/neg 2": {
+            "type": "int ∈ [0, 2]",
+            "id": 579
+        },
+        "rnd/flr/cei 1": {
+            "type": "int ∈ [0, 3]",
+            "id": 485
+        },
+        "rnd/flr/cei 2": {
+            "type": "int ∈ [0, 3]",
+            "id": 486
+        }
+    },
+    "Item Compare Trigger": {
+        "item id 1": {
+            "type": "int",
+            "id": 80
+        },
+        "item id 2": {
+            "type": "int",
+            "id": 95
+        },
+        "typ 1": {
+            "type": "int ∈ [0, 5]",
+            "id": 476
+        },
+        "typ 2": {
+            "type": "int ∈ [0, 5]",
+            "id": 477
+        },
+        "mod1": {
+            "type": "float",
+            "id": 479
+        },
+        "mod2": {
+            "type": "float",
+            "id": 483
+        },
+        "true id": {
+            "type": "int",
+            "id": 51
+        },
+        "false id": {
+            "type": "int",
+            "id": 71
+        },
+        "tol +-": {
+            "type": "float",
+            "id": 484
+        },
+        "op1": {
+            "type": "int ∈ [1, 4]",
+            "id": 480
+        },
+        "op2": {
+            "type": "int ∈ [1, 4]",
+            "id": 481
+        },
+        "compare op": {
+            "type": "int ∈ [0, 5]",
+            "id": 482
+        },
+        "abs/neg 1": {
+            "type": "int ∈ [0, 2]",
+            "id": 578
+        },
+        "abs/neg 2": {
+            "type": "int ∈ [0, 2]",
+            "id": 579
+        },
+        "rnd/flr/cei 1": {
+            "type": "int ∈ [0, 3]",
+            "id": 485
+        },
+        "rnd/flr/cei 2": {
+            "type": "int ∈ [0, 3]",
+            "id": 486
+        }
+    },
+    "Item Persistence Trigger": {
+        "item id": {
+            "type": "int",
+            "id": 80
+        },
+        "timer": {
+            "type": "bool",
+            "id": 494
+        },
+        "persistent": {
+            "type": "bool",
+            "id": 491
+        },
+        "target all": {
+            "type": "bool",
+            "id": 492
+        },
+        "reset": {
+            "type": "bool",
+            "id": 493
+        }
+    },
+    "Random Trigger": {
+        "group id 1": {
+            "type": "int",
+            "id": 51
+        },
+        "group id 2": {
+            "type": "int",
+            "id": 71
+        },
+        "chance": {
+            "type": "float",
+            "id": 10
+        }
+    },
+    "Advanced Random Trigger": {
+        "list": {
+            "type": "string",
+            "id": 152,
+            "note": "example: 2.10.3.15 -> g2 weight 10, g3 weight 15"
+        }
+    },
+    "Sequence Trigger": {
+        "sequence": {
+            "type": "string",
+            "id": 435,
+            "note": "period separated, similar to spawn remap"
+        },
+        "min int": {
+            "type": "float",
+            "id": 437
+        },
+        "reset": {
+            "type": "float",
+            "id": 438
+        },
+        "mode": {
+            "type": "int ∈ [0, 2]",
+            "id": 438
+        },
+        "reset full/step": {
+            "type": "bool",
+            "id": 439
+        }
+    },
+    "Spawn Particle Trigger": {
+        "particle group": {
+            "type": "int",
+            "id": 51
+        },
+        "position group": {
+            "type": "int",
+            "id": 71
+        },
+        "offset X": {
+            "type": "int",
+            "id": 547
+        },
+        "offset Y": {
+            "type": "int",
+            "id": 548
+        },
+        "offvar X": {
+            "type": "int",
+            "id": 549
+        },
+        "offvar Y": {
+            "type": "int",
+            "id": 550
+        },
+        "rotation": {
+            "type": "int",
+            "id": 552
+        },
+        "rotation +-": {
+            "type": "int",
+            "id": 553
+        },
+        "scale": {
+            "type": "float",
+            "id": 554
+        },
+        "scale +-": {
+            "type": "float",
+            "id": 555
+        },
+        "match rot": {
+            "type": "bool",
+            "id": 551
+        }
+    },
+    "Reset Trigger": {
+        "group id": {
+            "type": "int",
+            "id": 51
+        }
+    },
+    "Rotate Gameplay / Arrow Trigger": {
+        "edit velocity": {
+            "type": "bool",
+            "id": 169
+        },
+        "velocity mod x": {
+            "type": "float",
+            "id": 582
+        },
+        "velocity mod y": {
+            "type": "float",
+            "id": 583
+        },
+        "override velocity": {
+            "type": "bool",
+            "id": 584
+        },
+        "change channel": {
+            "type": "bool",
+            "id": 171
+        },
+        "channel only": {
+            "type": "bool",
+            "id": 172
+        },
+        "target channel": {
+            "type": "int",
+            "id": 173
+        },
+        "dont slide": {
+            "type": "bool",
+            "id": 585
+        },
+        "instant offset": {
+            "type": "bool",
+            "id": 368
+        },
+        "arrow dir": {
+            "type": "int ∈ [1, 4]",
+            "id": 167,
+            "note": "1: up, 2: down, 3: left, 4: right"
+        },
+        "gravity dir": {
+            "type": "int ∈ [1, 4]",
+            "id": 166,
+            "note": "1: up, 2: down, 3: left, 4: right"
+        }
+    },
+    "Event Trigger": {
+        "group id": {
+            "type": "int",
+            "id": 51
+        },
+        "extra id": {
+            "type": "int",
+            "id": 447
+        },
+        "extra id 2": {
+            "type": "int",
+            "id": 525
+        },
+        "events": {
+            "type": "string",
+            "id": 430,
+            "note": "period separated list"
+        }
+    },
+    "Timewarp Trigger": {
+        "time mod": {
+            "type": "float",
+            "id": 120
+        }
+    },
+    "Counter Display": {
+        "item id": {
+            "type": "int",
+            "id": 80
+        },
+        "time counter": {
+            "type": "bool",
+            "id": 466
+        },
+        "align": {
+            "type": "int ∈ [0, 2]",
+            "id": 391
+        },
+        "seconds only": {
+            "type": "bool",
+            "id": 389
+        },
+        "maintime/points/attempts": {
+            "type": "int ∈ [-3, 0]",
+            "id": 390
+        }
+    },
+    "UI Trigger": {
+        "group id": {
+            "type": "int",
+            "id": 51
+        },
+        "ui target": {
+            "type": "int",
+            "id": 71
+        },
+        "xref pos": {
+            "type": "int ∈ [1, 4]",
+            "id": 385
+        },
+        "yref pos": {
+            "type": "int ∈ [1, 4]",
+            "id": 386
+        },
+        "xref relative": {
+            "type": "bool",
+            "id": 387
+        },
+        "yref relative": {
+            "type": "bool",
+            "id": 388
+        }
+    },
+    "Collision Trigger": {
+        "block A id": {
+            "type": "int",
+            "id": 80
+        },
+        "block B id": {
+            "type": "int",
+            "id": 95
+        },
+        "target id": {
+            "type": "int",
+            "id": 51
+        },
+        "activate group": {
+            "type": "bool",
+            "id": 56
+        },
+        "trigger on exit": {
+            "type": "bool",
+            "id": 93
+        },
+        "P1": {
+            "type": "bool",
+            "id": 138
+        },
+        "P2": {
+            "type": "bool",
+            "id": 200
+        },
+        "PP": {
+            "type": "bool",
+            "id": 201
+        }
+    },
+    "Instant Collision Trigger": {
+        "block A id": {
+            "type": "int",
+            "id": 80
+        },
+        "block B id": {
+            "type": "int",
+            "id": 95
+        },
+        "true id": {
+            "type": "int",
+            "id": 51
+        },
+        "false id": {
+            "type": "int",
+            "id": 71
+        },
+        "P1": {
+            "type": "bool",
+            "id": 138
+        },
+        "P2": {
+            "type": "bool",
+            "id": 200
+        },
+        "PP": {
+            "type": "bool",
+            "id": 201
+        }
+    },
+    "Collision State Block": {
+        "state on": {
+            "type": "int",
+            "id": 51
+        },
+        "state off": {
+            "type": "int",
+            "id": 71
+        }
+    },
+    "Collision Block": {
+        "block id": {
+            "type": "int",
+            "id": 80
+        },
+        "dynamic block": {
+            "type": "bool",
+            "id": 94
+        }
+    },
+    "Toggle Block": {
+        "group id": {
+            "type": "int",
+            "id": 51
+        },
+        "activate group": {
+            "type": "bool",
+            "id": 56
+        },
+        "claim touch": {
+            "type": "bool",
+            "id": 445
+        },
+        "spawn only": {
+            "type": "bool",
+            "id": 504
+        },
+        "multi activate": {
+            "type": "bool",
+            "id": 99
+        }
+    },
+    "Options Trigger": {
+        "streak additive": {
+            "type": "int ∈ [-1, 1]",
+            "id": 159
+        },
+        "hide ground": {
+            "type": "int ∈ [-1, 1]",
+            "id": 161
+        },
+        "hide mg": {
+            "type": "int ∈ [-1, 1]",
+            "id": 195
+        },
+        "hide P1": {
+            "type": "int ∈ [-1, 1]",
+            "id": 162
+        },
+        "hide P2": {
+            "type": "int ∈ [-1, 1]",
+            "id": 163
+        },
+        "disable P1 controls": {
+            "type": "int ∈ [-1, 1]",
+            "id": 165
+        },
+        "disable P2 controls": {
+            "type": "int ∈ [-1, 1]",
+            "id": 199
+        },
+        "unlink dual gravity": {
+            "type": "int ∈ [-1, 1]",
+            "id": 160
+        },
+        "hide attempts": {
+            "type": "int ∈ [-1, 1]",
+            "id": 532
+        },
+        "audio on death": {
+            "type": "int ∈ [-1, 1]",
+            "id": 575
+        },
+        "no death sfx": {
+            "type": "int ∈ [-1, 1]",
+            "id": 576
+        },
+        "edit respawn time": {
+            "type": "int ∈ [-1, 1]",
+            "id": 573
+        },
+        "respawn time": {
+            "type": "float",
+            "id": 574
+        }
+    },
+    "On Death Trigger": {
+        "group id": {
+            "type": "int",
+            "id": 51
+        },
+        "activate group": {
+            "type": "bool",
+            "id": 56
+        }
+    },
+    "Gravity Trigger": {
+        "gravity": {
+            "type": "float",
+            "id": 148
+        },
+        "P1": {
+            "type": "bool",
+            "id": 138
+        },
+        "P2": {
+            "type": "bool",
+            "id": 200
+        },
+        "PT": {
+            "type": "bool",
+            "id": 201
+        }
+    },
+    "Player Control Trigger": {
+        "P1": {
+            "type": "bool",
+            "id": 138
+        },
+        "P2": {
+            "type": "bool",
+            "id": 200
+        },
+        "stop jump": {
+            "type": "bool",
+            "id": 540
+        },
+        "stop move": {
+            "type": "bool",
+            "id": 541
+        },
+        "stop rot": {
+            "type": "bool",
+            "id": 542
+        },
+        "stop slide": {
+            "type": "bool",
+            "id": 543
+        }
+    }
+}
