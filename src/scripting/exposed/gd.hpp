@@ -11,7 +11,7 @@ void forAllObjects(const sol::function& f);
 void forSelectedObjects(const sol::function& f);
 GameObject* createObject(const sol::lua_table& t);
 void deleteObjects(const sol::variadic_args& args);
+void setObjectPropertyEnums(sol::state& lua);
 
 void registerTable(sol::state&);
-std::vector<sol::table> getPropertyTable(sol::state&);
 } //gd

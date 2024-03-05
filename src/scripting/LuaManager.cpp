@@ -56,15 +56,17 @@ void LuaManager::runScript(const ScriptInfo& scriptinfo)
     gd::registerTable(lua);
     lua.set("GameObjectType", LGameObject::getGameObjectTypeTable(lua));
 
-    for(const auto& nameTablePair : gd::getPropertyTable(lua))
-    {
-        lua.set(nameTablePair);
-    }
+    gd::setObjectPropertyEnums(lua);
+    //for(const auto& nameTablePair : gd::getPropertyTable(lua))
+    //{
+    //    lua.set(nameTablePair);
+    //}
 
 
     std::string tostdout;
     std::string toappend = fmt::format("\n[{}]: ", scriptinfo.name);
-    lua.set("myprint", [&](const sol::variadic_args& args) {
+    sol::table gd = lua["gd"];
+    gd.set("print", [&](const sol::variadic_args& args) {
         tostdout += toappend;
         appendToString(" ", tostdout, args);
     });

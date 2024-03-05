@@ -1,13 +1,6 @@
 ---@module 'gd'
 ---@meta
 
---@class Color3B
---@field r number
---@field g number
---@field b number
-
----@class float
-
 ---@class GameObject
 ---@field id integer
 ---@field type GameObjectType
@@ -44,14 +37,14 @@ function GameObject:addGroups(...) end
 function GameObject:forAllGroups(f) end
 
 
-
-
 gd = {}
 --TODO: opacity, color<br>
 ---@param properties table<number, number|boolean|string>
 ---@return GameObject
 function gd.create(properties) end
 
+---fast print (experimental)
+function gd.print(...) end
 
 ---@return GameObject[]
 function gd.getSelectedObjects() end
@@ -64,6 +57,9 @@ function gd.getObjectCount() end
 
 ---@param fun fun(obj: GameObject)
 function gd.forAllObjects(fun) end
+
+---@param fun fun(obj: GameObject)
+function gd.forSelectedObjects(fun) end
 
 ---------------------TODO--------------------
 

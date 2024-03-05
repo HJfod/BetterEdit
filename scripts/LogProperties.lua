@@ -6,7 +6,7 @@
 gd.forAllObjects(function(obj)
     local props = obj:getProperties()
     for k, v in pairs(props) do
-        myprint(k .. "=" .. v)
+        gd.print(k .. "=" .. v)
     end
-    myprint("--")
+    gd.print("--")
 end)

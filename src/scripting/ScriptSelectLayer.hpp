@@ -22,4 +22,7 @@ struct ScriptSelectLayer : public geode::Popup<>
     void onOpenPath(cocos2d::CCObject*);
     void onSelectFile(cocos2d::CCObject*);
     void onCopyPath(cocos2d::CCObject*);
+    void onUpdateBindings(cocos2d::CCObject*);
+    
+    static void updateBindings();
 };

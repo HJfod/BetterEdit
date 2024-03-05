@@ -2,9 +2,11 @@
 #include "LuaManager.hpp"
 
 #include <Geode/loader/Mod.hpp>
+#include <geode.custom-keybinds/include/Keybinds.hpp>
 
 
 using namespace cocos2d;
+using namespace keybinds;
 namespace fs = ghc::filesystem;
 
 ScriptSelectLayer* ScriptSelectLayer::create() {
@@ -19,26 +21,17 @@ ScriptSelectLayer* ScriptSelectLayer::create() {
 
 void ScriptSelectLayer::onScript(CCObject* btn)
 {
-    int index = btn->getTag();
-    try
+    int index = btn->getTag();    
+    if(index < 0 || static_cast<size_t>(index) >= scripts.size())
     {
-        const auto& script = this->scripts.at(index);
-        LuaManager::runScript(script);
+        geode::log::error("index script tag out of bounds. index: {}, size: {}", index, scripts.size());
+    }
 
-        geode::Notification::create(script.name, geode::NotificationIcon::Success, 1.0f)->show();
+    geode::Loader::get()->queueInMainThread(
+        [scriptPath = scripts[index]]{ LuaManager::runScript(scriptPath); }
+    );
 
-        this->onClose(nullptr);
-    }
-    catch(std::runtime_error& e)
-    {
-        std::string str = fmt::format("{}: {} | Internal error type: {}", scripts[index].name, e.what(), typeid(e).name());
-        geode::log::error("{}", str);
-        geode::Notification::create(scripts[index].name, geode::NotificationIcon::Error, 1.0f)->show();
-    }
-    catch(std::exception& e)
-    {
-        geode::log::error("Unknown error running script: {}", e.what());
-    }
+    this->onClose(nullptr);
 }
 
 
@@ -72,23 +65,18 @@ void ScriptSelectLayer::onCopyPath(cocos2d::CCObject*)
 
 void ScriptSelectLayer::setScriptMembers()
 {
-    auto MOD = geode::Mod::get();
-    scripts_dir = MOD->getConfigDir() / "scripts";
-
-    if(fs::is_directory(scripts_dir))
+    if(auto scriptspath = ScriptInfo::getScriptsPath())
     {
+        scripts_dir = *scriptspath;
         scripts = ScriptInfo::getScriptsFromFolder(scripts_dir);
-        return;
     }
-
-    if(!fs::is_symlink(scripts_dir)) return;
-
-    auto sympath = fs::read_symlink(scripts_dir);
-    if(!fs::is_directory(sympath)) return;
-
-    scripts_dir = sympath;
-    scripts = ScriptInfo::getScriptsFromFolder(scripts_dir);
 }
+
+void ScriptSelectLayer::onUpdateBindings(CCObject*)
+{
+    updateBindings();
+}
+
 bool ScriptSelectLayer::setup()
 {
     setScriptMembers();
@@ -104,11 +92,12 @@ bool ScriptSelectLayer::setup()
     for(const auto& btndata : std::initializer_list<std::pair<const char*, SEL_MenuHandler>>
         {{"Open Path", menu_selector(ScriptSelectLayer::onOpenPath)},
         {"Add File", menu_selector(ScriptSelectLayer::onSelectFile)},
-        {"Copy Path", menu_selector(ScriptSelectLayer::onCopyPath)}}
+        {"Copy Path", menu_selector(ScriptSelectLayer::onCopyPath)},
+        {"Update Bindings", menu_selector(ScriptSelectLayer::onUpdateBindings)}}
     )
     {
         auto spr = ButtonSprite::create(btndata.first, "bigFont.fnt", "GJ_button_04.png", 0.7f);
-        spr->setScale(.7);
+        spr->setScale(.6);
         auto btn = CCMenuItemSpriteExtra::create(spr, this, btndata.second);
         btnMenu->addChild(btn);
     }
@@ -174,7 +163,6 @@ bool ScriptSelectLayer::setup()
         auto authorlabel = CCLabelBMFont::create(fmt::format("By {}", s.dev).c_str(), "goldFont.fnt");
 
         float limitWidth = 320 - label->getScaledContentSize().width - playtestSpr->getContentWidth();
-        geode::log::info("{}", limitWidth);
         authorlabel->limitLabelWidth(limitWidth, 0.6f, 0.1f);
         authorlabel->setAnchorPoint(ccp(0, 0.5f));
         authorlabel->setPosition(label->getPosition() + CCPoint(label->getScaledContentSize().width + (limitWidth / 20), 0));
@@ -201,7 +189,53 @@ bool ScriptSelectLayer::setup()
         scroll->moveToTop();
     }
 
-    
-
     return true;
+}
+
+void ScriptSelectLayer::updateBindings()
+{
+    auto bm = BindManager::get();
+    auto scriptBindings = bm->getBindablesIn("Scripts");
+
+    auto path = ScriptInfo::getScriptsPath();
+    if(!path) return;
+    auto scripts = ScriptInfo::getScriptsFromFolder(*path);
+
+
+    auto scriptInBindingsExists = [&](const keybinds::BindableAction& binding) -> bool
+    {
+        for(const auto& existingScript : scripts)
+        {
+            auto id = binding.getID();
+            auto id2 = existingScript.getUniqueString();
+            if(id == id2)
+                return true;
+        }
+        return false;
+    };
+
+    for(const auto& scriptInBinding : scriptBindings)
+    {
+        if(!scriptInBindingsExists(scriptInBinding))
+        {
+            bm->removeBindable(scriptInBinding.getID());
+        }
+    }
+
+    for(const auto& script : scripts)
+    {
+        bm->registerBindable({
+            //ID
+            script.getUniqueString(),
+            // Name
+            fmt::format("{} by {}", script.name, script.dev),
+            // Description, leave empty for none
+            "",
+            // Default binds
+            { },
+            // Category; use slashes for specifying subcategories. See the
+            // Category class for default categories
+            "Scripts"
+        });
+    }
 }

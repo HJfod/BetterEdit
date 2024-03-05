@@ -4,15 +4,33 @@
 #include <Geode/binding/EditorUI.hpp>
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/binding/GameObject.hpp>
+#include <geode.custom-keybinds/include/Keybinds.hpp>
+#include "LuaManager.hpp"
+
 
 
 using namespace cocos2d;
+using namespace geode;
+using namespace keybinds;
 
 struct MyEditorUI : geode::Modify<MyEditorUI, EditorUI>
 {
     void onBtn(CCObject*)
     {
         ScriptSelectLayer::create()->show();
+    }
+
+    void setBindings()
+    {
+        ScriptInfo::forAllOnPath([&](const ScriptInfo& script){
+            this->template addEventListener<InvokeBindFilter>([script /*copy*/](InvokeBindEvent* event){
+                if (event->isDown())
+                {
+                    LuaManager::runScript(script);
+                }
+                return ListenerResult::Propagate;
+            }, script.getUniqueString());
+        });
     }
     bool init(LevelEditorLayer* editor)
     {
@@ -23,6 +41,8 @@ struct MyEditorUI : geode::Modify<MyEditorUI, EditorUI>
         auto menu = static_cast<CCMenu*>(this->getChildByID("undo-menu"));
         menu->addChild(btn);
         menu->updateLayout();
+
+        setBindings();
         return true;
     }
 };
@@ -34,3 +54,8 @@ struct MyMenuLayer : geode::Modify<MyMenuLayer, MenuLayer>
         ScriptSelectLayer::create()->show();
     }
 };
+
+$execute
+{
+    ScriptSelectLayer::updateBindings();
+}

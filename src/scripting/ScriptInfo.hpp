@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 #include <fstream>
+#include <functional>
 #include <fmt/format.h>
 
 
@@ -70,6 +71,34 @@ struct ScriptInfo
             if(auto script = ScriptInfo::fromLuaFile(itemPath)) ret.push_back(*script);
         }
         return ret;
+    }
+
+    static std::optional<ghc::filesystem::path> getScriptsPath()
+    {
+        auto MOD = geode::Mod::get();
+        auto scripts_dir = MOD->getConfigDir() / "scripts";
+
+        if(ghc::filesystem::is_directory(scripts_dir)) return scripts_dir;
+        if(!ghc::filesystem::is_symlink(scripts_dir)) return {};
+
+        auto sympath = ghc::filesystem::read_symlink(scripts_dir);
+        
+        if(ghc::filesystem::is_directory(sympath)) return sympath;
+        return {};
+    }
+
+    std::string getUniqueString() const {
+        return geode::Mod::get()->expandSpriteName(fmt::format("{}-{}", name, dev).c_str());
+    }
+
+    static void forAllOnPath(const std::function<void(const ScriptInfo&)>& callback)
+    {
+        auto path = getScriptsPath();
+        if(!path) return;
+        for(const auto& s : getScriptsFromFolder(*path))
+        {
+            callback(s);
+        }
     }
 
 };

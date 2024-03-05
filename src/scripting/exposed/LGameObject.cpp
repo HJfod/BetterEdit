@@ -139,20 +139,31 @@ sol::table LGameObject::getGameObjectTypeTable(sol::state& lua)
         "AnimatedHazard", 47
     );
 }
+
+//this reorders sections
+inline void moveObjectX(GameObject* obj, float x)
+{
+    LuaHelper::ui()->moveObject(obj, CCPoint(x - obj->getPositionX(), 0.0f));
+}
+inline void moveObjectY(GameObject* obj, float y)
+{
+    LuaHelper::ui()->moveObject(obj, CCPoint(0.0f, y - obj->getPositionY()));
+}
+
 void LGameObject::registerGameObject(sol::state& lua)
 {
     sol::usertype<GameObject> type = lua.new_usertype<GameObject>("GameObject", sol::no_constructor);
-    type.set("x", sol::property(&GameObject::getPositionX, &GameObject::setPositionX));
-    type.set("y", sol::property(&GameObject::getPositionY, &GameObject::setPositionY));
+    
+    type.set("x", sol::property(&GameObject::getPositionX, moveObjectX));
+    type.set("y", sol::property(&GameObject::getPositionY, moveObjectY));
+
+
     type.set("rotation", sol::property(&GameObject::getRotation, &GameObject::setRotation));
     type.set("scale", sol::property(&GameObject::setScale, &GameObject::getScale));
 
     type.set("groupCount", sol::readonly_property(&GameObject::m_groupCount));
     type.set("type", sol::readonly_property(&GameObject::m_objectType));
     type.set("id", sol::readonly_property(&GameObject::m_objectID));
-
-    
-
 
     type.set_function("addGroups", &LGameObject::addGroup);
     type.set_function("setGroups", &LGameObject::setGroups);
