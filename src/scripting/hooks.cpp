@@ -35,8 +35,8 @@ struct MyEditorUI : geode::Modify<MyEditorUI, EditorUI>
     bool init(LevelEditorLayer* editor)
     {
         if(!EditorUI::init(editor)) return false;
-        auto spr = CCSprite::createWithSpriteFrameName("GJ_newBtn_001.png");
-        spr->setScale(.5f);
+        auto spr = CCSprite::createWithSpriteFrameName("be-button.png"_spr);
+        spr->setScale(.75f);
         auto btn = CCMenuItemSpriteExtra::create(spr, nullptr, this, menu_selector(MyEditorUI::onBtn));
         auto menu = static_cast<CCMenu*>(this->getChildByID("undo-menu"));
         menu->addChild(btn);
