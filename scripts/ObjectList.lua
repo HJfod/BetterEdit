@@ -12,9 +12,9 @@ for i = 0, 2, 1 do
         local x = 15 + (j * 60)
         local y = 315 - (i * 90)
         gd.create({
-            [gd.p.object_common.id] = object_id,
-            [gd.p.object_common.x] = x,
-            [gd.p.object_common.y] = y
+            [object_common.id] = object_id,
+            [object_common.x] = x,
+            [object_common.y] = y
         })
         object_id = object_id + 1
     end

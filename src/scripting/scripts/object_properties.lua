@@ -1,49 +1,21 @@
 
-local json = require "json"
 
-local f = io.open("obj_props.json", "r")
-if not f then
-    print ("could not find file")
-    return
-end
+local j = require "fixjson"
 
-local str = f:read("*a")
-local j = json.decode(str)
+local tablestrformat = "%s = {"
+local tablecloseformat = "}"
+local keyformat = "\t%s = %i,"
 
-function fixkey(str)
-    str = string.gsub(str, " ", "_")
-    str = string.gsub(str, "'", "")
-    str = string.gsub(str, "?", "")
-    str = string.gsub(str, "/", "_")
-    str = string.gsub(str, "%+%-", "rand")
-    str = string.gsub(str, "%.%.%.", "")
-    str = string.lower(str)
-
-    if str == "end" then return "end_" end --end is a keyword smh
-    return str
-end
-
-print("gd.p = {")
-for trigger, t in pairs(j) do
-    trigger = fixkey(trigger)
-    print("\t" .. trigger .. " = {")
-    for k, v in pairs(t) do
-        k = fixkey(k)
-        local comment = "--"
-        if v.type then
-            v.type = string.gsub(v.type, "∈ ", "")
-            comment = comment .. v.type
-        end
-        if v.note then
-            if v.type then
-                comment = comment .. "<br>" .. v.note
-            else
-                comment = v.note
-            end
-        end
-        print("\t\t" .. k .. " = " .. v.id .. "," .. comment)
+for k, v in pairs(j) do
+    print(("---@enum %s"):format(k))
+    print(tablestrformat:format(k))
+    for kk, vv in pairs(v) do
+        io.write(keyformat:format(kk, vv.id))
+        if vv.note or vv.type then io.write(" --") end
+        if vv.type then io.write(vv.type) end
+        if vv.note and vv.type then io.write(", ") end
+        if vv.note then io.write(vv.note) end
+        io.write("\n")
     end
-    print("\t},")
+    print(tablecloseformat)
 end
-
-print("}")

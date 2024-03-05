@@ -22,8 +22,8 @@ void ScriptSelectLayer::onScript(CCObject* btn)
     int index = btn->getTag();
     try
     {
-        auto& script = this->scripts.at(index);
-        LuaManager::runScript(script.path);
+        const auto& script = this->scripts.at(index);
+        LuaManager::runScript(script);
 
         geode::Notification::create(script.name, geode::NotificationIcon::Success, 1.0f)->show();
 

@@ -14,13 +14,29 @@ file(GLOB SOURCES
 	src/editor/*.cpp
 	src/utils/*.cpp
 	src/scripting/lua/*.c
+	src/scripting/exposed/*.cpp
 	src/scripting/*.cpp
 	src/*.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC "src" "src/scripting/lua")
+
+if(WIN32)
+	file(GLOB SCRIPTING_SOURCES
+		src/scripting/lua/*.c
+		src/scripting/exposed/*.cpp
+		src/scripting/*.cpp
+		src/*.cpp
+	)
+	target_sources(${PROJECT_NAME} PRIVATE ${SCRIPTING_SOURCES})
+	target_compile_definitions(${PROJECT_NAME} PRIVATE SOL_NO_EXCEPTIONS)
+	target_include_directories(${PROJECT_NAME} PUBLIC "src" "src/scripting/lua")
+	target_precompile_headers(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CMAKE_SOURCE_DIR}/src/scripting/lua/sol.hpp>)
+endif()
+
+
+
 
 if (NOT DEFINED ENV{GEODE_SDK})
     message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")
@@ -48,5 +64,3 @@ else()
 		-Wno-overloaded-virtual
 	)
 endif()
-
-target_precompile_headers(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CMAKE_SOURCE_DIR}/src/scripting/lua/sol.hpp>)
