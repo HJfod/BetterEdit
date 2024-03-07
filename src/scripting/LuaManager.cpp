@@ -15,8 +15,6 @@
 
 using namespace cocos2d;
 
-
-
 void appendToString(std::string_view separator, std::string& out, const sol::variadic_args& args)
 {
     for(const auto& arg : args)
@@ -62,7 +60,6 @@ void LuaManager::runScript(const ScriptInfo& scriptinfo)
     //    lua.set(nameTablePair);
     //}
 
-
     std::string tostdout;
     std::string toappend = fmt::format("\n[{}]: ", scriptinfo.name);
     sol::table gd = lua["gd"];
@@ -70,7 +67,6 @@ void LuaManager::runScript(const ScriptInfo& scriptinfo)
         tostdout += toappend;
         appendToString(" ", tostdout, args);
     });
-
 
     lua.safe_script_file(scriptinfo.path.string(), internal_error);
 
@@ -83,4 +79,3 @@ void LuaManager::runScript(const ScriptInfo& scriptinfo)
 
 
 }
-

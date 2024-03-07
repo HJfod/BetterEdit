@@ -7,6 +7,8 @@
 #include <geode.custom-keybinds/include/Keybinds.hpp>
 #include "LuaManager.hpp"
 
+#include <utils/HandleUIHide.hpp>
+
 
 
 using namespace cocos2d;
@@ -38,10 +40,10 @@ struct MyEditorUI : geode::Modify<MyEditorUI, EditorUI>
         auto spr = CCSprite::createWithSpriteFrameName("be-button.png"_spr);
         spr->setScale(.75f);
         auto btn = CCMenuItemSpriteExtra::create(spr, nullptr, this, menu_selector(MyEditorUI::onBtn));
+        handleUIHideOnPlaytest(this, btn);
         auto menu = static_cast<CCMenu*>(this->getChildByID("undo-menu"));
         menu->addChild(btn);
         menu->updateLayout();
-
         setBindings();
         return true;
     }

@@ -18,8 +18,11 @@ static gd::set<short> getGroupIDs(GameObject* obj) {
     return res;
 }
 
+namespace
+{
 
-void LGameObject::addGroup(GameObject* obj, const sol::variadic_args& args)
+
+void addGroup(GameObject* obj, const sol::variadic_args& args)
 {
     for(const auto& g : LuaHelper::getFromVarArgs<int>(args))
     {
@@ -27,12 +30,12 @@ void LGameObject::addGroup(GameObject* obj, const sol::variadic_args& args)
     }
 }
 
-sol::as_table_t<gd::set<short>> LGameObject::getGroups(GameObject* obj)
+sol::as_table_t<gd::set<short>> getGroups(GameObject* obj)
 {
     return sol::as_table(getGroupIDs(obj));
 }
 
-void LGameObject::removeAllGroups(GameObject* obj)
+void removeAllGroups(GameObject* obj)
 {
     for(const auto& g : getGroupIDs(obj))
     {
@@ -40,7 +43,7 @@ void LGameObject::removeAllGroups(GameObject* obj)
     }
 }
 
-void LGameObject::removeGroups(GameObject* obj, const sol::variadic_args& args)
+void removeGroups(GameObject* obj, const sol::variadic_args& args)
 {
     for(const auto& g : LuaHelper::getFromVarArgs<int>(args))
     {
@@ -48,7 +51,7 @@ void LGameObject::removeGroups(GameObject* obj, const sol::variadic_args& args)
     }
 }
 
-void LGameObject::forAllGroups(GameObject* obj, const sol::function& f)
+void forAllGroups(GameObject* obj, const sol::function& f)
 {
     for(const auto& g : getGroupIDs(obj))
     {
@@ -56,13 +59,13 @@ void LGameObject::forAllGroups(GameObject* obj, const sol::function& f)
     }
 }
 
-void LGameObject::setGroups(GameObject* obj, const sol::variadic_args& args)
+void setGroups(GameObject* obj, const sol::variadic_args& args)
 {
-    LGameObject::removeAllGroups(obj);
-    LGameObject::addGroup(obj, args);
+    removeAllGroups(obj);
+    addGroup(obj, args);
 }
 
-sol::table LGameObject::getProperties(sol::this_state lua, GameObject* obj, const sol::variadic_args& args)
+sol::table getProperties(sol::this_state lua, GameObject* obj, const sol::variadic_args& args)
 {
     std::vector<int> v = LuaHelper::getFromVarArgs<int>(args);
     std::string str = obj->getSaveString(LuaHelper::editor());
@@ -85,6 +88,19 @@ sol::table LGameObject::getProperties(sol::this_state lua, GameObject* obj, cons
             t.set(key, std::string(*valueIt));
     }
     return t;
+}
+
+} //empty namespace
+
+
+//this reorders sections
+inline void moveObjectX(GameObject* obj, float x)
+{
+    LuaHelper::ui()->moveObject(obj, CCPoint(x - obj->getPositionX(), 0.0f));
+}
+inline void moveObjectY(GameObject* obj, float y)
+{
+    LuaHelper::ui()->moveObject(obj, CCPoint(0.0f, y - obj->getPositionY()));
 }
 
 sol::table LGameObject::getGameObjectTypeTable(sol::state& lua)
@@ -140,16 +156,6 @@ sol::table LGameObject::getGameObjectTypeTable(sol::state& lua)
     );
 }
 
-//this reorders sections
-inline void moveObjectX(GameObject* obj, float x)
-{
-    LuaHelper::ui()->moveObject(obj, CCPoint(x - obj->getPositionX(), 0.0f));
-}
-inline void moveObjectY(GameObject* obj, float y)
-{
-    LuaHelper::ui()->moveObject(obj, CCPoint(0.0f, y - obj->getPositionY()));
-}
-
 void LGameObject::registerGameObject(sol::state& lua)
 {
     sol::usertype<GameObject> type = lua.new_usertype<GameObject>("GameObject", sol::no_constructor);
@@ -165,13 +171,13 @@ void LGameObject::registerGameObject(sol::state& lua)
     type.set("type", sol::readonly_property(&GameObject::m_objectType));
     type.set("id", sol::readonly_property(&GameObject::m_objectID));
 
-    type.set_function("addGroups", &LGameObject::addGroup);
-    type.set_function("setGroups", &LGameObject::setGroups);
-    type.set_function("removeGroups", &LGameObject::removeGroups);
-    type.set_function("getGroups", &LGameObject::getGroups);
-    type.set_function("removeAllGroups", &LGameObject::removeAllGroups);
-    type.set_function("forAllGroups", &LGameObject::forAllGroups);
-    type.set_function("getProperties", &LGameObject::getProperties);
+    type.set_function("addGroups", addGroup);
+    type.set_function("setGroups", setGroups);
+    type.set_function("removeGroups", removeGroups);
+    type.set_function("getGroups", getGroups);
+    type.set_function("removeAllGroups", removeAllGroups);
+    type.set_function("forAllGroups", forAllGroups);
+    type.set_function("getProperties", getProperties);
 
     type.set_function("getSaveString", [](GameObject* obj) -> std::string { return std::string(obj->getSaveString(LuaHelper::editor())); });
 
