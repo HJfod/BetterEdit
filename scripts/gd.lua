@@ -61,6 +61,10 @@ function gd.forAllObjects(fun) end
 ---@param fun fun(obj: GameObject)
 function gd.forSelectedObjects(fun) end
 
+---@param ... GameObject|GameObject[]
+---Avoid calling this function in a loop, instead add all objects needed to be deleted in a table and just call the function once. 
+function gd.deleteObjects(...) end
+
 ---------------------TODO--------------------
 
 

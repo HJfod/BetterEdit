@@ -24,4 +24,7 @@ They are regular lua comments.
 ## Intellisense
 Using [Lua Language Server](https://luals.github.io/) ([VSCode](https://marketplace.visualstudio.com/items?itemName=sumneko.lua))
 
-Download [.luarc.json](https://github.com/iAndyHD3/BetterEdit/blob/lua/.luarc.json) and place it in your `scripts` directory. From my testing on vscode, lua language sever only recognizes the file if it's in the root of the workspace, therefore you might need to open the `scripts` folder as a workspace on vscode
+1. Download [.luarc.json](https://github.com/iAndyHD3/BetterEdit/blob/lua/.luarc.json) and place it in your `scripts` directory (or the root directory of your workspace).
+1. Download [gd.lua](https://github.com/iAndyHD3/BetterEdit/blob/lua/scripts/gd.lua) and place it in your `scripts` directory.
+
+From my testing on vscode, lua language sever only recognizes the `.luarc.json` file if it's in the root of the workspace, therefore you might need to open the `scripts` folder as a workspace on vscode (or as said, place `.luarc.json` at the root of your workspace)
