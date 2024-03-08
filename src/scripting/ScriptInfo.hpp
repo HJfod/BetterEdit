@@ -78,13 +78,17 @@ struct ScriptInfo
         auto MOD = geode::Mod::get();
         auto scripts_dir = MOD->getConfigDir() / "scripts";
 
-        if(ghc::filesystem::is_directory(scripts_dir)) return scripts_dir;
-        if(!ghc::filesystem::is_symlink(scripts_dir)) return {};
+        if(ghc::filesystem::is_directory(scripts_dir))
+            return scripts_dir;
 
-        auto sympath = ghc::filesystem::read_symlink(scripts_dir);
-        
-        if(ghc::filesystem::is_directory(sympath)) return sympath;
-        return {};
+        if(ghc::filesystem::is_symlink(scripts_dir))
+        {
+            auto sympath = ghc::filesystem::read_symlink(scripts_dir);
+            if(ghc::filesystem::is_directory(sympath))
+                return sympath;
+        }
+
+        return ghc::filesystem::create_directory(scripts_dir) ? scripts_dir : ghc::filesystem::path{};
     }
 
     std::string getUniqueString() const {

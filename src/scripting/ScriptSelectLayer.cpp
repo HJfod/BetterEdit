@@ -43,6 +43,12 @@ void ScriptSelectLayer::onSelectFile(cocos2d::CCObject*)
 {
     auto onSelect = [this](fs::path file)
     {
+        if(!fs::exists(scripts_dir))
+        {
+            return geode::Loader::get()->queueInMainThread([]{
+                geode::Notification::create("Path does not exist", geode::NotificationIcon::Error)->show();
+            });
+        }
         fs::copy_file(file, scripts_dir / file.filename(), fs::copy_options::overwrite_existing);
         onClose(nullptr);
         geode::Loader::get()->queueInMainThread([]{ ScriptSelectLayer::create()->show(); });
@@ -83,11 +89,21 @@ bool ScriptSelectLayer::setup()
 
     this->setTitle("Run script file", "bigFont.fnt", 0.7f);
 
+
     auto winSize = CCDirector::get()->getWinSize();
     auto btnMenu = CCMenu::create();
     btnMenu->setLayout(RowLayout::create());
     btnMenu->setPosition(m_mainLayer->convertToNodeSpace(winSize / 2 + CCPoint(0, 65)));
     m_mainLayer->addChild(btnMenu);
+
+    if(!fs::exists(scripts_dir))
+    {
+        auto label = CCLabelBMFont::create("Could not create scripts directory", "bigFont.fnt");
+        label->setScale(.7f);
+        label->setPosition(btnMenu->getPosition() + CCPoint(0, -60));
+        m_mainLayer->addChild(label);
+        return true;
+    }
 
     for(const auto& btndata : std::initializer_list<std::pair<const char*, SEL_MenuHandler>>
         {{"Open Path", menu_selector(ScriptSelectLayer::onOpenPath)},
@@ -105,26 +121,18 @@ bool ScriptSelectLayer::setup()
     btnMenu->updateLayout();
 
 
-    if(scripts.empty() || !fs::exists(scripts_dir))
+
+    if(scripts.empty())
     {
-        bool created = fs::is_directory(scripts_dir) || fs::create_directory(scripts_dir);
-        const char* str = created ? "Add scripts to folder :)" : "Could not create directory";
-        auto label = CCLabelBMFont::create(str, "bigFont.fnt");
+        auto label = CCLabelBMFont::create("Add scripts to folder :)", "bigFont.fnt");
         label->setScale(.7f);
         label->setPosition(btnMenu->getPosition() + CCPoint(0, -60));
         m_mainLayer->addChild(label);
 
-        if(created)
-        {
-            auto pathLabel = CCLabelBMFont::create(scripts_dir.string().c_str(), "chatFont.fnt");
-            pathLabel->limitLabelWidth(m_size.width - 50, 1, 0.1);
-            pathLabel->setPosition(label->getPosition() + CCPoint(0, -30));
-            m_mainLayer->addChild(pathLabel);
-        }
-        else
-        {
-            this->scripts_dir = fs::path();
-        }
+        auto pathLabel = CCLabelBMFont::create(scripts_dir.string().c_str(), "chatFont.fnt");
+        pathLabel->limitLabelWidth(m_size.width - 50, 1, 0.1);
+        pathLabel->setPosition(label->getPosition() + CCPoint(0, -30));
+        m_mainLayer->addChild(pathLabel);
         return true;
     }
 

@@ -49,7 +49,13 @@ void LuaManager::runScript(const ScriptInfo& scriptinfo)
     sol::state lua;
     LuaManager::L = lua.lua_state();
 
-    lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::string, sol::lib::package);
+    lua.open_libraries(
+        sol::lib::base,
+        sol::lib::math,
+        sol::lib::table,
+        sol::lib::string,
+        sol::lib::package
+    );
     LGameObject::registerGameObject(lua);
     gd::registerTable(lua);
     lua.set("GameObjectType", LGameObject::getGameObjectTypeTable(lua));

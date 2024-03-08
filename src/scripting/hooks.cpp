@@ -49,13 +49,13 @@ struct MyEditorUI : geode::Modify<MyEditorUI, EditorUI>
     }
 };
 
-struct MyMenuLayer : geode::Modify<MyMenuLayer, MenuLayer>
-{
-    void onMoreGames(CCObject*)
-    {
-        ScriptSelectLayer::create()->show();
-    }
-};
+//struct MyMenuLayer : geode::Modify<MyMenuLayer, MenuLayer>
+//{
+//    void onMoreGames(CCObject*)
+//    {
+//        ScriptSelectLayer::create()->show();
+//    }
+//};
 
 $execute
 {
