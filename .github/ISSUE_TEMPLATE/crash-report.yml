@@ -1,0 +1,40 @@
+name: Crash Report
+description: Report a crash (I.e., when the mod/game closes unexpectedly)
+labels: [crash]
+assignees: HJfod
+body: 
+  - type: markdown
+    attributes:
+      value: |
+        ## Report a Crash
+
+  - type: input
+    id: be-version
+    attributes:
+      label: BetterEdit version
+      description: The version of BetterEdit you're using
+      placeholder: Latest
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-desc
+    attributes:
+      label: Description
+      description: What should the feature do? How should it work? Why is it needed?
+      placeholder: Feature description
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Concept Art
+      description: |
+        If you have any concept art / images related to the feature, please include them here!
+
+        Tip: You can attach images by clicking this area to highlight it and then dragging files in.
+      placeholder: |
+        Include any concept art you may have for the feature here
+    validations:
+      required: false
