@@ -49,4 +49,5 @@ body:
       - label: Android (32-bit)
       - label: Android (64-bit)
       - label: Linux
+    validations:
       required: true
