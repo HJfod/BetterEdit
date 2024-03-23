@@ -3,6 +3,7 @@
 #include <Geode/loader/Mod.hpp>
 #include <Geode/utils/general.hpp>
 #include <Geode/loader/Hook.hpp>
+#include <utils/Warn.hpp>
 
 using namespace geode::prelude;
 
@@ -70,7 +71,9 @@ private:
 
 public:
     friend PatchFactory<PATCH_FACTORY_VER_1_MASK> createPatches1();
-
+    
+    BE_ALLOW_START
+    BE_ALLOW_UNUSED_PARAMS
     auto win(uintptr_t offset, ByteVector const& data = {}, bool cocosOffset = false) && {
     #ifdef GEODE_IS_WINDOWS
         this->set((cocosOffset ? base::getCocos() : base::get()) + offset, data);
@@ -95,6 +98,7 @@ public:
     #endif
         return PatchFactory<Mask | MASK_ANDROID64>(std::move(*this));
     }
+    BE_ALLOW_END
 
     PatchAddr addr() {
         static_assert(!(Mask & MASK_OUTDATED), "This patch is outdated!");

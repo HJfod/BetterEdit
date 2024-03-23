@@ -15,7 +15,7 @@ using namespace geode::prelude;
 
 class $modify(EditorUI) {
     $override
-    virtual void scrollWheel(float y, float x) {
+    virtual void scrollWheel(float y, float) {
         // Disable scrolling during playtest
         if (m_editorLayer->m_playbackMode == PlaybackMode::Playing) {
             return;

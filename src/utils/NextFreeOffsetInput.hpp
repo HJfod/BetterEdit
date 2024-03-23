@@ -4,7 +4,7 @@
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/TextInputDelegate.hpp>
 #include <Geode/utils/general.hpp>
-#include <Geode/ui/InputNode.hpp>
+#include <Geode/ui/TextInput.hpp>
 #include <span>
 
 using namespace geode::prelude;
@@ -16,26 +16,6 @@ concept NextFreeAllocator = requires(std::span<GameObject*> const& objs, C::Valu
     { C::getObjectCountToAllocate(upTo) } -> std::same_as<size_t>;
     { C::MIN_VALUE } -> std::convertible_to<typename C::ValueType>;
     { C::MAX_VALUE } -> std::convertible_to<typename C::ValueType>;
-};
-
-class NextFreeOffsetInput : public CCNode, public TextInputDelegate {
-protected:
-    InputNode* m_input;
-
-    bool init();
-
-public:
-    static NextFreeOffsetInput* create();
-
-    template <NextFreeAllocator Allocator>
-    Allocator::ValueType getValue() const {
-        if (auto value = numFromString<typename Allocator::ValueType>(m_input->getInput()->getString())) {
-            return clamp(value.unwrap(), Allocator::MIN_VALUE, Allocator::MAX_VALUE);
-        }
-        else {
-            return Allocator::MIN_VALUE;
-        }
-    }
 };
 
 // Nån kanske vill veta varför några kommentarer här är på svenska.
@@ -114,15 +94,59 @@ public:
 };
 
 template <NextFreeAllocator Allocator>
-FakeObjectsForNextFree<Allocator> addFakeObjects(NextFreeOffsetInput* input) {
-    // Det krävs inte offsettera om vi har ingen input
-    if (!input) {
-        return FakeObjectsForNextFree<Allocator>();
+class NextFreeOffsetInput : public CCNode {
+protected:
+    TextInput* m_input;
+    // Bevara värdet mellan öppningar
+    static inline typename Allocator::ValueType s_cachedValue = Allocator::MIN_VALUE;
+
+    bool init() {
+        if (!CCNode::init())
+            return false;
+        
+        this->setAnchorPoint({ .5f, .5f });
+        this->setContentSize({ 40, 30 });
+
+        auto label = CCLabelBMFont::create("Offset", "goldFont.fnt");
+        label->setScale(.35f);
+        this->addChildAtPosition(label, Anchor::Top, ccp(0, -5));
+        
+        m_input = TextInput::create(60.f, "Off");
+        m_input->setCommonFilter(CommonFilter::Uint);
+        m_input->setScale(.5f);
+        // Minns värdet
+        if (s_cachedValue != Allocator::MIN_VALUE) {
+            m_input->setString(numToString(s_cachedValue));
+        }
+        m_input->setCallback([](auto str) {
+            if (auto value = numFromString<typename Allocator::ValueType>(str)) {
+                s_cachedValue = clamp(value.unwrap(), Allocator::MIN_VALUE, Allocator::MAX_VALUE);
+            }
+            else {
+                s_cachedValue = Allocator::MIN_VALUE;
+            }
+        });
+        this->addChildAtPosition(m_input, Anchor::Bottom, ccp(0, 10));
+
+        return true;
     }
-    auto upTo = input->template getValue<Allocator>();
-    // Det krävs inte offsettera om vi räknar upp till det minsta
-    if (upTo == Allocator::MIN_VALUE) {
-        return FakeObjectsForNextFree<Allocator>();
+
+public:
+    static NextFreeOffsetInput* create() {
+        auto ret = new NextFreeOffsetInput();
+        if (ret && ret->init()) {
+            ret->autorelease();
+            return ret;
+        }
+        CC_SAFE_DELETE(ret);
+        return nullptr;
     }
-    return FakeObjectsForNextFree<Allocator>(upTo);
-}
+
+    static FakeObjectsForNextFree<Allocator> addFakeObjects() {
+        // Det krävs inte offsettera om vi räknar upp till det minsta
+        if (s_cachedValue == Allocator::MIN_VALUE) {
+            return FakeObjectsForNextFree<Allocator>();
+        }
+        return FakeObjectsForNextFree<Allocator>(s_cachedValue);
+    }
+};

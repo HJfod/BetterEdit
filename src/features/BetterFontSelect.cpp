@@ -17,7 +17,7 @@ public:
 
 class $modify(BetterSelectFontLayer, SelectFontLayer) {
     void onSelect(CCObject* sender) {
-        int s = static_cast<CCNode*>(sender)->getTag();
+        size_t s = static_cast<CCNode*>(sender)->getTag();
 
         GameManager::get()->m_levelEditorLayer->updateLevelFont(s);
 
@@ -63,10 +63,8 @@ class $modify(BetterSelectFontLayer, SelectFontLayer) {
 
         auto content = scroll->m_contentLayer;
 
-        constexpr int FONT_COUNT = 60;
+        constexpr size_t FONT_COUNT = 60;
         content->setContentSize(ccp(320, 30 * (FONT_COUNT)));
-
-        int selectedFont = p0->m_levelSettings->m_fontIndex;
 
         auto unSel = CCSprite::createWithSpriteFrameName("GJ_selectSongBtn_001.png");
         auto sel = CCSprite::createWithSpriteFrameName("GJ_selectSongOnBtn_001.png");
@@ -117,8 +115,8 @@ class $modify(BetterSelectFontLayer, SelectFontLayer) {
             auto btn = CCMenuItemToggler::create(unSel, sel, menu, menu_selector(BetterSelectFontLayer::onSelect));
             btn->setTag(i);
             btn->setPosition(node->getContentSize().width - 20, 15);
-            btn->toggle(i == p0->m_levelSettings->m_fontIndex);
-            btn->setEnabled(!(i == p0->m_levelSettings->m_fontIndex));
+            btn->toggle(static_cast<int>(i) == p0->m_levelSettings->m_fontIndex);
+            btn->setEnabled(!(static_cast<int>(i) == p0->m_levelSettings->m_fontIndex));
 
             menu->addChild(btn);
 

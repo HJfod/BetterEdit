@@ -10,7 +10,7 @@ struct Dev {
 
     CCNode* create(AboutBEPopup* popup, bool big) const {
         auto node = CCNode::create();
-        node->setContentSize({ 100.f, 50.f });
+        node->setContentSize({ links.size() * 25.f + 25, 50 });
         node->setAnchorPoint({ .5f, .5f });
 
         auto label = CCLabelBMFont::create(name, "bigFont.fnt");
@@ -21,6 +21,7 @@ struct Dev {
         menu->setContentSize(node->getContentSize() * ccp(1, 0.5));
         menu->ignoreAnchorPointForPosition(false);
         menu->setAnchorPoint({ .5f, 0 });
+        menu->setScale(big ? .8f : 1.f);
 
         for (auto link : links) {
             auto spr = CCSprite::createWithSpriteFrameName(link.first);
@@ -180,7 +181,7 @@ void AboutBEPopup::onSuggestFeature(CCObject*) {
         "Note that you need a <cb>Github Account</c> to post Issues.",
         "Cancel", "Open Github",
         340.f,
-        [](auto layer, bool btn2) {
+        [](auto, bool btn2) {
             if (btn2) {
                 web::openLinkInBrowser("https://github.com/HJfod/BetterEdit/issues/new/choose");
             }
@@ -196,7 +197,7 @@ void AboutBEPopup::onReportBug(CCObject*) {
         "Note that you need a <cb>Github Account</c> to post Issues.",
         "Cancel", "Open Github",
         340.f,
-        [](auto layer, bool btn2) {
+        [](auto, bool btn2) {
             if (btn2) {
                 web::openLinkInBrowser("https://github.com/HJfod/BetterEdit/issues/new/choose");
             }

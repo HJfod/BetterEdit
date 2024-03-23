@@ -33,3 +33,16 @@ setup_geode_mod(${PROJECT_NAME})
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pro/)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/pro)
 endif()
+
+# Bad code will NOT be deployed!
+if(MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+else()
+	target_compile_options(${PROJECT_NAME} PRIVATE
+		-Wall -Wextra -Wpedantic
+		# $override, $modify, etc. should be allowed
+		-Wno-dollar-in-identifier-extension
+		# Class init functions all overload a virtual
+		-Wno-overloaded-virtual
+	)
+endif()
