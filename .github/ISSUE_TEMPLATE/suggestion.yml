@@ -20,24 +20,12 @@ body:
   - type: textarea
     id: screenshots
     attributes:
-      label: Screenshots
+      label: Concept Art
       description: |
-        If you have screenshots/videos of the bug happening, please include them!
+        If you have any concept art / images related to the feature, please include them here!
 
         Tip: You can attach images by clicking this area to highlight it and then dragging files in.
-      placeholder: Screenshots/videos of the bug
+      placeholder: |
+        Include any concept art you may have for the feature here
     validations:
       required: false
-
-  - type: checkboxes
-    attributes:
-      label: Platform
-      description: What platform are you using?
-      options:
-      - label: Windows
-      - label: Mac
-      - label: Android (32-bit)
-      - label: Android (64-bit)
-      - label: Linux
-    validations:
-      required: true

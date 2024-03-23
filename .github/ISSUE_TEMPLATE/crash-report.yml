@@ -27,14 +27,40 @@ body:
       required: true
 
   - type: textarea
-    id: screenshots
+    id: crashlog
     attributes:
-      label: Concept Art
+      label: Crashlog
       description: |
-        If you have any concept art / images related to the feature, please include them here!
+        Please include the latest crashlog from `<...>/Geometry Dash/geode/crashlogs`.
 
         Tip: You can attach images by clicking this area to highlight it and then dragging files in.
       placeholder: |
-        Include any concept art you may have for the feature here
+        2023-07-29T20:56:01+0300
+        Whoopsies! An exception has occurred while running Geode.
+        It appears that the crash occurred while executing code from the "hjfod.betteredit" mod. Please submit this crash report to its developer (HJfod) for assistance.
+
+        == Geode Information ==
+        Loader Version: v1.0.0
+        Installed mods: 7
+        Failed mods: 0
+
+        == Exception Information ==
+        Faulty Module: D:\SteamLibrary\steamapps\common\Geometry Dash\geode\unzipped\hjfod.betteredit\hjfod.betteredit.dll
+        Faulty Mod: hjfod.betteredit
+        Exception Code: c0000005 (EXCEPTION_ACCESS_VIOLATION)
+        Exception Flags: 0
+        ...
     validations:
-      required: false
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Platform
+      description: What platform are you using?
+      options:
+      - label: Windows
+      - label: Mac
+      - label: Android (32-bit)
+      - label: Android (64-bit)
+      - label: Linux
+      required: true
