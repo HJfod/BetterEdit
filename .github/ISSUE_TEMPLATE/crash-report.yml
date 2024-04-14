@@ -1,0 +1,67 @@
+name: Crash Report
+description: Report a crash (I.e., when the mod/game closes unexpectedly)
+labels: [crash]
+assignees: HJfod
+body: 
+  - type: markdown
+    attributes:
+      value: |
+        ## Report a Crash
+
+  - type: input
+    id: be-version
+    attributes:
+      label: BetterEdit version
+      description: The version of BetterEdit you're using
+      placeholder: Latest
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-desc
+    attributes:
+      label: Description
+      description: What should the feature do? How should it work? Why is it needed?
+      placeholder: Feature description
+    validations:
+      required: true
+
+  - type: textarea
+    id: crashlog
+    attributes:
+      label: Crashlog
+      description: |
+        Please include the latest crashlog from `<...>/Geometry Dash/geode/crashlogs`.
+
+        Tip: You can attach images by clicking this area to highlight it and then dragging files in.
+      placeholder: |
+        2023-07-29T20:56:01+0300
+        Whoopsies! An exception has occurred while running Geode.
+        It appears that the crash occurred while executing code from the "hjfod.betteredit" mod. Please submit this crash report to its developer (HJfod) for assistance.
+
+        == Geode Information ==
+        Loader Version: v1.0.0
+        Installed mods: 7
+        Failed mods: 0
+
+        == Exception Information ==
+        Faulty Module: D:\SteamLibrary\steamapps\common\Geometry Dash\geode\unzipped\hjfod.betteredit\hjfod.betteredit.dll
+        Faulty Mod: hjfod.betteredit
+        Exception Code: c0000005 (EXCEPTION_ACCESS_VIOLATION)
+        Exception Flags: 0
+        ...
+    validations:
+      required: true
+
+  - type: checkboxes
+    attributes:
+      label: Platform
+      description: What platform are you using?
+      options:
+      - label: Windows
+      - label: Mac
+      - label: Android (32-bit)
+      - label: Android (64-bit)
+      - label: Linux
+    validations:
+      required: true

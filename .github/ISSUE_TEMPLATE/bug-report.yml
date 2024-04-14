@@ -1,0 +1,53 @@
+name: Bug Report
+description: Report a bug with the mod. Use the Crash Report form to report crashes!
+labels: [bug]
+assignees: HJfod
+body: 
+  - type: markdown
+    attributes:
+      value: |
+        ## Report a Bug
+        > :warning: Use the Crash Report form to report crashes!
+
+  - type: input
+    id: be-version
+    attributes:
+      label: BetterEdit version
+      description: The version of BetterEdit you're using
+      placeholder: Latest
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-desc
+    attributes:
+      label: Bug description
+      description: A clear and concise description of what the bug is - is something not working as expected? Does something look off? Is the mod conflicting with another mod?
+      placeholder: Bug description
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: |
+        If you have screenshots/videos of the bug happening, please include them!
+
+        Tip: You can attach images by clicking this area to highlight it and then dragging files in.
+      placeholder: Screenshots/videos of the bug
+    validations:
+      required: false
+
+  - type: checkboxes
+    attributes:
+      label: Platform
+      description: What platform are you using?
+      options:
+      - label: Windows
+      - label: Mac
+      - label: Android (32-bit)
+      - label: Android (64-bit)
+      - label: Linux
+    validations:
+      required: true

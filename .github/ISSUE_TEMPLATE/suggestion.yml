@@ -1,0 +1,31 @@
+name: Suggestion
+description: Suggest a new feature to be added
+labels: [suggestion]
+assignees: HJfod
+body: 
+  - type: markdown
+    attributes:
+      value: |
+        ## Suggest a Feature
+
+  - type: textarea
+    id: feature-desc
+    attributes:
+      label: Feature description
+      description: A clear and concise description of what the bug is - is something not working as expected? Does something look off? Is the mod conflicting with another mod?
+      placeholder: Bug description
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Concept Art
+      description: |
+        If you have any concept art / images related to the feature, please include them here!
+
+        Tip: You can attach images by clicking this area to highlight it and then dragging files in.
+      placeholder: |
+        Include any concept art you may have for the feature here
+    validations:
+      required: false
