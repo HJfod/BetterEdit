@@ -2,6 +2,7 @@
 ## v6.3.4
 
  * <cr>Remove the "Crash Recovery" option</c> as it has not yet been implemented and was included accidentally
+ * Fix <cp>Next Free Group ID Offset</c> crashing
  * Switch to the new BetterEdit logo
 
 ## v6.3.3
