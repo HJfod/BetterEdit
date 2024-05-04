@@ -1,4 +1,9 @@
 
+## v6.3.4
+
+ * <cr>Remove the "Crash Recovery" option</c> as it has not yet been implemented and was included accidentally
+ * Switch to the new BetterEdit logo
+
 ## v6.3.3
 
  * Make layer lock button fully hidden on All layer

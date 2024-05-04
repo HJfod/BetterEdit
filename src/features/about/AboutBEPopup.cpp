@@ -3,6 +3,7 @@
 #include <Geode/ui/GeodeUI.hpp>
 #include <Geode/ui/MDTextArea.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
+#include <Geode/utils/web.hpp>
 
 struct Dev {
     const char* name;
