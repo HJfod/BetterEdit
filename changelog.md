@@ -1,4 +1,8 @@
 
+## v6.3.5
+
+ * Add a border around the logo to have it fit with the Geode UI
+
 ## v6.3.4
 
  * <cr>Remove the "Crash Recovery" option</c> as it has not yet been implemented and was included accidentally
