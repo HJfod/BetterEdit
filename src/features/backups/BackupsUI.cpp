@@ -9,8 +9,10 @@ class $modify(BackupLevelLayer, EditLevelLayer) {
             return false;
         
         if (auto menu = this->getChildByID("folder-menu")) {
-            auto backupsSpr = CCSprite::createWithSpriteFrameName("GJ_myServerBtn_001.png");
-            backupsSpr->setScale(.65f);
+            auto backupsSpr = CircleButtonSprite::createWithSpriteFrameName(
+                "backups.png"_spr, 1.f, CircleBaseColor::Green
+            );
+            backupsSpr->setScale(.8f);
             auto backupsBtn = CCMenuItemSpriteExtra::create(
                 backupsSpr, this, menu_selector(BackupLevelLayer::onBackups)
             );

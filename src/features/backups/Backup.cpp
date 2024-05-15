@@ -165,15 +165,17 @@ Result<> Backup::cleanAutomated(GJGameLevel* level) {
 
     constexpr size_t MAX_AUTOMATED_COUNT = 3;
 
-    // Do the cleanup
-    size_t ix = 0;
-    for (auto backup : automated) {
-        // Keep only the MAX_AUTOMATED_COUNT newest automated backups
-        if (++ix > MAX_AUTOMATED_COUNT) {
-            GEODE_UNWRAP(backup->deleteThis());
+    // Do the cleanup if needed
+    if (automated.size() > MAX_AUTOMATED_COUNT) {
+        size_t ix = 0;
+        for (auto backup : automated) {
+            // Keep only the MAX_AUTOMATED_COUNT newest automated backups
+            if (++ix > MAX_AUTOMATED_COUNT) {
+                GEODE_UNWRAP(backup->deleteThis());
+            }
         }
+        automated.erase(automated.begin() + MAX_AUTOMATED_COUNT, automated.end());
     }
-    automated.erase(automated.begin() + MAX_AUTOMATED_COUNT, automated.end());
 
     return Ok();
 }

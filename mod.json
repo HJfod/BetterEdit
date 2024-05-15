@@ -35,7 +35,7 @@
 		},
 		{
 			"id": "hjfod.bettersave",
-			"version": "1.1.0",
+			"version": "1.1.1",
 			"importance": "required"
 		}
     ],
@@ -47,6 +47,12 @@
 		}
 	},
 	"settings": {
+		"auto-save": {
+			"type": "bool",
+			"default": true,
+			"name": "Auto-save",
+			"description": "Automatically saves the level every 5 minutes, as well as creates a backup. The backups created by autosave get automatically deleted after 3 new ones have been created to avoid using too much disk space"
+		},
 		"mouse-move-on-zoom": {
 			"type": "bool",
 			"default": true,
@@ -126,12 +132,6 @@
 			"name": "Show Grid on Size Change",
 			"description": "If the grid is currently hidden and you use the controls to change its size, its toggled on",
 			"platforms": ["windows", "android64"]
-		},
-		"auto-save": {
-			"type": "bool",
-			"default": true,
-			"name": "Auto-save",
-			"description": "Automatically saves the level every 5 minutes, as well as creates a backup. The backups created by autosave get automatically deleted after 3 new ones have been created to avoid using too much disk space"
 		}
 	},
 	"tags": ["editor", "enhancement", "utility", "customization"]

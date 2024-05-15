@@ -21,7 +21,7 @@ class $modify(AutoSaveUI, EditorUI) {
     }
     void onAutoSaveTick(float) {
         constexpr size_t COUNTDOWN = 5;
-        constexpr size_t AUTO_SAVE_INTERVAL = 20;
+        constexpr size_t AUTO_SAVE_INTERVAL = 60 * 5;
 
         m_fields->secondsSinceLastAutoSave += 1;
         if (m_fields->secondsSinceLastAutoSave > AUTO_SAVE_INTERVAL - COUNTDOWN) {
