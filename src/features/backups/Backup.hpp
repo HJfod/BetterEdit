@@ -6,7 +6,7 @@ using namespace geode::prelude;
 
 class Backup final {
 public:
-    using Clock = std::chrono::utc_clock;
+    using Clock = std::chrono::system_clock;
     using TimePoint = std::chrono::time_point<Clock>;
     using TimeUnit = std::chrono::minutes;
 
