@@ -66,14 +66,14 @@ void BackupListPopup::updateList() {
         m_statusLabel->setVisible(true);
     }
     else for (auto backup : backups) {
-        m_scrollLayer->m_contentLayer->addChild(BackupItem::create(backup, m_level));
+        m_scrollLayer->m_contentLayer->addChild(BackupItem::create(backup));
     }
 
     m_scrollLayer->m_contentLayer->updateLayout();
 }
 
 void BackupListPopup::onNewBackup(CCObject*) {
-    auto res = Backup::create(m_level);
+    auto res = Backup::create(m_level, false);
     if (!res) {
         FLAlertLayer::create(
             "Unable to Backup",

@@ -12,14 +12,14 @@ struct UpdateBackupListEvent : public Event {
 class BackupItem : public CCNode {
 protected:
     BackupPtr m_backup;
-    GJGameLevel* m_forLevel;
 
-    bool init(BackupPtr backup, GJGameLevel* forLevel);
+    bool init(BackupPtr backup);
 
     void onView(CCObject*);
     void onRestore(CCObject*);
     void onDelete(CCObject*);
+    void onConvertAutomated(CCObject*);
 
 public:
-    static BackupItem* create(BackupPtr backup, GJGameLevel* forLevel);
+    static BackupItem* create(BackupPtr backup);
 };

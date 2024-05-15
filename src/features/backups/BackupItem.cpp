@@ -3,14 +3,13 @@
 #include <fmt/chrono.h>
 #include <utils/EditorViewOnlyMode.hpp>
 
-bool BackupItem::init(BackupPtr backup, GJGameLevel* forLevel) {
+bool BackupItem::init(BackupPtr backup) {
     if (!CCNode::init())
         return false;
 
     this->setContentSize({ 275, 35 });
     
     m_backup = backup;
-    m_forLevel = forLevel;
 
     auto bg = CCScale9Sprite::create("square02c_001.png");
     bg->setColor({ 25, 25, 25 });
@@ -33,6 +32,18 @@ bool BackupItem::init(BackupPtr backup, GJGameLevel* forLevel) {
     menu->setAnchorPoint({ 1, .5f });
     menu->setContentWidth(100);
 
+    auto deleteSpr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
+    auto deleteBtn = CCMenuItemSpriteExtra::create(
+        deleteSpr, this, menu_selector(BackupItem::onDelete)
+    );
+    menu->addChild(deleteBtn);
+
+    auto restoreSpr = CCSprite::createWithSpriteFrameName("GJ_undoBtn_001.png");
+    auto restoreBtn = CCMenuItemSpriteExtra::create(
+        restoreSpr, this, menu_selector(BackupItem::onRestore)
+    );
+    menu->addChild(restoreBtn);
+
     auto viewSpr = CircleButtonSprite::createWithSpriteFrameName(
         "eye-white.png"_spr, 1.f, CircleBaseColor::Green, CircleBaseSize::Small
     );
@@ -41,20 +52,19 @@ bool BackupItem::init(BackupPtr backup, GJGameLevel* forLevel) {
     );
     menu->addChild(viewBtn);
 
-    auto restoreSpr = CCSprite::createWithSpriteFrameName("GJ_undoBtn_001.png");
-    auto restoreBtn = CCMenuItemSpriteExtra::create(
-        restoreSpr, this, menu_selector(BackupItem::onRestore)
-    );
-    menu->addChild(restoreBtn);
+    if (backup->isAutomated()) {
+        bg->setColor({ 30, 93, 156 });
 
-    auto deleteSpr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
-    auto deleteBtn = CCMenuItemSpriteExtra::create(
-        deleteSpr, this, menu_selector(BackupItem::onDelete)
-    );
-    menu->addChild(deleteBtn);
+        auto convertSpr = CCSprite::createWithSpriteFrameName("GJ_rotationControlBtn02_001.png");
+        auto convertBtn = CCMenuItemSpriteExtra::create(
+            convertSpr, this, menu_selector(BackupItem::onConvertAutomated)
+        );
+        menu->addChild(convertBtn);
+    }
 
     menu->setLayout(
         RowLayout::create()
+            ->setAxisReverse(true)
             ->setAxisAlignment(AxisAlignment::End)
             ->setDefaultScaleLimits(.1f, .55f)
     );
@@ -63,9 +73,31 @@ bool BackupItem::init(BackupPtr backup, GJGameLevel* forLevel) {
     return true;
 }
 
+void BackupItem::onConvertAutomated(CCObject*) {
+    createQuickPopup(
+        "Preserve Backup",
+        "Do you want to <cj>preserve this automated backup</c>?\n"
+        "By default, <cy>automated backups are deleted after three newer backups have been made</c>.\n"
+        "Preserving the backup turns it into a normal backup, <cp>preventing it from being deleted automatically</c>.",
+        "Cancel", "Preserve",
+        [this](auto*, bool btn2) {
+            if (btn2) {
+                auto res = m_backup->preserveAutomated();
+                if (!res) {
+                    FLAlertLayer::create(
+                        "Unable to Preserve Backup",
+                        fmt::format("Unable to preserve backup: {}", res.unwrapErr()),
+                        "OK"
+                    )->show();
+                }
+                UpdateBackupListEvent().post();
+            }
+        }
+    );
+}
 void BackupItem::onView(CCObject*) {
     auto scene = CCScene::create();
-    scene->addChild(createViewOnlyEditor(m_backup->getLevel(), [level = m_forLevel]() {
+    scene->addChild(createViewOnlyEditor(m_backup->getLevel(), [level = m_backup->getOriginalLevel()]() {
         auto layer = EditLevelLayer::create(level);
         auto popup = BackupListPopup::create(level);
         popup->m_scene = layer;
@@ -122,9 +154,9 @@ void BackupItem::onDelete(CCObject*) {
     );
 }
 
-BackupItem* BackupItem::create(BackupPtr backup, GJGameLevel* forLevel) {
+BackupItem* BackupItem::create(BackupPtr backup) {
     auto ret = new BackupItem();
-    if (ret && ret->init(backup, forLevel)) {
+    if (ret && ret->init(backup)) {
         ret->autorelease();
         return ret;
     }
