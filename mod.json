@@ -1,6 +1,6 @@
 {
-	"geode": "2.0.0-beta.25",
-	"version": "v6.3.5",
+	"geode": "2.0.0-beta.26",
+	"version": "6.4.0",
 	"gd": {
 		"win": "2.204",
 		"mac": "2.200",
@@ -8,7 +8,7 @@
 	},
 	"id": "hjfod.betteredit",
 	"name": "BetterEdit",
-	"developers": ["HJfod", "TheSillyDoggo", "Fleym", "ninXout", "CattoDev"],
+	"developers": ["HJfod"],
 	"description": "The Ultimate Editor Mod",
 	"repository": "https://github.com/HJfod/BetterEdit",
 	"links": {
@@ -19,14 +19,24 @@
 	"dependencies": [
         {
             "id": "geode.node-ids",
-            "version": "v1.6.0",
+            "version": "1.6.0",
             "importance": "required"
         },
 		{
 			"id": "geode.custom-keybinds",
-			"version": "v1.5.0",
+			"version": "1.5.0",
 			"importance": "required",
 			"platforms": ["windows"]
+		},
+		{
+			"id": "hjfod.gmd-api",
+			"version": "1.0.5",
+			"importance": "required"
+		},
+		{
+			"id": "hjfod.bettersave",
+			"version": "1.1.0",
+			"importance": "required"
 		}
     ],
 	"resources": {

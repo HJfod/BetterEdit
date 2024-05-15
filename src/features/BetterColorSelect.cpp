@@ -66,11 +66,13 @@ static constexpr std::array SPECIAL_CHANNEL_ORDER_LARGE {
 };
 
 class $modify(NewColorSelect, CustomizeObjectLayer) {
-    // This makes sure that the first call to goToPage always actually 
-    // generates the page content
-    int page = 0;
-    bool modified = false;
-    bool initDone = false;
+    struct Fields {
+        // This makes sure that the first call to goToPage always actually 
+        // generates the page content
+        int page = 0;
+        bool modified = false;
+        bool initDone = false;
+    };
 
     static size_t getChannelsOnPage() {
         if (Mod::get()->template getSettingValue<bool>("larger-color-menu")) {

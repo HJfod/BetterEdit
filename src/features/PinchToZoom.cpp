@@ -11,10 +11,12 @@ using namespace geode::prelude;
 // thank you mat matcool
 
 class $modify(EditorUI) {
-    std::unordered_set<Ref<CCTouch>> m_touches;
-    float m_initialDistance = 0.f;
-    float m_initialScale = 1.f;
-    CCPoint m_touchMidPoint;
+    struct Fields {
+        std::unordered_set<Ref<CCTouch>> m_touches;
+        float m_initialDistance = 0.f;
+        float m_initialScale = 1.f;
+        CCPoint m_touchMidPoint;
+    };
 
     $override
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) override {

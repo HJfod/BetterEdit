@@ -2,7 +2,9 @@
 #include <Geode/modify/EditorUI.hpp>
 
 class $modify(HideUI, EditorUI) {
-    std::vector<Ref<CCNode>> toHide;
+    struct Fields {
+        std::vector<Ref<CCNode>> toHide;
+    };
 
     $override
     void showUI(bool toggle) {

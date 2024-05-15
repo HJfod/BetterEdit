@@ -65,7 +65,7 @@ bool AboutBEPopup::setup() {
 
     // other devs
 
-    auto credits = CCLabelBMFont::create("Credits", "goldFont.fnt");
+    auto credits = CCLabelBMFont::create("Contributors", "goldFont.fnt");
     credits->setScale(.6f);
     m_mainLayer->addChildAtPosition(credits, Anchor::Center, ccp(0, 10));
 
@@ -102,9 +102,22 @@ bool AboutBEPopup::setup() {
                 { "gj_twIcon_001.png", "https://twitter.com/cattodevgd/" },
             }
         },
+        Dev {
+            .name = "Mat",
+            .links = {
+                { "geode.loader/github.png", "https://github.com/matcool" },
+            }
+        },
+        Dev {
+            .name = "Alphalaneous",
+            .links = {
+                { "geode.loader/github.png", "https://github.com/Alphalaneous" },
+                { "gj_twIcon_001.png", "https://twitter.com/Alphalaneous" },
+            }
+        },
     }) {
         auto label = dev.create(this, false);
-        label->setLayoutOptions(AxisLayoutOptions::create()->setMaxScale(.65f));
+        label->setLayoutOptions(AxisLayoutOptions::create()->setScaleLimits(.1f, .65f));
         devs->addChild(label);
     }
     devs->setLayout(
@@ -127,7 +140,7 @@ bool AboutBEPopup::setup() {
         { "Special Thanks", menu_selector(AboutBEPopup::onSpecialThanks) },
         { "Support BE", menu_selector(AboutBEPopup::onSupport) },
     }) {
-        auto spr = ButtonSprite::create(pair.first, "goldFont.fnt", "GJ_button_05.png");
+        auto spr = ButtonSprite::create(pair.first, "goldFont.fnt", "GJ_button_05.png", .8f);
         spr->setScale(.55f);
         auto btn = CCMenuItemSpriteExtra::create(spr, this, pair.second);
         menu->addChild(btn);
