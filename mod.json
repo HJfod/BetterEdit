@@ -30,12 +30,12 @@
 		},
 		{
 			"id": "hjfod.gmd-api",
-			"version": "1.0.5",
+			"version": "1.1.0",
 			"importance": "required"
 		},
 		{
 			"id": "hjfod.bettersave",
-			"version": "1.1.1",
+			"version": "1.2.0",
 			"importance": "required"
 		}
     ],
@@ -43,6 +43,9 @@
 		"spritesheets": {
 			"UISheet": [
 				"resources/*.png"
+			],
+			"ViewTabSheet": [
+				"resources/view/*.png"
 			]
 		}
 	},
@@ -66,6 +69,12 @@
 			"name": "Pinch to Zoom",
 			"description": "When enabled, you can use two fingers to zoom",
 			"platforms": ["android32", "android64"]
+		},
+		"show-zoom-text": {
+			"type": "bool",
+			"default": true,
+			"name": "Show Zoom Text",
+			"description": "When enabled, flashes the current zoom level as text when you zoom in / out in the editor"
 		},
 		"scale-factor": {
 			"type": "float",
@@ -112,12 +121,6 @@
 			},
 			"name": "Larger Color Menu",
 			"description": "If you're using the <cr>New Color Menu</c>, this makes the color channel buttons a bit larger"
-		},
-		"show-zoom-text": {
-			"type": "bool",
-			"default": true,
-			"name": "Show Zoom Text",
-			"description": "When enabled, flashes the current zoom level as text when you zoom in / out in the editor"
 		},
 		"grid-size-controls": {
 			"type": "bool",

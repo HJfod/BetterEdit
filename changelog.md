@@ -2,6 +2,7 @@
 ## v6.4.0
 
  * Backups system
+ * View tab
 
 ## v6.3.5
 

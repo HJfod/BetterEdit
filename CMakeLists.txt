@@ -12,6 +12,7 @@ file(GLOB SOURCES
 	src/features/ZoomLevelText/*.cpp
 	src/features/about/*.cpp
 	src/features/backups/*.cpp
+	src/features/ViewTab/*.cpp
 	src/editor/*.cpp
 	src/utils/*.cpp
 	src/*.cpp
