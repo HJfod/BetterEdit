@@ -155,8 +155,8 @@ struct $modify(ViewTabUI, EditorUI) {
         auto winSize = CCDirector::get()->getWinSize();
         
         // Make a bit space for new style menu since the old one is a tiny bit cramped
-        if (auto side = getChildOfType<CCSprite>(this, 1)) {
-            side->setPositionX(74);
+        if (auto left = getChildOfType<CCSprite>(this, 1), right = getChildOfType<CCSprite>(this, 2); left && right) {
+            left->setPositionX(winSize.width - right->getPositionX());
         }
         for (auto& child : CCArrayExt<CCNode*>(m_pChildren)) {
             if (auto bar = typeinfo_cast<EditButtonBar*>(child)) {
@@ -175,7 +175,9 @@ struct $modify(ViewTabUI, EditorUI) {
             this->updateModeSprites();
 
             menu->setContentSize({ 90, 90 });
-            menu->setPositionX(4);
+            if (auto otherSide = this->getChildByID("toolbar-toggles-menu")) {
+                menu->setPositionX(winSize.width - otherSide->getPositionX());
+            }
             menu->setLayout(RowLayout::create()
                 ->setCrossAxisOverflow(false)
                 ->setGrowCrossAxis(true)
@@ -231,10 +233,14 @@ struct $modify(ViewTabUI, EditorUI) {
         }));
         btns->addObject(this->createViewToggleGV("v_grid.png"_spr, "0038"));
         btns->addObject(this->createViewToggleMSV("v_dash.png"_spr, "show-dash-lines"));
-        
+
+        auto toolbarBG = getChildOfType<CCSprite>(this, 0);
         auto buttonBar = EditButtonBar::create(
             btns,
-            { CCDirector::get()->getWinSize().width / 2, 56 },
+            ccp(
+                CCDirector::get()->getWinSize().width / 2 - 5,
+                toolbarBG->getContentHeight() * toolbarBG->getScaleY() - 5
+            ),
             m_tabsArray->count(), false,
             GameManager::get()->getIntGameVariable("0049"),
             GameManager::get()->getIntGameVariable("0050")
