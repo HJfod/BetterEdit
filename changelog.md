@@ -3,6 +3,8 @@
 
  * Backups system
  * View tab
+ * Better organized edit tab
+ * Hide UI button
 
 ## v6.3.5
 
