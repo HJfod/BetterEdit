@@ -18,6 +18,7 @@ class $modify(HideButtonUI, EditorUI) {
                 "eye-off.png"_spr, 1.f, CircleBaseColor::Gray, CircleBaseSize::Small
             );
             unhideSpr->setOpacity(105);
+            static_cast<CCSprite*>(unhideSpr->getTopNode())->setOpacity(105);
             auto hideSpr   = CircleButtonSprite::createWithSpriteFrameName(
                 "eye-on.png"_spr, 1.f, CircleBaseColor::Green, CircleBaseSize::Small
             );
