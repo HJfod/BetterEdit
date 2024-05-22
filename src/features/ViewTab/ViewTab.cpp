@@ -234,13 +234,9 @@ struct $modify(ViewTabUI, EditorUI) {
         btns->addObject(this->createViewToggleGV("v_grid.png"_spr, "0038"));
         btns->addObject(this->createViewToggleMSV("v_dash.png"_spr, "show-dash-lines"));
 
-        auto toolbarBG = getChildOfType<CCSprite>(this, 0);
         auto buttonBar = EditButtonBar::create(
             btns,
-            ccp(
-                CCDirector::get()->getWinSize().width / 2 - 5,
-                toolbarBG->getContentHeight() * toolbarBG->getScaleY() - 5
-            ),
+            ccp(winSize.width / 2 - 5, CCDirector::get()->getScreenBottom() + m_toolbarHeight - 6),
             m_tabsArray->count(), false,
             GameManager::get()->getIntGameVariable("0049"),
             GameManager::get()->getIntGameVariable("0050")
@@ -250,7 +246,6 @@ struct $modify(ViewTabUI, EditorUI) {
         // when doing getChildByTag for its tabs
         buttonBar->setTag(-1);
         buttonBar->setVisible(m_selectedMode == 4);
-
         this->addChild(buttonBar, 10);
 
         this->updateViewTab();

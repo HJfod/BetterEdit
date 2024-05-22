@@ -3,13 +3,18 @@
 #include <Geode/binding/EditButtonBar.hpp>
 #include <Geode/binding/EditorUI.hpp>
 #include <Geode/binding/Slider.hpp>
-#include <Geode/binding/EditButtonBar.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/EditButtonBar.hpp>
+#include <Geode/modify/EditorPauseLayer.hpp>
 
 using namespace geode::prelude;
 
-class $modify(EditorUI) {
+class $modify(ScaledUI, EditorUI) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("EditorUI::init", -100);
+    }
+
     $override
     bool init(LevelEditorLayer* p0) {
         if (!EditorUI::init(p0))
@@ -106,26 +111,54 @@ class $modify(EditorUI) {
         deleteTabs->setPositionY(deleteTabs->getPositionY() * scale);
         deleteTabs->setScale(scale);
 
-        std::vector<EditButtonBar*> bars = {};
-        auto barMenu = CCMenu::create();
-        barMenu->setAnchorPoint(ccp(0.5f, 0));
-        barMenu->setPosition(ccp(0, 0));
-        barMenu->setScale(scale);
-        barMenu->setID("object-buttons");
-
-        for (size_t i = 0; i < this->getChildrenCount(); i++) {
-            if (typeinfo_cast<EditButtonBar*>(this->getChildren()->objectAtIndex(i))) {
-                bars.push_back(static_cast<EditButtonBar*>(this->getChildren()->objectAtIndex(i)));
+        // The EditButtonBar::loadFromItems hook below makes this work!
+        for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {
+            if (auto bar = typeinfo_cast<EditButtonBar*>(c)) {
+                bar->setScale(scale);
             }
         }
-        
-        for (size_t i = 0; i < bars.size(); i++) {
-            bars[i]->removeFromParentAndCleanup(false);            
-            barMenu->addChild(bars[i]);
-        }
 
-        this->addChild(barMenu, 1);
+        // Make the builds tabs be center-aligned
+        auto winSize = CCDirector::get()->getWinSize();
+        this->getChildByID("build-tabs-menu")->setPositionX(winSize.width / 2);
+
+        // This is so silly. If you don't do this, the menu is wrongly positioned, 
+        // but only the first time. I have no clue what's going on
+        this->centerBuildTabs();
+        this->recreateButtonTabs();
 
         return true;
+    }
+
+    $override
+    void recreateButtonTabs() {
+        EditorUI::recreateButtonTabs();
+        this->centerBuildTabs();
+    }
+    
+    void centerBuildTabs() {
+        // This centers the build tab
+        auto winSize = CCDirector::get()->getWinSize();
+        for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {
+            if (auto bar = typeinfo_cast<EditButtonBar*>(c)) {
+                getChild(bar, 0)->setPositionX(-winSize.width / 2 + 5);
+                if (auto menu = getChildOfType<CCMenu>(bar, 0)) {
+                    menu->setPositionX(winSize.width / 2 + 5);
+                }
+                bar->setPositionX(winSize.width / 2);
+            }
+        }
+    }
+};
+
+class $modify(EditorPauseLayer) {
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("EditorPauseLayer::onResume", -100);
+    }
+
+    $override
+    void onResume(CCObject* pSender) {
+        EditorPauseLayer::onResume(pSender);
+        static_cast<ScaledUI*>(EditorUI::get())->centerBuildTabs();
     }
 };

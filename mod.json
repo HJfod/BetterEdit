@@ -106,6 +106,12 @@
 			"name": "New Font Selection Menu",
 			"description": "Replaces the old font select screen with a better one with scrolling"
 		},
+		"new-edit-menu": {
+			"type": "bool",
+			"default": true,
+			"name": "New Edit Menu",
+			"description": "Changes the object moving menu to have the move button grouped directionally rather than in a list"
+		},
 		"new-color-menu": {
 			"type": "bool",
 			"default": true,
