@@ -10,6 +10,7 @@ static constexpr size_t MOVE_MENU_GROUPS_PER_PAGE = 4;
 class MoveGroup : public CCMenu {
 protected:
     bool init(
+        std::string const& name,
         CCMenuItemSpriteExtra* up,
         CCMenuItemSpriteExtra* down,
         CCMenuItemSpriteExtra* left,
@@ -32,18 +33,25 @@ protected:
         this->addChildAtPosition(left,  Anchor::Left,   ccp( 10, 0));
         this->addChildAtPosition(right, Anchor::Right,  ccp(-10, 0));
 
+        if (!name.empty()) {
+            auto label = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
+            label->setScale(.25f);
+            this->addChildAtPosition(label, Anchor::Top, ccp(0, 11));
+        }
+
         return true;
     }
 
 public:
     static MoveGroup* create(
+        std::string const& name,
         CCMenuItemSpriteExtra* up,
         CCMenuItemSpriteExtra* down,
         CCMenuItemSpriteExtra* left,
         CCMenuItemSpriteExtra* right
     ) {
         auto ret = new MoveGroup();
-        if (ret && ret->init(up, down, left, right)) {
+        if (ret && ret->init(name, up, down, left, right)) {
             ret->autorelease();
             return ret;
         }
@@ -174,9 +182,14 @@ public:
         }
 
         // Update visibility & scale
-        result->setVisible(ui->m_editButtonBar->isVisible());
-        result->setScale(ui->m_editButtonBar->getScale());
-        ui->m_editButtonBar->setVisible(false);
+        updateVisiblity(ui);
+    }
+    static void updateVisiblity(EditorUI* ui, bool show = true) {
+        if (auto menu = static_cast<CustomEditMenu*>(ui->getChildByID("custom-move-menu"_spr))) {
+            menu->setVisible(show && ui->m_selectedMode == 3);
+            menu->setScale(ui->m_editButtonBar->getScale());
+            ui->m_editButtonBar->setVisible(false);
+        }
     }
 
     void updateButtonLayout() {
@@ -242,7 +255,15 @@ public:
                 // `groups` has duplicates
                 !up->getParent() && !down->getParent() && !left->getParent() && !right->getParent()
             ) {
-                m_groups.push_back(MoveGroup::create(up, down, left, right));
+                std::string name;
+                switch (hash(group.c_str())) {
+                    case hash("half-button"):    name = "1/2"; break;
+                    case hash("quarter-button"): name = "1/4"; break;
+                    case hash("eighth-button"):  name = "1/8"; break;
+                    case hash("unit-button"):    name = "1/30"; break;
+                    default: break;
+                }
+                m_groups.push_back(MoveGroup::create(name, up, down, left, right));
             }
         }
 
@@ -265,20 +286,20 @@ class $modify(EditorUI) {
     void createMoveMenu() {
         EditorUI::createMoveMenu();
 
-        this->addMoveButton("move-up-quarter-button"_spr,    "edit_upBtn5_001.png",    "1/4", EditCommandExt::QuarterUp);
-        this->addMoveButton("move-down-quarter-button"_spr,  "edit_downBtn5_001.png",  "1/4", EditCommandExt::QuarterDown);
-        this->addMoveButton("move-left-quarter-button"_spr,  "edit_leftBtn5_001.png",  "1/4", EditCommandExt::QuarterLeft);
-        this->addMoveButton("move-right-quarter-button"_spr, "edit_rightBtn5_001.png", "1/4", EditCommandExt::QuarterRight);
+        this->addMoveButton("move-up-quarter-button"_spr,    "edit_upBtn5_001.png",    EditCommandExt::QuarterUp);
+        this->addMoveButton("move-down-quarter-button"_spr,  "edit_downBtn5_001.png",  EditCommandExt::QuarterDown);
+        this->addMoveButton("move-left-quarter-button"_spr,  "edit_leftBtn5_001.png",  EditCommandExt::QuarterLeft);
+        this->addMoveButton("move-right-quarter-button"_spr, "edit_rightBtn5_001.png", EditCommandExt::QuarterRight);
 
-        this->addMoveButton("move-up-eighth-button"_spr,    "edit_upBtn5_001.png",    "1/8", EditCommandExt::EighthUp);
-        this->addMoveButton("move-down-eighth-button"_spr,  "edit_downBtn5_001.png",  "1/8", EditCommandExt::EighthDown);
-        this->addMoveButton("move-left-eighth-button"_spr,  "edit_leftBtn5_001.png",  "1/8", EditCommandExt::EighthLeft);
-        this->addMoveButton("move-right-eighth-button"_spr, "edit_rightBtn5_001.png", "1/8", EditCommandExt::EighthRight);
+        this->addMoveButton("move-up-eighth-button"_spr,    "edit_upBtn5_001.png",    EditCommandExt::EighthUp);
+        this->addMoveButton("move-down-eighth-button"_spr,  "edit_downBtn5_001.png",  EditCommandExt::EighthDown);
+        this->addMoveButton("move-left-eighth-button"_spr,  "edit_leftBtn5_001.png",  EditCommandExt::EighthLeft);
+        this->addMoveButton("move-right-eighth-button"_spr, "edit_rightBtn5_001.png", EditCommandExt::EighthRight);
 
-        this->addMoveButton("move-up-unit-button"_spr,    "edit_upBtn_001.png",    "Unit", EditCommandExt::UnitUp);
-        this->addMoveButton("move-down-unit-button"_spr,  "edit_downBtn_001.png",  "Unit", EditCommandExt::UnitDown);
-        this->addMoveButton("move-left-unit-button"_spr,  "edit_leftBtn_001.png",  "Unit", EditCommandExt::UnitLeft);
-        this->addMoveButton("move-right-unit-button"_spr, "edit_rightBtn_001.png", "Unit", EditCommandExt::UnitRight);
+        this->addMoveButton("move-up-unit-button"_spr,    "edit_upBtn_001.png",    EditCommandExt::UnitUp);
+        this->addMoveButton("move-down-unit-button"_spr,  "edit_downBtn_001.png",  EditCommandExt::UnitDown);
+        this->addMoveButton("move-left-unit-button"_spr,  "edit_leftBtn_001.png",  EditCommandExt::UnitLeft);
+        this->addMoveButton("move-right-unit-button"_spr, "edit_rightBtn_001.png", EditCommandExt::UnitRight);
 
         m_editButtonBar->reloadItems(
             GameManager::get()->getIntGameVariable("0049"),
@@ -290,21 +311,23 @@ class $modify(EditorUI) {
         }
     }
 
-    void addMoveButton(const char* id, const char* spr, const char* text, EditCommand command) {
+    void addMoveButton(const char* id, const char* spr, EditCommand command) {
         auto btn = this->getSpriteButton(spr, menu_selector(EditorUI::moveObjectCall), nullptr, .9f);
         btn->setID(id);
         btn->setTag(static_cast<int>(command));
-
-        if (text) {
-            auto label = CCLabelBMFont::create(text, "bigFont.fnt");
-            label->setScale(.35f);
-            label->setZOrder(10);
-            btn->addChildAtPosition(label, Anchor::Bottom, ccp(0, 11));
-        }
-
         m_editButtonBar->m_buttonArray->addObject(btn);
     }
 
+    $override
+    void toggleMode(CCObject* sender) {
+        EditorUI::toggleMode(sender);
+        CustomEditMenu::updateVisiblity(this);
+    }
+    $override
+    void showUI(bool show) {
+        EditorUI::showUI(show);
+        CustomEditMenu::updateVisiblity(this, show);
+    }
     $override
     void resetUI() {
         EditorUI::resetUI();
