@@ -214,8 +214,10 @@ struct $modify(ViewTabUI, EditorUI) {
         }));
         btns->addObject(this->createViewToggleGV("v_prevmode.png"_spr, "0036", [this](bool) {
             // Let's not be funny and ruin everyone's levels
-            m_editorLayer->resetMovingObjects();
-            this->onStopPlaytest(m_playtestBtn);
+            if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
+                m_editorLayer->resetMovingObjects();
+                this->onStopPlaytest(m_playtestBtn);
+            }
             m_editorLayer->updateEditorMode();
         }));
         btns->addObject(this->createViewToggle(
