@@ -12,7 +12,7 @@ struct NextFreeLayer : Modify<NextFreeLayer, EditorUI> {
 
         auto layer_btn_mnu = this->getChildByIDRecursive("layer-menu");
         auto next_free_spr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
-        auto new_layr_pos = layer_btn_mnu->getPositionX() - 10.f;
+        auto new_layer_pos = layer_btn_mnu->getPositionX() - 10.f;
         next_free_spr->setScale(0.54f);
         next_free_spr->setOpacity(175);
         next_free_spr->setFlipX(true);
@@ -26,7 +26,7 @@ struct NextFreeLayer : Modify<NextFreeLayer, EditorUI> {
         next_free_btn->setID("next-free-layer-button");
 
         layer_btn_mnu->addChild(next_free_btn);
-        layer_btn_mnu->setPositionX(new_layr_pos);
+        layer_btn_mnu->setPositionX(new_layer_pos);
         layer_btn_mnu->setLayout(
             RowLayout::create()
                 ->setAxisAlignment(AxisAlignment::Center)
