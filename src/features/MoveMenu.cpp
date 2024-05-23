@@ -21,12 +21,16 @@ protected:
         
         this->ignoreAnchorPointForPosition(false);
         this->setAnchorPoint({ .5f, .5f });
-        this->setContentSize({ 56, 28 });
+        this->setContentSize({ 60, 30 });
 
-        up->getNormalImage()->setScale(.75f);
-        down->getNormalImage()->setScale(.7f);
-        left->getNormalImage()->setScale(.75f);
-        right->getNormalImage()->setScale(.75f);
+        up->setScale(.5f);
+        down->setScale(.5f);
+        left->setScale(.5f);
+        right->setScale(.5f);
+        up->m_baseScale = .5f;
+        down->m_baseScale = .5f;
+        left->m_baseScale = .5f;
+        right->m_baseScale = .5f;
 
         this->addChildAtPosition(up,    Anchor::Top,    ccp( 0, -5));
         this->addChildAtPosition(down,  Anchor::Bottom, ccp( 0,  5));
@@ -36,7 +40,7 @@ protected:
         if (!name.empty()) {
             auto label = CCLabelBMFont::create(name.c_str(), "bigFont.fnt");
             label->setScale(.25f);
-            this->addChildAtPosition(label, Anchor::Top, ccp(0, 11));
+            this->addChildAtPosition(label, Anchor::Top, ccp(0, 10));
         }
 
         return true;
