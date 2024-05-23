@@ -1,47 +1,71 @@
-#include <Geode/cocos/label_nodes/CCLabelBMFont.h>
 #include <Geode/Geode.hpp>
-#include <Geode/modify/Modify.hpp>
-#include <Geode/modify/CCMenuItemSpriteExtra.hpp>
-#include <Geode/cocos/cocoa/CCObject.h>
-#include <Geode/modify/GJGameLevel.hpp>
 #include <Geode/modify/EditorUI.hpp>
-#include <string>
+#include <Geode/modify/LevelEditorLayer.hpp>
 
 using namespace geode::prelude;
 
 struct NextFreeLayer : Modify<NextFreeLayer, EditorUI> {
-  bool init(LevelEditorLayer* editorLayer) {
-    if (!EditorUI::init(editorLayer)) {
-      return false;
+    bool init(LevelEditorLayer* editorLayer) {
+        if (!EditorUI::init(editorLayer)) {
+            return false;
+        }
+
+        auto layer_btn_mnu = this->getChildByIDRecursive("layer-menu");
+        auto next_free_spr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
+        auto new_layr_pos = layer_btn_mnu->getPositionX() - 10.f;
+        next_free_spr->setScale(0.54f);
+        next_free_spr->setOpacity(175);
+        next_free_spr->setFlipX(true);
+
+        auto next_free_btn = CCMenuItemSpriteExtra::create(
+            next_free_spr,
+            this,
+            menu_selector(NextFreeLayer::on_next_free)
+        );
+
+        next_free_btn->setID("next-free-layer-button");
+
+        layer_btn_mnu->addChild(next_free_btn);
+        layer_btn_mnu->setPositionX(new_layr_pos);
+        layer_btn_mnu->setLayout(
+            RowLayout::create()
+                ->setAxisAlignment(AxisAlignment::Center)
+        );
+
+        return true;
     }
 
-    auto layers_menu = this->getChildByIDRecursive("layer-menu");
-    auto next_free_layer_spr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png"_spr);
-  
-    next_free_layer_spr->setScale(0.54f);
-    next_free_layer_spr->setOpacity(175);
+    void on_next_free(CCObject* sender) {
+        auto objs = this->m_editorLayer->m_objects;
+        auto next_free = this->m_editorLayer->getNextFreeEditorLayer(objs);
+        auto all_layers_btn = this->getChildByIDRecursive("all-layers-button");
 
-    auto next_free_layer_btn = CCMenuItemSpriteExtra::create(
-      next_free_layer_spr,
-      this,
-      menu_selector(NextFreeLayer::onNextFree)
-    );
+        this->m_editorLayer->m_currentLayer = next_free;
+        this->m_currentLayerLabel->setString(std::to_string(next_free).c_str());
+        all_layers_btn->setVisible(true);
+    }
 
-    layers_menu->addChild(next_free_layer_btn);
+    void onPlaytest(CCObject* sender) {
+        auto next_free_button = this->getChildByIDRecursive("next-free-layer-button");
+        next_free_button->setVisible(false);
 
-    return true;
-  }
+        EditorUI::onPlaytest(sender);
+    }
+};
 
-  void onNextFree(CCObject* pSender) {
-    cocos2d::CCArray *objects = this->m_editorLayer->m_objects;
-    short current_layer = this->m_editorLayer->m_currentLayer;
-    int next_free_layer = this->m_editorLayer->getNextFreeEditorLayer(objects);
+struct NextFreeEditorLayer : Modify<NextFreeEditorLayer, LevelEditorLayer> {
+    bool init(GJGameLevel* p0, bool p1) {
+        if (!LevelEditorLayer::init(p0, p1)) {
+            return false;
+        }
 
-    this->m_editorLayer->m_currentLayer = next_free_layer;
-    CCLabelBMFont* layer_label = this->m_currentLayerLabel;
+        return true;
+    }
 
-    layer_label->setString(
-        std::to_string(next_free_layer).c_str()
-    );
-  }
+    void onStopPlaytest() {
+        LevelEditorLayer::onStopPlaytest();
+
+        auto next_free_button = this->m_editorUI->getChildByIDRecursive("next-free-layer-button");
+        next_free_button->setVisible(true);
+    }
 };
