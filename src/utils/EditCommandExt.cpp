@@ -6,21 +6,22 @@ class $modify(EditorUI) {
     BE_ALLOW_START
     BE_ALLOW_FAKE_ENUMS
     CCPoint moveForCommand(EditCommand command) {
+        auto gridSize = EditorUI::get()->m_gridSize;
         switch (command) {
-            case EditCommandExt::QuarterLeft:  return ccp(-7.5f, 0);
-            case EditCommandExt::QuarterRight: return ccp(7.5f, 0);
-            case EditCommandExt::QuarterUp:    return ccp(0, 7.5f);
-            case EditCommandExt::QuarterDown:  return ccp(0, -7.5f);
-            
-            case EditCommandExt::EighthLeft:   return ccp(-3.75f, 0);
-            case EditCommandExt::EighthRight:  return ccp(3.75f, 0);
-            case EditCommandExt::EighthUp:     return ccp(0, 3.75f);
-            case EditCommandExt::EighthDown:   return ccp(0, -3.75f);
+            case EditCommandExt::QuarterLeft:   return ccp(-1 / 4.f, 0) * gridSize;
+            case EditCommandExt::QuarterRight:  return ccp( 1 / 4.f, 0) * gridSize;
+            case EditCommandExt::QuarterUp:     return ccp(0,  1 / 4.f) * gridSize;
+            case EditCommandExt::QuarterDown:   return ccp(0, -1 / 4.f) * gridSize;
 
-            case EditCommandExt::UnitLeft:     return ccp(-1, 0);
-            case EditCommandExt::UnitRight:    return ccp(1, 0);
-            case EditCommandExt::UnitUp:       return ccp(0, 1);
-            case EditCommandExt::UnitDown:     return ccp(0, -1);
+            case EditCommandExt::EighthLeft:   return ccp(-1 / 8.f, 0) * gridSize;
+            case EditCommandExt::EighthRight:  return ccp( 1 / 8.f, 0) * gridSize;
+            case EditCommandExt::EighthUp:     return ccp(0,  1 / 8.f) * gridSize;
+            case EditCommandExt::EighthDown:   return ccp(0, -1 / 8.f) * gridSize;
+
+            case EditCommandExt::UnitLeft:     return ccp(-.1f,  0);
+            case EditCommandExt::UnitRight:    return ccp( .1f,  0);
+            case EditCommandExt::UnitUp:       return ccp( 0,  .1f);
+            case EditCommandExt::UnitDown:     return ccp( 0, -.1f);
 
             default: return EditorUI::moveForCommand(command);
         }

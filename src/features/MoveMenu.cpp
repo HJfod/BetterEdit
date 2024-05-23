@@ -261,10 +261,10 @@ public:
             ) {
                 std::string name;
                 switch (hash(group.c_str())) {
-                    case hash("half-button"):    name = "1/2"; break;
-                    case hash("quarter-button"): name = "1/4"; break;
-                    case hash("eighth-button"):  name = "1/8"; break;
-                    case hash("unit-button"):    name = "1/30"; break;
+                    case hash("half-button"):    name = "1/2";   break;
+                    case hash("quarter-button"): name = "1/4";   break;
+                    case hash("eighth-button"):  name = "1/8";   break;
+                    case hash("unit-button"):    name = "Pixel"; break;
                     default: break;
                 }
                 m_groups.push_back(MoveGroup::create(name, up, down, left, right));
@@ -322,6 +322,11 @@ class $modify(EditorUI) {
         m_editButtonBar->m_buttonArray->addObject(btn);
     }
 
+    $override
+    void clickOnPosition(CCPoint pos) {
+        EditorUI::clickOnPosition(pos);
+        CustomEditMenu::updateVisiblity(this);
+    }
     $override
     void toggleMode(CCObject* sender) {
         EditorUI::toggleMode(sender);

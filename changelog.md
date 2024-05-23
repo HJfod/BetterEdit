@@ -5,6 +5,7 @@
  * View tab
  * Better organized edit tab
  * Hide UI button
+ * 1/4 and 1/8 moving is now relative to the current grid size
 
 ## v6.3.5
 
