@@ -54,14 +54,6 @@ struct NextFreeLayer : Modify<NextFreeLayer, EditorUI> {
 };
 
 struct NextFreeEditorLayer : Modify<NextFreeEditorLayer, LevelEditorLayer> {
-    bool init(GJGameLevel* p0, bool p1) {
-        if (!LevelEditorLayer::init(p0, p1)) {
-            return false;
-        }
-
-        return true;
-    }
-
     void onStopPlaytest() {
         LevelEditorLayer::onStopPlaytest();
 
