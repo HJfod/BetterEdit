@@ -6,6 +6,7 @@
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/GameManager.hpp>
 #include <utils/HandleUIHide.hpp>
+#include <utils/Pro.hpp>
 
 using namespace geode::prelude;
 
@@ -13,6 +14,10 @@ class $modify(TypeInUI, EditorUI) {
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
             return false;
+        
+        if (isProUIEnabled()) {
+            return true;
+        }
         
         auto layerMenu = this->getChildByID("layer-menu");
         layerMenu->setContentSize({ 130, layerMenu->getContentSize().height });
@@ -37,7 +42,9 @@ class $modify(TypeInUI, EditorUI) {
         );
 
         // Delete the existing layer lock button that's just an overlay on the text
-        this->getChildByIDRecursive("lock-layer-button")->removeFromParent();
+        if (auto lock = this->getChildByIDRecursive("lock-layer-button")) {
+            lock->removeFromParent();
+        }
 
         // setVisible is used by GD but setOpacity is not :-)
         static_cast<CCSprite*>(this->getChildByID("layer-locked-sprite"))->setOpacity(0);

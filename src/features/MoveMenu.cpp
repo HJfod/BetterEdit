@@ -2,6 +2,7 @@
 #include <Geode/modify/EditorUI.hpp>
 #include <utils/EditCommandExt.hpp>
 #include <utils/HandleUIHide.hpp>
+#include <utils/Pro.hpp>
 
 using namespace geode::prelude;
 
@@ -170,6 +171,8 @@ public:
         return nullptr;
     }
     static void createOrUpdate(EditorUI* ui) {
+        if (Mod::get()->template getSettingValue<bool>("new-edit-menu") || isProUIEnabled()) return;
+
         CustomEditMenu* result;
 
         if (auto existing = static_cast<CustomEditMenu*>(ui->getChildByID("custom-move-menu"_spr))) {
@@ -310,9 +313,7 @@ class $modify(EditorUI) {
             GameManager::get()->getIntGameVariable("0050")
         );
 
-        if (Mod::get()->template getSettingValue<bool>("new-edit-menu")) {
-            CustomEditMenu::createOrUpdate(this);
-        }
+        CustomEditMenu::createOrUpdate(this);
     }
 
     void addMoveButton(const char* id, const char* spr, EditCommand command) {
@@ -340,9 +341,7 @@ class $modify(EditorUI) {
     $override
     void resetUI() {
         EditorUI::resetUI();
-        if (Mod::get()->template getSettingValue<bool>("new-edit-menu")) {
-            CustomEditMenu::createOrUpdate(this);
-        }
+        CustomEditMenu::createOrUpdate(this);
     }
 };
 
@@ -350,7 +349,7 @@ class $modify(EditButtonBar) {
     $override
     void loadFromItems(CCArray* items, int r, int c, bool unkBool) {
         EditButtonBar::loadFromItems(items, r, c, unkBool);
-        if (Mod::get()->template getSettingValue<bool>("new-edit-menu") && this->getID() == "edit-button-bar") {
+        if (this->getID() == "edit-button-bar") {
             CustomEditMenu::createOrUpdate(EditorUI::get());
         }
     }
