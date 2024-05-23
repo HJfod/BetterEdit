@@ -1,5 +1,5 @@
-#include <Geode/Geode.hpp>
 #include <Geode/cocos/label_nodes/CCLabelBMFont.h>
+#include <Geode/Geode.hpp>
 #include <Geode/modify/Modify.hpp>
 #include <Geode/modify/CCMenuItemSpriteExtra.hpp>
 #include <Geode/cocos/cocoa/CCObject.h>
@@ -33,13 +33,15 @@ struct NextFreeLayer : Modify<NextFreeLayer, EditorUI> {
   }
 
   void onNextFree(CCObject* pSender) {
-    auto objects = this->m_editorLayer->m_objects;
-    auto current_layer = this->m_editorLayer->m_currentLayer;
-    auto next_free_layer = this->m_editorLayer->getNextFreeEditorLayer(objects);
+    cocos2d::CCArray *objects = this->m_editorLayer->m_objects;
+    short current_layer = this->m_editorLayer->m_currentLayer;
+    int next_free_layer = this->m_editorLayer->getNextFreeEditorLayer(objects);
 
     this->m_editorLayer->m_currentLayer = next_free_layer;
     CCLabelBMFont* layer_label = this->m_currentLayerLabel;
 
-    layer_label->setString(std::to_string(next_free_layer));
+    layer_label->setString(
+        std::to_string(next_free_layer).c_str()
+    );
   }
 };
