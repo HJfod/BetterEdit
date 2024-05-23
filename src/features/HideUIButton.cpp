@@ -15,12 +15,12 @@ class $modify(HideButtonUI, EditorUI) {
         
         if (auto menu = this->getChildByID("undo-menu")) {
             auto unhideSpr = CircleButtonSprite::createWithSpriteFrameName(
-                "eye-off.png"_spr, 1.f, CircleBaseColor::Gray, CircleBaseSize::Small
+                "eye-off.png"_spr, 1.f, CircleBaseColor::Gray, CircleBaseSize::Tiny
             );
             unhideSpr->setOpacity(105);
             static_cast<CCSprite*>(unhideSpr->getTopNode())->setOpacity(105);
             auto hideSpr   = CircleButtonSprite::createWithSpriteFrameName(
-                "eye-on.png"_spr, 1.f, CircleBaseColor::Green, CircleBaseSize::Small
+                "eye-on.png"_spr, 1.f, CircleBaseColor::Green, CircleBaseSize::Tiny
             );
 
             m_fields->hideToggle = CCMenuItemToggler::create(
