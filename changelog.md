@@ -1,4 +1,6 @@
-
+## v6.4.2
+ * Fix accidentally using non-existant function
+ 
 ## v6.4.1
  * Add option for disabling the View Tab
  * Fix various visual glitches & bugs
