@@ -112,6 +112,12 @@
 			"name": "New Edit Menu",
 			"description": "Changes the object moving menu to have the move button grouped directionally rather than in a list. <cr>Requires re-entering the editor!</c>"
 		},
+		"view-menu": {
+			"type": "bool",
+			"default": true,
+			"name": "Show View Tab",
+			"description": "Adds a new fourth tab to the editor with buttons from quickly toggling on/off the visibility of features"
+		},
 		"new-color-menu": {
 			"type": "bool",
 			"default": true,

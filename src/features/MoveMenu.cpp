@@ -68,6 +68,7 @@ public:
 class CustomEditMenu : public CCNode {
 protected:
     EditorUI* m_editorUI;
+    OnUIHide m_onUIHide;
     CCNode* m_groupRow;
     CCMenu* m_groupPageControlsMenu;
     CCMenu* m_bottomRow;
@@ -83,9 +84,14 @@ protected:
         this->setAnchorPoint(ccp(.5f, 0));
 
         m_editorUI = ui;
+        m_onUIHide.setFilter(UIShowFilter(ui));
+        m_onUIHide.bind([this](UIShowEvent* ev) {
+            this->updateMenu(ev->show);
+        });
 
         m_groupRow = CCNode::create();
         m_groupRow->setLayout(RowLayout::create()->setGap(3));
+        m_groupRow->getLayout()->ignoreInvisibleChildren(true);
         m_groupRow->setContentWidth(m_obContentSize.width - 40);
         m_groupRow->setAnchorPoint(ccp(.5f, .5f));
         this->addChildAtPosition(m_groupRow, Anchor::Center, ccp(0, 10));
@@ -122,8 +128,7 @@ protected:
         m_bottomRow->setContentWidth(m_obContentSize.width);
         this->addChildAtPosition(m_bottomRow, Anchor::Bottom, ccp(0, 15));
 
-        this->updateButtonLayout();
-        this->scheduleUpdate();
+        this->updateMenu();
         
         return true;
     }
@@ -148,14 +153,10 @@ protected:
             m_movePage = lastPage;
         }
 
-        // Add the buttons from the page to the group row
-        m_groupRow->removeAllChildren();
-        for (size_t i = 0; i < MOVE_MENU_GROUPS_PER_PAGE; i += 1) {
-            auto pagedIndex = m_movePage * MOVE_MENU_GROUPS_PER_PAGE + i;
-            if (pagedIndex >= m_groups.size()) {
-                break;
-            }
-            m_groupRow->addChild(m_groups.at(pagedIndex));
+        // Show only the buttons on this page
+        for (size_t i = 0; i < m_groups.size(); i += 1) {
+            auto pagedIndex = m_movePage * MOVE_MENU_GROUPS_PER_PAGE;
+            m_groups.at(i)->setVisible(i >= pagedIndex && i < pagedIndex + MOVE_MENU_GROUPS_PER_PAGE);
         }
         m_groupRow->updateLayout();
     }
@@ -170,41 +171,40 @@ public:
         CC_SAFE_DELETE(ret);
         return nullptr;
     }
-    static void createOrUpdate(EditorUI* ui) {
-        if (Mod::get()->template getSettingValue<bool>("new-edit-menu") || isProUIEnabled()) return;
+    static CustomEditMenu* get(EditorUI* ui, bool create = false) {
+        if (!ui) return nullptr;
 
-        CustomEditMenu* result;
-
-        if (auto existing = static_cast<CustomEditMenu*>(ui->getChildByID("custom-move-menu"_spr))) {
-            existing->updateButtonLayout();
-            result = existing;
-        }
-        else {
-            auto winSize = CCDirector::get()->getWinSize();
-            result = CustomEditMenu::create(ui);
-            result->setID("custom-move-menu"_spr);
-            result->setPosition(winSize.width / 2, 5);
-            ui->addChild(result, 10);
-            handleUIHideOnPlaytest(ui, result);
-        }
-
-        // Update visibility & scale
-        updateVisiblity(ui);
-    }
-    static void updateVisiblity(EditorUI* ui, bool show = true) {
         if (auto menu = static_cast<CustomEditMenu*>(ui->getChildByID("custom-move-menu"_spr))) {
-            menu->setVisible(show && ui->m_selectedMode == 3);
-            menu->setScale(ui->m_editButtonBar->getScale());
-            ui->m_editButtonBar->setVisible(false);
+            menu->updateMenu();
+            return menu;
         }
+
+        if (!Mod::get()->template getSettingValue<bool>("new-edit-menu") || isProUIEnabled()) {
+            return nullptr;
+        }
+
+        if (create) {
+            auto winSize = CCDirector::get()->getWinSize();
+
+            auto nuevo = CustomEditMenu::create(ui);
+            nuevo->setID("custom-move-menu"_spr);
+            nuevo->setPosition(winSize.width / 2, 5);
+            ui->addChild(nuevo, 10);
+
+            return nuevo;
+        }
+        return nullptr;
     }
 
-    void updateButtonLayout() {
-        // Clear existing groups
-        for (auto group : m_groups) {
-            group->removeFromParent();
+    void updateMenu(bool show = true) {
+        // Hide the original
+        m_editorUI->m_editButtonBar->setVisible(false);
+
+        // If we're not showing, we don't need to update the menu layout, just return
+        if (!show) {
+            this->setVisible(false);
+            return;
         }
-        m_groups.clear();
 
         // First element is mod ID, second is group
         std::vector<std::pair<std::string, std::string>> groups;
@@ -224,7 +224,12 @@ public:
             auto ref = Ref(btn);
             btn->removeFromParent();
 
+            // If this button has already been added, skip
             auto id = btn->getID();
+            if (m_bottomRow->getChildByID(id)) {
+                continue;
+            }
+
             auto modID = std::string();
             // Remove any mod ID prefix to support other mods that may add 
             // their own move buttons (also needed for BE's own extra move 
@@ -240,14 +245,32 @@ public:
                 auto group = id.substr(id.find('-') + 1);
                 // Remove whatever direction it is from the group
                 group = group.substr(group.find('-') + 1);
+
+                // If this group has already been added, skip
+                for (auto& g : m_groups) {
+                    if (g->getID() == group) {
+                        goto this_group_has_already_been_handled_fully_before;
+                    }
+                }
+                for (auto& [_, g] : groups) {
+                    if (g == group) {
+                        goto this_group_has_already_been_added_to_the_tba_list;
+                    }
+                }
+
                 // Add this group to the list
                 groups.push_back(std::make_pair(modID, group));
             }
 
+        this_group_has_already_been_added_to_the_tba_list:;
+
             // We want to preserve the order of non-move buttons, so put 
             // everything in the list
             btnsWithIDs.push_back(std::make_pair(btn->getID(), btn));
+
+        this_group_has_already_been_handled_fully_before:;
         }
+        m_editorUI->m_editButtonBar->m_buttonArray->removeAllObjects();
 
         // Group up move buttons
         for (auto [modID, group] : std::move(groups)) {
@@ -257,11 +280,7 @@ public:
             auto down  = findBtnByID(modID + "move-down-" + group);
             auto left  = findBtnByID(modID + "move-left-" + group);
             auto right = findBtnByID(modID + "move-right-" + group);
-            if (
-                up && down && left && right &&
-                // `groups` has duplicates
-                !up->getParent() && !down->getParent() && !left->getParent() && !right->getParent()
-            ) {
+            if (up && down && left && right) {
                 std::string name;
                 switch (hash(group.c_str())) {
                     case hash("half-button"):    name = "1/2";   break;
@@ -270,7 +289,10 @@ public:
                     case hash("unit-button"):    name = "Pixel"; break;
                     default: break;
                 }
-                m_groups.push_back(MoveGroup::create(name, up, down, left, right));
+                auto created = MoveGroup::create(name, up, down, left, right);
+                created->setID(group);
+                m_groups.push_back(created);
+                m_groupRow->addChild(created);
             }
         }
 
@@ -285,13 +307,20 @@ public:
 
         this->updatePage();
         m_bottomRow->updateLayout();
+
+        this->setVisible(m_editorUI->m_selectedMode == 3);
+        this->setScale(m_editorUI->m_editButtonBar->getScale());
     }
 };
 
 class $modify(EditorUI) {
     $override
-    void createMoveMenu() {
-        EditorUI::createMoveMenu();
+    bool init(LevelEditorLayer* editor) {
+        if (!EditorUI::init(editor))
+            return false;
+        
+        // The reason this is all done in init() rather than createMoveMenu() 
+        // is that we want NodeIDs to have added the IDs first
 
         this->addMoveButton("move-up-quarter-button"_spr,    "edit_upBtn5_001.png",    EditCommandExt::QuarterUp);
         this->addMoveButton("move-down-quarter-button"_spr,  "edit_downBtn5_001.png",  EditCommandExt::QuarterDown);
@@ -313,7 +342,10 @@ class $modify(EditorUI) {
             GameManager::get()->getIntGameVariable("0050")
         );
 
-        CustomEditMenu::createOrUpdate(this);
+        // Create the custom edit menu
+        (void)CustomEditMenu::get(this, true);
+
+        return true;
     }
 
     void addMoveButton(const char* id, const char* spr, EditCommand command) {
@@ -324,24 +356,18 @@ class $modify(EditorUI) {
     }
 
     $override
-    void clickOnPosition(CCPoint pos) {
-        EditorUI::clickOnPosition(pos);
-        CustomEditMenu::updateVisiblity(this);
-    }
-    $override
     void toggleMode(CCObject* sender) {
         EditorUI::toggleMode(sender);
-        CustomEditMenu::updateVisiblity(this);
-    }
-    $override
-    void showUI(bool show) {
-        EditorUI::showUI(show);
-        CustomEditMenu::updateVisiblity(this, show);
+        if (auto menu = CustomEditMenu::get(this)) {
+            menu->updateMenu();
+        }
     }
     $override
     void resetUI() {
         EditorUI::resetUI();
-        CustomEditMenu::createOrUpdate(this);
+        if (auto menu = CustomEditMenu::get(this)) {
+            menu->updateMenu();
+        }
     }
 };
 
@@ -349,8 +375,10 @@ class $modify(EditButtonBar) {
     $override
     void loadFromItems(CCArray* items, int r, int c, bool unkBool) {
         EditButtonBar::loadFromItems(items, r, c, unkBool);
-        if (this->getID() == "edit-button-bar") {
-            CustomEditMenu::createOrUpdate(EditorUI::get());
+        if (this->getID() == "edit-tab-bar") {
+            if (auto menu = CustomEditMenu::get(EditorUI::get())) {
+                menu->updateMenu();
+            }
         }
     }
 };

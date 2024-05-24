@@ -2,34 +2,34 @@
 #include <Geode/modify/EditorUI.hpp>
 
 class $modify(HideUI, EditorUI) {
-    struct Fields {
-        std::vector<Ref<CCNode>> toHide;
-    };
-
     $override
-    void showUI(bool toggle) {
-        EditorUI::showUI(toggle);
-
-        // playtest no ui option
-        if (!GameManager::sharedState()->getGameVariable("0046")) {
-            toggle = true;
+    void showUI(bool show) {
+        if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
+            // Playtest no ui option
+            show = !GameManager::sharedState()->getGameVariable("0046");
         }
 
-        for (auto toHide : m_fields->toHide) {
-            toHide->setVisible(toggle);
-        }
+        EditorUI::showUI(show);
+        UIShowEvent(this, show).post();
 
-        m_currentLayerLabel->setVisible(toggle);
+        m_currentLayerLabel->setVisible(show);
 
         auto lockBtn = static_cast<CCMenuItemSpriteExtra*>(
             this->getChildByID("layer-menu")->getChildByID("lock-layer"_spr)
         );
         if (lockBtn) {
-            lockBtn->setVisible(toggle);
+            lockBtn->setVisible(show);
         }
+        m_tabsMenu->setVisible(show && m_selectedMode == 2);
     }
 };
 
-void handleUIHideOnPlaytest(EditorUI* ui, CCNode* target) {
-    static_cast<HideUI*>(ui)->m_fields->toHide.push_back(target);
+UIShowEvent::UIShowEvent(EditorUI* ui, bool show) : ui(ui), show(show) {}
+
+UIShowFilter::UIShowFilter(EditorUI* ui) : m_ui(ui) {}
+ListenerResult UIShowFilter::handle(MiniFunction<Callback> fn, UIShowEvent* ev) {
+    if (m_ui == ev->ui) {
+        fn(ev);
+    }
+    return ListenerResult::Propagate;
 }

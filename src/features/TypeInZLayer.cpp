@@ -11,6 +11,10 @@
 using namespace geode::prelude;
 
 class $modify(TypeInUI, EditorUI) {
+    struct Fields {
+        OnUIHide onUIHide;
+    };
+
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
             return false;
@@ -49,16 +53,20 @@ class $modify(TypeInUI, EditorUI) {
         // setVisible is used by GD but setOpacity is not :-)
         static_cast<CCSprite*>(this->getChildByID("layer-locked-sprite"))->setOpacity(0);
 
-        handleUIHideOnPlaytest(this, m_currentLayerLabel);
-        handleUIHideOnPlaytest(this, layerLockBtn);
+        m_fields->onUIHide.setFilter(UIShowFilter(this));
+        m_fields->onUIHide.bind([this, layerLockBtn](auto* ev) {
+            m_currentLayerLabel->setVisible(ev->show);
+            layerLockBtn->setVisible(ev->show);
+        });
         
         return true;
     }
 
     void updateLockBtn() {
-        auto lockBtn = static_cast<CCMenuItemSpriteExtra*>(
-            this->getChildByID("layer-menu")->getChildByID("lock-layer"_spr)
-        );
+        auto layerMenu = this->getChildByID("layer-menu");
+        if (!layerMenu) return;
+        auto lockBtn = static_cast<CCMenuItemSpriteExtra*>(layerMenu->getChildByID("lock-layer"_spr));
+        if (!lockBtn) return;
         const char* sprite = "GJ_lock_open_001.png";
         auto onAll = m_editorLayer->m_currentLayer == -1;
         auto layerLocked = !onAll ?
