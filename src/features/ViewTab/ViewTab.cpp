@@ -10,6 +10,7 @@
 #include <Geode/binding/EditButtonBar.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <geode.custom-keybinds/include/Keybinds.hpp>
+#include <utils/HandleUIHide.hpp>
 
 using namespace geode::prelude;
 using namespace keybinds;
@@ -53,6 +54,7 @@ class $modify(GameObjectExtra, GameObject) {
 struct $modify(ViewTabUI, EditorUI) {
     struct Fields {
         CCNode* viewModeBtn;
+        OnUIHide onUIHide;
     };
 
     static void onModify(auto& self) {
@@ -152,6 +154,10 @@ struct $modify(ViewTabUI, EditorUI) {
         if (!EditorUI::init(lel))
             return false;
         
+        if (!Mod::get()->template getSettingValue<bool>("view-menu")) {
+            return true;
+        }
+        
         auto winSize = CCDirector::get()->getWinSize();
         
         // Make a bit space for new style menu since the old one is a tiny bit cramped
@@ -186,7 +192,7 @@ struct $modify(ViewTabUI, EditorUI) {
 
     #ifdef GEODE_IS_WINDOWS
         this->template addEventListener<InvokeBindFilter>([=](InvokeBindEvent* event) {
-            if (event->isDown()) {
+            if (event->isDown() && m_editorLayer->m_playbackMode == PlaybackMode::Not) {
                 this->toggleMode(m_fields->viewModeBtn);
             }
             return ListenerResult::Propagate;
@@ -252,14 +258,14 @@ struct $modify(ViewTabUI, EditorUI) {
 
         this->updateViewTab();
 
-        return true;
-    }
+        m_fields->onUIHide.setFilter(this);
+        m_fields->onUIHide.bind([this](UIShowEvent* ev) {
+            m_fields->viewModeBtn->setVisible(ev->show);
+            this->getChildByID("view-tab"_spr)->setVisible(ev->show && m_selectedMode == 4);
+            m_buildModeBtn->getParent()->getChildByTag(4)->setVisible(ev->show);
+        });
 
-    $override
-    void showUI(bool show) {
-        EditorUI::showUI(show);
-        m_fields->viewModeBtn->setVisible(show);
-        this->showVisibilityTab(show);
+        return true;
     }
 
     void toggleMode(CCObject* sender) {
@@ -270,11 +276,6 @@ struct $modify(ViewTabUI, EditorUI) {
             
             viewBtnBar->setVisible(m_selectedMode == 4);
         }
-    }
-
-    void showVisibilityTab(bool show) {
-        this->getChildByID("view-tab"_spr)->setVisible(show && m_selectedMode == 4);
-        m_buildModeBtn->getParent()->getChildByTag(4)->setVisible(show);
     }
 
     $override

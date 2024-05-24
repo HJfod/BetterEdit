@@ -170,6 +170,16 @@ class $modify(ScaledUI, EditorUI) {
     }
 };
 
+class $modify(EditButtonBar) {
+    $override
+    void loadFromItems(CCArray* items, int r, int c, bool unkBool) {
+        EditButtonBar::loadFromItems(items, r, c, unkBool);
+        if (auto ui = static_cast<ScaledUI*>(EditorUI::get())) {
+            ui->centerBuildTabs();
+        }
+    }
+};
+
 class $modify(EditorPauseLayer) {
     static void onModify(auto& self) {
         (void)self.setHookPriority("EditorPauseLayer::onResume", -100);

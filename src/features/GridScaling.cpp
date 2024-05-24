@@ -19,6 +19,10 @@ class $modify(ObjectToolbox) {
 };
 
 class $modify(GridUI, EditorUI) {
+    struct Fields {
+        OnUIHide onUIHide;
+    };
+
     $override
     bool init(LevelEditorLayer* lel) {
         if (!EditorUI::init(lel))
@@ -71,7 +75,10 @@ class $modify(GridUI, EditorUI) {
         }
         this->addChildAtPosition(container, Anchor::Top, offset, false);
 
-        handleUIHideOnPlaytest(this, container);
+        m_fields->onUIHide.setFilter(UIShowFilter(this));
+        m_fields->onUIHide.bind([container](auto* ev) {
+            container->setVisible(ev->show);
+        });
 
         this->updateGridConstSize();
 

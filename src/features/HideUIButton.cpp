@@ -32,8 +32,6 @@ class $modify(HideButtonUI, EditorUI) {
             menu->updateLayout();
         }
 
-        handleUIHideOnPlaytest(this, m_tabsMenu);
-
         return true;
     }
 
