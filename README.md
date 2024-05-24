@@ -2,7 +2,7 @@
   <picture>
     <img alt="BetterEdit Logo" width="100" align="left" src="logo.png">
   </picture>
-  BetterEdit | Heavily WIP!
+  BetterEdit
   <br />
 </h1>
 <span>
