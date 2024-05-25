@@ -35,18 +35,18 @@ class $modify(ScaledUI, EditorUI) {
             slider->setPositionY(size.height - (size.height - slider->getPositionY()) * scale);
         }
         
-        if (auto settingsMenu = this->querySelector("settings-menu")) {
+        if (auto settingsMenu = this->getChildByID("settings-menu")) {
             settingsMenu->setPosition(size);
             settingsMenu->setAnchorPoint(ccp(1, 1));
             settingsMenu->setScale(scale);
         }
 
-        if (auto buttonsMenu = this->querySelector("editor-buttons-menu")) {
+        if (auto buttonsMenu = this->getChildByID("editor-buttons-menu")) {
             buttonsMenu->setPositionX((buttonsMenu->getPositionX() + buttonsMenu->getContentSize().width / 2));
             buttonsMenu->setAnchorPoint(ccp(1, 0.5f));
             buttonsMenu->setScale(scale);
 
-            if (auto layerMenu = this->querySelector("layer-menu")) {
+            if (auto layerMenu = this->getChildByID("layer-menu")) {
                 layerMenu->setPositionX(layerMenu->getPositionX() + layerMenu->getContentSize().width / 2);
                 layerMenu->setPositionY(buttonsMenu->getPositionY() - (buttonsMenu->getPositionY() - layerMenu->getPositionY()) * scale);
                 layerMenu->setAnchorPoint(ccp(1, 0.5f));
@@ -54,30 +54,30 @@ class $modify(ScaledUI, EditorUI) {
             }
         }
 
-        if (auto undoMenu = this->querySelector("undo-menu")) {
+        if (auto undoMenu = this->getChildByID("undo-menu")) {
             undoMenu->setPosition(ccp((undoMenu->getPositionX() - undoMenu->getContentSize().width / 2) * scale, size.height));
             undoMenu->setAnchorPoint(ccp(0, 1));
             undoMenu->setScale(scale);
         }
 
-        if (auto testMenu = this->querySelector("playtest-menu")) {
+        if (auto testMenu = this->getChildByID("playtest-menu")) {
             testMenu->setPosition(ccp((testMenu->getPositionX() - testMenu->getContentSize().width / 2) * scale, testMenu->getPositionY()));
             testMenu->setAnchorPoint(ccp(0, 0.5f));
             testMenu->setScale(scale);
 
-            if (auto playMenu = this->querySelector("playback-menu")) {
+            if (auto playMenu = this->getChildByID("playback-menu")) {
                 playMenu->setPosition(ccp((playMenu->getPositionX() - playMenu->getContentSize().width / 2) * scale, testMenu->getPositionY() + (playMenu->getPositionY() - testMenu->getPositionY()) * scale));
                 playMenu->setAnchorPoint(ccp(0, 0.5f));
                 playMenu->setScale(scale);
             }
 
-            if (auto zoomMenu = this->querySelector("zoom-menu")) {
+            if (auto zoomMenu = this->getChildByID("zoom-menu")) {
                 zoomMenu->setPosition(ccp((zoomMenu->getPositionX() - zoomMenu->getContentSize().width / 2) * scale, testMenu->getPositionY() + (zoomMenu->getPositionY() - testMenu->getPositionY()) * scale));
                 zoomMenu->setAnchorPoint(ccp(0, 0.5f));
                 zoomMenu->setScale(scale);
             }
 
-            if (auto linkMenu = this->querySelector("link-menu")) {
+            if (auto linkMenu = this->getChildByID("link-menu")) {
                 linkMenu->setPosition(ccp((linkMenu->getPositionX() - linkMenu->getContentSize().width / 2) * scale, testMenu->getPositionY() + (linkMenu->getPositionY() - testMenu->getPositionY()) * scale));
                 linkMenu->setAnchorPoint(ccp(0, 0.5f));
                 linkMenu->setScale(scale);
@@ -91,7 +91,7 @@ class $modify(ScaledUI, EditorUI) {
             objBG->setScaleY(scale);
         }
 
-        if (auto objTabs = this->querySelector("build-tabs-menu")) {
+        if (auto objTabs = this->getChildByID("build-tabs-menu")) {
             objTabs->setAnchorPoint(ccp(0.5f, 0));
             objTabs->setPositionY(objTabs->getPositionY() - objTabs->getContentSize().height / 2);
             objTabs->setPositionY(objTabs->getPositionY() * scale);
@@ -102,13 +102,13 @@ class $modify(ScaledUI, EditorUI) {
             }
         }
 
-        if (auto leftTabs = this->querySelector("toolbar-categories-menu")) {
+        if (auto leftTabs = this->getChildByID("toolbar-categories-menu")) {
             leftTabs->setAnchorPoint(ccp(0, 0));
             leftTabs->setPosition(ccp(leftTabs->getPositionX() - leftTabs->getContentSize().width / 2, 0));
             leftTabs->setScale(scale);
         }
 
-        if (auto rightTabs = this->querySelector("toolbar-toggles-menu")) {
+        if (auto rightTabs = this->getChildByID("toolbar-toggles-menu")) {
             rightTabs->setAnchorPoint(ccp(1, 0));
             rightTabs->setPosition(ccp(rightTabs->getPositionX() + rightTabs->getContentSize().width / 2, 0));
             rightTabs->setScale(scale);
@@ -124,7 +124,7 @@ class $modify(ScaledUI, EditorUI) {
             rightLine->setPosition(ccp(size.width - (size.width - rightLine->getPositionX()) * scale, rightLine->getPositionY() * scale));
         }
 
-        if (auto deleteTabs = this->querySelector("delete-category-menu")) {
+        if (auto deleteTabs = this->getChildByID("delete-category-menu")) {
             deleteTabs->setContentSize(ccp(0, 0));
             deleteTabs->setPositionY(deleteTabs->getPositionY() * scale);
             deleteTabs->setScale(scale);
@@ -139,7 +139,7 @@ class $modify(ScaledUI, EditorUI) {
 
         // Make the builds tabs be center-aligned
         auto winSize = CCDirector::get()->getWinSize();
-        this->querySelector("build-tabs-menu")->setPositionX(winSize.width / 2);
+        this->getChildByID("build-tabs-menu")->setPositionX(winSize.width / 2);
 
         // This is so silly. If you don't do this, the menu is wrongly positioned, 
         // but only the first time. I have no clue what's going on

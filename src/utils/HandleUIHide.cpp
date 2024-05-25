@@ -4,7 +4,7 @@
 class $modify(HideUI, EditorUI) {
     $override
     void showUI(bool show) {
-        if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
+        if (m_editorLayer->m_playbackMode == PlaybackMode::Playing) {
             // Playtest no ui option
             show = !GameManager::sharedState()->getGameVariable("0046");
         }
