@@ -1,3 +1,10 @@
+## v6.5.0
+ * Add support for <cy>2.206</c>
+ * Add <cp>Quick Save</c> feature that significantly improves level saving speeds
+ * Allow <cj>configuring autosave rate</c>
+ * Fix autosave possibly causing the level to be corrupted if it occurred during playtesting
+ * <cr>Remove BetterSave dependency</c> as the mod was discontinued
+
 ## v6.4.3
  * Fix playtest pausing not showing the UI
 

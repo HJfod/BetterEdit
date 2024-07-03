@@ -28,7 +28,7 @@ static std::string parseChangelog(std::optional<VersionInfo> const& since) {
                 auto ver = parse.unwrap();
                 if (!since || since.value() < ver) {
                     validHeader = true;
-                    res += "\n# " + ver.toString() + "\n\n";
+                    res += "\n# " + ver.toNonVString() + "\n\n";
                 }
                 else {
                     validHeader = false;

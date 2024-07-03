@@ -134,7 +134,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         auto spr = ColorChannelSprite::create();
         spr->setScale(.8f);
         // tag gets overwritten by CCMenuItemSpriteExtra :(
-        spr->setUserData(reinterpret_cast<void*>(channel));
+        spr->setUserData(reinterpret_cast<void*>(static_cast<intptr_t>(channel)));
         spr->setID("channel-sprite"_spr);
 
         if (recent && channel == 0) {
@@ -378,7 +378,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
 
     void gotoPageWithChannel(int channel) {
         if (0 < channel && channel < 1000) {
-            this->gotoPage((channel - 1) / getChannelsOnPage());
+            this->gotoPage(static_cast<int>((channel - 1) / getChannelsOnPage()));
         }
     }
 
@@ -388,7 +388,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         if (!m_fields->initDone) {
             return;
         }
-        int channelsPerPage = getChannelsOnPage();
+        int channelsPerPage = static_cast<int>(getChannelsOnPage());
         if (page < 0) {
             page = 0;
         }

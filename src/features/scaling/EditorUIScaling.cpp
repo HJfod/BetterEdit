@@ -144,17 +144,19 @@ class $modify(ScaledUI, EditorUI) {
         // This is so silly. If you don't do this, the menu is wrongly positioned, 
         // but only the first time. I have no clue what's going on
         this->centerBuildTabs();
-        this->recreateButtonTabs();
+        for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {
+            if (auto bar = typeinfo_cast<EditButtonBar*>(c)) {
+                bar->reloadItems(
+                    GameManager::get()->getIntGameVariable("0049"),
+                    GameManager::get()->getIntGameVariable("0050")
+                );
+            }
+        }
+        this->centerBuildTabs();
 
         return true;
     }
 
-    $override
-    void recreateButtonTabs() {
-        EditorUI::recreateButtonTabs();
-        this->centerBuildTabs();
-    }
-    
     void centerBuildTabs() {
         // This centers the build tab
         auto winSize = CCDirector::get()->getWinSize();

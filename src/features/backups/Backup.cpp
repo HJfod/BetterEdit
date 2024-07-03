@@ -1,9 +1,15 @@
 #include "Backup.hpp"
 #include <Geode/loader/Dirs.hpp>
 #include <hjfod.gmd-api/include/GMD.hpp>
-#include <hjfod.bettersave/include/BetterSave.hpp>
+#include <cvolton.level-id-api/include/EditorIDs.hpp>
 #include <matjson/stl_serialize.hpp>
 #include <fmt/chrono.h>
+
+// todo: list backups associated with deleted / lost levels
+
+std::filesystem::path getBackupsDir(GJGameLevel* level) {
+    return dirs::getSaveDir() / "betteredit-level-backups" / std::to_string(EditorIDs::getID(level));
+}
 
 struct BackupMetadata final {
 	typename Backup::TimePoint createTime = Backup::Clock::now();
@@ -51,6 +57,7 @@ bool Backup::isAutomated() const {
 
 Result<> Backup::restoreThis() {
     // Add changes to memory
+    // They should be saved on game close
     m_forLevel->m_levelString = m_level->m_levelString;
     m_forLevel->m_levelName = m_level->m_levelName;
     m_forLevel->m_levelDesc = m_level->m_levelDesc;
@@ -61,15 +68,11 @@ Result<> Backup::restoreThis() {
     m_forLevel->m_songIDs = m_level->m_songIDs;
     m_forLevel->m_sfxIDs = m_level->m_sfxIDs;
     m_forLevel->m_twoPlayerMode = m_level->m_twoPlayerMode;
-
-    // Save the level file to commit these changes
-    GEODE_UNWRAP(save::created::saveLevel(m_forLevel));
-
     return Ok();
 }
 Result<> Backup::deleteThis() {
     std::error_code ec;
-    ghc::filesystem::remove_all(m_directory, ec);
+    std::filesystem::remove_all(m_directory, ec);
     if (ec) {
         return Err("Unable to delete backup directory: {} (code {})", ec.message(), ec.value());
     }
@@ -85,7 +88,7 @@ Result<> Backup::preserveAutomated() {
     return Ok();
 }
 
-Result<std::shared_ptr<Backup>> Backup::load(ghc::filesystem::path const& dir, GJGameLevel* forLevel) {
+Result<std::shared_ptr<Backup>> Backup::load(std::filesystem::path const& dir, GJGameLevel* forLevel) {
     GEODE_UNWRAP_INTO(auto level, gmd::importGmdAsLevel(dir / "level.gmd").expect("Unable to read level file: {error}"));
     auto meta = file::readFromJson<BackupMetadata>(dir / "meta.json").unwrapOrDefault();
 
@@ -99,8 +102,8 @@ Result<std::shared_ptr<Backup>> Backup::load(ghc::filesystem::path const& dir, G
 }
 std::vector<std::shared_ptr<Backup>> Backup::load(GJGameLevel* level) {
     std::vector<std::shared_ptr<Backup>> res;
-    for (auto folder : file::readDirectory(save::getCurrentLevelSaveDir(level) / "backups").unwrapOrDefault()) {
-        if (!ghc::filesystem::is_directory(folder)) {
+    for (auto folder : file::readDirectory(getBackupsDir(level)).unwrapOrDefault()) {
+        if (!std::filesystem::is_directory(folder)) {
             continue;
         }
         auto b = Backup::load(folder, level);
@@ -124,9 +127,8 @@ Result<> Backup::create(GJGameLevel* level, bool automated) {
     }
     auto time = Clock::now();
 
-    auto dir = save::getCurrentLevelSaveDir(level) / "backups" / fmt::format("{:%Y-%m-%d_%H-%M}", time);
-
-    if (ghc::filesystem::exists(dir)) {
+    auto dir = getBackupsDir(level) / fmt::format("{:%Y-%m-%d_%H-%M}", time);
+    if (std::filesystem::exists(dir)) {
         return Err("Level was already backed up less than a minute ago");
     }
 
@@ -144,8 +146,8 @@ Result<> Backup::create(GJGameLevel* level, bool automated) {
 }
 Result<> Backup::cleanAutomated(GJGameLevel* level) {
     std::vector<std::shared_ptr<Backup>> automated;
-    for (auto folder : file::readDirectory(save::getCurrentLevelSaveDir(level) / "backups").unwrapOrDefault()) {
-        if (!ghc::filesystem::is_directory(folder)) {
+    for (auto folder : file::readDirectory(getBackupsDir(level)).unwrapOrDefault()) {
+        if (!std::filesystem::is_directory(folder)) {
             continue;
         }
         auto b = Backup::load(folder, level);

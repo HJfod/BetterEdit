@@ -11,6 +11,7 @@
 #include <Geode/utils/cocos.hpp>
 #include <geode.custom-keybinds/include/Keybinds.hpp>
 #include <utils/HandleUIHide.hpp>
+#include <utils/HolyUB.hpp>
 
 using namespace geode::prelude;
 using namespace keybinds;
@@ -206,9 +207,13 @@ struct $modify(ViewTabUI, EditorUI) {
         // for the view toggles was causing super weird crashes, so will have 
         // to make due with this :/
 
-        btns->addObject(this->createViewToggleGV("v_rotate.png"_spr, "0118", [this](bool) {
-            m_editorLayer->updatePreviewAnim();
-        }));
+        btns->addObject(this->createViewToggle(
+            "v_rotate.png"_spr,
+            [] { return GameManager::get()->getGameVariable("0118"); },
+            [this](bool) {
+                fakeEditorPauseLayer(m_editorLayer)->togglePreviewAnim(nullptr);
+            }
+        ));
         btns->addObject(this->createViewToggleGV("v_particles.png"_spr, "0117", [this](bool) {
             m_editorLayer->updatePreviewParticles();
         }));
@@ -221,7 +226,8 @@ struct $modify(ViewTabUI, EditorUI) {
         btns->addObject(this->createViewToggleGV("v_prevmode.png"_spr, "0036", [this](bool) {
             // Let's not be funny and ruin everyone's levels
             if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
-                m_editorLayer->resetMovingObjects();
+                // Why was this being called separately? `onStopPlaytest` already calls it
+                // m_editorLayer->resetMovingObjects();
                 this->onStopPlaytest(m_playtestBtn);
             }
             m_editorLayer->updateEditorMode();
@@ -288,8 +294,8 @@ struct $modify(ViewTabUI, EditorUI) {
     void selectObjects(CCArray* objs, bool ignoreFilters) {
         // filter out LDM objects
         if (objs) {
-            size_t objCount = objs->count();
-            for (size_t i = 0; i < objCount; i++) {
+            unsigned int objCount = objs->count();
+            for (unsigned int i = 0; i < objCount; i++) {
                 auto obj = static_cast<GameObjectExtra*>(objs->objectAtIndex(i));
                 if (obj->shouldHide()) {
                     objs->removeObjectAtIndex(i, false);

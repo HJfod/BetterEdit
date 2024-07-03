@@ -7,6 +7,7 @@
 #include <Geode/modify/EditorUI.hpp>
 #include <utils/EditCommandExt.hpp>
 #include <Geode/binding/EditButtonBar.hpp>
+#include <utils/HolyUB.hpp>
 
 using namespace geode::prelude;
 using namespace keybinds;
@@ -38,13 +39,13 @@ struct $modify(EditorUI) {
             this->showUI(false);
         });
         this->defineKeybind("select-all"_spr, [this]() {
-            this->selectAll();
+            fakeEditorPauseLayer(m_editorLayer)->onSelectAll(nullptr);
         });
         this->defineKeybind("select-all-left"_spr, [this]() {
-            this->selectAllWithDirection(true);
+            fakeEditorPauseLayer(m_editorLayer)->onSelectAllLeft(nullptr);
         });
         this->defineKeybind("select-all-right"_spr, [this]() {
-            this->selectAllWithDirection(false);
+            fakeEditorPauseLayer(m_editorLayer)->onSelectAllRight(nullptr);
         });
         this->defineKeybind("move-obj-half-left"_spr, [this] {
             this->moveObjectCall(EditCommand::HalfLeft);

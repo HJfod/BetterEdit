@@ -4,6 +4,8 @@
 
 using namespace geode::prelude;
 
+std::filesystem::path getBackupsDir(GJGameLevel* level);
+
 class Backup final {
 public:
     using Clock = std::chrono::system_clock;
@@ -11,14 +13,14 @@ public:
     using TimeUnit = std::chrono::minutes;
 
 private:
-    ghc::filesystem::path m_directory;
+    std::filesystem::path m_directory;
     Ref<GJGameLevel> m_level;
     Ref<GJGameLevel> m_forLevel;
     TimePoint m_createTime;
     bool m_automated;
 
 public:
-    static Result<std::shared_ptr<Backup>> load(ghc::filesystem::path const& dir, GJGameLevel* forLevel);
+    static Result<std::shared_ptr<Backup>> load(std::filesystem::path const& dir, GJGameLevel* forLevel);
     static std::vector<std::shared_ptr<Backup>> load(GJGameLevel* level);
     static Result<> create(GJGameLevel* level, bool automated);
     static Result<> cleanAutomated(GJGameLevel* level);

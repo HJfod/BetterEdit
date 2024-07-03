@@ -1,10 +1,10 @@
 {
-	"geode": "2.0.0-beta.26",
-	"version": "6.4.3",
+	"geode": "3.1.1",
+	"version": "6.5.0",
 	"gd": {
-		"win": "2.204",
-		"mac": "2.200",
-		"android": "2.205"
+		"win": "2.206",
+		"mac": "2.206",
+		"android": "2.206"
 	},
 	"id": "hjfod.betteredit",
 	"name": "BetterEdit",
@@ -19,24 +19,34 @@
 	"dependencies": [
         {
             "id": "geode.node-ids",
-            "version": "1.11.0",
+            "version": "1.13.0",
             "importance": "required"
         },
 		{
 			"id": "geode.custom-keybinds",
-			"version": "1.5.0",
+			"version": "1.6.2",
 			"importance": "required",
-			"platforms": ["windows"]
+			"platforms": ["win"]
 		},
 		{
 			"id": "hjfod.gmd-api",
-			"version": "1.1.0",
+			"version": "1.2.1",
 			"importance": "required"
 		},
 		{
-			"id": "hjfod.bettersave",
-			"version": "1.2.0",
+			"id": "cvolton.level-id-api",
+			"version": "1.0.0",
 			"importance": "required"
+		},
+		{
+			"id": "hjfod.trashcan",
+			"version": "1.0.0",
+			"importance": "recommended"
+		},
+		{
+			"id": "hjfod.backups",
+			"version": "1.0.0",
+			"importance": "recommended"
 		}
     ],
 	"resources": {
@@ -50,18 +60,25 @@
 		}
 	},
 	"settings": {
-		"auto-save": {
+		"auto-save-rate": {
+			"type": "string",
+			"default": "Every 10 Minutes",
+			"name": "Auto-save",
+			"one-of": ["Every 10 Minutes", "Every 20 Minutes", "Every Hour", "Never"],
+			"description": "Automatically saves the level in the editor at the specified rate, as well as creates a backup. The backups created by autosave get automatically deleted after 3 new ones have been created to avoid using too much disk space"
+		},
+		"quick-save": {
 			"type": "bool",
 			"default": true,
-			"name": "Auto-save",
-			"description": "Automatically saves the level every 5 minutes, as well as creates a backup. The backups created by autosave get automatically deleted after 3 new ones have been created to avoid using too much disk space"
+			"name": "Quick Save",
+			"description": "Makes level saving faster by saving to a backup file rather than directly to the save file"
 		},
 		"mouse-move-on-zoom": {
 			"type": "bool",
 			"default": true,
 			"name": "Zoom Towards Cursor",
 			"description": "When enabled and while holding down the CTRL key, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen",
-			"platforms": ["windows", "macos"]
+			"platforms": ["win", "macos"]
 		},
 		"pinch-to-zoom": {
 			"type": "bool",
@@ -139,14 +156,14 @@
 			"default": true,
 			"name": "Show Grid Size Controls",
 			"description": "Shows controls in the UI for adjusting the size of the grid. <cr>Requires re-entering the editor!</c>",
-			"platforms": ["windows", "android64"]
+			"platforms": ["win", "android64"]
 		},
 		"show-grid-on-size-change": {
 			"type": "bool",
 			"default": true,
 			"name": "Show Grid on Size Change",
 			"description": "If the grid is currently hidden and you use the controls to change its size, its toggled on",
-			"platforms": ["windows", "android64"]
+			"platforms": ["win", "android64"]
 		}
 	},
 	"tags": ["editor", "enhancement", "utility", "customization"]

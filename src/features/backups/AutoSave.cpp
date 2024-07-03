@@ -3,9 +3,20 @@
 
 using namespace geode::prelude;
 
+static std::chrono::seconds getAutoSaveInterval() {
+    auto rate = Mod::get()->template getSettingValue<std::string>("auto-save-rate");
+    switch (hash(rate.c_str())) {
+        case hash("Every 10 Minutes"): return std::chrono::minutes(10);
+        case hash("Every 20 Minutes"): return std::chrono::minutes(20);
+        case hash("Every Hour"): return std::chrono::hours(1);
+        default:
+        case hash("Never"): return std::chrono::seconds(0);
+    }
+}
+
 class $modify(AutoSaveUI, EditorUI) {
     struct Fields {
-        size_t secondsSinceLastAutoSave = 0;
+        std::chrono::seconds timeSinceLastAutoSave = std::chrono::seconds(0);
         Ref<Notification> autoSaveCountdownNotification;
     };
 
@@ -13,18 +24,25 @@ class $modify(AutoSaveUI, EditorUI) {
         if (!EditorUI::init(editor))
             return false;
         
-        if (Mod::get()->template getSettingValue<bool>("auto-save")) {
+        if (getAutoSaveInterval() > std::chrono::seconds(0)) {
             this->schedule(schedule_selector(AutoSaveUI::onAutoSaveTick), 1);
         }
 
         return true;
     }
     void onAutoSaveTick(float) {
-        constexpr size_t COUNTDOWN = 5;
-        constexpr size_t AUTO_SAVE_INTERVAL = 60 * 5;
+        constexpr auto COUNTDOWN = std::chrono::seconds(5);
 
-        m_fields->secondsSinceLastAutoSave += 1;
-        if (m_fields->secondsSinceLastAutoSave > AUTO_SAVE_INTERVAL - COUNTDOWN) {
+        auto interval = getAutoSaveInterval();
+
+        m_fields->timeSinceLastAutoSave += std::chrono::seconds(1);
+
+        // Never do autosaving when playtesting
+        if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
+            return;
+        }
+
+        if (m_fields->timeSinceLastAutoSave > interval - COUNTDOWN) {
             // Make sure the autosave notification exists
             if (!m_fields->autoSaveCountdownNotification) {
                 m_fields->autoSaveCountdownNotification = Notification::create(
@@ -34,14 +52,19 @@ class $modify(AutoSaveUI, EditorUI) {
             }
             
             // The actual save
-            if (m_fields->secondsSinceLastAutoSave > AUTO_SAVE_INTERVAL) {
+            if (m_fields->timeSinceLastAutoSave > interval) {
                 m_fields->autoSaveCountdownNotification->setString("Saving...");
                 m_fields->autoSaveCountdownNotification->setIcon(NotificationIcon::Loading);
-                m_fields->secondsSinceLastAutoSave = 0;
+                m_fields->timeSinceLastAutoSave = std::chrono::seconds(0);
                 
                 // Run on next frame to ensure this one gets rendered first
                 Loader::get()->queueInMainThread([this] {
-                    // Save level
+                    // Make sure to stop playtesting!!!!!!
+                    if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
+                        this->onStopPlaytest(nullptr);
+                    }
+
+                    // Save level (using QuickSave if enabled)
                     auto layer = EditorPauseLayer::create(m_editorLayer);
                     layer->saveLevel();
                     layer->release();
@@ -74,7 +97,7 @@ class $modify(AutoSaveUI, EditorUI) {
             // Warning countdown
             else {
                 m_fields->autoSaveCountdownNotification->setString(
-                    fmt::format("Saving in {} seconds", AUTO_SAVE_INTERVAL - m_fields->secondsSinceLastAutoSave)
+                    fmt::format("Saving in {} seconds", (interval - m_fields->timeSinceLastAutoSave).count())
                 );
             }
         }

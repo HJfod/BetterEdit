@@ -17,12 +17,11 @@ public:
 
 class $modify(BetterSelectFontLayer, SelectFontLayer) {
     void onSelect(CCObject* sender) {
-        size_t s = static_cast<CCNode*>(sender)->getTag();
-
+        int s = static_cast<CCNode*>(sender)->getTag();
         GameManager::get()->m_levelEditorLayer->updateLevelFont(s);
 
         for (size_t i = 0; i < SelFont::buttons.size(); i++) {
-            if (i != s) {
+            if (i != static_cast<size_t>(s)) {
                 SelFont::buttons[i]->toggle(false);    
                 SelFont::buttons[i]->setEnabled(true);
             }
@@ -113,7 +112,7 @@ class $modify(BetterSelectFontLayer, SelectFontLayer) {
             menu->addChild(font);
 
             auto btn = CCMenuItemToggler::create(unSel, sel, menu, menu_selector(BetterSelectFontLayer::onSelect));
-            btn->setTag(i);
+            btn->setTag(static_cast<int>(i));
             btn->setPosition(node->getContentSize().width - 20, 15);
             btn->toggle(static_cast<int>(i) == p0->m_levelSettings->m_fontIndex);
             btn->setEnabled(!(static_cast<int>(i) == p0->m_levelSettings->m_fontIndex));
