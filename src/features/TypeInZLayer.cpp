@@ -69,9 +69,9 @@ class $modify(TypeInUI, EditorUI) {
         if (!lockBtn) return;
         const char* sprite = "GJ_lock_open_001.png";
         auto onAll = m_editorLayer->m_currentLayer == -1;
-        auto layerLocked = !onAll ?
-            m_editorLayer->isLayerLocked(m_editorLayer->m_currentLayer) : 
-            false;
+        auto layerLocked = !onAll ; //?
+            // m_editorLayer->isLayerLocked(m_editorLayer->m_currentLayer) : 
+            // false;
 
         if (onAll) {
             sprite = "GJ_lockGray_001.png";
