@@ -72,6 +72,10 @@ class $modify(TypeInUI, EditorUI) {
         auto layerLocked = !onAll ; //?
             // m_editorLayer->isLayerLocked(m_editorLayer->m_currentLayer) : 
             // false;
+        
+        log::info("LevelEditorLayer::m_lockedLayers: 0x{:x}", offsetof(LevelEditorLayer, m_lockedLayers));
+        log::info("LevelEditorLayer::m_currentLayer: 0x{:x}", offsetof(LevelEditorLayer, m_currentLayer));
+        log::info("LevelEditorLayer::m_layerLockingEnabled: 0x{:x}", offsetof(LevelEditorLayer, m_layerLockingEnabled));
 
         if (onAll) {
             sprite = "GJ_lockGray_001.png";
