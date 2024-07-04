@@ -69,14 +69,8 @@ class $modify(TypeInUI, EditorUI) {
         if (!lockBtn) return;
         const char* sprite = "GJ_lock_open_001.png";
         auto onAll = m_editorLayer->m_currentLayer == -1;
-        auto layerLocked = !onAll ; //?
-            // m_editorLayer->isLayerLocked(m_editorLayer->m_currentLayer) : 
-            // false;
+        auto layerLocked = !onAll && m_editorLayer->isLayerLocked(m_editorLayer->m_currentLayer);
         
-        log::info("LevelEditorLayer::m_lockedLayers: 0x{:x}", offsetof(LevelEditorLayer, m_lockedLayers));
-        log::info("LevelEditorLayer::m_currentLayer: 0x{:x}", offsetof(LevelEditorLayer, m_currentLayer));
-        log::info("LevelEditorLayer::m_layerLockingEnabled: 0x{:x}", offsetof(LevelEditorLayer, m_layerLockingEnabled));
-
         if (onAll) {
             sprite = "GJ_lockGray_001.png";
         }
