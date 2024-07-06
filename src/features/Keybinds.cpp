@@ -32,11 +32,52 @@ struct $modify(EditorUI) {
                 this->activateScaleControl(scaleBtn);
             }
         });
+        this->defineKeybind("toggle-link-controls"_spr, [this]() {
+            GameManager::get()->toggleGameVariable("0097");
+            m_editorLayer->updateOptions();
+        });
         this->defineKeybind("show-ui"_spr, [this]() {
             this->showUI(true);
         });
         this->defineKeybind("hide-ui"_spr, [this]() {
             this->showUI(false);
+        });
+
+        this->defineKeybind("open-edit-object"_spr, [this]() {
+            this->editObject(nullptr);
+        });
+        this->defineKeybind("open-edit-group"_spr, [this]() {
+            this->editGroup(nullptr);
+        });
+        this->defineKeybind("open-edit-special"_spr, [this]() {
+            this->editObject2(nullptr);
+        });
+        this->defineKeybind("copy-values"_spr, [this]() {
+            this->onCopyState(nullptr);
+        });
+        this->defineKeybind("paste-state"_spr, [this]() {
+            this->onPasteState(nullptr);
+        });
+        this->defineKeybind("paste-color"_spr, [this]() {
+            this->onPasteColor(nullptr);
+        });
+
+        this->defineKeybind("save-level"_spr, [this]() {
+            if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
+                this->onStopPlaytest(nullptr);
+            }
+            fakeEditorPauseLayer(m_editorLayer)->saveLevel();
+            Notification::create("Level saved", NotificationIcon::Success)->show();
+        });
+
+        this->defineKeybind("build-helper"_spr, [this]() {
+            fakeEditorPauseLayer(m_editorLayer)->onBuildHelper(nullptr);
+        });
+        this->defineKeybind("align-x"_spr, [this]() {
+            fakeEditorPauseLayer(m_editorLayer)->onAlignX(nullptr);
+        });
+        this->defineKeybind("align-y"_spr, [this]() {
+            fakeEditorPauseLayer(m_editorLayer)->onAlignY(nullptr);
         });
         this->defineKeybind("select-all"_spr, [this]() {
             fakeEditorPauseLayer(m_editorLayer)->onSelectAll(nullptr);
@@ -47,6 +88,7 @@ struct $modify(EditorUI) {
         this->defineKeybind("select-all-right"_spr, [this]() {
             fakeEditorPauseLayer(m_editorLayer)->onSelectAllRight(nullptr);
         });
+
         this->defineKeybind("move-obj-half-left"_spr, [this] {
             this->moveObjectCall(EditCommand::HalfLeft);
         });
@@ -131,6 +173,95 @@ $execute {
         {},
         Category::EDITOR_MODIFY
     ));
+    BindManager::get()->registerBindable(BindableAction(
+        "show-scale"_spr,
+        "Show Scale Control",
+        "Show the object scaling controls",
+        {},
+        Category::EDITOR_UI
+    ));
+
+    BindManager::get()->registerBindable(BindableAction(
+        "save-level"_spr,
+        "Save Level",
+        "",
+        {},
+        Category::EDITOR_MODIFY
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "build-helper"_spr,
+        "Build Helper",
+        "Executes the <cy>Build Helper</c> feature, aka remaps Groud and Color "
+        "IDs of the selected objects to unused ones",
+        {},
+        Category::EDITOR_MODIFY
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "align-x"_spr,
+        "Align X",
+        "Executes the <cy>Align X</c> feature, aka aligns all of the selected "
+        "objects along the X axis",
+        {},
+        Category::EDITOR_MODIFY
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "align-y"_spr,
+        "Align Y",
+        "Executes the <cy>Align Y</c> feature, aka aligns all of the selected "
+        "objects along the Y axis",
+        {},
+        Category::EDITOR_MODIFY
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "toggle-link-controls"_spr,
+        "Toggle Link Controls",
+        "",
+        {},
+        Category::EDITOR_UI
+    ));
+
+    BindManager::get()->registerBindable(BindableAction(
+        "open-edit-object"_spr,
+        "Edit Object",
+        "Open the <cb>Edit Object</c> popup for the selected objects",
+        {},
+        Category::EDITOR_MODIFY
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "open-edit-group"_spr,
+        "Edit Group",
+        "Open the <co>Edit Group</c> popup for the selected objects",
+        {},
+        Category::EDITOR_MODIFY
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "open-edit-special"_spr,
+        "Edit Special",
+        "Open the <cj>Edit Special</c> popup for the selected objects",
+        {},
+        Category::EDITOR_MODIFY
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "copy-values"_spr,
+        "Copy Values",
+        "",
+        {},
+        Category::EDITOR_MODIFY
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "paste-state"_spr,
+        "Paste State",
+        "",
+        {},
+        Category::EDITOR_MODIFY
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "paste-color"_spr,
+        "Paste Color",
+        "",
+        {},
+        Category::EDITOR_MODIFY
+    ));
 
     BindManager::get()->registerBindable(BindableAction(
         "select-all"_spr,
@@ -154,13 +285,6 @@ $execute {
         Category::EDITOR_MODIFY
     ));
 
-    BindManager::get()->registerBindable(BindableAction(
-        "show-scale"_spr,
-        "Show Scale Control",
-        "Show the object scaling controls",
-        {},
-        Category::EDITOR_UI
-    ));
     // todo: toggle UI
     BindManager::get()->registerBindable(BindableAction(
         "show-ui"_spr,

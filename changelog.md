@@ -1,3 +1,6 @@
+## v6.6.0
+ * Add keybinds for <cj>Save Level</c>, <co>Build Helper</c>, <cp>Align X</c>, <ca>Align Y</c>, <cb>Edit Object</c>, <co>Edit Group</c>, <cj>Edit Special</c>, <cr>Copy Values</c>, <cg>Paste State</c>, <cy>Paste Color</c>, and <cl>Toggle Link Controls</c>
+
 ## v6.5.0
  * Add support for <cy>2.206</c>
  * Add <cp>Quick Save</c> feature that significantly improves level saving speeds
