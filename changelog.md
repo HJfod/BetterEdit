@@ -96,28 +96,28 @@
 
 **Note: The changelog from here is for BetterEdit v5, which was only for Geode in Update 2.1 and is no longer available. The mod has since been rewritten from the ground up, and as such features mentioned in its changelogs may or may not exist in the latest version. v5 was also never officially released; only alpha versions were ever put out.**
 
-# v5.0.0-alpha.8
+## v5.0.0-alpha.8
 
  - Add Global Clipboard
  - Add Clear Clipboard
  - Fix trackpad horizontal scrolling on Mac
  - Add Use time instead of Percentage 
 
-# v5.0.0-alpha.7
+## v5.0.0-alpha.7
 
  - Add customizable keybinds support through Custom Keybinds dependency
  - Add hover tooltips to Swipe mode buttons if the MouseAPI mod is installed
  - Added some default keybinds like Rotate 45 degrees
  - Add info button for start pos tab
 
-# v5.0.0-alpha.6
+## v5.0.0-alpha.6
 
 ### Changes
  - Add Playtest Replay
  - Add logo
  - Now on MacOS
 
-# v5.0.0-alpha.5
+## v5.0.0-alpha.5
 
  - Fix select filters not working with new Swipe mechanics
  - Fix some black objects being incorrectly colored with the new Swipe mechanics
@@ -131,7 +131,7 @@
  - If you try to select objects but have filters enabled, now displays a warning
  - Tracking hooks now have lower priority, lowering the chance of conflicts with other editor mods
 
-# v5.0.0-alpha.4
+## v5.0.0-alpha.4
 
  - Fix performance issue while moving around in the editor
  - Fix crash when exiting editor
@@ -140,7 +140,7 @@
  - Disabling percentage text now actually disables it
  - Other small performance improvements and fixes
 
-# v5.0.0-alpha.3
+## v5.0.0-alpha.3
 
  - Add level percentage in editor
  - Full undo history that allows undoing anything
@@ -153,16 +153,16 @@
  - Retroactively switched versioning to v5.0.0-alpha.X as Geode now supports that
  - Update to Geode v1.0.0-beta
 
-# v5.0.0-alpha.2
+## v5.0.0-alpha.2
 
  - Add special start pos selector popup (will be cleaned up later)
  - Update for Geode version to v0.4.4
 
-# v5.0.0-alpha.1
+## v5.0.0-alpha.1
 
  - Start pos switcher in the editor
 
-# v5.0.0-alpha.0
+## v5.0.0-alpha.0
 
  - Zoom with ctrl + mouse wheel, move horizontally with shift + mouse wheel
  - Current zoom level is displayed as text
