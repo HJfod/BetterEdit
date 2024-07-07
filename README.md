@@ -1,4 +1,4 @@
-# <span style="display: flex; align-items: center; gap: .25em"><img src="logo-new.png" width="50"> BetterEdit</span>
+# <span style="display: flex; align-items: center; gap: .25em"><img src="logo.png" width="50"> BetterEdit</span>
 
 <span>
   <a href="LICENSE"><img alt="License Badge" src="https://img.shields.io/github/license/HJfod/BetterEdit?label=license&style=flat-square" /></a>
@@ -12,6 +12,8 @@
   <a href="https://github.com/HJfod/BetterEdit/actions/workflows/build.yml"><img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/HJFod/BetterEdit/build.yml?style=flat-square" /></a>
 </span>
 
+<br>
+
 A mod that makes the <a href="https://store.steampowered.com/app/322170/Geometry_Dash/">Geometry Dash</a> editor, well, <i>better</i>.
 
 ## :rocket: Installation
@@ -20,10 +22,10 @@ You can install BetterEdit through [Geode](https://geode-sdk.org). After install
 
 **BetterEdit needs the following mods to also be installed:**
 
- * [NodeIDs](https://github.com/geode-sdk/NodeIDs)
- * [Custom Keybinds (Windows only)](https://github.com/geode-sdk/CustomKeybinds)
- * [GMD API](https://github.com/HJfod/GMD-API)
- * [BetterSave](https://github.com/HJfod/BetterSave)
+ * [NodeIDs](https://geode-sdk.org/mods/geode.node-ids)
+ * [Custom Keybinds (Windows only)](https://geode-sdk.org/mods/geode.custom-keybinds)
+ * [GMD API](https://geode-sdk.org/mods/hjfod.gmd-api)
+ * [Level ID API](https://geode-sdk.org/mods/cvolton.level-id-api)
 
 ## :beetle: Bug reports & feature suggestions
 
