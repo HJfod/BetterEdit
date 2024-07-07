@@ -26,3 +26,5 @@
     #define BE_ALLOW_FAKE_ENUMS
     #define BE_ALLOW_UNUSED_PARAMS
 #endif
+
+#define $be_ensure_hookable(...) static_assert(requires { __VA_ARGS__; })

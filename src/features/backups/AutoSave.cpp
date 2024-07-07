@@ -1,5 +1,6 @@
 #include <Geode/modify/EditorUI.hpp>
 #include "Backup.hpp"
+#include "QuickSave.hpp"
 
 using namespace geode::prelude;
 
@@ -46,7 +47,7 @@ class $modify(AutoSaveUI, EditorUI) {
             // Make sure the autosave notification exists
             if (!m_fields->autoSaveCountdownNotification) {
                 m_fields->autoSaveCountdownNotification = Notification::create(
-                    "", CCSprite::createWithSpriteFrameName("GJ_timeIcon_001.png"), 0
+                    "", CCSprite::createWithSpriteFrameName("GJ_timeIcon_001.png"), COUNTDOWN.count()
                 );
                 m_fields->autoSaveCountdownNotification->show();
             }
@@ -64,10 +65,8 @@ class $modify(AutoSaveUI, EditorUI) {
                         this->onStopPlaytest(nullptr);
                     }
 
-                    // Save level (using QuickSave if enabled)
-                    auto layer = EditorPauseLayer::create(m_editorLayer);
-                    layer->saveLevel();
-                    layer->release();
+                    // Save level
+                    createAutoSave(m_editorLayer);
 
                     // Create backup
                     auto res = Backup::create(m_editorLayer->m_level, true);

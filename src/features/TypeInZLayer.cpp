@@ -26,6 +26,9 @@ class $modify(TypeInUI, EditorUI) {
         auto layerMenu = this->getChildByID("layer-menu");
         layerMenu->setContentSize({ 130, layerMenu->getContentSize().height });
 
+        // Otherwise it clippety clips off the screen
+        layerMenu->setPositionX(layerMenu->getPositionX() - 10);
+
         auto layerLockSpr = CCSprite::createWithSpriteFrameName("GJ_lockGray_001.png");
         layerLockSpr->setScale(.75f);
         auto layerLockBtn = CCMenuItemSpriteExtra::create(

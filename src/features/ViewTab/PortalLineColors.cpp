@@ -1,3 +1,5 @@
+// geode-begin-ignore-all
+
 // #include <Geode/utils/cocos.hpp>
 // #include <Geode/binding/GameObject.hpp>
 // #include <Geode/modify/DrawGridLayer.hpp>

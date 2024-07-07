@@ -50,6 +50,7 @@ protected:
             m_input->setString(numToString(s_value));
         }
         m_input->setCallback([](auto str) {
+            log::info("hi: {}", str);
             if (auto value = numFromString<ValueType>(str)) {
                 s_value = clamp(value.unwrap(), Source::MIN_VALUE, Source::MAX_VALUE);
             }

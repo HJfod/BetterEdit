@@ -1,5 +1,12 @@
 # BetterEdit 6
 
+## v6.6.1
+ * <cj>Auto-saved changes</c> are now <co>discarded if you exit without saving</c>
+ * Fix <cj>Auto-Save countdown</c> being permanently stuck on screen
+ * Fix <cy>Layer Controls</c> being clipped a little off-screen
+ * Fix <cg>Group Offset</c> not working
+ * Expand <cp>Changelog</c> to include historical versions of BetterEdit too for the sake of fun
+
 ## v6.6.0
  * Add keybinds for <cj>Save Level</c>, <co>Build Helper</c>, <cp>Align X</c>, <ca>Align Y</c>, <cb>Edit Object</c>, <co>Edit Group</c>, <cj>Edit Special</c>, <cr>Copy Values</c>, <cg>Paste State</c>, <cy>Paste Color</c>, and <cl>Toggle Link Controls</c>
 
