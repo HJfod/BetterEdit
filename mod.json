@@ -20,7 +20,7 @@
         {
             "id": "geode.node-ids",
             "version": "1.13.0",
-            "importance": "required"
+            "importance": "required" 
         },
 		{
 			"id": "geode.custom-keybinds",
