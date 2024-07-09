@@ -100,10 +100,24 @@ class $modify(MenuLayer) {
         if (!MenuLayer::init())
             return false;
         
-        // Check if there's quicksaved crash data
-        auto files = file::readDirectory(getQuickSaveDir()).unwrapOrDefault();
-        ranges::push(files, file::readDirectory(getAutoSaveDir()).unwrapOrDefault());
-        for (auto file : files) {
+        // Only check once on startup so deleting levels doesn't become impossible
+        static bool CHECKED_CRASHDATA = false;
+        if (CHECKED_CRASHDATA) {
+            return true;
+        }
+        CHECKED_CRASHDATA = true;
+
+        restoreCrashData(getAutoSaveDir());
+
+        // Important: Load Quick Saved crash data *after* autosaved crash data, 
+        // as quick saved data is always more up-to-date
+        restoreCrashData(getQuickSaveDir());
+        
+        return true;
+    }
+
+    static void restoreCrashData(std::filesystem::path const& path) {
+        for (auto file : file::readDirectory(path).unwrapOrDefault()) {
             auto data = gmd::importGmdAsLevel(file);
             if (!data) continue;
             auto imported = *data;
@@ -121,7 +135,5 @@ class $modify(MenuLayer) {
                 log::info("Restored crashed level {}", imported->m_levelName);
             }
         }
-
-        return true;
     }
 };

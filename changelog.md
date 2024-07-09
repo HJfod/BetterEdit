@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.6.2
+ * Fix bugs with <cp>auto-save</c> that made it impossible to save any new progress as well as causing levels to be duplicated and made it impossible to delete levels
+
 ## v6.6.1
  * <cj>Auto-saved changes</c> are now <co>discarded if you exit without saving</c>
  * Fix <cj>Auto-Save countdown</c> being permanently stuck on screen
