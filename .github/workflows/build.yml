@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: HJfod/BetterEditPro
-          path: BetterEdit/pro
+          path: pro
           token: ${{ secrets.ACCESS_TOKEN }}
           ref: v6
           
