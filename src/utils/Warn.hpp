@@ -20,7 +20,7 @@
     #define BE_ALLOW_SHADOWING       BE_ALLOW_CLANG(-Wshadow)
     #define BE_ALLOW_FAKE_ENUMS
     #define BE_ALLOW_UNUSED_PARAMS   BE_ALLOW_CLANG(-Wunused-parameter)
-    #define BE_ALLOW_UNUSED_FUNCTION
+    #define BE_ALLOW_UNUSED_FUNCTION BE_ALLOW_CLANG(-Wunused-function)
 #else
     #define BE_ALLOW_START
     #define BE_ALLOW_END
