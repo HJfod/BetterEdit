@@ -158,6 +158,10 @@ class $modify(ScaledUI, EditorUI) {
     }
 
     void centerBuildTabs() {
+        if (isProUIEnabled()) {
+            return;
+        }
+
         // This centers the build tab
         auto winSize = CCDirector::get()->getWinSize();
         for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {

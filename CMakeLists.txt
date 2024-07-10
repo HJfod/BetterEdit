@@ -6,6 +6,13 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 project(BetterEdit VERSION 1.0.0)
 
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pro/)
+	message(STATUS "Including Pro features")
+	set(BE_PRO_FOUND TRUE)
+else()
+	message(STATUS "Including only free features, no Pro")
+endif()
+
 file(GLOB SOURCES
 	src/features/*.cpp
 	src/features/scaling/*.cpp
@@ -18,9 +25,21 @@ file(GLOB SOURCES
 	src/*.cpp
 )
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
+if (${BE_PRO_FOUND})
+	file(GLOB PRO_SOURCES
+		pro/*.cpp
+		pro/features/*.cpp
+		pro/ui/*.cpp
+	)
+endif()
+
+add_library(${PROJECT_NAME} SHARED ${SOURCES} ${PRO_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC "src")
+if (${BE_PRO_FOUND})
+	target_include_directories(${PROJECT_NAME} PUBLIC "")
+	target_compile_definitions(${PROJECT_NAME} PUBLIC BETTEREDIT_PRO)
+endif()
 
 if (NOT DEFINED ENV{GEODE_SDK})
     message(FATAL_ERROR "Unable to find Geode SDK! Please define GEODE_SDK environment variable to point to Geode")
@@ -31,10 +50,6 @@ endif()
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 setup_geode_mod(${PROJECT_NAME})
-
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pro/)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/pro)
-endif()
 
 # Bad code will NOT be deployed!
 if(MSVC)

@@ -179,7 +179,11 @@ public:
             return menu;
         }
 
-        if (!Mod::get()->template getSettingValue<bool>("new-edit-menu") || isProUIEnabled()) {
+        if (!Mod::get()->template getSettingValue<bool>("new-edit-menu")) {
+            return nullptr;
+        }
+        
+        if (isProUIEnabled()) {
             return nullptr;
         }
 

@@ -9,6 +9,10 @@
 #include <Geode/binding/EditButtonBar.hpp>
 #include <utils/HolyUB.hpp>
 
+#ifdef BETTEREDIT_PRO
+#include <pro/features/GroupSummaryPopup.hpp>
+#endif
+
 using namespace geode::prelude;
 using namespace keybinds;
 
@@ -137,6 +141,12 @@ struct $modify(EditorUI) {
         this->defineKeybind("move-obj-big-down"_spr, [this] {
             this->moveObjectCall(EditCommand::BigDown);
         });
+
+    #ifdef BETTEREDIT_PRO
+        this->defineKeybind("group-summary"_spr, [this] {
+            GroupSummaryPopup::create()->show();
+        });
+    #endif
         
         return true;
     }
@@ -412,6 +422,16 @@ $execute {
         {},
         Category::EDITOR_MOVE, true
     });
+
+#ifdef BETTEREDIT_PRO
+    BindManager::get()->registerBindable({
+        "group-summary"_spr,
+        "Open Group Summary",
+        "",
+        {},
+        Category::EDITOR, false
+    });
+#endif
 }
 
 #endif
