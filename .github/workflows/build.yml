@@ -37,6 +37,7 @@ jobs:
         with:
           repository: HJfod/BetterEditPro
           path: BetterEdit/pro
+          token: ${{ secrets.ACCESS_TOKEN }}
           ref: v6
           
       - name: Build the mod
