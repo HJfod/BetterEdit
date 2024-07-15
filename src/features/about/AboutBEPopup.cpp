@@ -1,5 +1,6 @@
 #include "AboutBEPopup.hpp"
 #include "ChangelogPopup.hpp"
+#include "SupportPopup.hpp"
 #include <Geode/ui/GeodeUI.hpp>
 #include <Geode/ui/MDTextArea.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
@@ -184,7 +185,8 @@ bool AboutBEPopup::setup() {
 }
 
 void AboutBEPopup::onSupport(CCObject*) {
-    openSupportPopup(Mod::get());
+    SupportPopup::create(false)->show();
+    // openSupportPopup(Mod::get());
 }
 
 void AboutBEPopup::onSuggestFeature(CCObject*) {

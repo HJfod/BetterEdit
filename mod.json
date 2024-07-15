@@ -1,6 +1,6 @@
 {
 	"geode": "3.2.0",
-	"version": "6.6.2",
+	"version": "6.6.3",
 	"gd": {
 		"win": "2.206",
 		"mac": "2.206",
@@ -57,7 +57,10 @@
 			"ViewTabSheet": [
 				"resources/view/*.png"
 			]
-		}
+		},
+		"sprites": [
+			"resources/images/*.png"
+		]
 	},
 	"settings": {
 		"auto-save-rate": {
@@ -164,6 +167,12 @@
 			"name": "Show Grid on Size Change",
 			"description": "If the grid is currently hidden and you use the controls to change its size, its toggled on",
 			"platforms": ["win", "android64"]
+		},
+		"dev-mode": {
+			"type": "bool",
+			"default": false,
+			"name": "Developer Mode",
+			"description": "Enables some features intended for Developers"
 		}
 	},
 	"tags": ["editor", "enhancement", "utility", "customization"]

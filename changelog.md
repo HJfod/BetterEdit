@@ -1,5 +1,10 @@
 # BetterEdit 6
 
+## v6.6.3
+ * Add a <co>Support</c> button to the pause menu (that can be hidden through the popup)
+ * Add <ca>Developer Mode</c> setting
+ * Fix a bug with backups overwriting the level
+
 ## v6.6.2
  * Fix bugs with <cp>auto-save</c> that made it impossible to save any new progress as well as causing levels to be duplicated and made it impossible to delete levels
 

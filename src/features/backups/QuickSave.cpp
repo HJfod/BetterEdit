@@ -5,6 +5,7 @@
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 #include <hjfod.gmd-api/include/GMD.hpp>
 #include <utils/HolyUB.hpp>
+#include <utils/EditorViewOnlyMode.hpp>
 
 using namespace geode::prelude;
 
@@ -69,6 +70,10 @@ class $modify(EditorPauseLayer) {
 
     $override
     void FLAlert_Clicked(FLAlertLayer* fl, bool btn2) {
+        if (isViewOnlyEditor(m_editorLayer)) {
+            return EditorPauseLayer::FLAlert_Clicked(fl, btn2);
+        }
+
         // Discard autosaves on exit without save
         if (fl->getTag() == 1 && btn2) {
             log::warn("Discarding autosaved changes");
@@ -82,7 +87,11 @@ class $modify(EditorPauseLayer) {
     }
 
     $override
-    void onExitNoSave(CCObject*) {
+    void onExitNoSave(CCObject* sender) {
+        if (isViewOnlyEditor(m_editorLayer)) {
+            return EditorPauseLayer::onExitNoSave(sender);
+        }
+
         auto fl = FLAlertLayer::create(
             this,
             "Exit",

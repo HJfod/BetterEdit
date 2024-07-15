@@ -6,7 +6,7 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 project(BetterEdit VERSION 1.0.0)
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pro/)
+if (NOT DONT_INCLUDE_PRO AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pro/)
 	message(STATUS "Including Pro features")
 	set(BE_PRO_FOUND TRUE)
 else()
@@ -26,11 +26,7 @@ file(GLOB SOURCES
 )
 
 if (${BE_PRO_FOUND})
-	file(GLOB PRO_SOURCES
-		pro/*.cpp
-		pro/features/*.cpp
-		pro/ui/*.cpp
-	)
+	include(pro/ProSources.cmake)
 endif()
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${PRO_SOURCES})
@@ -39,6 +35,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC "src")
 if (${BE_PRO_FOUND})
 	target_include_directories(${PROJECT_NAME} PUBLIC "")
 	target_compile_definitions(${PROJECT_NAME} PUBLIC BETTEREDIT_PRO)
+
+	include(pro/OpenSSL.cmake)
 endif()
 
 if (NOT DEFINED ENV{GEODE_SDK})
