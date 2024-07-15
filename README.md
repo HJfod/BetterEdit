@@ -54,7 +54,7 @@ You can also contact the developer of the mod (HJfod) directly through Discord o
 
 BetterEdit's development is supported via [donations on my Ko-fi](https://ko-fi.com/hjfod)!
 
-There is also plans for a paid version called **BetterEdit Pro** in the future, however details on that will be coming later.
+There is also plans for making additional features for Supporters such as **Group Summary** and a **redesigned UI**, however details on that will be coming later.
 
 ## :balance_scale: Licensing
 
