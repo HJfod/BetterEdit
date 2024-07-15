@@ -1,5 +1,9 @@
 # BetterEdit 6
 
+## v6.6.5
+
+ * Should fix issues with BetterEdit not being loaded on Android due to Custom Keybinds missing
+
 ## v6.6.4
  * Add keybinds for <cp>Increase Grid Size</c> and <cg>Decrease Grid Size</c>
  * Increase the hardcoded limits of <ca>Button Rows</c> and <cy>Buttons Per Row</c> to 12 and 48 respectively
