@@ -1,5 +1,6 @@
 #include "Backup.hpp"
 #include <Geode/loader/Dirs.hpp>
+#include <Geode/utils/file.hpp>
 #include <hjfod.gmd-api/include/GMD.hpp>
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 #include <matjson/stl_serialize.hpp>

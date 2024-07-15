@@ -7,6 +7,12 @@ class $modify(EditorOptionsLayer) {
     void onButtonRows(CCObject* sender) {
         if (0) EditorOptionsLayer::onButtonRows(sender);
 
+        FLAlertLayer::create(
+            "huuhdsfh",
+            fmt::format("sizeof(GJOptionsLayer): 0x{:x}", sizeof(GJOptionsLayer)),
+            "OK"
+        )->show();
+
         m_buttonRows = clamp(m_buttonRows + (sender->getTag() ? 1 : -1), 2, 12);
         m_buttonRowsLabel->setString(std::to_string(m_buttonRows).c_str());
     }

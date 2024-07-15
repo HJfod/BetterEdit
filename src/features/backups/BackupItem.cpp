@@ -2,6 +2,7 @@
 #include "BackupListPopup.hpp"
 #include <fmt/chrono.h>
 #include <utils/EditorViewOnlyMode.hpp>
+#include <Geode/ui/BasedButtonSprite.hpp>
 
 bool BackupItem::init(BackupPtr backup) {
     if (!CCNode::init())

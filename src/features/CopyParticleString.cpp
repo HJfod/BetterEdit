@@ -1,4 +1,10 @@
 #include <Geode/modify/CreateParticlePopup.hpp>
+#include <Geode/binding/ButtonSprite.hpp>
+#include <Geode/binding/CCMenuItemSpriteExtra.hpp>
+#include <Geode/binding/GameToolbox.hpp>
+#include <Geode/binding/ParticleGameObject.hpp>
+#include <Geode/utils/cocos.hpp>
+#include <Geode/ui/Notification.hpp>
 
 using namespace geode::prelude;
 

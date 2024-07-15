@@ -1,5 +1,7 @@
 #include "SupportPopup.hpp"
 #include <Geode/utils/web.hpp>
+#include <Geode/loader/Mod.hpp>
+#include <Geode/binding/ButtonSprite.hpp>
 
 bool SupportPopup::setup(bool showDontShowAgain) {
     m_bgSprite->setVisible(false);

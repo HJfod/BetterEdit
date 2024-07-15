@@ -1,6 +1,7 @@
 
 #include <Geode/modify/EditorPauseLayer.hpp>
 #include <Geode/ui/BasedButtonSprite.hpp>
+#include <Geode/binding/GameToolbox.hpp>
 #include "AboutBEPopup.hpp"
 #include "SupportPopup.hpp"
 

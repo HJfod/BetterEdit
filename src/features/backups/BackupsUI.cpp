@@ -1,4 +1,5 @@
 #include <Geode/modify/EditLevelLayer.hpp>
+#include <Geode/ui/BasedButtonSprite.hpp>
 #include "BackupListPopup.hpp"
 
 using namespace geode::prelude;
