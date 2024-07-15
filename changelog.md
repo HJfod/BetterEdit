@@ -1,5 +1,10 @@
 # BetterEdit 6
 
+## v6.6.4
+ * Add keybinds for <cp>Increase Grid Size</c> and <cg>Decrease Grid Size</c>
+ * Increase the hardcoded limits of <ca>Button Rows</c> and <cy>Buttons Per Row</c> to 12 and 48 respectively
+ * Bump <cb>Custom Keybinds</c> version to add support for assigning mouse side buttons to keybinds
+
 ## v6.6.3
  * Add a <co>Support</c> button to the pause menu (that can be hidden through the popup)
  * Add <ca>Developer Mode</c> setting

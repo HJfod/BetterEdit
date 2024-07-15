@@ -3,6 +3,7 @@
 #include <utils/NextFreeOffsetInput.hpp>
 #include <utils/Warn.hpp>
 #include <Geode/binding/GameObject.hpp>
+#include <Geode/binding/EffectGameObject.hpp>
 
 using namespace geode::prelude;
 

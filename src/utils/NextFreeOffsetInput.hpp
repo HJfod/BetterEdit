@@ -4,6 +4,7 @@
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/TextInputDelegate.hpp>
 #include <Geode/utils/general.hpp>
+#include <Geode/utils/cocos.hpp>
 #include <Geode/ui/TextInput.hpp>
 #include <span>
 

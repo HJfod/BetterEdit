@@ -1,3 +1,4 @@
+#include "GridScaling.hpp"
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/modify/ObjectToolbox.hpp>
 #include <Geode/ui/TextInput.hpp>
@@ -105,25 +106,12 @@ class $modify(GridUI, EditorUI) {
     }
 
     void onGridSize(CCObject* sender) {
-        static std::array SNAP_GRID_SIZES {
-            3.75f, 7.5f, 15.f, 30.f, 60.f, 90.f, 120.f
-        };
-        auto value = Mod::get()->template getSavedValue<float>("grid-size");
         if (sender->getTag() == -1) {
-            auto next = std::lower_bound(SNAP_GRID_SIZES.begin(), SNAP_GRID_SIZES.end(), value);
-            if (next != SNAP_GRID_SIZES.begin()) {
-                next--;
-            }
-            value = *next;
+            decrementGridSize(this);
         }
         else {
-            auto next = std::upper_bound(SNAP_GRID_SIZES.begin(), SNAP_GRID_SIZES.end(), value);
-            if (next == SNAP_GRID_SIZES.end()) {
-                next--;
-            }
-            value = *next;
+            incrementGridSize(this);
         }
-        this->updateGridConstSize(value);
     }
 
     $override
@@ -141,5 +129,27 @@ class $modify(GridUI, EditorUI) {
         m_selectedMode = actualMode;
     }
 };
+
+static std::array SNAP_GRID_SIZES {
+    3.75f, 7.5f, 15.f, 30.f, 60.f, 90.f, 120.f
+};
+void decrementGridSize(EditorUI* ui) {
+    auto value = Mod::get()->template getSavedValue<float>("grid-size");
+    auto next = std::lower_bound(SNAP_GRID_SIZES.begin(), SNAP_GRID_SIZES.end(), value);
+    if (next != SNAP_GRID_SIZES.begin()) {
+        next--;
+    }
+    value = *next;
+    static_cast<GridUI*>(ui)->updateGridConstSize(value);
+}
+void incrementGridSize(EditorUI* ui) {
+    auto value = Mod::get()->template getSavedValue<float>("grid-size");
+    auto next = std::upper_bound(SNAP_GRID_SIZES.begin(), SNAP_GRID_SIZES.end(), value);
+    if (next == SNAP_GRID_SIZES.end()) {
+        next--;
+    }
+    value = *next;
+    static_cast<GridUI*>(ui)->updateGridConstSize(value);
+}
 
 #endif

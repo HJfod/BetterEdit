@@ -8,6 +8,7 @@
 #include <utils/EditCommandExt.hpp>
 #include <Geode/binding/EditButtonBar.hpp>
 #include <utils/HolyUB.hpp>
+#include "GridScaling.hpp"
 
 #include <utils/Pro.hpp>
 #ifdef BETTEREDIT_PRO
@@ -65,6 +66,13 @@ struct $modify(EditorUI) {
         });
         this->defineKeybind("paste-color"_spr, [this]() {
             this->onPasteColor(nullptr);
+        });
+
+        this->defineKeybind("enlarge-grid-size"_spr, [this]() {
+            incrementGridSize(this);
+        });
+        this->defineKeybind("ensmallen-grid-size"_spr, [this]() {
+            decrementGridSize(this);
         });
 
         this->defineKeybind("save-level"_spr, [this]() {
@@ -184,14 +192,16 @@ $execute {
         "Rotate Snap",
         "Rotate the Selected Object(s) to Match Adjacent Slopes",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "show-scale"_spr,
         "Show Scale Control",
         "Show the object scaling controls",
         {},
-        Category::EDITOR_UI
+        Category::EDITOR_UI,
+        false
     ));
 
     BindManager::get()->registerBindable(BindableAction(
@@ -199,7 +209,8 @@ $execute {
         "Save Level",
         "",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "build-helper"_spr,
@@ -207,7 +218,8 @@ $execute {
         "Executes the <cy>Build Helper</c> feature, aka remaps Groud and Color "
         "IDs of the selected objects to unused ones",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "align-x"_spr,
@@ -215,7 +227,8 @@ $execute {
         "Executes the <cy>Align X</c> feature, aka aligns all of the selected "
         "objects along the X axis",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "align-y"_spr,
@@ -223,14 +236,16 @@ $execute {
         "Executes the <cy>Align Y</c> feature, aka aligns all of the selected "
         "objects along the Y axis",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "toggle-link-controls"_spr,
         "Toggle Link Controls",
         "",
         {},
-        Category::EDITOR_UI
+        Category::EDITOR_UI,
+        false
     ));
 
     BindManager::get()->registerBindable(BindableAction(
@@ -238,42 +253,65 @@ $execute {
         "Edit Object",
         "Open the <cb>Edit Object</c> popup for the selected objects",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "open-edit-group"_spr,
         "Edit Group",
         "Open the <co>Edit Group</c> popup for the selected objects",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "open-edit-special"_spr,
         "Edit Special",
         "Open the <cj>Edit Special</c> popup for the selected objects",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "copy-values"_spr,
         "Copy Values",
         "",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "paste-state"_spr,
         "Paste State",
         "",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "paste-color"_spr,
         "Paste Color",
         "",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
+    ));
+
+    BindManager::get()->registerBindable(BindableAction(
+        "enlarge-grid-size"_spr,
+        "Increase Grid Size",
+        "",
+        {},
+        Category::EDITOR_UI,
+        false
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "ensmallen-grid-size"_spr,
+        "Decrease Grid Size",
+        "",
+        {},
+        Category::EDITOR_UI,
+        false
     ));
 
     BindManager::get()->registerBindable(BindableAction(
@@ -281,21 +319,24 @@ $execute {
         "Select All",
         "Select All Object(s)",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "select-all-left"_spr,
         "Select All Left",
         "Select All Object(s) Left of the Screen",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "select-all-right"_spr,
         "Select All Right",
         "Select All Object(s) Right of the Screen",
         {},
-        Category::EDITOR_MODIFY
+        Category::EDITOR_MODIFY,
+        false
     ));
 
     // todo: toggle UI
@@ -304,14 +345,16 @@ $execute {
         "Show UI",
         "",
         {},
-        Category::EDITOR_UI
+        Category::EDITOR_UI,
+        false
     ));
     BindManager::get()->registerBindable(BindableAction(
         "hide-ui"_spr,
         "Hide UI",
         "",
         {},
-        Category::EDITOR_UI
+        Category::EDITOR_UI,
+        false
     ));
     BindManager::get()->registerBindable({
         "move-obj-half-left"_spr,
