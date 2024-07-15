@@ -36,21 +36,21 @@ class $modify(AboutBEPauseLayer, EditorPauseLayer) {
                 particleFall->setScaleY(1.61f);
                 supportSpr->addChildAtPosition(particleFall, Anchor::Bottom);
 
-                auto particleTop1 = GameToolbox::particleFromString("5a-1a2a0.33a15a-90a180a0a0a59a0a0a-10a0a0a0a0a20a1a75a48a1a0a0a0a0.27451a0a1a0a2a1a0a165a1a0a0.686275a0a0.235294a0a1a0a0a0a0.61a0a21a8a29a22a-11a40a1a2a1a0a0a0a158a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
-                particleTop1->setPosition({ supportSpr->getContentWidth() * .25f, supportSpr->getContentHeight() / 2 });
-                particleTop1->setZOrder(1);
-                particleTop1->setScaleX(.91f);
-                particleTop1->setScaleY(.91f);
-                particleTop1->setOpacity(105);
-                supportSpr->addChild(particleTop1);
+                // auto particleTop1 = GameToolbox::particleFromString("5a-1a2a0.33a15a-90a180a0a0a59a0a0a-10a0a0a0a0a20a1a75a48a1a0a0a0a0.27451a0a1a0a2a1a0a165a1a0a0.686275a0a0.235294a0a1a0a0a0a0.61a0a21a8a29a22a-11a40a1a2a1a0a0a0a158a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
+                // particleTop1->setPosition({ supportSpr->getContentWidth() * .25f, supportSpr->getContentHeight() / 2 });
+                // particleTop1->setZOrder(1);
+                // particleTop1->setScaleX(.91f);
+                // particleTop1->setScaleY(.91f);
+                // particleTop1->setOpacity(105);
+                // supportSpr->addChild(particleTop1);
 
-                auto particleTop2 = GameToolbox::particleFromString("5a-1a2a0.33a15a-90a180a0a0a59a0a0a-10a0a0a0a0a20a1a75a48a1a0a0a0a0.27451a0a1a0a2a1a0a165a1a0a0.686275a0a0.235294a0a1a0a0a0a0.61a0a21a8a29a22a-11a40a1a2a1a0a0a0a158a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
-                particleTop2->setPosition({ supportSpr->getContentWidth() * .75f, supportSpr->getContentHeight() / 2 });
-                particleTop2->setZOrder(1);
-                particleTop2->setScaleX(.91f);
-                particleTop2->setScaleY(.91f);
-                particleTop2->setOpacity(105);
-                supportSpr->addChild(particleTop2);
+                // auto particleTop2 = GameToolbox::particleFromString("5a-1a2a0.33a15a-90a180a0a0a59a0a0a-10a0a0a0a0a20a1a75a48a1a0a0a0a0.27451a0a1a0a2a1a0a165a1a0a0.686275a0a0.235294a0a1a0a0a0a0.61a0a21a8a29a22a-11a40a1a2a1a0a0a0a158a0a0a0a0a0a0a0a0a0a0a0a0a0a0", nullptr, false);
+                // particleTop2->setPosition({ supportSpr->getContentWidth() * .75f, supportSpr->getContentHeight() / 2 });
+                // particleTop2->setZOrder(1);
+                // particleTop2->setScaleX(.91f);
+                // particleTop2->setScaleY(.91f);
+                // particleTop2->setOpacity(105);
+                // supportSpr->addChild(particleTop2);
 
                 supportSpr->setScale(.8f);
                 supportSpr->runAction(CCRepeat::create(
