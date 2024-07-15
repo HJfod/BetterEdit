@@ -1,6 +1,6 @@
 {
 	"geode": "3.2.0",
-	"version": "6.6.4",
+	"version": "6.6.5",
 	"gd": {
 		"win": "2.206",
 		"mac": "2.206",
@@ -25,8 +25,7 @@
 		{
 			"id": "geode.custom-keybinds",
 			"version": "1.7.1",
-			"importance": "required",
-			"platforms": ["win"]
+			"importance": "required"
 		},
 		{
 			"id": "hjfod.gmd-api",
