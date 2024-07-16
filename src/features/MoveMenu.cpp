@@ -1,5 +1,8 @@
 #include <Geode/modify/EditButtonBar.hpp>
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/binding/CCMenuItemSpriteExtra.hpp>
+#include <Geode/binding/GameManager.hpp>
+#include <Geode/utils/cocos.hpp>
 #include <utils/EditCommandExt.hpp>
 #include <utils/HandleUIHide.hpp>
 #include <utils/Pro.hpp>

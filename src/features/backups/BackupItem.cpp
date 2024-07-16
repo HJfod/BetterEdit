@@ -3,6 +3,7 @@
 #include <fmt/chrono.h>
 #include <utils/EditorViewOnlyMode.hpp>
 #include <Geode/ui/BasedButtonSprite.hpp>
+#include <Geode/binding/EditLevelLayer.hpp>
 
 bool BackupItem::init(BackupPtr backup) {
     if (!CCNode::init())

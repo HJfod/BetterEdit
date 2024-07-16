@@ -3,6 +3,7 @@
 EditableBMLabelProxy* EditableBMLabelProxy::create() {
     auto ret = new EditableBMLabelProxy();
     if (ret && ret->init()) {
+        ret->scheduleUpdate();
         ret->autorelease();
         return ret;
     }
@@ -43,6 +44,22 @@ EditableBMLabelProxy* EditableBMLabelProxy::replace(
     existing->removeFromParent();
     
     return proxy;
+}
+
+static float getWorldScale(CCNode* node) {
+    if (auto parent = node->getParent()) {
+        return getWorldScale(parent) * node->getScale();
+    }
+    return node->getScale();
+}
+
+void EditableBMLabelProxy::update(float) {
+    if (m_input) {
+        m_input->setPosition(
+            m_inputParent->convertToNodeSpace(this->getParent()->convertToWorldSpace(m_obPosition))
+        );
+        m_input->setScale(getWorldScale(this) * 1.15f);
+    }
 }
 
 void EditableBMLabelProxy::setPosition(CCPoint const& pos) {

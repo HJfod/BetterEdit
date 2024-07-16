@@ -1,4 +1,6 @@
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/ui/Notification.hpp>
 #include "Backup.hpp"
 #include "QuickSave.hpp"
 

@@ -1,8 +1,9 @@
 # BetterEdit 6
 
 ## v6.6.5
-
- * Should fix issues with BetterEdit not being loaded on Android due to Custom Keybinds missing
+ * Fix <cj>Next Free</c> not taking into account trigger Target Group IDs on Android
+ * Fix issues with BetterEdit not being loaded on Android due to <cb>Custom Keybinds</c> missing
+ * Fix layer input misplacement when using <co>UI Scale</c>
 
 ## v6.6.4
  * Add keybinds for <cp>Increase Grid Size</c> and <cg>Decrease Grid Size</c>

@@ -1,6 +1,9 @@
 #include "GridScaling.hpp"
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/modify/ObjectToolbox.hpp>
+#include <Geode/binding/GameManager.hpp>
+#include <Geode/binding/CCMenuItemSpriteExtra.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/ui/TextInput.hpp>
 #include <utils/HandleUIHide.hpp>
 

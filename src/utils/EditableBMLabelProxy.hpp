@@ -26,6 +26,8 @@ public:
         std::function<void(std::string const&)> onUpdate = nullptr
     );
 
+    void update(float) override;
+
 #define PROXY_FWD_1(fun, param_ty) \
     void fun(param_ty x) override { \
         CCLabelBMFont::fun(x); \

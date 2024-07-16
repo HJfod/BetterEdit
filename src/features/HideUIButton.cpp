@@ -1,4 +1,7 @@
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/binding/CCMenuItemToggler.hpp>
+#include <Geode/binding/LevelEditorLayer.hpp>
+#include <Geode/ui/BasedButtonSprite.hpp>
 #include <utils/HandleUIHide.hpp>
 
 using namespace geode::prelude;

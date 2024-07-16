@@ -26,7 +26,6 @@ struct GroupIDSource final {
         if (auto eobj = typeinfo_cast<EffectGameObject*>(obj)) {
             used.insert(eobj->m_centerGroupID);
             used.insert(eobj->m_targetGroupID);
-            log::info("targetGroupID: {}", eobj->m_targetGroupID);
         }
     }
 };

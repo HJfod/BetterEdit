@@ -1,5 +1,7 @@
 #include "BackupListPopup.hpp"
 #include "Backup.hpp"
+#include <Geode/ui/Scrollbar.hpp>
+#include <Geode/ui/General.hpp>
 
 bool BackupListPopup::setup(GJGameLevel* level) {
     m_level = level;
