@@ -4,6 +4,7 @@
 #include <Geode/binding/GameToolbox.hpp>
 #include "AboutBEPopup.hpp"
 #include "SupportPopup.hpp"
+#include <utils/Pro.hpp>
 
 using namespace geode::prelude;
 
@@ -70,6 +71,12 @@ class $modify(AboutBEPauseLayer, EditorPauseLayer) {
                 topMenu->addChild(supportBtn);
                 topMenu->updateLayout();
             }
+
+            BE_PRO_FEATURE(
+                if (auto btn = this->querySelector("support-be-btn"_spr)) {
+                    btn->removeFromParent();
+                }
+            );
         }
 
         auto menu = this->getChildByID("guidelines-menu");

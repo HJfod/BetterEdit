@@ -151,13 +151,11 @@ struct $modify(EditorUI) {
             this->moveObjectCall(EditCommand::BigDown);
         });
 
-        if (isProEnabled()) {
+        BE_PRO_FEATURE(
             this->defineKeybind("group-summary"_spr, [this] {
-            #ifdef BETTEREDIT_PRO
                 GroupSummaryPopup::create()->show();
-            #endif
             });
-        }
+        );
         
         return true;
     }
@@ -469,7 +467,7 @@ $execute {
         Category::EDITOR_MOVE, true
     });
 
-    if (isProEnabled()) {
+    BE_PRO_FEATURE_GLOBAL(
         BindManager::get()->registerBindable({
             "group-summary"_spr,
             "Open Group Summary",
@@ -477,7 +475,7 @@ $execute {
             {},
             Category::EDITOR, false
         });
-    }
+    );
 }
 
 #endif

@@ -5,6 +5,11 @@
 #include <Geode/ui/MDTextArea.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
 #include <Geode/utils/web.hpp>
+#include <utils/Pro.hpp>
+
+#ifdef BETTEREDIT_PRO
+#include <pro/ui/SupportersPopup.hpp>
+#endif
 
 struct Dev {
     const char* name;
@@ -51,7 +56,7 @@ bool AboutBEPopup::setup() {
 
     auto developedBy = CCLabelBMFont::create("Developed by", "goldFont.fnt");
     developedBy->setScale(.7f);
-    m_mainLayer->addChildAtPosition(developedBy, Anchor::Center, ccp(0, 85));
+    m_mainLayer->addChildAtPosition(developedBy, Anchor::Center, ccp(0, 90));
 
     auto hjfod = Dev {
         .name = "HJfod",
@@ -62,13 +67,13 @@ bool AboutBEPopup::setup() {
             { "geode.loader/gift.png", "https://ko-fi.com/hjfod" },
         }
     }.create(this, true);
-    m_mainLayer->addChildAtPosition(hjfod, Anchor::Center, ccp(0, 55));
+    m_mainLayer->addChildAtPosition(hjfod, Anchor::Center, ccp(0, 60));
 
     // other devs
 
     auto credits = CCLabelBMFont::create("Contributors", "goldFont.fnt");
     credits->setScale(.6f);
-    m_mainLayer->addChildAtPosition(credits, Anchor::Center, ccp(0, 10));
+    m_mainLayer->addChildAtPosition(credits, Anchor::Center, ccp(0, 15));
 
     auto devs = CCNode::create();
     devs->setContentSize({ 325, 90 });
@@ -126,7 +131,7 @@ bool AboutBEPopup::setup() {
             ->setCrossAxisOverflow(true)
             ->setGap(20.f)
     );
-    m_mainLayer->addChildAtPosition(devs, Anchor::Center, ccp(0, -20));
+    m_mainLayer->addChildAtPosition(devs, Anchor::Center, ccp(0, -15));
 
     // actions
 
@@ -140,6 +145,7 @@ bool AboutBEPopup::setup() {
         { "Changelog", menu_selector(AboutBEPopup::onChangelog) },
         { "Special Thanks", menu_selector(AboutBEPopup::onSpecialThanks) },
         { "Support BE", menu_selector(AboutBEPopup::onSupport) },
+        { "Supporters", menu_selector(AboutBEPopup::onSupporters) },
     }) {
         auto spr = ButtonSprite::create(pair.first, "goldFont.fnt", "GJ_button_05.png", .8f);
         spr->setScale(.55f);
@@ -148,7 +154,14 @@ bool AboutBEPopup::setup() {
     }
 
     menu->setLayout(RowLayout::create()->setGrowCrossAxis(true));
-    m_mainLayer->addChildAtPosition(menu, Anchor::Center, ccp(0, -70));
+    m_mainLayer->addChildAtPosition(menu, Anchor::Center, ccp(0, -60));
+
+    BE_PRO_FEATURE(
+        auto label = CCLabelBMFont::create("Thank You for Supporting BetterEdit <3", "bigFont.fnt");
+        label->setColor({ 55, 255, 255 });
+        label->setScale(.35f);
+        m_mainLayer->addChildAtPosition(label, Anchor::Center, ccp(0, -95));
+    );
 
     // BE links
 
@@ -187,6 +200,11 @@ bool AboutBEPopup::setup() {
 void AboutBEPopup::onSupport(CCObject*) {
     SupportPopup::create(false)->show();
     // openSupportPopup(Mod::get());
+}
+void AboutBEPopup::onSupporters(CCObject*) {
+#ifdef BETTEREDIT_PRO
+    pro::SupportersPopup::create()->show();
+#endif
 }
 
 void AboutBEPopup::onSuggestFeature(CCObject*) {

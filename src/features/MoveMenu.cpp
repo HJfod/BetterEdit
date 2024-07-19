@@ -186,9 +186,10 @@ public:
             return nullptr;
         }
         
-        if (isProUIEnabled()) {
-            return nullptr;
-        }
+        // todo: pro
+        // if (isProUIEnabled()) {
+        //     return nullptr;
+        // }
 
         if (create) {
             auto winSize = CCDirector::get()->getWinSize();

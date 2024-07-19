@@ -19,9 +19,10 @@ class $modify(TypeInUI, EditorUI) {
         if (!EditorUI::init(lel))
             return false;
         
-        if (isProUIEnabled()) {
-            return true;
-        }
+        // todo: pro
+        // if (isProUIEnabled()) {
+        //     return true;
+        // }
         
         auto layerMenu = this->getChildByID("layer-menu");
         layerMenu->setContentSize({ 130, layerMenu->getContentSize().height });

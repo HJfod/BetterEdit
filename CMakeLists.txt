@@ -49,6 +49,8 @@ add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 setup_geode_mod(${PROJECT_NAME})
 
+target_compile_definitions(${PROJECT_NAME} PUBLIC "BETTEREDIT_VERSION_STR=${MOD_VERSION}")
+
 # Bad code will NOT be deployed!
 if(MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4)

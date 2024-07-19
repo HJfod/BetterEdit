@@ -21,9 +21,7 @@ class $modify(ScaledUI, EditorUI) {
         if (!EditorUI::init(p0))
             return false;
 
-        if (isProUIEnabled()) {
-            return true;
-        }
+        // todo: pro compatability
         
         float scale = Mod::get()->getSettingValue<double>("scale-factor");
         auto size = CCDirector::get()->getWinSize();
@@ -158,10 +156,6 @@ class $modify(ScaledUI, EditorUI) {
     }
 
     void centerBuildTabs() {
-        if (isProUIEnabled()) {
-            return;
-        }
-
         // This centers the build tab
         auto winSize = CCDirector::get()->getWinSize();
         for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {

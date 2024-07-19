@@ -10,19 +10,25 @@
 BE_ALLOW_START
 BE_ALLOW_UNUSED_FUNCTION
 
-static bool isProUIEnabled() {
 #ifdef BETTEREDIT_PRO
-    return pro::isNewUIEnabled();
+    #define BE_PRO_FEATURE(...) \
+        pro::checkProEnabled() \
+            .listen([this](auto* value) { \
+                if (pro::verifyPro<__LINE__>(*value) == (__LINE__ + pro::ssl::MAGIC_OK)) { \
+                    __VA_ARGS__; \
+                } \
+            })
+
+    #define BE_PRO_FEATURE_GLOBAL(...) \
+        pro::checkProEnabled() \
+            .listen([](auto* value) { \
+                if (pro::verifyPro<__LINE__>(*value) == (__LINE__ + pro::ssl::MAGIC_OK)) { \
+                    __VA_ARGS__; \
+                } \
+            })
 #else
-    return false;
+    #define BE_PRO_FEATURE(...)
+    #define BE_PRO_FEATURE_GLOBAL(...)
 #endif
-}
-static bool isProEnabled() {
-#ifdef BETTEREDIT_PRO
-    return pro::isProEnabled();
-#else
-    return false;
-#endif
-}
 
 BE_ALLOW_END
