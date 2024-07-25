@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.7.0
+ * Add button to quickly go to <cy>Next Free Layer</c>
+
 ## v6.6.5
  * Fix <cj>Next Free</c> not taking into account trigger Target Group IDs on Android
  * Fix issues with BetterEdit not being loaded on Android due to <cb>Custom Keybinds</c> missing

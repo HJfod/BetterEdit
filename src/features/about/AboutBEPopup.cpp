@@ -204,6 +204,8 @@ void AboutBEPopup::onSupport(CCObject*) {
 void AboutBEPopup::onSupporters(CCObject*) {
 #ifdef BETTEREDIT_PRO
     pro::SupportersPopup::create()->show();
+#else
+    FLAlertLayer::create("BE Supporters", "Coming soon ;)", "OK")->show();
 #endif
 }
 
@@ -283,6 +285,7 @@ bool SpecialThanksPopup::setup() {
         " * <co>Camila</c>\n"
         " * <cl>Brittank88</c>\n"
         " * <co>Alphalaneous</c>\n"
+        " * <cl>The Bearodactyl</c>\n"
         "## Other thanks <3\n\n"
         " * <cr>TWICE - Scientist MV</c> & <cr>TWICE - What is Love? MV</c>\n"
         " * <cy>RobTop</c>\n"

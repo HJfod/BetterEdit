@@ -28,7 +28,7 @@ class $modify(TypeInUI, EditorUI) {
         layerMenu->setContentSize({ 130, layerMenu->getContentSize().height });
 
         // Otherwise it clippety clips off the screen
-        layerMenu->setPositionX(layerMenu->getPositionX() - 10);
+        layerMenu->setPositionX(layerMenu->getPositionX() - 12  );
 
         auto layerLockSpr = CCSprite::createWithSpriteFrameName("GJ_lockGray_001.png");
         layerLockSpr->setScale(.75f);
@@ -37,6 +37,19 @@ class $modify(TypeInUI, EditorUI) {
         );
         layerLockBtn->setID("lock-layer"_spr);
         layerMenu->insertBefore(layerLockBtn, nullptr);
+
+        // Next free layer button
+        auto nextFreeSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
+        nextFreeSpr->setScale(0.54f);
+        nextFreeSpr->setOpacity(175);
+        nextFreeSpr->setFlipX(true);
+        
+        auto nextFreeBtn = CCMenuItemSpriteExtra::create(
+            nextFreeSpr, this, menu_selector(TypeInUI::onNextFreeLayer)
+        );
+        nextFreeBtn->setID("next-free-layer-button"_spr);
+        layerMenu->addChild(nextFreeBtn);
+
         layerMenu->updateLayout();
         
         m_currentLayerLabel = EditableBMLabelProxy::replace(
@@ -58,9 +71,10 @@ class $modify(TypeInUI, EditorUI) {
         static_cast<CCSprite*>(this->getChildByID("layer-locked-sprite"))->setOpacity(0);
 
         m_fields->onUIHide.setFilter(UIShowFilter(this));
-        m_fields->onUIHide.bind([this, layerLockBtn](auto* ev) {
+        m_fields->onUIHide.bind([this, layerLockBtn, nextFreeBtn](auto* ev) {
             m_currentLayerLabel->setVisible(ev->show);
             layerLockBtn->setVisible(ev->show);
+            nextFreeBtn->setVisible(ev->show);
         });
         
         return true;
@@ -93,6 +107,28 @@ class $modify(TypeInUI, EditorUI) {
 
         lockBtn->setVisible(m_editorLayer->m_layerLockingEnabled && !onAll);
         m_currentLayerLabel->setColor(layerLocked ? ccc3(255, 150, 0) : ccc3(255, 255, 255));
+    }
+
+    void onNextFreeLayer(CCObject*) {
+        std::set<short> usedLayers;
+        for (auto obj : CCArrayExt<GameObject*>(m_editorLayer->m_objects)) {
+            usedLayers.insert(obj->m_editorLayer);
+            usedLayers.insert(obj->m_editorLayer2);
+        }
+
+        short nextFree  ;
+        for (nextFree = 0; nextFree < std::numeric_limits<short>::max(); nextFree += 1) {
+            if (!usedLayers.contains(nextFree)) {
+                break;
+            }
+        }
+        m_editorLayer->m_currentLayer = nextFree;
+        m_currentLayerLabel->setString(fmt::format("{}", nextFree).c_str());
+
+        if (auto btn = this->querySelector("all-layers-button")) {
+            btn->setVisible(true);
+        }
+        this->updateLockBtn();
     }
 
     $override
