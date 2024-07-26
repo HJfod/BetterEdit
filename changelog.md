@@ -2,6 +2,8 @@
 
 ## v6.7.0
  * Add button to quickly go to <cy>Next Free Layer</c>
+ * There's now a small buffer period in the <cj>Save Level</c> keybind, so that spamming the save key will only save once
+ * Bump version number to avoid having <cr>v6.6.6</c>
 
 ## v6.6.5
  * Fix <cj>Next Free</c> not taking into account trigger Target Group IDs on Android
