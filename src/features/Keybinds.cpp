@@ -76,6 +76,14 @@ struct $modify(EditorUI) {
         });
 
         this->defineKeybind("save-level"_spr, [this]() {
+            // Prevent spamming Ctrl + S
+            static std::chrono::time_point<std::chrono::system_clock> LAST_USED = std::chrono::system_clock::now();
+            auto lastUsed = LAST_USED;
+            auto now = LAST_USED = std::chrono::system_clock::now();
+            if (now - lastUsed < std::chrono::seconds(2)) {
+                return;
+            }
+            
             if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
                 this->onStopPlaytest(nullptr);
             }

@@ -193,7 +193,7 @@ struct $modify(ViewTabUI, EditorUI) {
         }
 
     #ifdef GEODE_IS_WINDOWS
-        this->template addEventListener<InvokeBindFilter>([=](InvokeBindEvent* event) {
+        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
             if (event->isDown() && m_editorLayer->m_playbackMode == PlaybackMode::Not) {
                 this->toggleMode(m_fields->viewModeBtn);
             }
