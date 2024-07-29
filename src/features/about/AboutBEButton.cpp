@@ -71,12 +71,6 @@ class $modify(AboutBEPauseLayer, EditorPauseLayer) {
                 topMenu->addChild(supportBtn);
                 topMenu->updateLayout();
             }
-
-            BE_PRO_FEATURE(
-                if (auto btn = this->querySelector("support-be-btn"_spr)) {
-                    btn->removeFromParent();
-                }
-            );
         }
 
         auto menu = this->getChildByID("guidelines-menu");

@@ -2,6 +2,7 @@
 #include <Geode/utils/web.hpp>
 #include <Geode/loader/Mod.hpp>
 #include <Geode/binding/ButtonSprite.hpp>
+#include <utils/Pro.hpp>
 
 bool SupportPopup::setup(bool showDontShowAgain) {
     m_bgSprite->setVisible(false);
@@ -19,7 +20,7 @@ bool SupportPopup::setup(bool showDontShowAgain) {
 
 
     auto bottomMenu = CCMenu::create();
-    bottomMenu->setContentWidth(100);
+    bottomMenu->setContentWidth(200);
     bottomMenu->setAnchorPoint({ .5f, .5f });
 
     auto supportSpr = ButtonSprite::create("Support", "goldFont.fnt", "GJ_button_01.png", .8f);
@@ -27,6 +28,10 @@ bool SupportPopup::setup(bool showDontShowAgain) {
         supportSpr, this, menu_selector(SupportPopup::onKofi)
     );
     bottomMenu->addChild(supportBtn);
+
+#ifdef BETTEREDIT_PRO
+    pro::addSupportPopupStuff(bottomMenu);
+#endif
 
     bottomMenu->setLayout(RowLayout::create()->setDefaultScaleLimits(.1f, 1.f));
     m_mainLayer->addChildAtPosition(bottomMenu, Anchor::Bottom, ccp(0, 18));

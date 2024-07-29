@@ -156,12 +156,9 @@ bool AboutBEPopup::setup() {
     menu->setLayout(RowLayout::create()->setGrowCrossAxis(true));
     m_mainLayer->addChildAtPosition(menu, Anchor::Center, ccp(0, -60));
 
-    BE_PRO_FEATURE(
-        auto label = CCLabelBMFont::create("Thank You for Supporting BetterEdit <3", "bigFont.fnt");
-        label->setColor({ 55, 255, 255 });
-        label->setScale(.35f);
-        m_mainLayer->addChildAtPosition(label, Anchor::Center, ccp(0, -95));
-    );
+#ifdef BETTEREDIT_PRO
+    pro::addAboutPopupStuff(m_mainLayer);
+#endif
 
     // BE links
 

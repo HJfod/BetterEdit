@@ -10,11 +10,6 @@
 #include <utils/HolyUB.hpp>
 #include "GridScaling.hpp"
 
-#include <utils/Pro.hpp>
-#ifdef BETTEREDIT_PRO
-#include <pro/features/GroupSummaryPopup.hpp>
-#endif
-
 using namespace geode::prelude;
 using namespace keybinds;
 
@@ -34,7 +29,7 @@ struct $modify(EditorUI) {
             this->transformObjectCall(EditCommand::RotateSnap);
         });
         this->defineKeybind("show-scale"_spr, [this]() {
-            if(auto scaleBtn = m_editButtonBar->m_buttonArray->objectAtIndex(m_editButtonBar->m_buttonArray->count() - 3)) {
+            if (auto scaleBtn = m_editButtonBar->m_buttonArray->objectAtIndex(m_editButtonBar->m_buttonArray->count() - 3)) {
                 this->activateScaleControl(scaleBtn);
             }
         });
@@ -159,12 +154,6 @@ struct $modify(EditorUI) {
             this->moveObjectCall(EditCommand::BigDown);
         });
 
-        BE_PRO_FEATURE(
-            this->defineKeybind("group-summary"_spr, [this] {
-                GroupSummaryPopup::create()->show();
-            });
-        );
-        
         return true;
     }
 
@@ -474,16 +463,6 @@ $execute {
         {},
         Category::EDITOR_MOVE, true
     });
-
-    BE_PRO_FEATURE_GLOBAL(
-        BindManager::get()->registerBindable({
-            "group-summary"_spr,
-            "Open Group Summary",
-            "",
-            {},
-            Category::EDITOR, false
-        });
-    );
 }
 
 #endif
