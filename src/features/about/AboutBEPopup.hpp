@@ -12,6 +12,7 @@ protected:
 public:
     static AboutBEPopup* create();
 
+    void onClose(CCObject* sender) override;
     void onSettings(CCObject*);
     void onReportBug(CCObject*);
     void onSuggestFeature(CCObject*);

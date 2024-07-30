@@ -139,17 +139,18 @@ bool AboutBEPopup::setup() {
     menu->setContentSize({ 325, 100 });
     menu->ignoreAnchorPointForPosition(false);
 
-    for (auto pair : std::initializer_list<std::pair<const char*, SEL_MenuHandler>> {
-        { "Report a Bug", menu_selector(AboutBEPopup::onReportBug) },
-        { "Suggest a Feature", menu_selector(AboutBEPopup::onSuggestFeature) },
-        { "Changelog", menu_selector(AboutBEPopup::onChangelog) },
-        { "Special Thanks", menu_selector(AboutBEPopup::onSpecialThanks) },
-        { "Support BE", menu_selector(AboutBEPopup::onSupport) },
-        { "Supporters", menu_selector(AboutBEPopup::onSupporters) },
+    for (auto pair : std::initializer_list<std::tuple<const char*, const char*, SEL_MenuHandler>> {
+        { "report-bug-btn", "Report a Bug", menu_selector(AboutBEPopup::onReportBug) },
+        { "suggest-btn", "Suggest a Feature", menu_selector(AboutBEPopup::onSuggestFeature) },
+        { "changelog-btn", "Changelog", menu_selector(AboutBEPopup::onChangelog) },
+        { "special-thanks-btn", "Special Thanks", menu_selector(AboutBEPopup::onSpecialThanks) },
+        { "support-btn", "Support BE", menu_selector(AboutBEPopup::onSupport) },
+        { "supporters-btn", "Supporters", menu_selector(AboutBEPopup::onSupporters) },
     }) {
-        auto spr = ButtonSprite::create(pair.first, "goldFont.fnt", "GJ_button_05.png", .8f);
+        auto spr = ButtonSprite::create(std::get<1>(pair), "goldFont.fnt", "GJ_button_05.png", .8f);
         spr->setScale(.55f);
-        auto btn = CCMenuItemSpriteExtra::create(spr, this, pair.second);
+        auto btn = CCMenuItemSpriteExtra::create(spr, this, std::get<2>(pair));
+        btn->setID(std::get<0>(pair));
         menu->addChild(btn);
     }
 
@@ -157,7 +158,7 @@ bool AboutBEPopup::setup() {
     m_mainLayer->addChildAtPosition(menu, Anchor::Center, ccp(0, -60));
 
 #ifdef BETTEREDIT_PRO
-    pro::addAboutPopupStuff(m_mainLayer);
+    pro::addAboutPopupStuff(this);
 #endif
 
     // BE links
@@ -192,6 +193,10 @@ bool AboutBEPopup::setup() {
     m_buttonMenu->addChildAtPosition(optionsBtn, Anchor::TopRight, ccp(-3, -3));
 
     return true;
+}
+
+void AboutBEPopup::onClose(CCObject* sender) {
+    PopupWithCorners::onClose(sender);
 }
 
 void AboutBEPopup::onSupport(CCObject*) {
