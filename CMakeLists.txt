@@ -6,7 +6,7 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 project(BetterEdit VERSION 1.0.0)
 
-if (NOT DONT_INCLUDE_PRO AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pro/)
+if (NOT DONT_INCLUDE_PRO AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/pro/)
 	message(STATUS "Including Pro features")
 	set(BE_PRO_FOUND TRUE)
 else()
