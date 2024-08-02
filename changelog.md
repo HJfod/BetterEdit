@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.8.0 (WIP)
+ * <cp>Supporters</c> can now link their account to be <cb>listed in-game</c> & gain access to <cy>exclusive features</c> (in the future, features not yet done)
+
 ## v6.7.0
  * Add button to quickly go to <cy>Next Free Layer</c>
  * There's now a small buffer period in the <cj>Save Level</c> keybind, so that spamming the save key will only save once
