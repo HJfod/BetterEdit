@@ -29,17 +29,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install OpenSSL (Windows)
-        if: ${{ matrix.config.os == 'Windows' }}
-        run: |
-          vcpkg install openssl:x86-windows
-
-      - name: Install OpenSSL (Android)
-        if: ${{ matrix.config.os == 'ubuntu-latest' }}
-        run: |
-          sudo apt-get install libssl-dev
-          sudo apt-get install pkg-config
-
       - name: Checkout Pro
         uses: actions/checkout@v4
         with:
