@@ -1,6 +1,7 @@
 # BetterEdit 6
 
 ## v6.8.0 (WIP)
+ * Allow modifying <cd>Mixed</c> values in the Group ID Popup (Editor Layers, Z Order, Channel) relatively
  * <cp>Supporters</c> can now link their account to be <cb>listed in-game</c> & gain access to <cy>exclusive features</c> (in the future, features not yet done)
 
 ## v6.7.0
