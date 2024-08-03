@@ -25,3 +25,4 @@ Pre-2.206 versions of BetterEdit relied on the now-defunct BetterSave mod to cre
 BetterEdit is first and foremost **a passion project**, however it is also being developed by a poor student living on his own. If you would like to support development and help me out, I have a <cp>Ko-fi</c>!
 
 [Link to my Ko-fi](https://ko-fi.com/hjfod)
+ 
