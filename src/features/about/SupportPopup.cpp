@@ -7,8 +7,19 @@
 bool SupportPopup::setup(bool showDontShowAgain) {
     m_bgSprite->setVisible(false);
 
-    auto bg = CCSprite::create("support-popup.png"_spr);
-    m_mainLayer->addChildAtPosition(bg, Anchor::Center);
+    // This incredibly silly practice is just to avoid CLI build times due to it not caching singular sprites
+    auto bg0 = CCSprite::createWithSpriteFrameName("support-shard-0.png"_spr);
+    bg0->setAnchorPoint({ 1, 0 });
+    m_mainLayer->addChildAtPosition(bg0, Anchor::Center);
+    auto bg1 = CCSprite::createWithSpriteFrameName("support-shard-1.png"_spr);
+    bg1->setAnchorPoint({ 0, 0 });
+    m_mainLayer->addChildAtPosition(bg1, Anchor::Center);
+    auto bg2 = CCSprite::createWithSpriteFrameName("support-shard-2.png"_spr);
+    bg2->setAnchorPoint({ 1, 1 });
+    m_mainLayer->addChildAtPosition(bg2, Anchor::Center);
+    auto bg3 = CCSprite::createWithSpriteFrameName("support-shard-3.png"_spr);
+    bg3->setAnchorPoint({ 0, 1 });
+    m_mainLayer->addChildAtPosition(bg3, Anchor::Center);
 
     auto invisibleSupportSpr = ButtonSprite::create("Support", "goldFont.fnt", "GJ_button_01.png", .8f);
     invisibleSupportSpr->setScale(1.8f);
