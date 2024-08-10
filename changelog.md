@@ -1,9 +1,16 @@
 # BetterEdit 6
 
-## v6.8.0 (WIP)
- * Allow modifying <cd>Mixed</c> values in the Group ID Popup (Editor Layers, Z Order, Channel) relatively
+## v6.8.0-alpha.4
+ * Fix a bug with servers causing supporter popups to not work
+
+## v6.8.0-alpha.3
  * Add <cc>HSV Preview</c>
  * <cg>Better Warp Selection</c> that allows grid-snapping and more (<co>WIP</c> + <cp>Supporter-only</c>)
+
+## v6.8.0-alpha.2
+ * Allow modifying <cd>Mixed</c> values in the Group ID Popup (Editor Layers, Z Order, Channel) relatively
+
+## v6.8.0-alpha.1
  * <cp>Supporters</c> can now link their account to be <cb>listed in-game</c> & gain access to <cy>exclusive features</c> (in the future, features not yet done)
 
 ## v6.7.0
