@@ -160,9 +160,11 @@ class $modify(ScaledUI, EditorUI) {
         auto winSize = CCDirector::get()->getWinSize();
         for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {
             if (auto bar = typeinfo_cast<EditButtonBar*>(c)) {
-                getChild(bar, 0)->setPositionX(-winSize.width / 2 + 5);
-                if (auto menu = getChildOfType<CCMenu>(bar, 0)) {
-                    menu->setPositionX(winSize.width / 2 + 5);
+                if (bar->getChildrenCount() > 0) {
+                    getChild(bar, 0)->setPositionX(-winSize.width / 2 + 5);
+                    if (auto menu = getChildOfType<CCMenu>(bar, 0)) {
+                        menu->setPositionX(winSize.width / 2 + 5);
+                    }
                 }
                 bar->setPositionX(winSize.width / 2);
             }
