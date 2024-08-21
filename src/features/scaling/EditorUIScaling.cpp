@@ -162,15 +162,16 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
 
         EditButtonBar::loadFromItems(items, r, c, unkBool);
 
-        //fix visible pages when opening editor, can be assumed as 0 as loadFromItems resets the page to 0
-        for (auto barPages : CCArrayExt<CCNode*>(m_pagesArray)) {
-            barPages->setVisible(false);
-        }
-        if (CCNode* firstPage = typeinfo_cast<CCNode*>(m_pagesArray->objectAtIndex(0))){
-            firstPage->setVisible(true);
-        }
-
         if (auto ui = typeinfo_cast<EditorUI*>(getParent())) {
+
+            //fix visible pages when opening editor, can be assumed as 0 as loadFromItems resets the page to 0
+            for (auto barPages : CCArrayExt<CCNode*>(m_pagesArray)) {
+                barPages->setVisible(false);
+            }
+            if (CCNode* firstPage = typeinfo_cast<CCNode*>(m_pagesArray->objectAtIndex(0))){
+                firstPage->setVisible(true);
+            }
+
             auto winSize = CCDirector::get()->getWinSize();
 
             setPositionX(winSize.width / 2);
