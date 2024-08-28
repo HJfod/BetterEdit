@@ -190,7 +190,7 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
                 navMenu->setContentSize(menu->getContentSize());
                 navMenu->setScale(menu->getScale());
 
-                float xOffset = 180 / getScale();
+                float xOffset = (winSize.width / getScale())/2 - 104;
                 float yOffset = 2;
 
                 CCSprite* prevSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
