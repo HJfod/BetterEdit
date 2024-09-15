@@ -20,7 +20,7 @@ static std::filesystem::path getAutoSaveDir() {
 }
 
 static bool CREATING_AUTO_SAVE = false;
-void ::createAutoSave(LevelEditorLayer* lel) {
+void createAutoSave(LevelEditorLayer* lel) {
     CREATING_AUTO_SAVE = true;
     fakeEditorPauseLayer(lel)->saveLevel();
     CREATING_AUTO_SAVE = false;
