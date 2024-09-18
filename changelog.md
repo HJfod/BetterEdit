@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.8.0-alpha.6
+ * Add inputs for <cb>Scale</c>, <cg>Scale X</c>, and <co>Scale Y</c>
+
 ## v6.8.0-alpha.5
  * Fix color trigger popup crashing (& also make <cc>HSV Preview</c> more responsive)
 
