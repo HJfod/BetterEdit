@@ -1,5 +1,5 @@
 {
-	"geode": "3.4.0",
+	"geode": "3.7.2",
 	"version": "6.8.0-alpha.4",
 	"gd": {
 		"win": "2.206",
@@ -10,7 +10,6 @@
 	"name": "BetterEdit",
 	"developers": ["HJfod"],
 	"description": "The Ultimate Editor Mod",
-	"repository": "https://github.com/HJfod/BetterEdit",
 	"links": {
 		"homepage": "https://betteredit.pro",
 		"source": "https://github.com/HJfod/BetterEdit",
@@ -80,14 +79,14 @@
 			"default": true,
 			"name": "Zoom Towards Cursor",
 			"description": "When enabled and while holding down the CTRL key, zooming in the editor with the scroll wheel will be zoomed toward the cursor and not the center of the screen",
-			"platforms": ["win", "macos"]
+			"platforms": ["desktop"]
 		},
 		"pinch-to-zoom": {
 			"type": "bool",
 			"default": true,
 			"name": "Pinch to Zoom",
 			"description": "When enabled, you can use two fingers to zoom",
-			"platforms": ["android32", "android64"]
+			"platforms": ["android"]
 		},
 		"show-zoom-text": {
 			"type": "bool",
@@ -176,7 +175,8 @@
 		"better-select": {
 			"type": "bool",
 			"default": false,
-			"name": "Better Warp Selection (WIP + Supporter-Only)"
+			"name": "Better Warp Selection (WIP + Supporter-Only)",
+			"enable-if": "saved:has-pro"
 		}
 	},
 	"tags": ["editor", "enhancement", "utility", "customization"]
