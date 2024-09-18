@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.8.0-alpha.5
+ * Fix color trigger popup crashing (& also make <cc>HSV Preview</c> more responsive)
+
 ## v6.8.0-alpha.4
  * Fix a bug with servers causing supporter popups to not work
 

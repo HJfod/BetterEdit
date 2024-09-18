@@ -8,7 +8,7 @@
 #include <utils/Pro.hpp>
 
 #ifdef BETTEREDIT_PRO
-#include <pro/ui/SupportersPopup.hpp>
+#include <pro/features/supporters/SupportersPopup.hpp>
 #endif
 
 struct Dev {
