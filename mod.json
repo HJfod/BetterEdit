@@ -45,6 +45,21 @@
 			"id": "hjfod.backups",
 			"version": "1.0.0",
 			"importance": "recommended"
+		},
+		{
+			"id": "alphalaneous.awesome_modifier_icons",
+			"version": "1.0.3",
+			"importance": "recommended"
+		},
+		{
+			"id": "alphalaneous.improvedlink",
+			"version": "1.0.5",
+			"importance": "recommended"
+		},
+		{
+			"id": "alphalaneous.improved_group_view",
+			"version": "1.0.5",
+			"importance": "recommended"
 		}
     ],
 	"resources": {
@@ -166,11 +181,22 @@
 			"description": "If the grid is currently hidden and you use the controls to change its size, its toggled on",
 			"platforms": ["win", "android64"]
 		},
+		"copy-paste-from-clipboard": {
+			"type": "bool",
+			"default": true,
+			"name": "Copy & Paste to Clipboard",
+			"description": "Copy & paste objects to/from system clipboard. This means that when you copy objects, you can paste it in a text editor in its text representation, and also paste it in to the editor later"
+		},
 		"dev-mode": {
 			"type": "bool",
 			"default": false,
 			"name": "Developer Mode",
 			"description": "Enables some features intended for Developers"
+		},
+		"pro-section": {
+			"type": "title",
+			"name": "Supporter Settings",
+			"description": "These settings are only for <cp>Supporter Features</c>."
 		},
 		"better-select": {
 			"type": "bool",
