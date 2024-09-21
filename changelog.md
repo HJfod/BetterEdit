@@ -1,5 +1,12 @@
 # BetterEdit 6
 
+## v6.8.0-alpha.7
+ * Add <cg>Scale Snapping</c>
+ * Add <ca>Rotation Snapping</c> and <cc>Lock Object Position During Rotation</c>
+ * Add <co>Input Rotation Degrees</c>
+ * Add <cb>Copy/Paste to/from System Clipboard</c>
+ * Add <cg>Alpha's Editor Mods</c> as Recommendations :3
+
 ## v6.8.0-alpha.6
  * Add inputs for <cb>Scale</c>, <cg>Scale X</c>, and <co>Scale Y</c>
 
