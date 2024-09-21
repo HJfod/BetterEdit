@@ -98,6 +98,8 @@ class $modify(ScaledUI, EditorUI) {
             if (Mod::get()->getSettingValue<bool>("scale-build-tabs")) {
                 objTabs->setScale(scale);
             }
+
+            m_toolbarHeight = objTabs->getPositionY();
         }
 
         if (auto leftTabs = this->getChildByID("toolbar-categories-menu")) {
@@ -139,9 +141,7 @@ class $modify(ScaledUI, EditorUI) {
         auto winSize = CCDirector::get()->getWinSize();
         this->getChildByID("build-tabs-menu")->setPositionX(winSize.width / 2);
 
-        // This is so silly. If you don't do this, the menu is wrongly positioned, 
-        // but only the first time. I have no clue what's going on
-        this->centerBuildTabs();
+        // Reload EditButtonBars to recenter
         for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {
             if (auto bar = typeinfo_cast<EditButtonBar*>(c)) {
                 bar->reloadItems(
@@ -150,46 +150,69 @@ class $modify(ScaledUI, EditorUI) {
                 );
             }
         }
-        this->centerBuildTabs();
 
         return true;
     }
-
-    void centerBuildTabs() {
-        // This centers the build tab
-        auto winSize = CCDirector::get()->getWinSize();
-        for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {
-            if (auto bar = typeinfo_cast<EditButtonBar*>(c)) {
-                if (bar->getChildrenCount() > 0) {
-                    getChild(bar, 0)->setPositionX(-winSize.width / 2 + 5);
-                    if (auto menu = getChildOfType<CCMenu>(bar, 0)) {
-                        menu->setPositionX(winSize.width / 2 + 5);
-                    }
-                }
-                bar->setPositionX(winSize.width / 2);
-            }
-        }
-    }
 };
 
-class $modify(EditButtonBar) {
+class $modify(BetterEditButtonBar, EditButtonBar) {
+
     $override
     void loadFromItems(CCArray* items, int r, int c, bool unkBool) {
+
         EditButtonBar::loadFromItems(items, r, c, unkBool);
-        if (auto ui = static_cast<ScaledUI*>(EditorUI::get())) {
-            ui->centerBuildTabs();
+
+        if (auto ui = typeinfo_cast<EditorUI*>(getParent())) {
+
+            //fix visible pages when opening editor, can be assumed as 0 as loadFromItems resets the page to 0
+            for (auto barPages : CCArrayExt<CCNode*>(m_pagesArray)) {
+                barPages->setVisible(false);
+            }
+            if (CCNode* firstPage = typeinfo_cast<CCNode*>(m_pagesArray->objectAtIndex(0))){
+                firstPage->setVisible(true);
+            }
+
+            auto winSize = CCDirector::get()->getWinSize();
+
+            setPositionX(winSize.width / 2);
+
+            if (auto scrollLayer = getChildOfType<BoomScrollLayer>(this, 0)) {
+                scrollLayer->setPositionX(-winSize.width / 2 + 5);
+            }
+
+            if (auto menu = getChildOfType<CCMenu>(this, 0)) {
+                menu->setVisible(false);
+            
+                //easier to create a new menu than work with the old one
+                CCMenu* navMenu = CCMenu::create();
+
+                navMenu->setPosition({-winSize.width / 2, 0});
+                navMenu->setContentSize(menu->getContentSize());
+                navMenu->setScale(menu->getScale());
+
+                float xOffset = (winSize.width / getScale())/2 - 104;
+                float yOffset = 2;
+
+                CCSprite* prevSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
+                prevSpr->setScale(0.6f);
+                CCSprite* nextSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
+                nextSpr->setFlipX(true);
+                nextSpr->setScale(0.6f);
+
+                CCMenuItemSpriteExtra* prevButton = CCMenuItemSpriteExtra::create(prevSpr, this, menu_selector(EditButtonBar::onLeft));
+                CCMenuItemSpriteExtra* nextButton = CCMenuItemSpriteExtra::create(nextSpr, this, menu_selector(EditButtonBar::onRight));
+
+                prevButton->setPositionX(menu->getContentWidth()/2 - xOffset);
+                prevButton->setPositionY((ui->m_toolbarHeight/2 + yOffset) / getScale());
+                
+                nextButton->setPositionX(menu->getContentWidth()/2 + xOffset);
+                nextButton->setPositionY((ui->m_toolbarHeight/2 + yOffset) / getScale());
+
+                navMenu->addChild(prevButton);
+                navMenu->addChild(nextButton);
+
+                addChild(navMenu);
+            }
         }
-    }
-};
-
-class $modify(EditorPauseLayer) {
-    static void onModify(auto& self) {
-        (void)self.setHookPriority("EditorPauseLayer::onResume", -100);
-    }
-
-    $override
-    void onResume(CCObject* pSender) {
-        EditorPauseLayer::onResume(pSender);
-        static_cast<ScaledUI*>(EditorUI::get())->centerBuildTabs();
     }
 };
