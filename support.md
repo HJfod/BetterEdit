@@ -3,9 +3,7 @@ BetterEdit is first and foremost <cy>a passion project</c>, but if you would lik
 
 [Link to my Ko-fi](https://ko-fi.com/hjfod)
 
-I'm also planning on making a <cb>paid Pro version</c> in the future with some cool extra features :)
-
-However, please <cr>don't donate just for the purpose of getting Pro</c>! While I fully intended to make it, I know from past experience that something might come in the way, and <cr>I do not want to receive money for a product until I can guarantee it exists</c>.
+Supporters get <co>Early Access</c> to features. I also plan on adding extra advanced features for Supporters!
 
 ## <cy>Do not donate any money you need yourself</c>.
 

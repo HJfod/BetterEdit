@@ -22,6 +22,6 @@ Pre-2.206 versions of BetterEdit relied on the now-defunct BetterSave mod to cre
 
 ## <cy>Support</c>
 
-BetterEdit is first and foremost **a passion project**, however it is also being developed by a poor student living on his own. If you would like to support development and help me out, I have a <cp>Ko-fi</c>!
+BetterEdit is first and foremost **a passion project**, however it is also being developed by a poor student living on his own. If you would like to support development and help me out, I have a <cp>Ko-fi</c>! Supporters get <co>Early Access</c> to features. I also plan on adding extra advanced features for Supporters in the future!
 
 [Link to my Ko-fi](https://ko-fi.com/hjfod)

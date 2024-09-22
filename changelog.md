@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.8.0-beta.1
+ * Release candidate
+
 ## v6.8.0-alpha.7
  * Add <cg>Scale Snapping</c>
  * Add <ca>Rotation Snapping</c> and <cc>Lock Object Position During Rotation</c>
