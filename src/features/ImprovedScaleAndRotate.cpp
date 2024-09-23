@@ -6,28 +6,6 @@
 
 using namespace geode::prelude;
 
-// i hate touch prioi hate touch prioi hate touch prioi hate touch prioi hate 
-// touch prioi hate touch prioi hate touch prioi hate touch prioi hate touch 
-// aka fix that will make you audibly say "kill yourself"
-class $modify(SuperExtraEvenMoreForcePrioUI, EditorUI) {
-    struct Fields {
-        std::unordered_set<CCTextInputNode*> forceTouchPrio;
-    };
-
-    $override
-    bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
-        for (auto input : m_fields->forceTouchPrio) {
-            if (input->isVisible() && CCRect(
-                input->getPosition() - input->getScaledContentSize() / 2,
-                input->getScaledContentSize()
-            ).containsPoint(input->getParent()->convertTouchToNodeSpace(touch))) {
-                return input->ccTouchBegan(touch, event);
-            }
-        }
-        return EditorUI::ccTouchBegan(touch, event);
-    }
-};
-
 // Returns radians
 static float angleOfPointOnCircle(CCPoint const& point) {
     return atan2f(point.y, point.x) * (180.f / std::numbers::pi_v<float>);
@@ -170,10 +148,9 @@ class $modify(GJScaleControl) {
         this->updateInput(this->getInputY());
         this->updateInput(this->getInputXY());
 
-        auto ui = static_cast<SuperExtraEvenMoreForcePrioUI*>(m_delegate);
-        ui->m_fields->forceTouchPrio.insert(this->getInputX()->getInputNode());
-        ui->m_fields->forceTouchPrio.insert(this->getInputY()->getInputNode());
-        ui->m_fields->forceTouchPrio.insert(this->getInputXY()->getInputNode());
+        be::evilForceTouchPrio(static_cast<EditorUI*>(m_delegate), this->getInputX()->getInputNode());
+        be::evilForceTouchPrio(static_cast<EditorUI*>(m_delegate), this->getInputY()->getInputNode());
+        be::evilForceTouchPrio(static_cast<EditorUI*>(m_delegate), this->getInputXY()->getInputNode());
     }
     $override
     void updateLabelX(float scale) {
@@ -376,8 +353,7 @@ class $modify(InputRotationControl, GJRotationControl) {
         this->setThumbValue(angle);
         this->getInput()->setString(numToString(angle, 3));
 
-        auto ui = static_cast<SuperExtraEvenMoreForcePrioUI*>(m_delegate);
-        ui->m_fields->forceTouchPrio.insert(this->getInput()->getInputNode());
+        be::evilForceTouchPrio(static_cast<EditorUI*>(m_delegate), this->getInput()->getInputNode());
     }
 
     float getThumbValue() const {
@@ -412,7 +388,7 @@ class $modify(EditorUI) {
     $override
     void activateRotationControl(CCObject* sender) {
         EditorUI::activateRotationControl(sender);
-        static_cast<InputRotationControl*>(m_rotationControl)->myLoadValues(::getSelectedObjects(this));
+        static_cast<InputRotationControl*>(m_rotationControl)->myLoadValues(be::getSelectedObjects(this));
     }
     // Make angleChanged be absolute rotation instead of relative
     $override

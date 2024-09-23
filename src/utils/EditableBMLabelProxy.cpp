@@ -108,3 +108,7 @@ void EditableBMLabelProxy::textChanged(CCTextInputNode*) {
         m_ignoreLabelUpdate = false;
     }
 }
+
+TextInput* EditableBMLabelProxy::getInput() const {
+    return m_input;
+}

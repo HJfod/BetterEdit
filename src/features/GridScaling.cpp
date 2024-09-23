@@ -5,7 +5,7 @@
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/ui/TextInput.hpp>
-#include <utils/HandleUIHide.hpp>
+#include <utils/Editor.hpp>
 
 using namespace geode::prelude;
 

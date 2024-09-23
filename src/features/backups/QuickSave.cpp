@@ -5,7 +5,7 @@
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 #include <hjfod.gmd-api/include/GMD.hpp>
 #include <utils/HolyUB.hpp>
-#include <utils/EditorViewOnlyMode.hpp>
+#include <utils/Editor.hpp>
 
 using namespace geode::prelude;
 
@@ -70,7 +70,7 @@ class $modify(EditorPauseLayer) {
 
     $override
     void FLAlert_Clicked(FLAlertLayer* fl, bool btn2) {
-        if (isViewOnlyEditor(m_editorLayer)) {
+        if (be::isViewOnlyEditor(m_editorLayer)) {
             return EditorPauseLayer::FLAlert_Clicked(fl, btn2);
         }
 
@@ -88,7 +88,7 @@ class $modify(EditorPauseLayer) {
 
     $override
     void onExitNoSave(CCObject* sender) {
-        if (isViewOnlyEditor(m_editorLayer)) {
+        if (be::isViewOnlyEditor(m_editorLayer)) {
             return EditorPauseLayer::onExitNoSave(sender);
         }
 

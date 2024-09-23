@@ -5,7 +5,7 @@
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/binding/GameManager.hpp>
-#include <utils/HandleUIHide.hpp>
+#include <utils/Editor.hpp>
 #include <utils/Pro.hpp>
 
 using namespace geode::prelude;
@@ -52,7 +52,7 @@ class $modify(TypeInUI, EditorUI) {
 
         layerMenu->updateLayout();
         
-        m_currentLayerLabel = EditableBMLabelProxy::replace(
+        auto proxy = EditableBMLabelProxy::replace(
             m_currentLayerLabel, this, 40.f, "Z",
             [this](auto str) {
                 m_editorLayer->m_currentLayer = numFromString<int>(str).unwrapOr(-1);
@@ -61,6 +61,8 @@ class $modify(TypeInUI, EditorUI) {
                 this->updateLockBtn();
             }
         );
+        m_currentLayerLabel = proxy;
+        be::evilForceTouchPrio(this, proxy->getInput()->getInputNode());
 
         // Delete the existing layer lock button that's just an overlay on the text
         if (auto lock = this->getChildByIDRecursive("lock-layer-button")) {

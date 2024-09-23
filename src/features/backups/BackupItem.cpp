@@ -1,7 +1,7 @@
 #include "BackupItem.hpp"
 #include "BackupListPopup.hpp"
 #include <fmt/chrono.h>
-#include <utils/EditorViewOnlyMode.hpp>
+#include <utils/Editor.hpp>
 #include <Geode/ui/BasedButtonSprite.hpp>
 #include <Geode/binding/EditLevelLayer.hpp>
 
@@ -99,7 +99,7 @@ void BackupItem::onConvertAutomated(CCObject*) {
 }
 void BackupItem::onView(CCObject*) {
     auto scene = CCScene::create();
-    scene->addChild(createViewOnlyEditor(m_backup->getLevel(), [level = m_backup->getOriginalLevel()]() {
+    scene->addChild(be::createViewOnlyEditor(m_backup->getLevel(), [level = m_backup->getOriginalLevel()]() {
         auto layer = EditLevelLayer::create(level);
         auto popup = BackupListPopup::create(level);
         popup->m_scene = layer;

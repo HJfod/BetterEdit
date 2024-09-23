@@ -1,7 +1,10 @@
 # BetterEdit 6
 
+## v6.8.0-beta.2
+ * Fix being able to place objects through the Z layer input
+
 ## v6.8.0-beta.1
- * Release candidate
+ * Release candidate; minor internal fixes & UI tweaks
 
 ## v6.8.0-alpha.7
  * Add <cg>Scale Snapping</c>

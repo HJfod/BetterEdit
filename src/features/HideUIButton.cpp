@@ -2,7 +2,7 @@
 #include <Geode/binding/CCMenuItemToggler.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/ui/BasedButtonSprite.hpp>
-#include <utils/HandleUIHide.hpp>
+#include <utils/Editor.hpp>
 
 using namespace geode::prelude;
 

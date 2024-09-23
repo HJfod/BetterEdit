@@ -11,7 +11,7 @@
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <geode.custom-keybinds/include/Keybinds.hpp>
-#include <utils/HandleUIHide.hpp>
+#include <utils/Editor.hpp>
 #include <utils/HolyUB.hpp>
 
 using namespace geode::prelude;

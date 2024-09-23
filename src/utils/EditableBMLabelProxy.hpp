@@ -56,4 +56,6 @@ public:
     void setString(const char* str, bool needUpdateLabel) override;
 
     void textChanged(CCTextInputNode*) override;
+
+    TextInput* getInput() const;
 };
