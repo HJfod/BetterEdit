@@ -1,6 +1,6 @@
 {
 	"geode": "3.7.1",
-	"version": "6.8.0-beta.2",
+	"version": "6.8.0-beta.3",
 	"gd": {
 		"win": "2.206",
 		"mac": "2.206",
@@ -196,12 +196,19 @@
 		"pro-section": {
 			"type": "title",
 			"name": "Supporter Settings",
-			"description": "These settings are only for <cp>Supporter Features</c>."
+			"description": "These settings are for features only available to <cp>Supporters</c>. Support BetterEdit to get access!"
 		},
 		"better-select": {
 			"type": "bool",
 			"default": false,
-			"name": "Better Warp Selection (WIP + Supporter-Only)",
+			"name": "Better Warp Selection (WIP)",
+			"enable-if": "saved:has-pro"
+		},
+		"enable-pro-ui": {
+			"type": "bool",
+			"default": true,
+			"name": "Enable Pro UI",
+			"description": "Give the Editor a <cy>New Look</c>!",
 			"enable-if": "saved:has-pro"
 		}
 	},

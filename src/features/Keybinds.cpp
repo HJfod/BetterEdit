@@ -29,8 +29,18 @@ struct $modify(EditorUI) {
             this->transformObjectCall(EditCommand::RotateSnap);
         });
         this->defineKeybind("show-scale"_spr, [this]() {
-            if (auto scaleBtn = m_editButtonBar->m_buttonArray->objectAtIndex(m_editButtonBar->m_buttonArray->count() - 3)) {
+            if (auto scaleBtn = this->querySelector("scale-button")) {
                 this->activateScaleControl(scaleBtn);
+            }
+        });
+        this->defineKeybind("show-scale-xy"_spr, [this]() {
+            if (auto scaleBtn = this->querySelector("scale-xy-button")) {
+                this->activateScaleControl(scaleBtn);
+            }
+        });
+        this->defineKeybind("show-warp"_spr, [this]() {
+            if (auto btn = this->querySelector("warp-button")) {
+                this->activateTransformControl(btn);
             }
         });
         this->defineKeybind("toggle-link-controls"_spr, [this]() {
@@ -192,8 +202,24 @@ $execute {
     ));
     BindManager::get()->registerBindable(BindableAction(
         "show-scale"_spr,
-        "Show Scale Control",
-        "Show the object scaling controls",
+        "Toggle Scale Control",
+        "Toggle the object scaling controls",
+        {},
+        Category::EDITOR_UI,
+        false
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "show-scale-xy"_spr,
+        "Toggle Scale X/Y Control",
+        "Toggle the object scaling by X/Y controls",
+        {},
+        Category::EDITOR_UI,
+        false
+    ));
+    BindManager::get()->registerBindable(BindableAction(
+        "show-warp"_spr,
+        "Toggle Warp Control",
+        "Toggle the object warping controls",
         {},
         Category::EDITOR_UI,
         false

@@ -1,5 +1,9 @@
 # BetterEdit 6
 
+## v6.8.0-beta.3
+ * Add <co>Toggle Scale X/Y Control</c> and <cp>Toggle Warp Control</c> keybinds
+ * Fix <cr>Toggle Scale Control</c> keybind crashing
+
 ## v6.8.0-beta.2
  * Fix being able to place objects through the Z layer input
 
