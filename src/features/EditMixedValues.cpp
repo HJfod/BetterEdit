@@ -4,6 +4,17 @@
 using namespace geode::prelude;
 
 template <class T>
+struct ValueLimits final {
+    T min;
+    T max;
+    constexpr ValueLimits(T value) : min(value), max(value) {}
+    constexpr ValueLimits(T min, T max) : min(min), max(max) {}
+    static constexpr ValueLimits zeroToInf() {
+        return ValueLimits(0, std::numeric_limits<T>::max());
+    }
+};
+
+template <class T>
 class MixedValuesHandler final {
 protected:
     std::vector<typename T::GameObjectType*> m_targets;
@@ -40,24 +51,21 @@ public:
         // Disable input until explicitly unmixed via button
         // This is because A) i'm too lazy to parse "Mix+N" strings and 
         // B) this makes it clear how to unmix
-        if (this->isMixed()) {
-            input->setMouseEnabled(false);
-            input->setTouchEnabled(false);
+        auto unmixSpr = ButtonSprite::create("Unmix", "goldFont.fnt", "GJ_button_05.png", .8f);
+        unmixSpr->setScale(.3f);
+        auto unmixBtn = CCMenuItemExt::createSpriteExtra(
+            unmixSpr, [this](auto) {
+                auto limits = this->getMinMax();
+                this->override(limits.min + (limits.max - limits.min) / 2);
+            }
+        );
+        auto menu = CCMenu::create();
+        menu->setID("unmix-menu"_spr);
+        menu->ignoreAnchorPointForPosition(false);
+        menu->setContentSize({ 25, 15 });
+        menu->addChildAtPosition(unmixBtn, Anchor::Center);
+        input->getParent()->addChildAtPosition(menu, Anchor::Bottom, ccp(0, 0), false);
 
-            auto unmixSpr = ButtonSprite::create("Unmix", "goldFont.fnt", "GJ_button_05.png", .8f);
-            unmixSpr->setScale(.3f);
-            auto unmixBtn = CCMenuItemExt::createSpriteExtra(
-                unmixSpr, [this](auto) {
-                    this->override(T::DEFAULT_VALUE);
-                }
-            );
-            auto menu = CCMenu::create();
-            menu->setID("unmix-menu"_spr);
-            menu->ignoreAnchorPointForPosition(false);
-            menu->setContentSize({ 25, 15 });
-            menu->addChildAtPosition(unmixBtn, Anchor::Center);
-            input->getParent()->addChildAtPosition(menu, Anchor::Bottom, ccp(0, 0), false);
-        }
         this->updateLabel();
     }
     bool isMixed() const {
@@ -73,12 +81,8 @@ public:
         return false;
     }
     void override(typename T::Type value) const {
-        m_input->setMouseEnabled(true);
-        m_input->setTouchEnabled(true);
-        m_input->getParent()->removeChildByID("unmix-menu"_spr);
-
         for (auto obj : m_targets) {
-            T::set(obj, clamp(value, T::MIN_VALUE, T::MAX_VALUE));
+            T::set(obj, clamp(value, T::LIMITS.min, T::LIMITS.max));
         }
         this->updateLabel();
     }
@@ -87,8 +91,8 @@ public:
     }
     void increment(typename T::Type value) const {
         for (auto obj : m_targets) {
-            auto val = clamp(T::get(obj) + value, T::MIN_VALUE, T::MAX_VALUE);
-            if (T::SKIP_ZERO && val == 0) {
+            auto val = clamp(T::get(obj) + value, T::LIMITS.min, T::LIMITS.max);
+            if (T::shouldSkipZero(obj) && val == 0) {
                 val = value > 0 ? 1 : -1;
             }
             T::set(obj, val);
@@ -101,7 +105,7 @@ public:
             usedLayers.insert(T::get(obj));
         }
         typename T::Type nextFree;
-        for (nextFree = T::MIN_VALUE; nextFree < T::MAX_VALUE; nextFree += 1) {
+        for (nextFree = T::LIMITS.min; nextFree < T::LIMITS.max; nextFree += 1) {
             if (!usedLayers.contains(nextFree)) {
                 break;
             }
@@ -111,41 +115,118 @@ public:
     void updateLabel() const {
         if (m_targets.empty()) return;
         if (this->isMixed()) {
-            auto value = T::get(m_targets.front()) - m_mixedSource;
-            m_input->setString(value == 0 ? "Mixed" : fmt::format("Mix{:+}", value));
+            auto limits = this->getMinMax();
+            m_input->setMouseEnabled(false);
+            m_input->setTouchEnabled(false);
+            m_input->detachWithIME();
+            m_input->getParent()->getChildByID("unmix-menu"_spr)->setVisible(true);
+            m_input->setString(fmt::format("{}..{}", limits.min, limits.max));
         }
         else {
+            m_input->setMouseEnabled(true);
+            m_input->setTouchEnabled(true);
+            m_input->getParent()->getChildByID("unmix-menu"_spr)->setVisible(false);
             m_input->setString(fmt::format("{}", T::get(m_targets.front())));
         }
     }
+    ValueLimits<typename T::Type> getMinMax() const {
+        auto limits = ValueLimits(T::get(m_targets.front()));
+        for (auto target : m_targets) {
+            auto value = T::get(target);
+            if (value < limits.min) {
+                limits.min = value;
+            }
+            if (value > limits.max) {
+                limits.max = value;
+            }
+        }
+        return limits;
+    }
 };
 
-#define MIXABLE_GAME_OBJECT_PROP(name_, gty_, ty_, val_, min_, max_, def_, skip_zero_, prop_) \
-    struct name_ final {                                                     \
-        using Type = ty_;                                                    \
-        using GameObjectType = gty_;                                         \
-        static constexpr Type MIXED_VALUE = val_;                            \
-        static constexpr Type MIN_VALUE = min_;                              \
-        static constexpr Type MAX_VALUE = max_;                              \
-        static constexpr Type DEFAULT_VALUE = def_;                          \
-        static constexpr bool SKIP_ZERO = skip_zero_;                        \
-        static Type get(GameObjectType* obj) { return obj->prop_; }              \
-        static void set(GameObjectType* obj, Type value) { obj->prop_ = value; } \
-    };
-
-MIXABLE_GAME_OBJECT_PROP(GOEL,  GameObject, short, -1, 0, std::numeric_limits<short>::max(), 0, false, m_editorLayer);
-MIXABLE_GAME_OBJECT_PROP(GOEL2, GameObject, short, -1, 0, std::numeric_limits<short>::max(), 0, false, m_editorLayer2);
-MIXABLE_GAME_OBJECT_PROP(GOZO,  GameObject, int, -1000, -999, 999, 2, true, m_zOrder);
-MIXABLE_GAME_OBJECT_PROP(EGOOV, EffectGameObject, int, -1, 0, std::numeric_limits<short>::max(), 0, false, m_ordValue);
-MIXABLE_GAME_OBJECT_PROP(EGOCV, EffectGameObject, int, -1, 0, std::numeric_limits<short>::max(), 0, false, m_channelValue);
+struct MixedPropEditorLayer final {
+    using Type = short;
+    using GameObjectType = GameObject;
+    static constexpr Type MIXED_VALUE = -1;
+    static constexpr ValueLimits<Type> LIMITS = ValueLimits<Type>::zeroToInf();
+    static bool shouldSkipZero(GameObjectType*) {
+        return false;
+    }
+    static Type get(GameObjectType* obj) {
+        return obj->m_editorLayer;
+    }
+    static void set(GameObjectType* obj, Type value) {
+        obj->m_editorLayer = value;
+    }
+};
+struct MixedPropEditorLayer2 final {
+    using Type = short;
+    using GameObjectType = GameObject;
+    static constexpr Type MIXED_VALUE = -1;
+    static constexpr ValueLimits<Type> LIMITS = ValueLimits<Type>::zeroToInf();
+    static bool shouldSkipZero(GameObjectType*) {
+        return false;
+    }
+    static Type get(GameObjectType* obj) {
+        return obj->m_editorLayer2;
+    }
+    static void set(GameObjectType* obj, Type value) {
+        obj->m_editorLayer2 = value;
+    }
+};
+struct MixedPropZOrder final {
+    using Type = int;
+    using GameObjectType = GameObject;
+    static constexpr Type MIXED_VALUE = -1000;
+    static constexpr ValueLimits<Type> LIMITS = { -999, 999 };
+    static bool shouldSkipZero(GameObjectType* obj) {
+        return obj->m_defaultZOrder != 0;
+    }
+    static Type get(GameObjectType* obj) {
+        return obj->m_zOrder == 0 ? obj->m_defaultZOrder : obj->m_zOrder;
+    }
+    static void set(GameObjectType* obj, Type value) {
+        obj->m_zOrder = value;
+    }
+};
+struct MixedPropOrder final {
+    using Type = int;
+    using GameObjectType = EffectGameObject;
+    static constexpr Type MIXED_VALUE = -1;
+    static constexpr ValueLimits<Type> LIMITS = ValueLimits<Type>::zeroToInf();
+    static bool shouldSkipZero(GameObjectType*) {
+        return false;
+    }
+    static Type get(GameObjectType* obj) {
+        return obj->m_ordValue;
+    }
+    static void set(GameObjectType* obj, Type value) {
+        obj->m_ordValue = value;
+    }
+};
+struct MixedPropChannel final {
+    using Type = int;
+    using GameObjectType = EffectGameObject;
+    static constexpr Type MIXED_VALUE = -1;
+    static constexpr ValueLimits<Type> LIMITS = ValueLimits<Type>::zeroToInf();
+    static bool shouldSkipZero(GameObjectType*) {
+        return false;
+    }
+    static Type get(GameObjectType* obj) {
+        return obj->m_channelValue;
+    }
+    static void set(GameObjectType* obj, Type value) {
+        obj->m_channelValue = value;
+    }
+};
 
 class $modify(SetGroupIDLayer) {
     struct Fields {
-        MixedValuesHandler<GOEL> editorLayerHandler;
-        MixedValuesHandler<GOEL2> editorLayer2Handler;
-        MixedValuesHandler<GOZO> zOrderHandler;
-        MixedValuesHandler<EGOOV> channelOrderHandler;
-        MixedValuesHandler<EGOCV> channelHandler;
+        MixedValuesHandler<MixedPropEditorLayer> editorLayerHandler;
+        MixedValuesHandler<MixedPropEditorLayer2> editorLayer2Handler;
+        MixedValuesHandler<MixedPropZOrder> zOrderHandler;
+        MixedValuesHandler<MixedPropOrder> channelOrderHandler;
+        MixedValuesHandler<MixedPropChannel> channelHandler;
     };
 
     $override
@@ -241,11 +322,10 @@ class $modify(SetGroupIDLayer) {
         if (0) SetGroupIDLayer::updateEditorOrderLabel();
     }
 
-    // Skip textChanged resetting the value to 0 if the input string is 'Mixed'
     $override
     virtual void textChanged(CCTextInputNode* input) {
-        auto str = std::string(input->getString());
-        if (str.size() && (str[0] == 'm' || str[0] == 'M')) {
+        // Check if the input is enabled
+        if (!input->isTouchEnabled()) {
             return;
         }
         if (input == m_editorLayerInput) {
