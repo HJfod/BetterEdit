@@ -2,6 +2,8 @@
 
 ## v6.8.0-beta.3
  * Add <co>Toggle Scale X/Y Control</c> and <cp>Toggle Warp Control</c> keybinds
+ * <cd>Mixed values</c> now show the range of the values rather than just "Mixed"
+ * Fix <ca>Z order values</c> being falsely set to 0 even though that's not possible
  * Fix <cr>Toggle Scale Control</c> keybind crashing
 
 ## v6.8.0-beta.2
