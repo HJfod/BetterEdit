@@ -167,6 +167,12 @@
 			"name": "Larger Color Menu",
 			"description": "If you're using the <cr>New Color Menu</c>, this makes the color channel buttons a bit larger"
 		},
+		"hide-trigger-ui": {
+			"type": "bool",
+			"default": false,
+			"name": "Hide Trigger Backgrounds",
+			"description": "Hides the <cc>backgrounds</c> on all triggers when using sliders, like with <cl>shader</c> triggers"
+		},
 		"grid-size-controls": {
 			"type": "bool",
 			"default": true,
