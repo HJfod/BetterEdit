@@ -36,6 +36,8 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
     }
 
     void updateUI() {
+        
+        EditButtonBar::loadFromItems(m_buttonArray, m_fields->m_cols, m_fields->m_rows, false);
         if (auto ui = typeinfo_cast<EditorUI*>(getParent())) {
             // fix visible pages when opening editor, can be assumed as 0 as loadFromItems resets the page to 0
             for (auto barPages : CCArrayExt<CCNode*>(m_pagesArray)) {
