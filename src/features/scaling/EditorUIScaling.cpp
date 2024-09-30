@@ -11,6 +11,110 @@
 
 using namespace geode::prelude;
 
+class $modify(BetterEditButtonBar, EditButtonBar) {
+
+    static void onModify(auto& self) {
+        (void)self.setHookPriority("EditButtonBar::loadFromItems", -100);
+    }
+
+    struct Fields {
+        int m_cols = 0;
+        int m_rows = 0;
+    };
+
+    $override
+    void loadFromItems(CCArray* items, int c, int r, bool unkBool) {
+
+        EditButtonBar::loadFromItems(items, c, r, unkBool);
+
+        // do not update if no change is made to prevent lag
+        if (m_fields->m_cols == c && m_fields->m_rows == r) return;
+
+        m_fields->m_cols = c;
+        m_fields->m_rows = r;
+        updateUI();
+    }
+
+    void updateUI() {
+        if (auto ui = typeinfo_cast<EditorUI*>(getParent())) {
+            // fix visible pages when opening editor, can be assumed as 0 as loadFromItems resets the page to 0
+            for (auto barPages : CCArrayExt<CCNode*>(m_pagesArray)) {
+                barPages->setVisible(false);
+            }
+            if (CCNode* firstPage = typeinfo_cast<CCNode*>(m_pagesArray->objectAtIndex(0))){
+                firstPage->setVisible(true);
+            }
+
+            auto winSize = CCDirector::get()->getWinSize();
+
+            setPositionX(winSize.width / 2);
+            m_scrollLayer->setPositionX(-(winSize.width / 2));
+
+            if (auto menu = getChildOfType<CCMenu>(this, 0)) {
+                menu->setVisible(false);
+            
+                // easier to create a new menu than work with the old one
+                CCMenu* navMenu = CCMenu::create();
+
+                navMenu->setPosition({-winSize.width / 2, 0});
+                navMenu->setContentSize(menu->getContentSize());
+                navMenu->setScale(menu->getScale());
+
+                float xOffset = (winSize.width / getScale())/2 - 104;
+                float yOffset = 2;
+
+                CCSprite* prevSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
+                prevSpr->setScale(0.6f);
+                CCSprite* nextSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
+                nextSpr->setFlipX(true);
+                nextSpr->setScale(0.6f);
+
+                CCMenuItemSpriteExtra* prevButton = CCMenuItemSpriteExtra::create(prevSpr, this, menu_selector(EditButtonBar::onLeft));
+                CCMenuItemSpriteExtra* nextButton = CCMenuItemSpriteExtra::create(nextSpr, this, menu_selector(EditButtonBar::onRight));
+
+                prevButton->setPositionX(menu->getContentWidth()/2 - xOffset);
+                prevButton->setPositionY((ui->m_toolbarHeight/2 + yOffset) / getScale());
+                
+                nextButton->setPositionX(menu->getContentWidth()/2 + xOffset);
+                nextButton->setPositionY((ui->m_toolbarHeight/2 + yOffset) / getScale());
+
+                navMenu->addChild(prevButton);
+                navMenu->addChild(nextButton);
+
+                addChild(navMenu);
+            }
+
+            // layout the pages and set their widths and heights according to the row and column counts, scale accordingly
+            for (ButtonPage* page : CCArrayExt<ButtonPage*>(m_scrollLayer->m_pages)) {
+                if (CCMenu* buttonMenu = getChildOfType<CCMenu>(page, 0)) {
+                    RowLayout* layout = RowLayout::create();
+                    layout->setAxisAlignment(AxisAlignment::Start);
+                    layout->setCrossAxisAlignment(AxisAlignment::End);
+                    layout->setAutoScale(true);
+                    layout->setGrowCrossAxis(true);
+                    layout->setCrossAxisOverflow(false);
+                    buttonMenu->setLayout(layout);
+
+                    float width = (m_fields->m_cols * 40 + m_fields->m_cols * layout->getGap()) - layout->getGap();
+                    float height = (m_fields->m_rows * 40 + m_fields->m_rows * layout->getGap()) - layout->getGap();
+
+                    buttonMenu->setContentSize({width, height});
+                    buttonMenu->setAnchorPoint({0.5, 1});
+                    buttonMenu->setPositionY(ui->m_toolbarHeight / getScale() - 5);
+                    buttonMenu->updateLayout();
+
+                    float outerWidth = (winSize.width / getScale()) - 235;
+                    float outerHeight = (ui->m_toolbarHeight / getScale()) - 15;
+                    float scaleW = outerWidth / width;
+                    float scaleH = outerHeight / height;
+
+                    buttonMenu->setScale(std::min(scaleW, scaleH));
+                }
+            }
+        }
+    }
+};
+
 class $modify(ScaledUI, EditorUI) {
     static void onModify(auto& self) {
         (void)self.setHookPriority("EditorUI::init", -100);
@@ -130,7 +234,7 @@ class $modify(ScaledUI, EditorUI) {
             deleteTabs->setScale(scale);
         }
 
-        // The EditButtonBar::loadFromItems hook below makes this work!
+        // The EditButtonBar changes make this work!
         for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {
             if (auto bar = typeinfo_cast<EditButtonBar*>(c)) {
                 bar->setScale(scale);
@@ -144,100 +248,10 @@ class $modify(ScaledUI, EditorUI) {
         // Reload EditButtonBars to recenter
         for (auto c : CCArrayExt<CCNode*>(this->getChildren())) {
             if (auto bar = typeinfo_cast<EditButtonBar*>(c)) {
-                bar->reloadItems(
-                    GameManager::get()->getIntGameVariable("0049"),
-                    GameManager::get()->getIntGameVariable("0050")
-                );
+                static_cast<BetterEditButtonBar*>(bar)->updateUI();
             }
         }
 
         return true;
-    }
-};
-
-class $modify(BetterEditButtonBar, EditButtonBar) {
-
-    $override
-    void loadFromItems(CCArray* items, int c, int r, bool unkBool) {
-
-        EditButtonBar::loadFromItems(items, c, r, unkBool);
-
-        if (auto ui = typeinfo_cast<EditorUI*>(getParent())) {
-
-            // fix visible pages when opening editor, can be assumed as 0 as loadFromItems resets the page to 0
-            for (auto barPages : CCArrayExt<CCNode*>(m_pagesArray)) {
-                barPages->setVisible(false);
-            }
-            if (CCNode* firstPage = typeinfo_cast<CCNode*>(m_pagesArray->objectAtIndex(0))){
-                firstPage->setVisible(true);
-            }
-
-            auto winSize = CCDirector::get()->getWinSize();
-
-            setPositionX(winSize.width / 2);
-            m_scrollLayer->setPositionX(-(winSize.width / 2));
-
-            if (auto menu = getChildOfType<CCMenu>(this, 0)) {
-                menu->setVisible(false);
-            
-                // easier to create a new menu than work with the old one
-                CCMenu* navMenu = CCMenu::create();
-
-                navMenu->setPosition({-winSize.width / 2, 0});
-                navMenu->setContentSize(menu->getContentSize());
-                navMenu->setScale(menu->getScale());
-
-                float xOffset = (winSize.width / getScale())/2 - 104;
-                float yOffset = 2;
-
-                CCSprite* prevSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
-                prevSpr->setScale(0.6f);
-                CCSprite* nextSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
-                nextSpr->setFlipX(true);
-                nextSpr->setScale(0.6f);
-
-                CCMenuItemSpriteExtra* prevButton = CCMenuItemSpriteExtra::create(prevSpr, this, menu_selector(EditButtonBar::onLeft));
-                CCMenuItemSpriteExtra* nextButton = CCMenuItemSpriteExtra::create(nextSpr, this, menu_selector(EditButtonBar::onRight));
-
-                prevButton->setPositionX(menu->getContentWidth()/2 - xOffset);
-                prevButton->setPositionY((ui->m_toolbarHeight/2 + yOffset) / getScale());
-                
-                nextButton->setPositionX(menu->getContentWidth()/2 + xOffset);
-                nextButton->setPositionY((ui->m_toolbarHeight/2 + yOffset) / getScale());
-
-                navMenu->addChild(prevButton);
-                navMenu->addChild(nextButton);
-
-                addChild(navMenu);
-            }
-
-            // layout the pages and set their widths and heights according to the row and column counts, scale accordingly
-            for (ButtonPage* page : CCArrayExt<ButtonPage*>(m_scrollLayer->m_pages)) {
-                if (CCMenu* buttonMenu = getChildOfType<CCMenu>(page, 0)) {
-                    RowLayout* layout = RowLayout::create();
-                    layout->setAxisAlignment(AxisAlignment::Start);
-                    layout->setCrossAxisAlignment(AxisAlignment::End);
-                    layout->setAutoScale(true);
-                    layout->setGrowCrossAxis(true);
-                    layout->setCrossAxisOverflow(false);
-                    buttonMenu->setLayout(layout);
-
-                    float width = (c * 40 + c * layout->getGap()) - layout->getGap();
-                    float height = (r * 40 + r * layout->getGap()) - layout->getGap();
-
-                    buttonMenu->setContentSize({width, height});
-                    buttonMenu->setAnchorPoint({0.5, 1});
-                    buttonMenu->setPositionY(ui->m_toolbarHeight / getScale() - 5);
-                    buttonMenu->updateLayout();
-
-                    float outerWidth = (winSize.width / getScale()) - 235;
-                    float outerHeight = (ui->m_toolbarHeight / getScale()) - 15;
-                    float scaleW = outerWidth / width;
-                    float scaleH = outerHeight / height;
-
-                    buttonMenu->setScale(std::min(scaleW, scaleH));
-                }
-            }
-        }
     }
 };
