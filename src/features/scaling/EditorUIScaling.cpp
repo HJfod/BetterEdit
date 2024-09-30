@@ -158,13 +158,13 @@ class $modify(ScaledUI, EditorUI) {
 class $modify(BetterEditButtonBar, EditButtonBar) {
 
     $override
-    void loadFromItems(CCArray* items, int r, int c, bool unkBool) {
+    void loadFromItems(CCArray* items, int c, int r, bool unkBool) {
 
-        EditButtonBar::loadFromItems(items, r, c, unkBool);
+        EditButtonBar::loadFromItems(items, c, r, unkBool);
 
         if (auto ui = typeinfo_cast<EditorUI*>(getParent())) {
 
-            //fix visible pages when opening editor, can be assumed as 0 as loadFromItems resets the page to 0
+            // fix visible pages when opening editor, can be assumed as 0 as loadFromItems resets the page to 0
             for (auto barPages : CCArrayExt<CCNode*>(m_pagesArray)) {
                 barPages->setVisible(false);
             }
@@ -175,15 +175,12 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
             auto winSize = CCDirector::get()->getWinSize();
 
             setPositionX(winSize.width / 2);
-
-            if (auto scrollLayer = getChildOfType<BoomScrollLayer>(this, 0)) {
-                scrollLayer->setPositionX(-winSize.width / 2 + 5);
-            }
+            m_scrollLayer->setPositionX(-(winSize.width / 2));
 
             if (auto menu = getChildOfType<CCMenu>(this, 0)) {
                 menu->setVisible(false);
             
-                //easier to create a new menu than work with the old one
+                // easier to create a new menu than work with the old one
                 CCMenu* navMenu = CCMenu::create();
 
                 navMenu->setPosition({-winSize.width / 2, 0});
@@ -212,6 +209,34 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
                 navMenu->addChild(nextButton);
 
                 addChild(navMenu);
+            }
+
+            // layout the pages and set their widths and heights according to the row and column counts, scale accordingly
+            for (ButtonPage* page : CCArrayExt<ButtonPage*>(m_scrollLayer->m_pages)) {
+                if (CCMenu* buttonMenu = getChildOfType<CCMenu>(page, 0)) {
+                    RowLayout* layout = RowLayout::create();
+                    layout->setAxisAlignment(AxisAlignment::Start);
+                    layout->setCrossAxisAlignment(AxisAlignment::End);
+                    layout->setAutoScale(true);
+                    layout->setGrowCrossAxis(true);
+                    layout->setCrossAxisOverflow(false);
+                    buttonMenu->setLayout(layout);
+
+                    float width = (c * 40 + c * layout->getGap()) - layout->getGap();
+                    float height = (r * 40 + r * layout->getGap()) - layout->getGap();
+
+                    buttonMenu->setContentSize({width, height});
+                    buttonMenu->setAnchorPoint({0.5, 1});
+                    buttonMenu->setPositionY(ui->m_toolbarHeight / getScale() - 5);
+                    buttonMenu->updateLayout();
+
+                    float outerWidth = (winSize.width / getScale()) - 235;
+                    float outerHeight = (ui->m_toolbarHeight / getScale()) - 15;
+                    float scaleW = outerWidth / width;
+                    float scaleH = outerHeight / height;
+
+                    buttonMenu->setScale(std::min(scaleW, scaleH));
+                }
             }
         }
     }
