@@ -23,12 +23,12 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
     };
 
     $override
-    void loadFromItems(CCArray* items, int c, int r, bool unkBool) {
+    void loadFromItems(CCArray* items, int c, int r, bool customObjects) {
 
-        EditButtonBar::loadFromItems(items, c, r, unkBool);
+        EditButtonBar::loadFromItems(items, c, r, customObjects);
 
         // do not update if no change is made to prevent lag
-        if (m_fields->m_cols == c && m_fields->m_rows == r) return;
+        if (m_fields->m_cols == c && m_fields->m_rows == r && !customObjects) return;
 
         m_fields->m_cols = c;
         m_fields->m_rows = r;
