@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.8.0-beta.4
+ * Fix <cc>View Tab LDM</c> being applied outside the editor
+
 ## v6.8.0-beta.3
  * Add <co>Toggle Scale X/Y Control</c> and <cp>Toggle Warp Control</c> keybinds
  * <cd>Mixed values</c> now show the range of the values rather than just "Mixed"

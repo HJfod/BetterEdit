@@ -1,6 +1,6 @@
 {
-	"geode": "3.7.1",
-	"version": "6.8.0-beta.3",
+	"geode": "3.8.0",
+	"version": "6.8.0-beta.4",
 	"gd": {
 		"win": "2.206",
 		"mac": "2.206",
@@ -202,14 +202,16 @@
 			"type": "bool",
 			"default": false,
 			"name": "Better Warp Selection (WIP)",
-			"enable-if": "saved:has-pro"
+			"enable-if": "saved:has-pro",
+			"enable-if-description": "This Feature is Supporter-Only"
 		},
 		"enable-pro-ui": {
 			"type": "bool",
 			"default": true,
 			"name": "Enable Pro UI",
 			"description": "Give the Editor a <cy>New Look</c>!",
-			"enable-if": "saved:has-pro"
+			"enable-if": "saved:has-pro",
+			"enable-if-description": "This Feature is Supporter-Only"
 		}
 	},
 	"tags": ["editor", "enhancement", "utility", "customization"]
