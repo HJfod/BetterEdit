@@ -1,4 +1,6 @@
 #include <Geode/modify/SetGroupIDLayer.hpp>
+#include <Geode/modify/SetupTriggerPopup.hpp>
+#include <Geode/modify/SetupRotateCommandPopup.hpp>
 #include <Geode/utils/cocos.hpp>
 
 using namespace geode::prelude;
@@ -7,6 +9,7 @@ template <class T>
 struct ValueLimits final {
     T min;
     T max;
+    constexpr ValueLimits() : min(std::numeric_limits<T>::min()), max(std::numeric_limits<T>::max()) {}
     constexpr ValueLimits(T value) : min(value), max(value) {}
     constexpr ValueLimits(T min, T max) : min(min), max(max) {}
     static constexpr ValueLimits zeroToInf() {
@@ -15,336 +18,372 @@ struct ValueLimits final {
 };
 
 template <class T>
-class MixedValuesHandler final {
-protected:
-    std::vector<typename T::GameObjectType*> m_targets;
-    typename T::Type m_mixedSource;
-    CCTextInputNode* m_input;
+struct MixedValuesConfig final {
+    using Type = T;
+    ValueLimits<Type> limits;
+    bool (*isTarget)(GameObject*) = +[](GameObject*) {
+        return true;
+    };
+    Type (*getDefault)(GameObject*);
+    Type (*get)(GameObject*);
+    void (*set)(GameObject*, Type);
+    bool (*shouldSkipZero)(GameObject*) = +[](GameObject*) {
+        return false;
+    };
+};
 
-public:
-    void setup(GameObject* obj, CCArray* objs, CCTextInputNode* input) {
-        m_input = input;
-        m_targets.clear();
+template <class T>
+class MixedValuesInput : public CCMenu {
+protected:
+    MixedValuesConfig<T> m_config;
+    std::vector<GameObject*> m_targets;
+    TextInput* m_input;
+    CCLabelBMFont* m_title = nullptr;
+    CCMenuItemSpriteExtra* m_arrowLeftBtn;
+    CCMenuItemSpriteExtra* m_arrowRightBtn;
+    CCMenuItemSpriteExtra* m_unmixBtn;
+    CCMenuItemSpriteExtra* m_nextFreeBtn = nullptr;
+
+protected:
+    bool init(
+        GameObject* obj, CCArray* objs, MixedValuesConfig<T> const& config,
+        const char* title, const char* arrowSpr, bool showNextFree
+    ) {
+        if (!CCMenu::init())
+            return false;
+        
+        m_config = config;
+
         if (obj) {
-            if constexpr (std::is_same_v<typename T::GameObjectType, GameObject>) {
+            if (m_config.isTarget(obj)) {
                 m_targets.push_back(obj);
-            }
-            else {
-                if (auto o = typeinfo_cast<typename T::GameObjectType*>(obj)) {
-                    m_targets.push_back(o);
-                }
             }
         }
         for (auto o : CCArrayExt<GameObject*>(objs)) {
-            if constexpr (std::is_same_v<typename T::GameObjectType, GameObject>) {
+            if (m_config.isTarget(o)) {
                 m_targets.push_back(o);
             }
-            else {
-                if (auto e = typeinfo_cast<typename T::GameObjectType*>(o)) {
-                    m_targets.push_back(e);
-                }
-            }
         }
-        if (!m_targets.empty()) {
-            m_mixedSource = T::get(m_targets.front());
+        
+        this->ignoreAnchorPointForPosition(false);
+        this->setContentSize(ccp(120, 60));
+        this->setAnchorPoint(ccp(.5f, .5f));
+
+        if (title) {
+            m_title = CCLabelBMFont::create(title, "goldFont.fnt");
+            m_title->setScale(.65f);
+            this->addChildAtPosition(m_title, Anchor::Top, ccp(0, -10));
         }
-        // Disable input until explicitly unmixed via button
-        // This is because A) i'm too lazy to parse "Mix+N" strings and 
-        // B) this makes it clear how to unmix
+
+        m_input = TextInput::create(50, "Num");
+        m_input->setCallback([this](std::string const& text) {
+            this->override(numFromString<T>(text).unwrapOr(0));
+        });
+        m_input->setCommonFilter(CommonFilter::Int);
+        this->addChildAtPosition(m_input, Anchor::Center, ccp(0, -10));
+
+        auto arrowLeftSpr = CCSprite::createWithSpriteFrameName(arrowSpr);
+        arrowLeftSpr->setScale(.7f);
+        m_arrowLeftBtn = CCMenuItemSpriteExtra::create(
+            arrowLeftSpr, this, menu_selector(MixedValuesInput::onArrow)
+        );
+        m_arrowLeftBtn->setTag(-1);
+        m_arrowLeftBtn->setID("arrow-left-button"_spr);
+        this->addChildAtPosition(m_arrowLeftBtn, Anchor::Left, ccp(15, -10));
+
+        auto arrowRightSpr = CCSprite::createWithSpriteFrameName(arrowSpr);
+        arrowRightSpr->setScale(.7f);
+        arrowRightSpr->setFlipX(true);
+        m_arrowRightBtn = CCMenuItemSpriteExtra::create(
+            arrowRightSpr, this, menu_selector(MixedValuesInput::onArrow)
+        );
+        m_arrowRightBtn->setTag(1);
+        m_arrowRightBtn->setID("arrow-right-button"_spr);
+        this->addChildAtPosition(m_arrowRightBtn, Anchor::Right, ccp(-15, -10));
+
+        if (showNextFree) {
+            auto nextFreeSpr = CCSprite::createWithSpriteFrameName("GJ_plus2Btn_001.png");
+            nextFreeSpr->setScale(.8f);
+            m_nextFreeBtn = CCMenuItemSpriteExtra::create(
+                nextFreeSpr, this, menu_selector(MixedValuesInput::onNextFree)
+            );
+            m_nextFreeBtn->setTag(1);
+            m_nextFreeBtn->setID("next-free-button"_spr);
+            this->addChildAtPosition(m_nextFreeBtn, Anchor::TopRight, ccp(-6, -10));
+        }
+        
         auto unmixSpr = ButtonSprite::create("Unmix", "goldFont.fnt", "GJ_button_05.png", .8f);
         unmixSpr->setScale(.3f);
-        auto unmixBtn = CCMenuItemExt::createSpriteExtra(
+        m_unmixBtn = CCMenuItemExt::createSpriteExtra(
             unmixSpr, [this](auto) {
                 auto limits = this->getMinMax();
                 this->override(limits.min + (limits.max - limits.min) / 2);
             }
         );
-        auto menu = CCMenu::create();
-        menu->setID("unmix-menu"_spr);
-        menu->ignoreAnchorPointForPosition(false);
-        menu->setContentSize({ 25, 15 });
-        menu->addChildAtPosition(unmixBtn, Anchor::Center);
-        input->getParent()->addChildAtPosition(menu, Anchor::Bottom, ccp(0, 0), false);
+        m_unmixBtn->setID("unmix-button"_spr);
+        this->addChildAtPosition(m_unmixBtn, Anchor::Bottom, ccp(0, 0));
 
         this->updateLabel();
+
+        return true;
     }
-    bool isMixed() const {
-        if (m_targets.empty()) {
-            return false;
-        }
-        auto value = T::get(m_targets.front());
+
+    void onArrow(CCObject* sender) {
         for (auto obj : m_targets) {
-            if (T::get(obj) != value) {
-                return true;
+            auto val = clamp(
+                m_config.get(obj) + sender->getTag(),
+                m_config.limits.min, m_config.limits.max
+            );
+            if (m_config.shouldSkipZero(obj) && val == 0) {
+                val = sender->getTag() > 0 ? 1 : -1;
             }
-        }
-        return false;
-    }
-    void override(typename T::Type value) const {
-        for (auto obj : m_targets) {
-            T::set(obj, clamp(value, T::LIMITS.min, T::LIMITS.max));
+            m_config.set(obj, val);
         }
         this->updateLabel();
     }
-    void parse(std::string const& value) const {
-        this->override(numFromString<typename T::Type>(value).unwrapOr(0));
-    }
-    void increment(typename T::Type value) const {
+    void onNextFree(CCObject*) {
+        std::set<T> usedLayers;
         for (auto obj : m_targets) {
-            auto val = clamp(T::get(obj) + value, T::LIMITS.min, T::LIMITS.max);
-            if (T::shouldSkipZero(obj) && val == 0) {
-                val = value > 0 ? 1 : -1;
-            }
-            T::set(obj, val);
+            usedLayers.insert(m_config.get(obj));
         }
-        this->updateLabel();
-    }
-    void nextFree() const {
-        std::set<typename T::Type> usedLayers;
-        for (auto obj : m_targets) {
-            usedLayers.insert(T::get(obj));
-        }
-        typename T::Type nextFree;
-        for (nextFree = T::LIMITS.min; nextFree < T::LIMITS.max; nextFree += 1) {
+        T nextFree;
+        for (nextFree = m_config.limits.min; nextFree < m_config.limits.max; nextFree += 1) {
             if (!usedLayers.contains(nextFree)) {
                 break;
             }
         }
         this->override(nextFree);
     }
-    void updateLabel() const {
-        if (m_targets.empty()) return;
-        if (this->isMixed()) {
-            auto limits = this->getMinMax();
-            m_input->setMouseEnabled(false);
-            m_input->setTouchEnabled(false);
-            m_input->detachWithIME();
-            m_input->getParent()->getChildByID("unmix-menu"_spr)->setVisible(true);
-            m_input->setString(fmt::format("{}..{}", limits.min, limits.max));
+
+    bool isMixed() const {
+        if (m_targets.empty()) {
+            return false;
         }
-        else {
-            m_input->setMouseEnabled(true);
-            m_input->setTouchEnabled(true);
-            m_input->getParent()->getChildByID("unmix-menu"_spr)->setVisible(false);
-            m_input->setString(fmt::format("{}", T::get(m_targets.front())));
+        auto value = m_config.get(m_targets.front());
+        for (auto obj : m_targets) {
+            if (m_config.get(obj) != value) {
+                return true;
+            }
         }
+        return false;
     }
-    ValueLimits<typename T::Type> getMinMax() const {
-        auto limits = ValueLimits(T::get(m_targets.front()));
+    void override(T value) {
+        for (auto obj : m_targets) {
+            m_config.set(obj, clamp(value, m_config.limits.min, m_config.limits.max));
+        }
+        this->updateLabel();
+    }
+
+    ValueLimits<T> getMinMax() const {
+        auto limits = ValueLimits(m_config.get(m_targets.front()));
         for (auto target : m_targets) {
-            auto value = T::get(target);
-            if (value < limits.min) {
-                limits.min = value;
-            }
-            if (value > limits.max) {
-                limits.max = value;
-            }
+            auto value = m_config.get(target);
+            limits.min = std::min(value, limits.min);
+            limits.max = std::max(value, limits.max);
         }
         return limits;
     }
-};
 
-struct MixedPropEditorLayer final {
-    using Type = short;
-    using GameObjectType = GameObject;
-    static constexpr Type MIXED_VALUE = -1;
-    static constexpr ValueLimits<Type> LIMITS = ValueLimits<Type>::zeroToInf();
-    static bool shouldSkipZero(GameObjectType*) {
-        return false;
+public:
+    static MixedValuesInput* create(
+        GameObject* obj, CCArray* objs,
+        MixedValuesConfig<T> const& config,
+        const char* title, const char* arrowSpr, bool showNextFree
+    ) {
+        auto ret = new MixedValuesInput();
+        if (ret && ret->init(obj, objs, config, title, arrowSpr, showNextFree)) {
+            ret->autorelease();
+            return ret;
+        }
+        CC_SAFE_DELETE(ret);
+        return nullptr;
     }
-    static Type get(GameObjectType* obj) {
-        return obj->m_editorLayer;
+
+    void replace(CCTextInputNode*& inputMember, CCNode* menu) {
+        if (!menu) return;
+        inputMember = m_input->getInputNode();
+        
+        this->setPosition(menu->getPosition());
+        menu->getParent()->addChild(this);
+
+        this->setID(menu->getID());
+        // Try to match all of the menu's existing stuff to the new menu
+        for (auto child : CCArrayExt<CCNode*>(menu->getChildren())) {
+            // First check using ID to avoid type casting overhead
+            auto id = child->getID();
+            if (string::contains(id, "next-free")) {
+                if (m_nextFreeBtn) m_nextFreeBtn->setID(id);
+                continue;
+            }
+            if (string::contains(id, "prev-button")) {
+                m_arrowLeftBtn->setID(id);
+                continue;
+            }
+            if (string::contains(id, "next-button")) {
+                m_arrowRightBtn->setID(id);
+                continue;
+            }
+            if (string::contains(id, "input")) {
+                m_input->setID(id);
+                continue;
+            }
+            if (string::contains(id, "label")) {
+                if (m_title) m_title->setID(id);
+                continue;
+            }
+        }
+
+        menu->removeFromParent();
     }
-    static void set(GameObjectType* obj, Type value) {
-        obj->m_editorLayer = value;
-    }
-};
-struct MixedPropEditorLayer2 final {
-    using Type = short;
-    using GameObjectType = GameObject;
-    static constexpr Type MIXED_VALUE = -1;
-    static constexpr ValueLimits<Type> LIMITS = ValueLimits<Type>::zeroToInf();
-    static bool shouldSkipZero(GameObjectType*) {
-        return false;
-    }
-    static Type get(GameObjectType* obj) {
-        return obj->m_editorLayer2;
-    }
-    static void set(GameObjectType* obj, Type value) {
-        obj->m_editorLayer2 = value;
-    }
-};
-struct MixedPropZOrder final {
-    using Type = int;
-    using GameObjectType = GameObject;
-    static constexpr Type MIXED_VALUE = -1000;
-    static constexpr ValueLimits<Type> LIMITS = { -999, 999 };
-    static bool shouldSkipZero(GameObjectType* obj) {
-        return obj->m_defaultZOrder != 0;
-    }
-    static Type get(GameObjectType* obj) {
-        return obj->m_zOrder == 0 ? obj->m_defaultZOrder : obj->m_zOrder;
-    }
-    static void set(GameObjectType* obj, Type value) {
-        obj->m_zOrder = value;
-    }
-};
-struct MixedPropOrder final {
-    using Type = int;
-    using GameObjectType = EffectGameObject;
-    static constexpr Type MIXED_VALUE = -1;
-    static constexpr ValueLimits<Type> LIMITS = ValueLimits<Type>::zeroToInf();
-    static bool shouldSkipZero(GameObjectType*) {
-        return false;
-    }
-    static Type get(GameObjectType* obj) {
-        return obj->m_ordValue;
-    }
-    static void set(GameObjectType* obj, Type value) {
-        obj->m_ordValue = value;
-    }
-};
-struct MixedPropChannel final {
-    using Type = int;
-    using GameObjectType = EffectGameObject;
-    static constexpr Type MIXED_VALUE = -1;
-    static constexpr ValueLimits<Type> LIMITS = ValueLimits<Type>::zeroToInf();
-    static bool shouldSkipZero(GameObjectType*) {
-        return false;
-    }
-    static Type get(GameObjectType* obj) {
-        return obj->m_channelValue;
-    }
-    static void set(GameObjectType* obj, Type value) {
-        obj->m_channelValue = value;
+
+    void updateLabel() {
+        if (m_targets.empty()) return;
+        if (this->isMixed()) {
+            auto minmax = this->getMinMax();
+            m_input->setEnabled(false);
+            m_input->getInputNode()->m_placeholderLabel->setOpacity(255);
+            m_input->defocus();
+            m_unmixBtn->setVisible(true);
+            m_input->setString(fmt::format("{}..{}", minmax.min, minmax.max));
+        }
+        else {
+            m_input->setEnabled(true);
+            m_unmixBtn->setVisible(false);
+            m_input->setString(fmt::format("{}", m_config.get(m_targets.front())));
+        }
     }
 };
 
 class $modify(SetGroupIDLayer) {
-    struct Fields {
-        MixedValuesHandler<MixedPropEditorLayer> editorLayerHandler;
-        MixedValuesHandler<MixedPropEditorLayer2> editorLayer2Handler;
-        MixedValuesHandler<MixedPropZOrder> zOrderHandler;
-        MixedValuesHandler<MixedPropOrder> channelOrderHandler;
-        MixedValuesHandler<MixedPropChannel> channelHandler;
-    };
-
     $override
     bool init(GameObject* obj, CCArray* objs) {
         if (!SetGroupIDLayer::init(obj, objs))
             return false;
         
-        m_fields->editorLayerHandler.setup(obj, objs, m_editorLayerInput);
-        m_fields->editorLayer2Handler.setup(obj, objs, m_editorLayer2Input);
-        m_fields->zOrderHandler.setup(obj, objs, m_zOrderInput);
-        if (m_orderInput) m_fields->channelOrderHandler.setup(obj, objs, m_orderInput);
-        if (m_channelInput) m_fields->channelHandler.setup(obj, objs, m_channelInput);
+        MixedValuesInput<short>::create(
+            obj, objs, MixedValuesConfig<short> {
+                .limits = ValueLimits<short>::zeroToInf(),
+                .getDefault = +[](GameObject*) {
+                    return short(0);
+                },
+                .get = +[](GameObject* obj) {
+                    return obj->m_editorLayer;
+                },
+                .set = +[](GameObject* obj, short value) {
+                    obj->m_editorLayer = value;
+                },
+            },
+            "Editor L", "GJ_arrow_02_001.png", true
+        )->replace(m_editorLayerInput, m_mainLayer->querySelector("editor-layer-menu"));
+        
+        MixedValuesInput<short>::create(
+            obj, objs, MixedValuesConfig<short> {
+                .limits = ValueLimits<short>::zeroToInf(),
+                .getDefault = +[](GameObject*) {
+                    return short(0);
+                },
+                .get = +[](GameObject* obj) {
+                    return obj->m_editorLayer2;
+                },
+                .set = +[](GameObject* obj, short value) {
+                    obj->m_editorLayer2 = value;
+                },
+            },
+            "Editor L2", "GJ_arrow_03_001.png", true
+        )->replace(m_editorLayer2Input, m_mainLayer->querySelector("editor-layer-2-menu"));
+        
+        MixedValuesInput<int>::create(
+            obj, objs, MixedValuesConfig<int> {
+                .limits = ValueLimits<int>(-999, 999),
+                .getDefault = +[](GameObject* obj) {
+                    return obj->m_defaultZOrder;
+                },
+                .get = +[](GameObject* obj) {
+                    return obj->m_zOrder == 0 ? obj->m_defaultZOrder : obj->m_zOrder;
+                },
+                .set = +[](GameObject* obj, int value) {
+                    obj->m_zOrder = value;
+                },
+                .shouldSkipZero = +[](GameObject* obj) {
+                    return obj->m_defaultZOrder != 0;
+                },
+            },
+            "Z Order", "GJ_arrow_02_001.png", false
+        )->replace(m_zOrderInput, m_mainLayer->querySelector("z-order-menu"));
+
+        if (m_orderInput) {
+            MixedValuesInput<int>::create(
+                obj, objs, MixedValuesConfig<int> {
+                    .limits = ValueLimits<int>::zeroToInf(),
+                    .isTarget = +[](GameObject* obj) {
+                        return typeinfo_cast<EffectGameObject*>(obj) != nullptr;
+                    },
+                    .getDefault = +[](GameObject*) {
+                        return 0;
+                    },
+                    .get = +[](GameObject* obj) {
+                        return static_cast<EffectGameObject*>(obj)->m_ordValue;
+                    },
+                    .set = +[](GameObject* obj, int value) {
+                        static_cast<EffectGameObject*>(obj)->m_ordValue = value;
+                    }
+                },
+                nullptr, "GJ_arrow_02_001.png", false
+            )->replace(m_orderInput, m_mainLayer->querySelector("channel-order-menu"));
+        }
+        if (m_channelInput) {
+            MixedValuesInput<int>::create(
+                obj, objs, MixedValuesConfig<int> {
+                    .limits = ValueLimits<int>::zeroToInf(),
+                    .isTarget = +[](GameObject* obj) {
+                        return typeinfo_cast<EffectGameObject*>(obj) != nullptr;
+                    },
+                    .getDefault = +[](GameObject*) {
+                        return 0;
+                    },
+                    .get = +[](GameObject* obj) {
+                        return static_cast<EffectGameObject*>(obj)->m_channelValue;
+                    },
+                    .set = +[](GameObject* obj, int value) {
+                        static_cast<EffectGameObject*>(obj)->m_channelValue = value;
+                    }
+                },
+                nullptr, "GJ_arrow_02_001.png", false
+            )->replace(m_channelInput, m_mainLayer->querySelector("channel-menu"));
+        }
 
         return true;
     }
-
-    $override
-    void onArrow(int tag, int increment) {
-        if (tag == m_editorLayerInput->getTag()) {
-            m_fields->editorLayerHandler.increment(increment);
-        }
-        else if (tag == m_editorLayer2Input->getTag()) {
-            m_fields->editorLayer2Handler.increment(increment);
-        }
-        else if (tag == m_zOrderInput->getTag()) {
-            m_fields->zOrderHandler.increment(increment);
-        }
-        else if (m_orderInput && tag == m_orderInput->getTag()) {
-            m_fields->channelOrderHandler.increment(increment);
-        }
-        else if (m_channelInput && tag == m_channelInput->getTag()) {
-            m_fields->channelHandler.increment(increment);
-        }
-        else {
-            SetGroupIDLayer::onArrow(tag, increment);
-        }
-    }
-
-    $override
-    void onNextFreeEditorLayer1(CCObject* sender) {
-        if (0) SetGroupIDLayer::onNextFreeEditorLayer1(sender);
-        m_fields->editorLayerHandler.nextFree();
-    }
-    $override
-    void onNextFreeEditorLayer2(CCObject* sender) {
-        if (0) SetGroupIDLayer::onNextFreeEditorLayer2(sender);
-        m_fields->editorLayerHandler.nextFree();
-    }
-    $override
-    void onNextFreeOrderChannel(CCObject* sender) {
-        if (0) SetGroupIDLayer::onNextFreeOrderChannel(sender);
-        m_fields->channelOrderHandler.nextFree();
-    }
-
-    $override
-    void updateEditorLayerID() {
-        if (0) SetGroupIDLayer::updateEditorLayerID();
-    }
-    $override
-    void updateEditorLabel() {
-        if (0) SetGroupIDLayer::updateEditorLabel();
-    }
-    $override
-    void updateEditorLayerID2() {
-        if (0) SetGroupIDLayer::updateEditorLayerID2();
-    }
-    $override
-    void updateEditorLabel2() {
-        if (0) SetGroupIDLayer::updateEditorLabel2();
-    }
-    $override
-    void updateZOrder() {
-        if (0) SetGroupIDLayer::updateZOrder();
-    }
-    $override
-    void updateZOrderLabel() {
-        if (0) SetGroupIDLayer::updateZOrderLabel();
-    }
-    $override
-    void updateOrderChannel() {
-        if (0) SetGroupIDLayer::updateOrderChannel();
-    }
-    $override
-    void updateOrderChannelLabel() {
-        if (0) SetGroupIDLayer::updateOrderChannelLabel();
-    }
-    $override
-    void updateEditorOrder() {
-        if (0) SetGroupIDLayer::updateEditorOrder();
-    }
-    $override
-    void updateEditorOrderLabel() {
-        if (0) SetGroupIDLayer::updateEditorOrderLabel();
-    }
-
-    $override
-    virtual void textChanged(CCTextInputNode* input) {
-        // Check if the input is enabled
-        if (!input->isTouchEnabled()) {
-            return;
-        }
-        if (input == m_editorLayerInput) {
-            m_fields->editorLayerHandler.parse(input->getString());
-        }
-        else if (input == m_editorLayer2Input) {
-            m_fields->editorLayer2Handler.parse(input->getString());
-        }
-        else if (input == m_zOrderInput) {
-            m_fields->zOrderHandler.parse(input->getString());
-        }
-        else if (input == m_orderInput) {
-            m_fields->channelOrderHandler.parse(input->getString());
-        }
-        else if (input == m_channelInput) {
-            m_fields->channelHandler.parse(input->getString());
-        }
-        else {
-            SetGroupIDLayer::textChanged(input);
-        }
-    }
 };
+
+// class $modify(SetupTriggerPopup) {
+//     $override
+//     void createValueControlAdvanced(
+//         int property, gd::string title, CCPoint position, float scale,
+//         bool disableSlider, InputValueType type, int charCountLimit, bool enableArrows,
+//         float minValue, float maxValue,
+//         int page, int group,
+//         GJInputStyle style,
+//         int precision, bool enableTrashCan
+//     ) {
+//         // SetupTriggerPopup::createValueControlAdvanced(
+//         //     property, title, position, scale, disableSlider, type, charCountLimit, enableArrows,
+//         //     minValue, maxValue, page, group, style, precision, enableTrashCan
+//         // );
+//     }
+// };
+
+// class $modify(SetupRotateCommandPopup) {
+//     $override
+//     bool init(EffectGameObject* obj, CCArray* objs) {
+//         if (!SetupRotateCommandPopup::init(obj, objs))
+//             return false;
+        
+//         auto test = CCLabelBMFont::create("balls", "bigFont.fnt");
+//         m_mainLayer->addChildAtPosition(test, Anchor::Center, ccp(0, 0), false);
+
+//         this->getGroupContainer(0x2329)->addObject(test);
+
+//         return true;
+//     }
+// };
