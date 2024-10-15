@@ -49,7 +49,11 @@ class $modify(GameObjectExtra, GameObject) {
         GameObject::setVisible(visible);
     }
     bool shouldHide() const {
-        return m_isHighDetail && Mod::get()->template getSavedValue<bool>("hide-ldm", false);
+        return
+            m_isHighDetail &&
+            // Only in the editor
+            EditorUI::get() && 
+            Mod::get()->template getSavedValue<bool>("hide-ldm", false);
     }
 };
 
