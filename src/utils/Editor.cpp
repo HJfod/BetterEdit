@@ -215,7 +215,7 @@ class $modify(HideUI, EditorUI) {
         m_currentLayerLabel->setVisible(show);
 
         auto lockBtn = static_cast<CCMenuItemSpriteExtra*>(
-            this->getChildByID("layer-menu")->getChildByID("lock-layer"_spr)
+            this->querySelector("layer-menu hjfod.betteredit/lock-layer")
         );
         if (lockBtn) {
             lockBtn->setVisible(show);
