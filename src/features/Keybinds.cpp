@@ -216,14 +216,6 @@ $execute {
         Category::EDITOR_UI,
         false
     ));
-    BindManager::get()->registerBindable(BindableAction(
-        "show-warp"_spr,
-        "Toggle Warp Control",
-        "Toggle the object warping controls",
-        {},
-        Category::EDITOR_UI,
-        false
-    ));
 
     BindManager::get()->registerBindable(BindableAction(
         "save-level"_spr,
