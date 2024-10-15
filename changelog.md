@@ -1,6 +1,8 @@
 # BetterEdit 6
 
 ## v6.8.0-beta.4
+ * Add option for <cy>Hide Trigger Popup BG when Modifying Slider</c> to all triggers (huge thank you to <cp>TheSillyDoggo</c>!)
+ * Make the build tabs responsive to screen size (huge thank you to <cg>Alphalaneous</c>!)
  * Fix <cc>View Tab LDM</c> being applied outside the editor
 
 ## v6.8.0-beta.3
@@ -92,7 +94,6 @@
  * Fix various visual glitches & bugs
 
 ## v6.4.0
-
  * Backups system
  * View tab
  * Better organized edit tab
@@ -100,44 +101,36 @@
  * 1/4 and 1/8 moving is now relative to the current grid size
 
 ## v6.3.5
-
  * Add a border around the logo to have it fit with the Geode UI
 
 ## v6.3.4
-
  * <cr>Remove the "Crash Recovery" option</c> as it has not yet been implemented and was included accidentally
  * Fix <cp>Next Free Group ID Offset</c> crashing
  * Switch to the new BetterEdit logo
 
 ## v6.3.3
-
  * Make layer lock button fully hidden on All layer
  * Fix the new color selector causing crashes and being buggy
  * Fix Next Free Offset not being remembered
  * Fix grid size controls not being hidden on playtest
 
 ## v6.3.2
-
  * Disable grid size controls on 32-bit Android as the most likely source of a crash
 
 ## v6.3.1
-
  * Fix crash when placing objects, as well as grid size not working
 
 ## v6.3.0
-
  * Add Next Free Offset for Group IDs
  * Add Grid Size controls
  * Fix being able to click on the layer number to lock it
  * Fix crash when selecting colors using the new color selector
 
 ## v6.2.1
-
  * Fix crash on mobile when typing in layer number
  * Fix crash when re-entering editor
 
 ## v6.2.0
-
  * Bring back quarter & eighth block move keybinds as the root issue was fixed in Geode Beta 18
  * Add automatic update checking on startup
  * Add ability to copy Player Color channels in Copy Color (by [Alphalaneous](https://github.com/Alphalaneous))
@@ -145,11 +138,9 @@
  * Other small bug fixes & improvements
 
 ## v6.1.1
-
  * Temporarily remove quarter & eighth block move keybinds as Geode is bugged and adding them caused moving objects to not work at all :/
 
 ## v6.1.0
-
  * Add in-game changelog popup
  * Add quarter & eighth block move keybinds
  * Fix crash when using the `Show Scale Control` keybind
@@ -159,7 +150,6 @@
  * Other small bug fixes & improvements
 
 ## v6.0.0
-
  * Add better color selection menu
  * Add better font selection menu
  * Add shift to scroll horizontally with the scroll wheel + control to zoom towards mouse
@@ -172,27 +162,23 @@
 > **Note: The changelog from here is for BetterEdit v5, which was only for Geode in Update 2.1 and is no longer available. The mod has since been rewritten from the ground up, and as such features mentioned in its changelogs may or may not exist in the latest version. v5 was also never officially released; only alpha versions were ever put out.**
 
 ## v5.0.0-alpha.8
-
  * Add Global Clipboard
  * Add Clear Clipboard
  * Add Use time instead of Percentage 
  * Fix trackpad horizontal scrolling on Mac
 
 ## v5.0.0-alpha.7
-
  * Add customizable keybinds support through Custom Keybinds dependency
  * Add hover tooltips to Swipe mode buttons if the MouseAPI mod is installed
  * Add some default keybinds like Rotate 45 degrees
  * Add info button for start pos tab
 
 ## v5.0.0-alpha.6
-
  * Add Playtest Replay
  * Add logo
  * Now on MacOS
 
 ## v5.0.0-alpha.5
-
  * Fix select filters not working with new Swipe mechanics
  * Fix some black objects being incorrectly colored with the new Swipe mechanics
  * Fix a crash when using Paste State on multiple objects
@@ -206,7 +192,6 @@
  * Tracking hooks now have lower priority, lowering the chance of conflicts with other editor mods
 
 ## v5.0.0-alpha.4
-
  * Fix performance issue while moving around in the editor
  * Fix crash when exiting editor
  * Fix script popup list not being aligned to the top
@@ -215,7 +200,6 @@
  * Other small performance improvements and fixes
 
 ## v5.0.0-alpha.3
-
  * Add level percentage in editor
  * Full undo history that allows undoing anything
  * Better selection stuff
@@ -228,16 +212,13 @@
  * Update to Geode v1.0.0-beta
 
 ## v5.0.0-alpha.2
-
  * Add special start pos selector popup (will be cleaned up later)
  * Update for Geode version to v0.4.4
 
 ## v5.0.0-alpha.1
-
  * Start pos switcher in the editor
 
 ## v5.0.0-alpha.0
-
  * Zoom with ctrl + mouse wheel, move horizontally with shift + mouse wheel
  * Current zoom level is displayed as text
 
@@ -247,7 +228,6 @@
 > Old BetterEdit versions also did not follow a consistent versioning scheme; the versioning here reports what the actual version would've been according to the current scheme, and the (now incorrect) name the version was released under
 
 ## v4.3.0 Lite (v4.0.5-min)
-
  * Remove portal line colors + portal line hiding due to the feature requiring a midhook (potential source of instability / lag)
  * Remove the color picker tool due to the feature requiring a CCScheduler::update hook (potential source of lag)
  * Remove keybind repeating due to the feature requiring a CCScheduler::update hook
@@ -258,7 +238,6 @@
  * Remove Soft Saving due to the feature being unfinished and laggy
 
 ## v4.3.0 (v4.0.5)
-
  * Backup everything button that exports all of your levels as .gmd2 files
  * Opening a level with a controller plugged in no longer crashes
  * Fix crashing when holding keys with repeating enabled
@@ -272,7 +251,6 @@
  * Removed the "Move Camera on Object Move" option due to no one liking it. It having 0 bitches, if you will.
 
 ## v4.2.0 (v4.0.4)
-
  * Assign mouse buttons to keybinds
  * Redesigned move buttons menu
  * View dash orb lines in Visibility tab
@@ -289,7 +267,6 @@
  * Probably other bugfixes that I never documented and have forgotten
 
 ## v4.1.2 (v4.0.3)
-
  * Keymap now has the option to view QWERTZ layout
  * Fix the keybind layer crashing sometimes
  * Fix Create Guidelines From BPM crashing
@@ -304,11 +281,9 @@
  * Remove an unnecessary midhook that was showing errors when BetterEdit was loaded
 
 ## v4.1.1 (v4.0.2)
-
  * You can now add a keybind to move object right half & move object up/down quarter
 
 ## v4.1.0 (v4.0.1)
-
  * Fully customizable keybinds!
  * Tons of new keybinds for things such as Build Helper, Preview Mode, Move by ½ a block etc.
  * Keybind indicators (hover a button to show its associated keybind, if it has one)
@@ -323,7 +298,6 @@
  * Fix some settings not saving
 
 ## v4.0.0
-
  * Add Layer Tools (Locking, Naming, Opacity)
  * Add Copy + Paste Repeat
  * Add Hide / Show UI button
@@ -362,7 +336,6 @@
  * Various minor bugfixes
 
 ## v3.4.0 (v0.34)
-
  * You can set a start ID for the Next Free button in Groups & Colors
  * You can now toggle off UI elements like percentage, position, zoom text
  * Updated Paste State UI
@@ -371,7 +344,6 @@
  * Various other minor bugfixes
 
 ## v3.3.0 (v0.33)
-
  * Add Editor Percentage
  * View the position you're at in the Editor
  * You can now disable the UI moving toward the cursor when scroll-zooming
@@ -383,7 +355,6 @@
  * Other minor bugfixes
 
 ## v3.2.0 (v0.32)
-
  * Automatically create Color Triggers for each color channel (By HJfod & Mat)
  * Zoom in/out by holding Control and scrolling with the mouse (Courtesy of Mat ) & Shift + Scroll to scroll sideways
  * Add Extra Object Info
@@ -392,13 +363,11 @@
  * Scaling objects of different scales in the editor no longer fuck up the positions
 
 ## v3.1.0 (v0.31)
-
  * Add Global Clipboard
  * Allow reordering favorite objects
  * Settings are now actually saved
 
 ## v3.0.0 (v0.3)
-
  * Add Level presets
  * Add Advanced Filter
  * Add Favorite objects
@@ -409,23 +378,18 @@
  * Fix editor freeze glitch (by cos8o)
 
 ## v2.0.1 (v0.21)
-
  * Fix a bug where the layer input doesn't hide / show properly when playtesting
 
 ## v2.0.0 (v0.2)
-
  * Add Advanced Scaling
  * Fix bugs with Go To Layer
 
 ## v1.1.1 (v0.12)
- 
  * Fix a bug where selecting multiple objects would set their Z Order to -1000
 
 ## v1.1.0 (v0.11)
-
  * Add HSV input
  * Add main screen Editor Layer input
 
 ## v1.0.0 (v0.1)
-
  * Add Editor Layer and Z Order inputs
