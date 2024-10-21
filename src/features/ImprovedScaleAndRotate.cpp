@@ -38,7 +38,7 @@ protected:
     }
 
     void updateSprite() {
-        m_sprite->setString(numToString(m_snaps[m_ix]).c_str());
+        m_sprite->setString(numToString(m_snaps[m_ix], 2).c_str());
         m_sprite->m_label->setScale(.7f);
 		auto size = m_sprite->getScaledContentSize();
 		m_sprite->setPosition(size / 2);
@@ -225,9 +225,9 @@ class $modify(SnappableScaleControl, GJScaleControl) {
         static std::array SNAPS { 1.f / 3, .25f, .2f, 1.f / 6, .1f };
         auto snapSizeBtn = ToggleSnapButton::create(
             SNAPS, [snapLinesX, snapLinesY, snapLinesXY](float snap) {
-                snapLinesX->updateSnapSize(snap);
-                snapLinesY->updateSnapSize(snap);
-                snapLinesXY->updateSnapSize(snap);
+                snapLinesX->updateSnapSize(size_t(1.f / snap));
+                snapLinesY->updateSnapSize(size_t(1.f / snap));
+                snapLinesXY->updateSnapSize(size_t(1.f / snap));
             }
         );
         snapSizeBtn->setEnabled(false);
