@@ -2,6 +2,7 @@
 
 ## v6.8.0-beta.4
  * Add option for <cy>Hide Trigger Popup BG when Modifying Slider</c> to all triggers (huge thank you to <cp>TheSillyDoggo</c>!)
+ * Add option for changing the snap size on the Scale and Rotate Controls
  * Make the build tabs responsive to screen size (huge thank you to <cg>Alphalaneous</c>!)
  * Fix <cc>View Tab LDM</c> being applied outside the editor
 

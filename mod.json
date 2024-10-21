@@ -69,11 +69,11 @@
 			],
 			"ViewTabSheet": [
 				"resources/view/*.png"
-			],
-			"SupportSheet": [
-				"resources/images/support-shard-*.png"
 			]
-		}
+		},
+		"sprites": [
+			"resources/images/*.png"
+		]
 	},
 	"settings": {
 		"auto-save-rate": {
