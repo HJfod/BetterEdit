@@ -208,16 +208,17 @@
 			"type": "bool",
 			"default": false,
 			"name": "Better Warp Selection (WIP)",
-			"enable-if": "saved:has-pro",
-			"enable-if-description": "This Feature is Supporter-Only"
+			"description": "<cr>THIS FEATURE IS HEAVILY WIP</c>",
+			"enable-if": "saved:has-pro && dev-mode",
+			"enable-if-description": "This Feature is Supporter-Only & Heavily WIP!"
 		},
 		"enable-pro-ui": {
 			"type": "bool",
-			"default": true,
+			"default": false,
 			"name": "Enable Pro UI",
-			"description": "Give the Editor a <cy>New Look</c>!",
-			"enable-if": "saved:has-pro",
-			"enable-if-description": "This Feature is Supporter-Only"
+			"description": "Give the Editor a <cy>New Look</c>! <cr>THIS FEATURE IS HEAVILY WIP</c>",
+			"enable-if": "saved:has-pro && dev-mode",
+			"enable-if-description": "This Feature is Supporter-Only & Heavily WIP!"
 		}
 	},
 	"tags": ["editor", "enhancement", "utility", "customization"]
