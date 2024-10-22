@@ -62,7 +62,7 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
                 navMenu->setContentSize(menu->getContentSize());
                 navMenu->setScale(menu->getScale());
 
-                float xOffset = (winSize.width / getScale())/2 - 104;
+                float xOffset = (winSize.width / getScale())/2 - 108;
 
                 CCSprite* prevSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
                 prevSpr->setScale(0.6f);
@@ -104,7 +104,7 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
                     buttonMenu->setPositionY(ui->m_toolbarHeight / getScale() - 7);
                     buttonMenu->updateLayout();
 
-                    float outerWidth = (winSize.width / getScale()) - 235;
+                    float outerWidth = (winSize.width / getScale()) - 240;
                     float outerHeight = (ui->m_toolbarHeight / getScale()) - 15;
                     float scaleW = outerWidth / width;
                     float scaleH = outerHeight / height;
