@@ -62,8 +62,7 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
                 navMenu->setContentSize(menu->getContentSize());
                 navMenu->setScale(menu->getScale());
 
-                float xOffset = (winSize.width / getScale())/2 - 104;
-                float yOffset = 2;
+                float xOffset = (winSize.width / getScale())/2 - 108;
 
                 CCSprite* prevSpr = CCSprite::createWithSpriteFrameName("GJ_arrow_02_001.png");
                 prevSpr->setScale(0.6f);
@@ -75,10 +74,10 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
                 CCMenuItemSpriteExtra* nextButton = CCMenuItemSpriteExtra::create(nextSpr, this, menu_selector(EditButtonBar::onRight));
 
                 prevButton->setPositionX(menu->getContentWidth()/2 - xOffset);
-                prevButton->setPositionY((ui->m_toolbarHeight/2 + yOffset) / getScale());
+                prevButton->setPositionY((ui->m_toolbarHeight/2) / getScale());
                 
                 nextButton->setPositionX(menu->getContentWidth()/2 + xOffset);
-                nextButton->setPositionY((ui->m_toolbarHeight/2 + yOffset) / getScale());
+                nextButton->setPositionY((ui->m_toolbarHeight/2) / getScale());
 
                 navMenu->addChild(prevButton);
                 navMenu->addChild(nextButton);
@@ -102,10 +101,10 @@ class $modify(BetterEditButtonBar, EditButtonBar) {
 
                     buttonMenu->setContentSize({width, height});
                     buttonMenu->setAnchorPoint({0.5, 1});
-                    buttonMenu->setPositionY(ui->m_toolbarHeight / getScale() - 5);
+                    buttonMenu->setPositionY(ui->m_toolbarHeight / getScale() - 7);
                     buttonMenu->updateLayout();
 
-                    float outerWidth = (winSize.width / getScale()) - 235;
+                    float outerWidth = (winSize.width / getScale()) - 240;
                     float outerHeight = (ui->m_toolbarHeight / getScale()) - 15;
                     float scaleW = outerWidth / width;
                     float scaleH = outerHeight / height;
