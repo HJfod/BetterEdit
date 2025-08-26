@@ -115,6 +115,14 @@
 			"platforms": ["desktop"],
 			"enable-if": "enable-fixed-mouse-controls"
 		},
+		"mouse-scroll-sensitivity": {
+			"type": "float",
+			"default": 32.0,
+			"name": "Mouse Scroll Sensitivity",
+			"description": "Controls the sensitivity of the mouse scroll input.",
+			"platforms": ["win"],
+			"enable-if": "enable-fixed-mouse-controls"
+		},
 		"pinch-to-zoom": {
 			"type": "bool",
 			"default": true,
