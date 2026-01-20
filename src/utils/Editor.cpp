@@ -21,7 +21,7 @@ class $modify(SuperExtraEvenMoreForcePrioUI, EditorUI) {
     $override
     bool ccTouchBegan(CCTouch* touch, CCEvent* event) {
         for (auto input : m_fields->forceTouchPrio) {
-            if (input->isVisible() && CCRect(
+            if (nodeIsVisible(input) && CCRect(
                 input->getPosition() - input->getScaledContentSize() / 2,
                 input->getScaledContentSize()
             ).containsPoint(input->getParent()->convertTouchToNodeSpace(touch))) {
