@@ -2,10 +2,10 @@
 	"geode": "4.6.2",
 	"version": "6.10.0-beta.1",
 	"gd": {
-		"win": "2.2074",
-		"mac": "2.2074",
-		"android": "2.2074",
-		"ios": "2.2074"
+		"win": "2.2081",
+		"mac": "2.2081",
+		"android": "2.2081",
+		"ios": "2.2081"
 	},
 	"id": "hjfod.betteredit",
 	"name": "BetterEdit",
