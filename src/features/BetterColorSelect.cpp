@@ -51,7 +51,9 @@ static std::string longTextForColorIdx(int channel) {
     }
 }
 
+static int CURRENT_PAGE = 0;
 static std::array<int, 15> RECENT_COLOR_IDS {};
+
 static constexpr std::array SPECIAL_CHANNEL_ORDER_SMALL {
     0,    1005, 1006, 
     1000, 1001, 1013, 
@@ -87,7 +89,6 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
         // This makes sure that the first call to goToPage always actually 
         // generates the page content
         NewColorSelect* m_layer = nullptr;
-        int page = 0;
         bool modified = false;
         bool initDone = false;
         ~Fields() {
@@ -422,7 +423,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
             // some GD code may cause this to be called before IDs have been added
             return;
         }
-        m_fields->page = page;
+        CURRENT_PAGE = page;
         channelsMenu->removeAllChildren();
 
         for (int channel = 1; channel <= channelsPerPage; channel++) {
@@ -443,7 +444,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
     BE_ALLOW_END
 
     void onPage(CCObject* sender) {
-        this->gotoPage(m_fields->page + sender->getTag());
+        this->gotoPage(CURRENT_PAGE + sender->getTag());
     }
 
     $override
@@ -664,7 +665,7 @@ class $modify(NewColorSelect, CustomizeObjectLayer) {
 
         m_fields->initDone = true;
 
-        this->gotoPage(0);
+        this->gotoPage(CURRENT_PAGE);
         this->updateCustomColorLabels();
 
         return true;
