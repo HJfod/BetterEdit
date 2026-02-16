@@ -7,9 +7,12 @@
 
 using namespace geode::prelude;
 
-class MySupportPopup : public PopupWithCorners<> {
+class MySupportPopup : public PopupWithCorners {
 protected:
-    EventListener<pro::server::ServerRequest<pro::server::MySupport>> m_mySupportListener;
+    async::TaskHolder<Result<pro::server::MySupport>> m_mySupportListener;
+    async::TaskHolder<Result<std::monostate>> m_updateSupportListener;
+    async::TaskHolder<Result<pro::server::UpdatedDeviceInfo>> m_updateDeviceListener;
+    async::TaskHolder<void> m_reloadListener;
     CCNode* m_playerInfo;
     SimplePlayer* m_playerIcon;
     CCLabelBMFont* m_playerName;
@@ -22,10 +25,10 @@ protected:
     LoadingSpinner* m_devicesLoading;
     CCLabelBMFont* m_errorLabel;
 
-    bool setup() override;
+    bool init() override;
 
     void reloadData();
-    void onLoadData(pro::server::ServerRequest<pro::server::MySupport>::Event* event);
+    void onLoadData(Result<pro::server::MySupport> result);
 
     void onReload(CCObject*);
     void onShowMe(CCObject* sender);

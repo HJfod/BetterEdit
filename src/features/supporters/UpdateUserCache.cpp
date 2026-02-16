@@ -17,18 +17,21 @@ class $modify(MenuLayer) {
         }
 
         // This is a stupid place to put this but oh well
-        server::clearCaches();
+        async::spawn(server::clearCaches());
 
         static bool CHECKED_TOKEN = false;
         if (!CHECKED_TOKEN) {
             CHECKED_TOKEN = true;
             if (auto token = pro::getProKey()) {
-                server::checkLicense(*token).listen([token = *token](Result<std::string>* result) {
-                    if (*result && **result != token.substr(token.find_last_of(':') + 1)) {
-                        // Override key if the token has been banned
-                        (void)saveProKey("");
+                async::spawn(
+                    server::checkLicense(*token),
+                    [token = *token](Result<std::string> result) {
+                        if (result.isOk() && result.unwrap() != token.substr(token.find_last_of(':') + 1)) {
+                            // Override key if the token has been banned
+                            (void)saveProKey("");
+                        }
                     }
-                });
+                );
             }
         }
 
@@ -48,18 +51,21 @@ class $modify(MenuLayer) {
         if (auto token = getProKey()) {
             auto gjam = GJAccountManager::get();
             auto gm = GameManager::get();
-            server::updateCachedInfo(*token, CachedGDInfo {
-                .gdAccountID = gjam->m_accountID,
-                .username = gjam->m_username,
-                .cubeID = gm->m_playerFrame,
-                .playerColor1 = gm->m_playerColor,
-                .playerColor2 = gm->m_playerColor2,
-                .glowColor = gm->m_playerGlow ? std::optional(gm->m_playerGlowColor.value()) : std::nullopt, 
-            }).listen([](Result<std::monostate>* result) {
-                if (result->isErr()) {
-                    log::info("Unable to update GD account info cache: {}", result->unwrapErr());
+            async::spawn(
+                server::updateCachedInfo(*token, CachedGDInfo {
+                    .gdAccountID = gjam->m_accountID,
+                    .username = gjam->m_username,
+                    .cubeID = gm->m_playerFrame,
+                    .playerColor1 = gm->m_playerColor,
+                    .playerColor2 = gm->m_playerColor2,
+                    .glowColor = gm->m_playerGlow ? std::optional(gm->m_playerGlowColor.value()) : std::nullopt, 
+                }),
+                [](Result<std::monostate> result) {
+                    if (result.isErr()) {
+                        log::info("Unable to update GD account info cache: {}", result.unwrapErr());
+                    }
                 }
-            });
+            );
         }
 
         return true;

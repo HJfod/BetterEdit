@@ -42,7 +42,10 @@ struct Dev {
     }
 };
 
-bool AboutBEPopup::setup() {
+bool AboutBEPopup::init() {
+    if (!Popup::init(358, 270, "GJ_square02.png"))
+        return false;
+
     m_noElasticity = true;
 
     this->setTitle("About BetterEdit");
@@ -299,7 +302,7 @@ void AboutBEPopup::onDevLink(CCObject* sender) {
 
 AboutBEPopup* AboutBEPopup::create() {
     auto ret = new AboutBEPopup();
-    if (ret && ret->initAnchored(358.f, 270.f, "GJ_square02.png")) {
+    if (ret && ret->init()) {
         ret->autorelease();
         return ret;
     }
@@ -307,7 +310,10 @@ AboutBEPopup* AboutBEPopup::create() {
     return nullptr;
 }
 
-bool SpecialThanksPopup::setup() {
+bool SpecialThanksPopup::init() {
+    if (!Popup::init(280, 210, "GJ_square01.png"))
+        return false;
+
     auto specialThanks = 
         "## Donators <3\n\n"
         " * <cp>Alphalaneous</c>\n"
@@ -340,7 +346,7 @@ bool SpecialThanksPopup::setup() {
 
 SpecialThanksPopup* SpecialThanksPopup::create() {
     auto ret = new SpecialThanksPopup();
-    if (ret && ret->initAnchored(280, 210, "GJ_square01.png")) {
+    if (ret && ret->init()) {
         ret->autorelease();
         return ret;
     }

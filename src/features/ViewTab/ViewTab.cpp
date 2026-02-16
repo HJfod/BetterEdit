@@ -14,11 +14,6 @@
 #include <utils/HolyUB.hpp>
 #include <features/supporters/Pro.hpp>
 
-#ifdef GEODE_IS_DESKTOP
-#include <geode.custom-keybinds/include/Keybinds.hpp>
-using namespace keybinds;
-#endif
-
 using namespace geode::prelude;
 
 class $modify(GameObjectExtra, GameObject) {
@@ -44,7 +39,7 @@ class $modify(GameObjectExtra, GameObject) {
 struct $modify(ViewTabUI, EditorUI) {
     struct Fields {
         CCNode* viewModeBtn;
-        OnUIHide onUIHide;
+        ListenerHandle onUIHide;
     };
 
     static void onModify(auto& self) {
@@ -168,12 +163,14 @@ struct $modify(ViewTabUI, EditorUI) {
         }
 
     #ifdef GEODE_IS_DESKTOP
-        this->template addEventListener<InvokeBindFilter>([=, this](InvokeBindEvent* event) {
-            if (event->isDown() && m_editorLayer->m_playbackMode == PlaybackMode::Not) {
-                this->toggleMode(m_fields->viewModeBtn);
+        this->addEventListener(
+            KeybindSettingPressedEventV3(Mod::get(), "keybind-view-mode"),
+            [=, this](Keybind const&, bool down, bool, double) {
+                if (down && m_editorLayer->m_playbackMode == PlaybackMode::Not) {
+                    this->toggleMode(m_fields->viewModeBtn);
+                }
             }
-            return ListenerResult::Propagate;
-        }, "view-mode"_spr);
+        );
     #endif
 
         // Create buttons
@@ -291,11 +288,10 @@ struct $modify(ViewTabUI, EditorUI) {
 
         this->updateViewTab();
 
-        m_fields->onUIHide.setFilter(this);
-        m_fields->onUIHide.bind([this](UIShowEvent* ev) {
-            m_fields->viewModeBtn->setVisible(ev->show);
-            this->getChildByID("view-tab"_spr)->setVisible(ev->show && m_selectedMode == 4);
-            m_buildModeBtn->getParent()->getChildByTag(4)->setVisible(ev->show);
+        m_fields->onUIHide = UIShowEvent(this).listen([this](bool show) {
+            m_fields->viewModeBtn->setVisible(show);
+            this->getChildByID("view-tab"_spr)->setVisible(show && m_selectedMode == 4);
+            m_buildModeBtn->getParent()->getChildByTag(4)->setVisible(show);
         });
 
         return true;
@@ -372,15 +368,3 @@ class $modify(LevelEditorLayer) {
         if (m_editorUI) static_cast<ViewTabUI*>(m_editorUI)->updateViewTab();
     }
 };
-
-#ifdef GEODE_IS_DESKTOP
-$execute {
-    BindManager::get()->registerBindable(BindableAction(
-        "view-mode"_spr,
-        "View Mode",
-        "Toggle the View Tab",
-        { Keybind::create(KEY_Four) },
-        Category::EDITOR_UI
-    ), "robtop.geometry-dash/delete-mode");
-}
-#endif

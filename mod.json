@@ -1,11 +1,11 @@
 {
-	"geode": "4.6.2",
-	"version": "6.10.0-beta.1",
+	"geode": "5.0.0-beta.2",
+	"version": "6.10.0",
 	"gd": {
-		"win": "2.2074",
-		"mac": "2.2074",
-		"android": "2.2074",
-		"ios": "2.2074"
+		"win": "2.2081",
+		"mac": "2.2081",
+		"android": "2.2081",
+		"ios": "2.2081"
 	},
 	"id": "hjfod.betteredit",
 	"name": "BetterEdit",
@@ -18,39 +18,8 @@
 	},
 	"dependencies": {
         "geode.node-ids": "1.21.0",
-		"geode.custom-keybinds": {
-			"version": "1.7.1",
-			"importance": "required",
-			"platforms": ["win", "mac"]
-		},
-		"hjfod.gmd-api": {
-			"version": "1.2.1",
-			"importance": "required"
-		},
-		"cvolton.level-id-api": {
-			"version": "1.0.0",
-			"importance": "required"
-		},
-		"hjfod.trashcan": {
-			"version": "1.0.0",
-			"importance": "recommended"
-		},
-		"hjfod.backups": {
-			"version": "1.0.0",
-			"importance": "suggested"
-		},
-		"alphalaneous.awesome_modifier_icons": {
-			"version": "1.0.3",
-			"importance": "suggested"
-		},
-		"alphalaneous.improvedlink": {
-			"version": "1.0.5",
-			"importance": "suggested"
-		},
-		"alphalaneous.improved_group_view": {
-			"version": "1.0.5",
-			"importance": "suggested"
-		}
+		"hjfod.gmd-api": "1.5.0",
+		"cvolton.level-id-api": "2.0.0"
 	},
 	"resources": {
 		"files": [
@@ -286,6 +255,305 @@
 			"description": "If true, <cj>Trigger Indicators</c> have arrowheads at the end",
 			"enable-if": "saved:has-pro",
 			"enable-if-description": "This feature is Supporter-only, but will be free soon!"
+		},
+		"keybinds-section": {
+			"type": "title",
+			"name": "Keybinds"
+		},
+		"keybind-view-mode": {
+			"type": "keybind",
+			"name": "View Mode",
+			"description": "Toggle the View Tab",
+			"category": "editor",
+			"default": "4"
+		},
+		"keybind-rotate-45-ccw": {
+			"type": "keybind",
+			"name": "Rotate 45 CCW",
+			"description": "Rotate the Selected Object(s) 45 Degrees Counter-Clockwise",
+			"category": "editor",
+			"default": "Shift+Q"
+		},
+        "keybind-rotate-45-cw": {
+			"type": "keybind",
+        	"name": "Rotate 45 CW",
+        	"description": "Rotate the Selected Object(s) 45 Degrees Clockwise",
+			"category": "editor",
+			"default": "Shift+E"
+		},
+        "keybind-rotate-snap": {
+			"type": "keybind",
+        	"name": "Rotate Snap",
+        	"description": "Rotate the Selected Object(s) to Match Adjacent Slopes",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-show-scale": {
+			"type": "keybind",
+        	"name": "Toggle Scale Control",
+        	"description": "Toggle the object scaling controls",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-show-scale-xy": {
+			"type": "keybind",
+        	"name": "Toggle Scale X/Y Control",
+        	"description": "Toggle the object scaling by X/Y controls",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-save-level": {
+			"type": "keybind",
+        	"name": "Save Level",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-pause-resume-playtest": {
+			"type": "keybind",
+        	"name": "Pause/Resume Playtest",
+        	"description": "Pauses or resumes the current playtest. Does not start playtesting",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-build-helper": {
+			"type": "keybind",
+        	"name": "Build Helper",
+        	"description": "Executes the <cy>Build Helper</c> feature, aka remaps Groud and Color IDs of the selected objects to unused ones",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-create-loop": {
+			"type": "keybind",
+        	"name": "Create loop",
+        	"description": "Executes the <cy>Create Loop</c> feature, aka makes a Spawn Trigger loop",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-align-x": {
+			"type": "keybind",
+        	"name": "Align X",
+        	"description": "Executes the <cy>Align X</c> feature, aka aligns all of the selected objects along the X axis",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-align-y": {
+			"type": "keybind",
+        	"name": "Align Y",
+        	"description": "Executes the <cy>Align Y</c> feature, aka aligns all of the selected objects along the Y axis",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-toggle-link-controls": {
+			"type": "keybind",
+        	"name": "Toggle Link Controls",
+        	"category": "editor",
+			"default": ""
+		},
+
+        "open-edit-object": {
+			"type": "keybind",
+        	"name": "Edit Object",
+        	"description": "Open the <cb>Edit Object</c> popup for the selected objects",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-open-edit-group": {
+			"type": "keybind",
+        	"name": "Edit Group",
+        	"description": "Open the <co>Edit Group</c> popup for the selected objects",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-open-edit-special": {
+			"type": "keybind",
+        	"name": "Edit Special",
+        	"description": "Open the <cj>Edit Special</c> popup for the selected objects",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-copy-values": {
+			"type": "keybind",
+        	"name": "Copy Values",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-paste-state": {
+			"type": "keybind",
+        	"name": "Paste State",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-paste-color": {
+			"type": "keybind",
+        	"name": "Paste Color",
+        	"category": "editor",
+			"default": ""
+		},
+
+        "enlarge-grid-size": {
+			"type": "keybind",
+        	"name": "Increase Grid Size",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-ensmallen-grid-size": {
+			"type": "keybind",
+        	"name": "Decrease Grid Size",
+        	"category": "editor",
+			"default": ""
+		},
+
+        "select-all": {
+			"type": "keybind",
+        	"name": "Select All",
+        	"description": "Select All Object(s)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-select-all-left": {
+			"type": "keybind",
+        	"name": "Select All Left",
+        	"description": "Select All Object(s) Left of the Screen",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-select-all-right": {
+			"type": "keybind",
+        	"name": "Select All Right",
+        	"description": "Select All Object(s) Right of the Screen",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-show-ui": {
+			"type": "keybind",
+        	"name": "Show UI",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-hide-ui": {
+			"type": "keybind",
+        	"name": "Hide UI",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-group-summary": {
+			"type": "keybind",
+        	"name": "Open Group Summary",
+        	"description": "Opens up <co>Group Summary</c>, aka a list showing which groups are in use",
+			"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-half-left": {
+			"type": "keybind",
+        	"name": "Move Object Half Left",
+        	"description": "Move Selected Object(s) half of a Block left (15 Units)",
+        	"category": "editor",
+			"default": "Ctrl+Alt+A"
+		},
+        "keybind-move-obj-half-right": {
+			"type": "keybind",
+        	"name": "Move Object Half Right",
+        	"description": "Move Selected Object(s) half of a Block right (15 Units)",
+        	"category": "editor",
+			"default": "Ctrl+Alt+D"
+		},
+        "keybind-move-obj-half-up": {
+			"type": "keybind",
+        	"name": "Move Object Half Up",
+        	"description": "Move Selected Object(s) half of a Block up (15 Units)",
+        	"category": "editor",
+			"default": "Ctrl+Alt+W"
+		},
+        "keybind-move-obj-half-down": {
+			"type": "keybind",
+        	"name": "Move Object Half Down",
+        	"description": "Move Selected Object(s) half of a Block down (15 Units)",
+        	"category": "editor",
+			"default": "Ctrl+Alt+S"
+		},
+        "keybind-move-obj-quarter-left": {
+			"type": "keybind",
+        	"name": "Move Object Quarter Left",
+        	"description": "Move Selected Object(s) quarter of a Block left (7.5 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-quarter-right": {
+			"type": "keybind",
+        	"name": "Move Object Quarter Right",
+        	"description": "Move Selected Object(s) quarter of a Block right (7.5 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-quarter-up": {
+			"type": "keybind",
+        	"name": "Move Object Quarter Up",
+        	"description": "Move Selected Object(s) quarter of a Block up (7.5 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-quarter-down": {
+			"type": "keybind",
+        	"name": "Move Object Quarter Down",
+        	"description": "Move Selected Object(s) quarter of a Block down (7.5 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-eighth-left": {
+			"type": "keybind",
+        	"name": "Move Object Eighth Left",
+        	"description": "Move Selected Object(s) eighth of a Block left (3.75 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-eighth-right": {
+			"type": "keybind",
+        	"name": "Move Object Eighth Right",
+        	"description": "Move Selected Object(s) eighth of a Block right (3.75 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-eighth-up": {
+			"type": "keybind",
+        	"name": "Move Object Eighth Up",
+        	"description": "Move Selected Object(s) eighth of a Block up (3.75 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-eighth-down": {
+			"type": "keybind",
+        	"name": "Move Object Eighth Down",
+        	"description": "Move Selected Object(s) eighth of a Block down (3.75 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-big-left": {
+			"type": "keybind",
+        	"name": "Move Object Big Left",
+        	"description": "Move Selected Object(s) 5 Blocks left (150 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-big-right": {
+			"type": "keybind",
+        	"name": "Move Object Big Right",
+        	"description": "Move Selected Object(s) 5 Blocks right (150 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-big-up": {
+			"type": "keybind",
+        	"name": "Move Object Big Up",
+        	"description": "Move Selected Object(s) 5 Blocks up (150 Units)",
+        	"category": "editor",
+			"default": ""
+		},
+        "keybind-move-obj-big-down": {
+			"type": "keybind",
+        	"name": "Move Object Big Down",
+        	"description": "Move Selected Object(s) 5 Blocks down (150 Units)",
+        	"category": "editor",
+			"default": ""
 		},
 		"wip-section": {
 			"type": "title",

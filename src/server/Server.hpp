@@ -2,14 +2,14 @@
 
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/binding/SimplePlayer.hpp>
-#include <Geode/utils/Task.hpp>
+#include <Geode/utils/Async.hpp>
 #include <optional>
 #include <chrono>
 
 using namespace geode::prelude;
 
 namespace pro::server {
-    constexpr std::string_view BASE_URL = "https://api.betteredit.pro";
+    static std::string BASE_URL = "https://api.betteredit.pro";
 
     struct CachedGDInfo final {
         int gdAccountID;
@@ -83,19 +83,19 @@ namespace pro::server {
     constexpr size_t MAX_DEVICE_COUNT = 5;
 
     template <class T>
-    using ServerRequest = Task<Result<T>, uint8_t>;
+    using ServerRequest = arc::Future<Result<T>>;
 
     std::string getUserAgent();
 
     ServerRequest<Supporters> getSupporters(size_t page, bool useCache = true);
-    ServerRequest<MySupport> getMySupport(std::string const& token, bool useCache = true);
-    ServerRequest<ActivatedLicense> activateLicense(std::string const& key);
-    ServerRequest<std::monostate> deactivateLicense(std::string const& token, std::string const& deviceID);
-    ServerRequest<std::string> checkLicense(std::string const& token);
-    ServerRequest<CreatedProductKey> createNewLicense(std::string const& token);
-    ServerRequest<std::monostate> updateCachedInfo(std::string const& token, CachedGDInfo const& info);
-    ServerRequest<std::monostate> updateSupporter(std::string const& token, UpdateSupporter const& info);
-    ServerRequest<UpdatedDeviceInfo> updateDeviceInfo(std::string const& token, std::string const& deviceID, UpdateDeviceInfo const& info);
+    ServerRequest<MySupport> getMySupport(std::string token, bool useCache = true);
+    ServerRequest<ActivatedLicense> activateLicense(std::string key);
+    ServerRequest<std::monostate> deactivateLicense(std::string token, std::string deviceID);
+    ServerRequest<std::string> checkLicense(std::string token);
+    ServerRequest<CreatedProductKey> createNewLicense(std::string token);
+    ServerRequest<std::monostate> updateCachedInfo(std::string token, CachedGDInfo info);
+    ServerRequest<std::monostate> updateSupporter(std::string token, UpdateSupporter info);
+    ServerRequest<UpdatedDeviceInfo> updateDeviceInfo(std::string token, std::string deviceID, UpdateDeviceInfo info);
 
-    void clearCaches();
+    arc::Future<> clearCaches();
 }

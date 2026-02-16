@@ -3,7 +3,7 @@
 #include <Geode/ui/MDTextArea.hpp>
 
 static std::string parseChangelog(std::optional<VersionInfo> const& since) {
-    auto changelog = Mod::get()->getMetadataRef().getChangelog().value_or(std::string());
+    auto changelog = Mod::get()->getMetadata().getChangelog().value_or(std::string());
     auto res = std::string();
 
     bool validHeader = false;
@@ -48,7 +48,10 @@ static std::string parseChangelog(std::optional<VersionInfo> const& since) {
     return res;
 }
 
-bool ChangelogPopup::setup(std::optional<VersionInfo> const& since) {
+bool ChangelogPopup::init(std::optional<VersionInfo> const& since) {
+    if (!Popup::init(340, 225, "GJ_square02.png"))
+        return false;
+
     m_noElasticity = true;
 
     this->setTitle("BetterEdit Changelog");
@@ -74,7 +77,7 @@ bool ChangelogPopup::setup(std::optional<VersionInfo> const& since) {
 
 ChangelogPopup* ChangelogPopup::create(std::optional<VersionInfo> const& since) {
     auto ret = new ChangelogPopup();
-    if (ret && ret->initAnchored(340, 225, since, "GJ_square02.png")) {
+    if (ret && ret->init(since)) {
         ret->autorelease();
         return ret;
     }

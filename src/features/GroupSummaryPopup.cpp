@@ -42,7 +42,10 @@ static CCSprite* createSpriteForTrigger(EffectGameObject* trigger, int group) {
     return spr;
 }
 
-bool ObjectsListPopup::setup(std::string const& title, GroupSummaryPopup* popup, CCArray* objs, bool render) {
+bool ObjectsListPopup::init(std::string const& title, GroupSummaryPopup* popup, CCArray* objs, bool render) {
+    if (!Popup::init(280, 240))
+        return false;
+
     this->setTitle(title);
 
     m_popup = popup;
@@ -96,7 +99,7 @@ ObjectsListPopup* ObjectsListPopup::create(
     std::string const& title, GroupSummaryPopup* popup, CCArray* objs, bool render
 ) {
     auto ret = new ObjectsListPopup();
-    if (ret && ret->initAnchored(280, 240, title, popup, objs, render)) {
+    if (ret && ret->init(title, popup, objs, render)) {
         ret->autorelease();
         return ret;
     }
@@ -104,7 +107,10 @@ ObjectsListPopup* ObjectsListPopup::create(
     return nullptr;
 }
 
-bool GroupSummaryPopup::setup(EditorUI* ui) {
+bool GroupSummaryPopup::init(EditorUI* ui) {
+    if (!Popup::init(380, 290))
+        return false;
+
     m_noElasticity = true;
     m_ui = ui;
 
@@ -489,7 +495,7 @@ void GroupSummaryPopup::onGroupTargets(CCObject* sender) {
 
 GroupSummaryPopup* GroupSummaryPopup::create(EditorUI* ui) {
     auto ret = new GroupSummaryPopup();
-    if (ret && ret->initAnchored(380, 290, ui)) {
+    if (ret && ret->init(ui)) {
         ret->autorelease();
         return ret;
     }
@@ -499,7 +505,7 @@ GroupSummaryPopup* GroupSummaryPopup::create(EditorUI* ui) {
 
 class $modify(GroupSummaryEditorUI, EditorUI) {
     struct Fields final {
-        OnUIHide onUIHide;
+        ListenerHandle onUIHide;
     };
 
     $override
@@ -522,9 +528,8 @@ class $modify(GroupSummaryEditorUI, EditorUI) {
             menu->addChild(btn);
             menu->updateLayout();
 
-            m_fields->onUIHide.setFilter(this);
-            m_fields->onUIHide.bind([btn](UIShowEvent* ev) {
-                btn->setVisible(ev->show);
+            m_fields->onUIHide = UIShowEvent(this).listen([btn](bool show) {
+                btn->setVisible(show);
             });
         }
         

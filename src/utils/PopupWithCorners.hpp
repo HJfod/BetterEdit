@@ -14,8 +14,7 @@ enum class Corner {
     Brown,
 };
 
-template <class... Args>
-class PopupWithCorners : public Popup<Args...> {
+class PopupWithCorners : public Popup {
 private:
     static const char* getCorner(Corner corner) {
         switch (corner) {

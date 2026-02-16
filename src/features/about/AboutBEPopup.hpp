@@ -5,9 +5,9 @@
 
 using namespace geode::prelude;
 
-class AboutBEPopup : public PopupWithCorners<> {
+class AboutBEPopup : public PopupWithCorners {
 protected:
-    bool setup() override;
+    bool init() override;
 
 public:
     static AboutBEPopup* create();
@@ -24,9 +24,9 @@ public:
     void onDevLink(CCObject* sender);
 };
 
-class SpecialThanksPopup : public PopupWithCorners<> {
+class SpecialThanksPopup : public PopupWithCorners {
 protected:
-    bool setup() override;
+    bool init();
 
 public:
     static SpecialThanksPopup* create();

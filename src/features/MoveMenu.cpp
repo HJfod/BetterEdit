@@ -69,7 +69,7 @@ public:
 class CustomEditMenu : public CCNode {
 protected:
     EditorUI* m_editorUI;
-    OnUIHide m_onUIHide;
+    ListenerHandle m_onUIHide;
     CCNode* m_groupRow;
     CCMenu* m_groupPageControlsMenu;
     CCMenu* m_bottomRow;
@@ -85,14 +85,12 @@ protected:
         this->setAnchorPoint(ccp(.5f, 0));
 
         m_editorUI = ui;
-        m_onUIHide.setFilter(UIShowFilter(ui));
-        m_onUIHide.bind([this](UIShowEvent* ev) {
-            this->updateMenu(ev->show);
+        m_onUIHide = UIShowEvent(ui).listen([this](bool show) {
+            this->updateMenu(show);
         });
 
         m_groupRow = CCNode::create();
         m_groupRow->setLayout(RowLayout::create()->setGap(3));
-        m_groupRow->getLayout()->ignoreInvisibleChildren(true);
         m_groupRow->setContentWidth(m_obContentSize.width - 40);
         m_groupRow->setAnchorPoint(ccp(.5f, .5f));
         this->addChildAtPosition(m_groupRow, Anchor::Center, ccp(0, 10));
@@ -226,7 +224,7 @@ public:
             btn->removeFromParent();
 
             // If this button has already been added, skip
-            auto id = btn->getID();
+            auto id = std::string(btn->getID());
             if (m_bottomRow->getChildByID(id)) {
                 continue;
             }

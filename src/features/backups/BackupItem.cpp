@@ -92,7 +92,7 @@ void BackupItem::onConvertAutomated(CCObject*) {
                         "OK"
                     )->show();
                 }
-                UpdateBackupListEvent().post();
+                UpdateBackupListEvent().send(false);
             }
         }
     );
@@ -126,9 +126,7 @@ void BackupItem::onRestore(CCObject*) {
                         "OK"
                     )->show();
                 }
-                auto ev = UpdateBackupListEvent();
-                ev.closeList = true;
-                ev.post();
+                UpdateBackupListEvent().send(true);
                 FLAlertLayer::create("Backup Restored", "The backup has been restored.", "OK")->show();
             }
         }
@@ -150,7 +148,7 @@ void BackupItem::onDelete(CCObject*) {
                         "OK"
                     )->show();
                 }
-                UpdateBackupListEvent().post();
+                UpdateBackupListEvent().send(false);
             }
         }
     );
