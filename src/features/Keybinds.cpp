@@ -1,9 +1,7 @@
 #include <Geode/DefaultInclude.hpp>
 
-// todo: CustomKeybinds on Mac
 #ifdef GEODE_IS_DESKTOP
 
-#include <geode.custom-keybinds/include/Keybinds.hpp>
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/binding/EditButtonBar.hpp>
 #include <Geode/binding/GameManager.hpp>
@@ -14,7 +12,6 @@
 #include <features/GroupSummaryPopup.hpp>
 
 using namespace geode::prelude;
-using namespace keybinds;
 
 struct $modify(EditorUI) {
     $override
@@ -22,68 +19,68 @@ struct $modify(EditorUI) {
         if (!EditorUI::init(lel))
             return false;
 
-        this->defineKeybind("rotate-45-ccw"_spr, [this]() {
+        this->defineKeybind("keybind-rotate-45-ccw", [this]() {
             this->transformObjectCall(EditCommand::RotateCCW45);
         });
-        this->defineKeybind("rotate-45-cw"_spr, [this]() {
+        this->defineKeybind("keybind-rotate-45-cw", [this]() {
             this->transformObjectCall(EditCommand::RotateCW45);
         });
-        this->defineKeybind("rotate-snap"_spr, [this]() {
+        this->defineKeybind("keybind-rotate-snap", [this]() {
             this->transformObjectCall(EditCommand::RotateSnap);
         });
-        this->defineKeybind("show-scale"_spr, [this]() {
+        this->defineKeybind("keybind-show-scale", [this]() {
             if (auto scaleBtn = this->querySelector("scale-button")) {
                 this->activateScaleControl(scaleBtn);
             }
         });
-        this->defineKeybind("show-scale-xy"_spr, [this]() {
+        this->defineKeybind("keybind-show-scale-xy", [this]() {
             if (auto scaleBtn = this->querySelector("scale-xy-button")) {
                 this->activateScaleControl(scaleBtn);
             }
         });
-        this->defineKeybind("show-warp"_spr, [this]() {
+        this->defineKeybind("keybind-show-warp", [this]() {
             if (auto btn = this->querySelector("warp-button")) {
                 this->activateTransformControl(btn);
             }
         });
-        this->defineKeybind("toggle-link-controls"_spr, [this]() {
+        this->defineKeybind("keybind-toggle-link-controls", [this]() {
             GameManager::get()->toggleGameVariable("0097");
             m_editorLayer->updateOptions();
         });
-        this->defineKeybind("show-ui"_spr, [this]() {
+        this->defineKeybind("keybind-show-ui", [this]() {
             this->showUI(true);
         });
-        this->defineKeybind("hide-ui"_spr, [this]() {
+        this->defineKeybind("keybind-hide-ui", [this]() {
             this->showUI(false);
         });
 
-        this->defineKeybind("open-edit-object"_spr, [this]() {
+        this->defineKeybind("keybind-open-edit-object", [this]() {
             this->editObject(nullptr);
         });
-        this->defineKeybind("open-edit-group"_spr, [this]() {
+        this->defineKeybind("keybind-open-edit-group", [this]() {
             this->editGroup(nullptr);
         });
-        this->defineKeybind("open-edit-special"_spr, [this]() {
+        this->defineKeybind("keybind-open-edit-special", [this]() {
             this->editObjectSpecial(0);
         });
-        this->defineKeybind("copy-values"_spr, [this]() {
+        this->defineKeybind("keybind-copy-values", [this]() {
             this->onCopyState(nullptr);
         });
-        this->defineKeybind("paste-state"_spr, [this]() {
+        this->defineKeybind("keybind-paste-state", [this]() {
             this->onPasteState(nullptr);
         });
-        this->defineKeybind("paste-color"_spr, [this]() {
+        this->defineKeybind("keybind-paste-color", [this]() {
             this->onPasteColor(nullptr);
         });
 
-        this->defineKeybind("enlarge-grid-size"_spr, [this]() {
+        this->defineKeybind("keybind-enlarge-grid-size", [this]() {
             incrementGridSize(this);
         });
-        this->defineKeybind("ensmallen-grid-size"_spr, [this]() {
+        this->defineKeybind("keybind-ensmallen-grid-size", [this]() {
             decrementGridSize(this);
         });
 
-        this->defineKeybind("save-level"_spr, [this]() {
+        this->defineKeybind("keybind-save-level", [this]() {
             // Prevent spamming Ctrl + S
             static std::chrono::time_point<std::chrono::system_clock> LAST_USED = std::chrono::system_clock::now();
             auto lastUsed = LAST_USED;
@@ -98,7 +95,7 @@ struct $modify(EditorUI) {
             fakeEditorPauseLayer(m_editorLayer)->saveLevel();
             Notification::create("Level saved", NotificationIcon::Success)->show();
         });
-        this->defineKeybind("pause-resume-playtest"_spr, [this]() {
+        this->defineKeybind("keybind-pause-resume-playtest", [this]() {
             // LevelEditorLayer::onPausePlaytest is inlined at least on Windows 
             // but this does the job better probably anyway sooo
             if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
@@ -106,423 +103,94 @@ struct $modify(EditorUI) {
             }
         });
 
-        this->defineKeybind("build-helper"_spr, [this]() {
+        this->defineKeybind("keybind-build-helper", [this]() {
             fakeEditorPauseLayer(m_editorLayer)->onBuildHelper(nullptr);
         });
-        this->defineKeybind("create-loop"_spr, [this]() {
+        this->defineKeybind("keybind-create-loop", [this]() {
             fakeEditorPauseLayer(m_editorLayer)->onCreateLoop(nullptr);
         });
-        this->defineKeybind("align-x"_spr, [this]() {
+        this->defineKeybind("keybind-align-x", [this]() {
             fakeEditorPauseLayer(m_editorLayer)->onAlignX(nullptr);
         });
-        this->defineKeybind("align-y"_spr, [this]() {
+        this->defineKeybind("keybind-align-y", [this]() {
             fakeEditorPauseLayer(m_editorLayer)->onAlignY(nullptr);
         });
-        this->defineKeybind("select-all"_spr, [this]() {
+        this->defineKeybind("keybind-select-all", [this]() {
             fakeEditorPauseLayer(m_editorLayer)->onSelectAll(nullptr);
         });
-        this->defineKeybind("select-all-left"_spr, [this]() {
+        this->defineKeybind("keybind-select-all-left", [this]() {
             fakeEditorPauseLayer(m_editorLayer)->onSelectAllLeft(nullptr);
         });
-        this->defineKeybind("select-all-right"_spr, [this]() {
+        this->defineKeybind("keybind-select-all-right", [this]() {
             fakeEditorPauseLayer(m_editorLayer)->onSelectAllRight(nullptr);
         });
 
-        this->defineKeybind("move-obj-half-left"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-half-left", [this] {
             this->moveObjectCall(EditCommand::HalfLeft);
         });
-        this->defineKeybind("move-obj-half-right"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-half-right", [this] {
             this->moveObjectCall(EditCommand::HalfRight);
         });
-        this->defineKeybind("move-obj-half-up"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-half-up", [this] {
             this->moveObjectCall(EditCommand::HalfUp);
         });
-        this->defineKeybind("move-obj-half-down"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-half-down", [this] {
             this->moveObjectCall(EditCommand::HalfDown);
         });
-        this->defineKeybind("move-obj-quarter-left"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-quarter-left", [this] {
             this->moveObjectCall(EditCommandExt::QuarterLeft);
         });
-        this->defineKeybind("move-obj-quarter-right"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-quarter-right", [this] {
             this->moveObjectCall(EditCommandExt::QuarterRight);
         });
-        this->defineKeybind("move-obj-quarter-up"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-quarter-up", [this] {
             this->moveObjectCall(EditCommandExt::QuarterUp);
         });
-        this->defineKeybind("move-obj-quarter-down"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-quarter-down", [this] {
             this->moveObjectCall(EditCommandExt::QuarterDown);
         });
-        this->defineKeybind("move-obj-eighth-left"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-eighth-left", [this] {
             this->moveObjectCall(EditCommandExt::EighthLeft);
         });
-        this->defineKeybind("move-obj-eighth-right"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-eighth-right", [this] {
             this->moveObjectCall(EditCommandExt::EighthRight);
         });
-        this->defineKeybind("move-obj-eighth-up"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-eighth-up", [this] {
             this->moveObjectCall(EditCommandExt::EighthUp);
         });
-        this->defineKeybind("move-obj-eighth-down"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-eighth-down", [this] {
             this->moveObjectCall(EditCommandExt::EighthDown);
         });
-        this->defineKeybind("move-obj-big-left"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-big-left", [this] {
             this->moveObjectCall(EditCommand::BigLeft);
         });
-        this->defineKeybind("move-obj-big-right"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-big-right", [this] {
             this->moveObjectCall(EditCommand::BigRight);
         });
-        this->defineKeybind("move-obj-big-up"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-big-up", [this] {
             this->moveObjectCall(EditCommand::BigUp);
         });
-        this->defineKeybind("move-obj-big-down"_spr, [this] {
+        this->defineKeybind("keybind-move-obj-big-down", [this] {
             this->moveObjectCall(EditCommand::BigDown);
         });
 
-        this->defineKeybind("group-summary"_spr, [this] {
+        this->defineKeybind("keybind-group-summary", [this] {
             GroupSummaryPopup::create(this)->show();
         });
 
         return true;
     }
 
-    void defineKeybind(const char* id, std::function<void()> callback) {
-        this->template addEventListener<InvokeBindFilter>([=](InvokeBindEvent* event) {
-            if (event->isDown()) {
-                callback();
+    void defineKeybind(const char* key, std::function<void()> callback) {
+        this->addEventListener(
+            KeybindSettingPressedEventV3(Mod::get(), key),
+            [=](Keybind const&, bool down, bool, double) {
+                if (down) {
+                    callback();
+                }
             }
-            return ListenerResult::Propagate;
-        }, id);
+        );
     }
 };
-
-$execute {
-    BindManager::get()->registerBindable(BindableAction(
-        "rotate-45-ccw"_spr,
-        "Rotate 45 CCW",
-        "Rotate the Selected Object(s) 45 Degrees Counter-Clockwise",
-        { Keybind::create(KEY_Q, Modifier::Shift) },
-        Category::EDITOR_MODIFY
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "rotate-45-cw"_spr,
-        "Rotate 45 CW",
-        "Rotate the Selected Object(s) 45 Degrees Clockwise",
-        { Keybind::create(KEY_E, Modifier::Shift) },
-        Category::EDITOR_MODIFY
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "rotate-snap"_spr,
-        "Rotate Snap",
-        "Rotate the Selected Object(s) to Match Adjacent Slopes",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "show-scale"_spr,
-        "Toggle Scale Control",
-        "Toggle the object scaling controls",
-        {},
-        Category::EDITOR_UI,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "show-scale-xy"_spr,
-        "Toggle Scale X/Y Control",
-        "Toggle the object scaling by X/Y controls",
-        {},
-        Category::EDITOR_UI,
-        false
-    ));
-
-    BindManager::get()->registerBindable(BindableAction(
-        "save-level"_spr,
-        "Save Level",
-        "",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "pause-resume-playtest"_spr,
-        "Pause/Resume Playtest",
-        "Pauses or resumes the current playtest. Does not start playtesting",
-        {},
-        Category::EDITOR,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "build-helper"_spr,
-        "Build Helper",
-        "Executes the <cy>Build Helper</c> feature, aka remaps Groud and Color "
-        "IDs of the selected objects to unused ones",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "create-loop"_spr,
-        "Create loop",
-        "Executes the <cy>Create Loop</c> feature, aka makes a Spawn Trigger loop",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "align-x"_spr,
-        "Align X",
-        "Executes the <cy>Align X</c> feature, aka aligns all of the selected "
-        "objects along the X axis",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "align-y"_spr,
-        "Align Y",
-        "Executes the <cy>Align Y</c> feature, aka aligns all of the selected "
-        "objects along the Y axis",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "toggle-link-controls"_spr,
-        "Toggle Link Controls",
-        "",
-        {},
-        Category::EDITOR_UI,
-        false
-    ));
-
-    BindManager::get()->registerBindable(BindableAction(
-        "open-edit-object"_spr,
-        "Edit Object",
-        "Open the <cb>Edit Object</c> popup for the selected objects",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "open-edit-group"_spr,
-        "Edit Group",
-        "Open the <co>Edit Group</c> popup for the selected objects",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "open-edit-special"_spr,
-        "Edit Special",
-        "Open the <cj>Edit Special</c> popup for the selected objects",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "copy-values"_spr,
-        "Copy Values",
-        "",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "paste-state"_spr,
-        "Paste State",
-        "",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "paste-color"_spr,
-        "Paste Color",
-        "",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-
-    BindManager::get()->registerBindable(BindableAction(
-        "enlarge-grid-size"_spr,
-        "Increase Grid Size",
-        "",
-        {},
-        Category::EDITOR_UI,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "ensmallen-grid-size"_spr,
-        "Decrease Grid Size",
-        "",
-        {},
-        Category::EDITOR_UI,
-        false
-    ));
-
-    BindManager::get()->registerBindable(BindableAction(
-        "select-all"_spr,
-        "Select All",
-        "Select All Object(s)",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "select-all-left"_spr,
-        "Select All Left",
-        "Select All Object(s) Left of the Screen",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "select-all-right"_spr,
-        "Select All Right",
-        "Select All Object(s) Right of the Screen",
-        {},
-        Category::EDITOR_MODIFY,
-        false
-    ));
-
-    // todo: toggle UI
-    BindManager::get()->registerBindable(BindableAction(
-        "show-ui"_spr,
-        "Show UI",
-        "",
-        {},
-        Category::EDITOR_UI,
-        false
-    ));
-    BindManager::get()->registerBindable(BindableAction(
-        "hide-ui"_spr,
-        "Hide UI",
-        "",
-        {},
-        Category::EDITOR_UI,
-        false
-    ));
-
-    BindManager::get()->registerBindable({
-        "group-summary"_spr,
-        "Open Group Summary",
-        "Opens up <co>Group Summary</c>, aka a list showing which groups are in use",
-        {},
-        Category::EDITOR, false
-    });
-
-    BindManager::get()->registerBindable({
-        "move-obj-half-left"_spr,
-        "Move Object Half Left",
-        "Move Selected Object(s) half of a Block left (15 Units)",
-        { Keybind::create(KEY_A, Modifier::Control | Modifier::Alt) },
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-half-right"_spr,
-        "Move Object Half Right",
-        "Move Selected Object(s) half of a Block right (15 Units)",
-        { Keybind::create(KEY_D, Modifier::Control | Modifier::Alt) },
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-half-up"_spr,
-        "Move Object Half Up",
-        "Move Selected Object(s) half of a Block up (15 Units)",
-        { Keybind::create(KEY_W, Modifier::Control | Modifier::Alt) },
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-half-down"_spr,
-        "Move Object Half Down",
-        "Move Selected Object(s) half of a Block down (15 Units)",
-        { Keybind::create(KEY_S, Modifier::Control | Modifier::Alt) },
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-quarter-left"_spr,
-        "Move Object Quarter Left",
-        "Move Selected Object(s) quarter of a Block left (7.5 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-quarter-right"_spr,
-        "Move Object Quarter Right",
-        "Move Selected Object(s) quarter of a Block right (7.5 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-quarter-up"_spr,
-        "Move Object Quarter Up",
-        "Move Selected Object(s) quarter of a Block up (7.5 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-quarter-down"_spr,
-        "Move Object Quarter Down",
-        "Move Selected Object(s) quarter of a Block down (7.5 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-eighth-left"_spr,
-        "Move Object Eighth Left",
-        "Move Selected Object(s) eighth of a Block left (3.75 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-eighth-right"_spr,
-        "Move Object Eighth Right",
-        "Move Selected Object(s) eighth of a Block right (3.75 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-eighth-up"_spr,
-        "Move Object Eighth Up",
-        "Move Selected Object(s) eighth of a Block up (3.75 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-eighth-down"_spr,
-        "Move Object Eighth Down",
-        "Move Selected Object(s) eighth of a Block down (3.75 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-big-left"_spr,
-        "Move Object Big Left",
-        "Move Selected Object(s) 5 Blocks left (150 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-big-right"_spr,
-        "Move Object Big Right",
-        "Move Selected Object(s) 5 Blocks right (150 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-big-up"_spr,
-        "Move Object Big Up",
-        "Move Selected Object(s) 5 Blocks up (150 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-    BindManager::get()->registerBindable({
-        "move-obj-big-down"_spr,
-        "Move Object Big Down",
-        "Move Selected Object(s) 5 Blocks down (150 Units)",
-        {},
-        Category::EDITOR_MOVE, true
-    });
-}
 
 #endif

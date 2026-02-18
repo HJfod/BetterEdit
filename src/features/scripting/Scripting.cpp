@@ -4,6 +4,7 @@
 #include <Geode/binding/EditorUI.hpp>
 #include <Geode/binding/GameObject.hpp>
 #include <Geode/modify/LevelEditorLayer.hpp>
+#include <utils/Editor.hpp>
 
 using namespace geode::prelude;
 
@@ -247,7 +248,7 @@ void JsScript::log(Log::Level level, std::string_view message) {
         Loader::get()->queueInMainThread([weak = weak_from_this()] {
             if (auto ptr = weak.lock()) {
                 ptr->m_queuedLogEvent = false;
-                JsScriptLoggedEvent(ptr).post();
+                JsScriptLoggedEvent(ptr).send();
             }
         });
     }
@@ -399,7 +400,7 @@ bool JsScript::run() {
     editor.setProperty("getSelectedObjects", m_ctx.createFunction(
         "<Editor>.getSelectedObjects",
         [](qjs::Context, qjs::Value) {
-            return ccArrayToVector<GameObject*>(EditorUI::get()->getSelectedObjects());
+            return be::getSelectedObjects(EditorUI::get());
         }
     ));
     editor.setProperty("getViewCenter", m_ctx.createFunction(
@@ -436,17 +437,6 @@ bool JsScript::tick() {
         this->log(Log::Level::Status, "Finished running script with value {}", value->toString());
     }
     return true;
-}
-
-JsScriptLoggedEvent::JsScriptLoggedEvent(std::shared_ptr<JsScript> script) : script(script) {}
-
-JsScriptLoggedFilter::JsScriptLoggedFilter(std::shared_ptr<JsScript> script) : m_script(script) {}
-
-ListenerResult JsScriptLoggedFilter::handle(std::function<Callback> fn, JsScriptLoggedEvent* ev) {
-    if (m_script == ev->script) {
-        fn(ev);
-    }
-    return ListenerResult::Propagate;
 }
 
 ScriptManager* ScriptManager::get() {

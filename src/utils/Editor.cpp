@@ -38,7 +38,9 @@ std::vector<GameObject*> be::getSelectedObjects(EditorUI* ui) {
         return std::vector<GameObject*>({ ui->m_selectedObject });
     }
     else {
-        return ccArrayToVector<GameObject*>(ui->m_selectedObjects);
+        // todo: remove this stupid bullshit once we bring back a good replacement for ccArrayToVector
+        auto ext = CCArrayExt<GameObject*>(ui->m_selectedObjects);
+        return std::vector<GameObject*>(ext.begin(), ext.end());
     }
 }
 
@@ -53,7 +55,7 @@ class $modify(GameManager) {
     void returnToLastScene(GJGameLevel* level) {
         auto editor = LevelEditorLayer::get();
         if (editor && m_sceneEnum == 3) {
-            EditorExitEvent().post();
+            EditorExitEvent().send();
         }
         if (SCENE_TO_RETURN_TO) {
             cocos::switchToScene(SCENE_TO_RETURN_TO);
@@ -230,21 +232,11 @@ class $modify(HideUI, EditorUI) {
         }
 
         EditorUI::showUI(show);
-        UIShowEvent(this, show).post();
+        UIShowEvent(this).send(show);
 
         m_tabsMenu->setVisible(show && m_selectedMode == 2);
     }
 };
-
-UIShowEvent::UIShowEvent(EditorUI* ui, bool show) : ui(ui), show(show) {}
-
-UIShowFilter::UIShowFilter(EditorUI* ui) : m_ui(ui) {}
-ListenerResult UIShowFilter::handle(std::function<Callback> fn, UIShowEvent* ev) {
-    if (m_ui == ev->ui) {
-        fn(ev);
-    }
-    return ListenerResult::Propagate;
-}
 
 class $modify(TintLayer, LevelEditorLayer) {
     struct Fields {

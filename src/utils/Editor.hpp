@@ -79,25 +79,9 @@ struct EditCommandExt {
 };
 
 //// Editor exit events - used for standardizing detecting when the editor is closed
-struct EditorExitEvent : public Event {};
+struct EditorExitEvent : public Event<EditorExitEvent, bool()> {};
 
 //// UI events - used for standard management of when the editor UI visibility is toggled
-struct UIShowEvent : public Event {
-    EditorUI* ui;
-    bool show;
-
-    UIShowEvent(EditorUI* ui, bool show);
+struct UIShowEvent : public Event<UIShowEvent, bool(bool), EditorUI*> {
+    using Event::Event;
 };
-class UIShowFilter : public EventFilter<UIShowEvent> {
-protected:
-    EditorUI* m_ui = nullptr;
-
-public:
-    using Callback = void(UIShowEvent*);
-
-    UIShowFilter() = default;
-    UIShowFilter(EditorUI* ui);
-
-    ListenerResult handle(std::function<Callback> fn, UIShowEvent* ev);
-};
-using OnUIHide = EventListener<UIShowFilter>;

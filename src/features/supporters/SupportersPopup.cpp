@@ -5,7 +5,10 @@
 using namespace pro;
 using namespace pro::server;
 
-bool SupportersPopup::setup() {
+bool SupportersPopup::init() {
+    if (!Popup::init(358, 270, "GJ_square02.png"))
+        return false;
+
     m_noElasticity = true;
 
     this->setTitle("BetterEdit Supporters");
@@ -52,9 +55,6 @@ bool SupportersPopup::setup() {
     m_pageLabel->setScale(.35f);
     m_mainLayer->addChildAtPosition(m_pageLabel, Anchor::TopRight, ccp(-20, -20));
 
-    m_reqListener.bind(this, &SupportersPopup::onLoadPage);
-    m_mySupportListener.bind(this, &SupportersPopup::onLoadMySupport);
-
     if (HAS_PRO()) {
         m_mySupportMenu = CCMenu::create();
         m_mySupportMenu->setContentWidth(200);
@@ -66,7 +66,12 @@ bool SupportersPopup::setup() {
         m_mySupportMenu->setLayout(RowLayout::create()->setGap(-3));
         m_mainLayer->addChildAtPosition(m_mySupportMenu, Anchor::Bottom, ccp(0, 22));
 
-        m_mySupportListener.setFilter(server::getMySupport(*getProKey()));
+        m_mySupportListener.spawn(
+            server::getMySupport(*getProKey()),
+            [this](auto value) {
+                this->onLoadMySupport(std::move(value));
+            }
+        );
     }
 
     this->loadPage(0);
@@ -80,98 +85,87 @@ void SupportersPopup::loadPage(size_t page) {
     m_errorLabel->setVisible(false);
     m_supportersList->removeAllChildren();
     this->updatePageInfo();
-    m_reqListener.setFilter(server::getSupporters(page));
+    m_reqListener.spawn(
+        server::getSupporters(page),
+        [this](auto value) {
+            this->onLoadPage(std::move(value));
+        }
+    );
 }
-void SupportersPopup::onLoadPage(ServerRequest<Supporters>::Event* event) {
-    if (auto value = event->getValue()) {
-        m_loadingCircle->setVisible(false);
-        if (value->isOk()) {
-            auto data = value->unwrap();
-            m_maxPage = data.totalPublicSupporterCount > 0 ?
-                (data.totalPublicSupporterCount - 1) / SUPPORTERS_PER_PAGE : 
-                0;
-            this->updatePageInfo();
+void SupportersPopup::onLoadPage(Result<Supporters> result) {
+    m_loadingCircle->setVisible(false);
+    if (result.isOk()) {
+        auto data = std::move(result).unwrap();
+        m_maxPage = data.totalPublicSupporterCount > 0 ?
+            (data.totalPublicSupporterCount - 1) / SUPPORTERS_PER_PAGE : 
+            0;
+        this->updatePageInfo();
 
-            for (auto supporter : data.supporters) {
-                auto supporterCell = CCMenu::create();
-                supporterCell->setContentSize({
-                    m_supportersList->getContentWidth() / 2,
-                    m_supportersList->getContentHeight() / (SUPPORTERS_PER_PAGE * .5f)
-                });
-                supporterCell->ignoreAnchorPointForPosition(false);
+        for (auto supporter : data.supporters) {
+            auto supporterCell = CCMenu::create();
+            supporterCell->setContentSize({
+                m_supportersList->getContentWidth() / 2,
+                m_supportersList->getContentHeight() / (SUPPORTERS_PER_PAGE * .5f)
+            });
+            supporterCell->ignoreAnchorPointForPosition(false);
 
-                auto cube = SimplePlayer::create(supporter.info.cubeID);
-                supporter.info.update(cube);
-                cube->setScale(.7f);
-                supporterCell->addChildAtPosition(cube, Anchor::Left, ccp(supporterCell->getContentHeight() / 2, 0));
+            auto cube = SimplePlayer::create(supporter.info.cubeID);
+            supporter.info.update(cube);
+            cube->setScale(.7f);
+            supporterCell->addChildAtPosition(cube, Anchor::Left, ccp(supporterCell->getContentHeight() / 2, 0));
 
-                auto name = CCLabelBMFont::create(supporter.info.username.c_str(), "bigFont.fnt");
-                name->limitLabelWidth(supporterCell->getContentWidth() - supporterCell->getContentHeight() - 5, .5f, .1f);
-                name->setAnchorPoint({ 0, .5f });
-                name->setColor(getSupporterColor(supporter.supportedAmount));
+            auto name = CCLabelBMFont::create(supporter.info.username.c_str(), "bigFont.fnt");
+            name->limitLabelWidth(supporterCell->getContentWidth() - supporterCell->getContentHeight() - 5, .5f, .1f);
+            name->setAnchorPoint({ 0, .5f });
+            name->setColor(getSupporterColor(supporter.supportedAmount));
 
-                auto nameBtn = CCMenuItemSpriteExtra::create(
-                    name, this, menu_selector(SupportersPopup::onSupporter)
-                );
-                nameBtn->setTag(supporter.info.gdAccountID);
-                supporterCell->addChildAtPosition(
-                    nameBtn, Anchor::Left,
-                    ccp(supporterCell->getContentHeight() + name->getScaledContentWidth() / 2, 0)
-                );
-                
-                m_supportersList->addChild(supporterCell);
-            }
-            m_supportersList->updateLayout();
+            auto nameBtn = CCMenuItemSpriteExtra::create(
+                name, this, menu_selector(SupportersPopup::onSupporter)
+            );
+            nameBtn->setTag(supporter.info.gdAccountID);
+            supporterCell->addChildAtPosition(
+                nameBtn, Anchor::Left,
+                ccp(supporterCell->getContentHeight() + name->getScaledContentWidth() / 2, 0)
+            );
+            
+            m_supportersList->addChild(supporterCell);
         }
-        else {
-            m_errorLabel->setString(value->unwrapErr().c_str());
-            m_errorLabel->limitLabelWidth(m_size.width - 50, .5f, .1f);
-            m_errorLabel->setVisible(true);
-        }
+        m_supportersList->updateLayout();
+    }
+    else {
+        m_errorLabel->setString(std::move(result).unwrapErr().c_str());
+        m_errorLabel->limitLabelWidth(m_size.width - 50, .5f, .1f);
+        m_errorLabel->setVisible(true);
     }
 }
-void SupportersPopup::onLoadMySupport(ServerRequest<MySupport>::Event* event) {
-    if (auto res = event->getValue()) {
-        m_mySupportMenu->removeChildByID("loading-spinner");
-        if (res->isOk()) {
-            auto showMeToggle = CCMenuItemToggler::createWithStandardSprites(
-                this, menu_selector(SupportersPopup::onShowMe), .5f
-            );
-            showMeToggle->toggle(res->unwrap().showingPublicly);
-            m_mySupportMenu->addChild(showMeToggle);
+void SupportersPopup::onLoadMySupport(Result<MySupport> result) {
+    m_mySupportMenu->removeChildByID("loading-spinner");
+    if (result.isOk()) {
+        auto showMeToggle = CCMenuItemToggler::createWithStandardSprites(
+            this, menu_selector(SupportersPopup::onShowMe), .5f
+        );
+        showMeToggle->toggle(result.unwrap().showingPublicly);
+        m_mySupportMenu->addChild(showMeToggle);
 
-            auto showMeLabel = CCLabelBMFont::create("Show Me Publicly in This List", "bigFont.fnt");
-            showMeLabel->setLayoutOptions(
-                AxisLayoutOptions::create()
-                    ->setScalePriority(1)
-                    ->setScaleLimits(.1f, .5f)
-            );
-            m_mySupportMenu->addChild(showMeLabel);
-        }
-        else {
-            log::error("Failed to fetch user info: {}", res->unwrapErr());
-            auto errorLabel = CCLabelBMFont::create("Failed to Fetch User Info", "bigFont.fnt");
-            errorLabel->setColor(ccc3(255, 55, 0));
-            errorLabel->setLayoutOptions(
-                AxisLayoutOptions::create()
-                    ->setScaleLimits(.1f, .5f)
-            );
-            m_mySupportMenu->addChild(errorLabel);
-        }
-        m_mySupportMenu->updateLayout();
+        auto showMeLabel = CCLabelBMFont::create("Show Me Publicly in This List", "bigFont.fnt");
+        showMeLabel->setLayoutOptions(
+            AxisLayoutOptions::create()
+                ->setScalePriority(1)
+                ->setScaleLimits(.1f, .5f)
+        );
+        m_mySupportMenu->addChild(showMeLabel);
     }
-    else if (event->isCancelled()) {
-        m_mySupportMenu->removeChildByID("loading-spinner");
-    
-        auto errorLabel = CCLabelBMFont::create("Request Cancelled", "bigFont.fnt");
+    else {
+        log::error("Failed to fetch user info: {}", result.unwrapErr());
+        auto errorLabel = CCLabelBMFont::create("Failed to Fetch User Info", "bigFont.fnt");
         errorLabel->setColor(ccc3(255, 55, 0));
         errorLabel->setLayoutOptions(
             AxisLayoutOptions::create()
                 ->setScaleLimits(.1f, .5f)
         );
         m_mySupportMenu->addChild(errorLabel);
-        m_mySupportMenu->updateLayout();
     }
+    m_mySupportMenu->updateLayout();
 }
 void SupportersPopup::updatePageInfo() {
     m_nextPageBtn->setVisible(m_page < m_maxPage);
@@ -191,17 +185,20 @@ void SupportersPopup::onSupporter(CCObject* sender) {
 }
 void SupportersPopup::onShowMe(CCObject* sender) {
     if (auto key = pro::getProKey()) {
-        server::updateSupporter(*key, UpdateSupporter {
-            .showPublicly = !static_cast<CCMenuItemToggler*>(sender)->isToggled()
-        }).listen([popup = Ref(this)](auto) {
-            popup->loadPage(popup->m_page);
-        });
+        m_updateSupportListener.spawn(
+            server::updateSupporter(*key, UpdateSupporter {
+                .showPublicly = !static_cast<CCMenuItemToggler*>(sender)->isToggled(),
+            }),
+            [popup = Ref(this)](auto) {
+                popup->loadPage(popup->m_page);
+            }
+        );
     }
 }
 
 SupportersPopup* SupportersPopup::create() {
     auto ret = new SupportersPopup();
-    if (ret && ret->initAnchored(358, 270, "GJ_square02.png")) {
+    if (ret && ret->init()) {
         ret->autorelease();
         return ret;
     }

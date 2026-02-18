@@ -8,12 +8,15 @@
 using namespace pro;
 using namespace pro::server;
 
-class ActivatingLicensePopup : public Popup<ActivateLicensePopup*, std::string const&> {
+class ActivatingLicensePopup : public Popup {
 protected:
     Ref<ActivateLicensePopup> m_popup;
-    EventListener<ServerRequest<ActivatedLicense>> m_listener;
+    async::TaskHolder<Result<ActivatedLicense>> m_listener;
 
-    bool setup(ActivateLicensePopup* popup, std::string const& key) override {
+    bool init(ActivateLicensePopup* popup, std::string const& key) {
+        if (!Popup::init(180, 100, "square01_001.png", CCRectZero))
+            return false;
+
         m_closeBtn->setVisible(false);
         m_popup = popup;
 
@@ -22,61 +25,60 @@ protected:
         auto spinner = LoadingSpinner::create(40);
         m_mainLayer->addChildAtPosition(spinner, Anchor::Center, ccp(0, -10));
 
-        m_listener.bind(this, &ActivatingLicensePopup::onRequest);
-        m_listener.setFilter(server::activateLicense(key));
+        m_listener.spawn(
+            server::activateLicense(key),
+            [this](Result<ActivatedLicense> result) {
+                this->onRequest(std::move(result));
+            }
+        );
 
         return true;
     }
 
-    void onRequest(ServerRequest<ActivatedLicense>::Event* event) {
-        if (auto res = event->getValue()) {
-            if (res->isOk()) {
-                // Copy info first as onClose may free the listener which will free the event
-                auto info = **res;
-                this->onClose(nullptr);
-                m_popup->onClose(nullptr);
+    void onRequest(Result<ActivatedLicense> result) {
+        if (result.isOk()) {
+            // Copy info first as onClose may free the listener which will free the event
+            auto info = std::move(result).unwrap();
+            this->onClose(nullptr);
+            m_popup->onClose(nullptr);
 
-                auto save = saveProKey(info.token);
-                if (!save) {
-                    FLAlertLayer::create(
-                        "Unable to Activate",
-                        fmt::format(
-                            "Unable to save the BetterEdit License Key!\n"
-                            "<cr>Please contact HJfod for assistance</c>\n"
-                            "Error: {}",
-                            save.unwrapErr()
-                        ),
-                        "OK"
-                    )->show();
-                }
-                else {
-                    createQuickPopup(
-                        "Activated!",
-                        "<cp>Thank you for supporting BetterEdit! <3\n</c>"
-                        "<cy>Please restart</c> to finish setting up Supporter features :)",
-                        "OK", "Restart",
-                        [](auto*, bool btn2) {
-                            if (btn2) {
-                                game::restart(true);
-                            }
-                        }
-                    );
-                }
+            auto save = saveProKey(info.token);
+            if (!save) {
+                FLAlertLayer::create(
+                    "Unable to Activate",
+                    fmt::format(
+                        "Unable to save the BetterEdit License Key!\n"
+                        "<cr>Please contact HJfod for assistance</c>\n"
+                        "Error: {}",
+                        save.unwrapErr()
+                    ),
+                    "OK"
+                )->show();
             }
             else {
-                this->onClose(nullptr);
-                FLAlertLayer::create("Unable to Activate", res->unwrapErr(), "OK")->show();
+                createQuickPopup(
+                    "Activated!",
+                    "<cp>Thank you for supporting BetterEdit! <3\n</c>"
+                    "<cy>Please restart</c> to finish setting up Supporter features :)",
+                    "OK", "Restart",
+                    [](auto*, bool btn2) {
+                        if (btn2) {
+                            game::restart(true);
+                        }
+                    }
+                );
             }
         }
-        else if (event->isCancelled()) {
+        else {
             this->onClose(nullptr);
+            FLAlertLayer::create("Unable to Activate", std::move(result).unwrapErr(), "OK")->show();
         }
     }
 
 public:
     static ActivatingLicensePopup* create(ActivateLicensePopup* popup, std::string const& key) {
         auto ret = new ActivatingLicensePopup();
-        if (ret && ret->initAnchored(180, 100, popup, key, "square01_001.png", CCRectZero)) {
+        if (ret && ret->init(popup, key)) {
             ret->autorelease();
             return ret;
         }
@@ -85,7 +87,10 @@ public:
     }
 };
 
-bool ActivateLicensePopup::setup() {
+bool ActivateLicensePopup::init() {
+    if (!Popup::init(290, 200))
+        return false;
+
     this->setTitle("Activate Supporter");
 
     auto activateTitle = CCLabelBMFont::create("Enter Your Activation Key", "goldFont.fnt");
@@ -252,7 +257,7 @@ void ActivateLicensePopup::onActivate(CCObject*) {
 
 ActivateLicensePopup* ActivateLicensePopup::create() {
     auto ret = new ActivateLicensePopup();
-    if (ret && ret->initAnchored(290, 200)) {
+    if (ret && ret->init()) {
         ret->autorelease();
         return ret;
     }

@@ -19,7 +19,7 @@ class $modify(TriggerPreviewUI, EditorUI) {
         std::pair<float, float> previewRange;
         CCMenuItemToggler* previewToggle = nullptr;
         CCMenuItemSpriteExtra* previewKnob = nullptr;
-        OnUIHide onUIHide;
+        ListenerHandle onUIHide;
     };
 
     $override
@@ -33,7 +33,7 @@ class $modify(TriggerPreviewUI, EditorUI) {
 
         if (auto menu = this->querySelector("editor-buttons-menu")) {
             auto sprOff = EditorButtonSprite::createWithSpriteFrameName("preview-trigger.png"_spr, .85f, EditorBaseColor::Orange);
-            auto sprOn = EditorButtonSprite::createWithSpriteFrameName("preview-trigger-pause.png"_spr, .85f, EditorBaseColor::Pink);
+            auto sprOn = EditorButtonSprite::createWithSpriteFrameName("preview-trigger-stop.png"_spr, .85f, EditorBaseColor::Pink);
             sprOff->setContentSize(ccp(40, 40));
             sprOn->setContentSize(ccp(40, 40));
             m_fields->previewToggle = CCMenuItemToggler::create(sprOff, sprOn, this, menu_selector(TriggerPreviewUI::onPreviewTrigger));
@@ -42,10 +42,9 @@ class $modify(TriggerPreviewUI, EditorUI) {
             menu->addChild(m_fields->previewToggle);
             menu->updateLayout();
 
-            m_fields->onUIHide.setFilter(this);
-            m_fields->onUIHide.bind([this](UIShowEvent* ev) {
+            m_fields->onUIHide = UIShowEvent(this).listen([this](bool show) {
                 const bool PREVIEWING = !m_fields->preview.empty();
-                m_fields->previewToggle->setVisible(PREVIEWING || ev->show);
+                m_fields->previewToggle->setVisible(PREVIEWING || show);
             });
 
             this->schedule(schedule_selector(TriggerPreviewUI::onPreviewFrame));

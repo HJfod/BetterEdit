@@ -35,12 +35,12 @@ struct Pages final {
 
 class GroupSummaryPopup;
 
-class ObjectsListPopup : public Popup<std::string const&, GroupSummaryPopup*, CCArray*, bool> {
+class ObjectsListPopup : public Popup {
 protected:
     GroupSummaryPopup* m_popup;
     Ref<CCArray> m_objs;
 
-    bool setup(std::string const& title, GroupSummaryPopup* popup, CCArray* objects, bool render) override;
+    bool init(std::string const& title, GroupSummaryPopup* popup, CCArray* objects, bool render);
 
     void onSelect(CCObject*);
 
@@ -48,7 +48,7 @@ public:
     static ObjectsListPopup* create(std::string const& title, GroupSummaryPopup* popup, CCArray* objects, bool render);
 };
 
-class GroupSummaryPopup : public Popup<EditorUI*> {
+class GroupSummaryPopup : public Popup {
 protected:
     EditorUI* m_ui;
     CCNode* m_groupsListContainer;
@@ -67,7 +67,7 @@ protected:
 
     friend class ObjectsListPopup;
 
-    bool setup(EditorUI* ui) override;
+    bool init(EditorUI* ui);
 
     void loadPage(size_t page);
     void updatePages(size_t page = 0);

@@ -21,12 +21,11 @@ protected:
     CCMenuItemSpriteExtra* m_runBtn;
     CCMenuItemToggler* m_logsToggle;
     CCLabelBMFont* m_logsLabel;
-    EventListener<JsScriptLoggedFilter> m_logListener;
+    ListenerHandle m_logListener;
     CCScale9Sprite* m_selectionSprite;
 
     bool init(RunScriptPopup* popup, std::shared_ptr<JsScript> script, float width);
 
-    void onLogged(JsScriptLoggedEvent* ev);
     void onRun(CCObject*);
     void onLogs(CCObject*);
 
@@ -36,18 +35,17 @@ public:
     void updateState();
 };
 
-class RunScriptPopup : public Popup<> {
+class RunScriptPopup : public Popup {
 protected:
     ScrollLayer* m_list;
     ScrollLayer* m_logsList;
-    EventListener<JsScriptLoggedFilter> m_logListener;
+    ListenerHandle m_logListener;
     static std::weak_ptr<JsScript> s_selected;
 
-    bool setup() override;
+    bool init();
     void reloadList();
     void updateLogs();
 
-    void onLogged(JsScriptLoggedEvent* ev);
     void onReload(CCObject*);
 
     friend class ScriptNode;

@@ -24,7 +24,7 @@ class $modify(ObjectToolbox) {
 
 class $modify(GridUI, EditorUI) {
     struct Fields {
-        OnUIHide onUIHide;
+        ListenerHandle onUIHide;
     };
 
     $override
@@ -79,9 +79,8 @@ class $modify(GridUI, EditorUI) {
         }
         this->addChildAtPosition(container, Anchor::Top, offset, false);
 
-        m_fields->onUIHide.setFilter(UIShowFilter(this));
-        m_fields->onUIHide.bind([container](auto* ev) {
-            container->setVisible(ev->show);
+        m_fields->onUIHide = UIShowEvent(this).listen([container](bool show) {
+            container->setVisible(show);
         });
 
         this->updateGridConstSize();

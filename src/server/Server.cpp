@@ -5,6 +5,7 @@
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/binding/GJAccountManager.hpp>
 #include <Geode/loader/Mod.hpp>
+#include <arc/sync/Mutex.hpp>
 
 using namespace pro;
 using namespace pro::server;
@@ -105,8 +106,7 @@ public:
     using Value    = typename Extract::Value;
 
 private:
-    std::mutex m_mutex;
-    CacheMap<CacheKey, ServerRequest<Value>> m_cache;
+    arc::Mutex<CacheMap<CacheKey, Value>> m_cache;
 
 public:
     FunCache() = default;
@@ -114,33 +114,36 @@ public:
     FunCache(FunCache&&) = delete;
 
     template <class... Args>
-    ServerRequest<Value> get(Args const&... args) {
-        std::unique_lock lock(m_mutex);
-        if (auto v = m_cache.get(Extract::key(args...))) {
-            return *v;
+    arc::Future<Result<Value>> get(Args&&... args) {
+        ARC_FRAME();
+        auto key = Extract::key(args...);
+
+        auto cache = co_await m_cache.lock();
+        if (auto v = cache->get(key)) {
+            co_return Ok(*v);
         }
-        auto f = Extract::invoke(F, args...);
-        m_cache.add(Extract::key(args...), ServerRequest<Value>(f));
-        return f;
+        auto f = ARC_CO_UNWRAP(co_await Extract::invoke(F, std::forward<Args>(args)...));
+        cache->add(std::move(key), Value{f});
+        co_return Ok(f);
     }
 
     template <class... Args>
-    void remove(Args const&... args) {
-        std::unique_lock lock(m_mutex);
-        m_cache.remove(Extract::key(args...));
+    arc::Future<> remove(Args const&... args) {
+        auto cache = co_await m_cache.lock();
+        cache->remove(Extract::key(args...));
     }
 
-    size_t size() {
-        std::unique_lock lock(m_mutex);
-        return m_cache.size();
+    arc::Future<size_t> size() {
+        auto cache = co_await m_cache.lock();
+        co_return cache->size();
     }
-    void limit(size_t size) {
-        std::unique_lock lock(m_mutex);
-        m_cache.limit(size);
+    arc::Future<> limit(size_t size) {
+        auto cache = co_await m_cache.lock();
+        cache->limit(size);
     }
-    void clear() {
-        std::unique_lock lock(m_mutex);
-        m_cache.clear();
+    arc::Future<> clear() {
+        auto cache = co_await m_cache.lock();
+        cache->clear();
     }
 };
 
@@ -279,42 +282,36 @@ std::string server::getUserAgent() {
 }
 
 template <class T>
-ServerRequest<T> serverRequest(std::string_view method, web::WebRequest&& req, std::string const& subUrl) {
-    return req.send(method, std::string(BASE_URL) + subUrl).map(
-        [](web::WebResponse* response) -> Result<T> {
-            if (response->ok()) {
-                if constexpr (std::is_same_v<T, std::monostate>) {
-                    return Ok(std::monostate());
-                }
-                else if constexpr (std::is_same_v<T, std::string>) {
-                    auto json = response->json();
-                    if (!json) return Err("Invalid JSON response - this is a bug in BetterEdit!");
-                    auto value = json.unwrap();
-                    if (!value.isString()) return Err("Invalid response schema - this is a bug in BetterEdit!");
-                    return Ok(value.asString().unwrap());
-                }
-                else {
-                    auto json = response->json();
-                    if (!json) return Err("Invalid JSON response - this is a bug in BetterEdit!");
-                    auto res = T::parse(*json);
-                    if (!res) return Err("Invalid response schema - this is a bug in BetterEdit! (Error: {})", res.unwrapErr());
-                    return Ok(*res);
-                }
-            }
-            else {
-                if (auto json = response->json()) {
-                    auto value = json.unwrap();
-                    if (value.isString()) {
-                        return Err(value.asString().unwrap());
-                    }
-                }
-                return Err("Unknown error (code {})", response->code());
-            }
-        },
-        [](web::WebProgress* p) -> uint8_t {
-            return static_cast<uint8_t>(p->downloadProgress().value_or(0));
+ServerRequest<T> serverRequest(std::string method, web::WebRequest req, std::string subUrl) {
+    web::WebResponse response = co_await req.send(method, BASE_URL + subUrl);
+    if (response.ok()) {
+        if constexpr (std::is_same_v<T, std::monostate>) {
+            co_return Ok(std::monostate());
         }
-    );
+        else if constexpr (std::is_same_v<T, std::string>) {
+            auto json = response.json();
+            if (!json) co_return Err("Invalid JSON response - this is a bug in BetterEdit!");
+            auto value = json.unwrap();
+            if (!value.isString()) co_return Err("Invalid response schema - this is a bug in BetterEdit!");
+            co_return Ok(value.asString().unwrap());
+        }
+        else {
+            auto json = response.json();
+            if (!json) co_return Err("Invalid JSON response - this is a bug in BetterEdit!");
+            auto res = T::parse(*json);
+            if (!res) co_return Err("Invalid response schema - this is a bug in BetterEdit! (Error: {})", res.unwrapErr());
+            co_return Ok(*res);
+        }
+    }
+    else {
+        if (auto json = response.json()) {
+            auto value = json.unwrap();
+            if (value.isString()) {
+                co_return Err(value.asString().unwrap());
+            }
+        }
+        co_return Err("Unknown error (code {})", response.code());
+    }
 }
 
 ServerRequest<Supporters> server::getSupporters(size_t page, bool useCache) {
@@ -328,7 +325,7 @@ ServerRequest<Supporters> server::getSupporters(size_t page, bool useCache) {
     return serverRequest<Supporters>("GET", std::move(req), "/supporters");
 }
 
-ServerRequest<MySupport> server::getMySupport(std::string const& token, bool useCache) {
+ServerRequest<MySupport> server::getMySupport(std::string token, bool useCache) {
     if (useCache) {
         return getCache<getMySupport>().get(token);
     }
@@ -340,7 +337,7 @@ ServerRequest<MySupport> server::getMySupport(std::string const& token, bool use
 
 // No caching for POST requests
 
-ServerRequest<ActivatedLicense> server::activateLicense(std::string const& key) {
+ServerRequest<ActivatedLicense> server::activateLicense(std::string key) {
     auto req = web::WebRequest();
     req.userAgent(getUserAgent());
     req.bodyJSON(matjson::makeObject({
@@ -351,7 +348,7 @@ ServerRequest<ActivatedLicense> server::activateLicense(std::string const& key) 
     return serverRequest<ActivatedLicense>("POST", std::move(req), "/activate");
 }
 
-ServerRequest<std::monostate> server::deactivateLicense(std::string const& token, std::string const& deviceID) {
+ServerRequest<std::monostate> server::deactivateLicense(std::string token, std::string deviceID) {
     auto req = web::WebRequest();
     req.userAgent(getUserAgent());
     req.bodyJSON(matjson::makeObject({
@@ -361,7 +358,7 @@ ServerRequest<std::monostate> server::deactivateLicense(std::string const& token
     return serverRequest<std::monostate>("POST", std::move(req), "/deactivate");
 }
 
-ServerRequest<std::string> server::checkLicense(std::string const& token) {
+ServerRequest<std::string> server::checkLicense(std::string token) {
     auto req = web::WebRequest();
     req.userAgent(getUserAgent());
     req.bodyJSON(matjson::makeObject({
@@ -370,9 +367,9 @@ ServerRequest<std::string> server::checkLicense(std::string const& token) {
     return serverRequest<std::string>("POST", std::move(req), "/check");
 }
 
-ServerRequest<CreatedProductKey> server::createNewLicense(std::string const& token) {
+ServerRequest<CreatedProductKey> server::createNewLicense(std::string token) {
     // Invalidate caches
-    clearCaches();
+    co_await clearCaches();
     
     auto req = web::WebRequest();
     req.userAgent(getUserAgent());
@@ -380,12 +377,12 @@ ServerRequest<CreatedProductKey> server::createNewLicense(std::string const& tok
         { "token", token },
         { "supported_amount", 0 },
     }));
-    return serverRequest<CreatedProductKey>("POST", std::move(req), "/new-license");
+    co_return co_await serverRequest<CreatedProductKey>("POST", std::move(req), "/new-license");
 }
 
-ServerRequest<std::monostate> server::updateCachedInfo(std::string const& token, CachedGDInfo const& info) {
+ServerRequest<std::monostate> server::updateCachedInfo(std::string token, CachedGDInfo info) {
     // Invalidate caches
-    clearCaches();
+    co_await clearCaches();
 
     auto req = web::WebRequest();
     req.userAgent(getUserAgent());
@@ -400,12 +397,12 @@ ServerRequest<std::monostate> server::updateCachedInfo(std::string const& token,
             { "glow_color", info.glowColor },
         }) }
     }));
-    return serverRequest<std::monostate>("POST", std::move(req), "/gd-account-info");
+    co_return co_await serverRequest<std::monostate>("POST", std::move(req), "/gd-account-info");
 }
 
-ServerRequest<std::monostate> server::updateSupporter(std::string const& token, UpdateSupporter const& info) {
+ServerRequest<std::monostate> server::updateSupporter(std::string token, UpdateSupporter info) {
     // Invalidate caches
-    clearCaches();
+    co_await clearCaches();
 
     auto req = web::WebRequest();
     req.userAgent(getUserAgent());
@@ -413,12 +410,12 @@ ServerRequest<std::monostate> server::updateSupporter(std::string const& token, 
         { "token", token },
         { "show_publicly", info.showPublicly },
     }));
-    return serverRequest<std::monostate>("POST", std::move(req), "/my-support");
+    co_return co_await serverRequest<std::monostate>("POST", std::move(req), "/my-support");
 }
 
-ServerRequest<UpdatedDeviceInfo> server::updateDeviceInfo(std::string const& token, std::string const& deviceID, UpdateDeviceInfo const& info) {
+ServerRequest<UpdatedDeviceInfo> server::updateDeviceInfo(std::string token, std::string deviceID, UpdateDeviceInfo info) {
     // Invalidate caches
-    clearCaches();
+    co_await clearCaches();
 
     auto req = web::WebRequest();
     req.userAgent(getUserAgent());
@@ -427,10 +424,10 @@ ServerRequest<UpdatedDeviceInfo> server::updateDeviceInfo(std::string const& tok
         { "device_id", deviceID },
         { "device_name", info.deviceName },
     }));
-    return serverRequest<UpdatedDeviceInfo>("POST", std::move(req), "/update-device");
+    co_return co_await serverRequest<UpdatedDeviceInfo>("POST", std::move(req), "/update-device");
 }
 
-void server::clearCaches() {
-    getCache<&getSupporters>().clear();
-    getCache<&getMySupport>().clear();
+arc::Future<void> server::clearCaches() {
+    co_await getCache<&getSupporters>().clear();
+    co_await getCache<&getMySupport>().clear();
 }

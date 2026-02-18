@@ -5,8 +5,8 @@
 
 using namespace geode::prelude;
 
-struct UpdateBackupListEvent : public Event {
-    bool closeList = false;
+struct UpdateBackupListEvent : public Event<UpdateBackupListEvent, bool(bool)> {
+    using Event::Event;
 };
 
 class BackupItem : public CCNode {

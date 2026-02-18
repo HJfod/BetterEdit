@@ -12,7 +12,7 @@ using namespace geode::prelude;
 
 class $modify(TypeInUI, EditorUI) {
     struct Fields {
-        OnUIHide onUIHide;
+        ListenerHandle onUIHide;
     };
 
     bool init(LevelEditorLayer* lel) {
@@ -67,11 +67,10 @@ class $modify(TypeInUI, EditorUI) {
         // setVisible is used by GD but setOpacity is not :-)
         static_cast<CCSprite*>(this->getChildByID("layer-locked-sprite"))->setOpacity(0);
 
-        m_fields->onUIHide.setFilter(UIShowFilter(this));
-        m_fields->onUIHide.bind([this, nextFreeBtn](auto* ev) {
-            m_currentLayerLabel->setVisible(ev->show);
-            nextFreeBtn->setVisible(ev->show);
-            this->updateLockBtn(ev->show);
+        m_fields->onUIHide = UIShowEvent(this).listen([this, nextFreeBtn](bool show) {
+            m_currentLayerLabel->setVisible(show);
+            nextFreeBtn->setVisible(show);
+            this->updateLockBtn(show);
         });
         
         return true;

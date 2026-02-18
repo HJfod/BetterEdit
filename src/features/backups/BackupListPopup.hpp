@@ -7,14 +7,14 @@
 
 using namespace geode::prelude;
 
-class BackupListPopup : public PopupWithCorners<GJGameLevel*> {
+class BackupListPopup : public PopupWithCorners {
 protected:
     Ref<GJGameLevel> m_level;
     ScrollLayer* m_scrollLayer;
     CCLabelBMFont* m_statusLabel;
-    EventListener<EventFilter<UpdateBackupListEvent>> m_updateListListener;
+    ListenerHandle m_updateListListener;
 
-    bool setup(GJGameLevel* level) override;
+    bool init(GJGameLevel* level);
     void updateList();
 
     void onNewBackup(CCObject*);

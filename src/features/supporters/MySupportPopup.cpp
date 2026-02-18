@@ -12,100 +12,107 @@ using namespace geode::prelude;
 using namespace pro;
 using namespace pro::server;
 
-class ActivateNewDevicePopup : public Popup<> {
+class ActivateNewDevicePopup : public Popup {
 protected:
-    EventListener<ServerRequest<CreatedProductKey>> m_listener;
+    async::TaskHolder<Result<CreatedProductKey>> m_listener;
     LoadingSpinner* m_loading;
 
-    bool setup() override {
+    bool init() {
+        if (!Popup::init(290, 200))
+            return false;
+
         this->setTitle("Activate New Device");
 
         m_loading = LoadingSpinner::create(45);
         m_mainLayer->addChildAtPosition(m_loading, Anchor::Center);
 
-        m_listener.bind(this, &ActivateNewDevicePopup::onRequest);
-        m_listener.setFilter(server::createNewLicense(*getProKey()));
+        m_listener.spawn(
+            server::createNewLicense(*getProKey()),
+            [this](Result<CreatedProductKey> result) {
+                this->onRequest(std::move(result));
+            }
+        );
 
         handleTouchPriority(this);
         
         return true;
     }
 
-    void onRequest(ServerRequest<CreatedProductKey>::Event* event) {
-        if (auto res = event->getValue()) {
-            if (res->isOk()) {
-                m_loading->setVisible(false);
+    void onRequest(Result<CreatedProductKey> result) {
+        if (result.isOk()) {
+            m_loading->setVisible(false);
 
-                auto useInfoLabel = CCLabelBMFont::create(
-                    "Enter this code on the other device:", "bigFont.fnt"
-                );
-                useInfoLabel->setColor({ 0, 255, 55 });
-                useInfoLabel->setScale(.35f);
-                m_mainLayer->addChildAtPosition(useInfoLabel, Anchor::Center, ccp(0, 40));
+            auto key = std::move(result).unwrap().key;
 
-                auto keyBG = CCScale9Sprite::create("square02_001.png");
-                keyBG->setOpacity(90);
-                keyBG->setScale(.5f);
-                keyBG->setContentSize(ccp(250, 30) * 2);
+            auto useInfoLabel = CCLabelBMFont::create(
+                "Enter this code on the other device:", "bigFont.fnt"
+            );
+            useInfoLabel->setColor({ 0, 255, 55 });
+            useInfoLabel->setScale(.35f);
+            m_mainLayer->addChildAtPosition(useInfoLabel, Anchor::Center, ccp(0, 40));
 
-                auto keyLabel = CCLabelBMFont::create((**res).key.c_str(), "bigFont.fnt");
-                keyLabel->limitLabelWidth(keyBG->getContentWidth() - 10, 1.f, .1f);
-                keyBG->addChildAtPosition(keyLabel, Anchor::Center);
+            auto keyBG = CCScale9Sprite::create("square02_001.png");
+            keyBG->setOpacity(90);
+            keyBG->setScale(.5f);
+            keyBG->setContentSize(ccp(250, 30) * 2);
 
-                m_mainLayer->addChildAtPosition(keyBG, Anchor::Center, ccp(0, 15));
+            auto keyLabel = CCLabelBMFont::create(key.c_str(), "bigFont.fnt");
+            keyLabel->limitLabelWidth(keyBG->getContentWidth() - 10, 1.f, .1f);
+            keyBG->addChildAtPosition(keyLabel, Anchor::Center);
 
-                auto copySpr = ButtonSprite::create("Copy to Clipboard", "goldFont.fnt", "GJ_button_05.png", .8f);
-                copySpr->setScale(.6f);
-                auto copyBtn = CCMenuItemExt::createSpriteExtra(
-                    copySpr, [key = (**res).key](auto) {
-                        if (clipboard::write(key)) {
-                            Notification::create("Copied to Clipboard", NotificationIcon::Success)->show();
-                        }
-                        else {
-                            Notification::create("Failed to Copy", NotificationIcon::Error)->show();
-                        }
+            m_mainLayer->addChildAtPosition(keyBG, Anchor::Center, ccp(0, 15));
+
+            auto copySpr = ButtonSprite::create("Copy to Clipboard", "goldFont.fnt", "GJ_button_05.png", .8f);
+            copySpr->setScale(.6f);
+            auto copyBtn = CCMenuItemExt::createSpriteExtra(
+                copySpr, [key](auto) {
+                    if (clipboard::write(key)) {
+                        Notification::create("Copied to Clipboard", NotificationIcon::Success)->show();
                     }
-                );
-                m_buttonMenu->addChildAtPosition(copyBtn, Anchor::Center, ccp(0, -15));
+                    else {
+                        Notification::create("Failed to Copy", NotificationIcon::Error)->show();
+                    }
+                }
+            );
+            m_buttonMenu->addChildAtPosition(copyBtn, Anchor::Center, ccp(0, -15));
 
-                auto useInfo2Label = CCLabelBMFont::create(
-                    "You can see this code again later!",
-                    "bigFont.fnt"
-                );
-                useInfo2Label->setAlignment(CCTextAlignment::kCCTextAlignmentCenter);
-                useInfo2Label->setColor({ 55, 255, 255 });
-                useInfo2Label->setScale(.35f);
-                m_mainLayer->addChildAtPosition(useInfo2Label, Anchor::Center, ccp(0, -40));
+            auto useInfo2Label = CCLabelBMFont::create(
+                "You can see this code again later!",
+                "bigFont.fnt"
+            );
+            useInfo2Label->setAlignment(CCTextAlignment::kCCTextAlignmentCenter);
+            useInfo2Label->setColor({ 55, 255, 255 });
+            useInfo2Label->setScale(.35f);
+            m_mainLayer->addChildAtPosition(useInfo2Label, Anchor::Center, ccp(0, -40));
 
-                auto useInfo3Label = CCLabelBMFont::create(
-                    "You need to be logged in on the same account on the other \n"
-                    "device. If you have an alt account, contact HJfod!",
-                    "bigFont.fnt"
-                );
-                useInfo3Label->setColor({ 205, 205, 205 });
-                useInfo3Label->setOpacity(205);
-                useInfo3Label->setAlignment(CCTextAlignment::kCCTextAlignmentCenter);
-                useInfo3Label->setScale(.25f);
-                m_mainLayer->addChildAtPosition(useInfo3Label, Anchor::Bottom, ccp(0, 20));
-            }
-            else {
-                this->onClose(nullptr);
-                FLAlertLayer::create(
-                    "Error",
-                    fmt::format("Unable to create a new activation key: {}", res->unwrapErr()),
-                    "OK"
-                )->show();
-            }
+            auto useInfo3Label = CCLabelBMFont::create(
+                "You need to be logged in on the same account on the other \n"
+                "device. If you have an alt account, contact HJfod!",
+                "bigFont.fnt"
+            );
+            useInfo3Label->setColor({ 205, 205, 205 });
+            useInfo3Label->setOpacity(205);
+            useInfo3Label->setAlignment(CCTextAlignment::kCCTextAlignmentCenter);
+            useInfo3Label->setScale(.25f);
+            m_mainLayer->addChildAtPosition(useInfo3Label, Anchor::Bottom, ccp(0, 20));
         }
-        else if (event->isCancelled()) {
+        else {
             this->onClose(nullptr);
+            FLAlertLayer::create(
+                "Error",
+                fmt::format(
+                    "Unable to create a new activation key: {}",
+                    std::move(result).unwrapErr()
+                ),
+                "OK"
+            )->show();
         }
     }
 
 public:
     static ActivateNewDevicePopup* create() {
         auto ret = new ActivateNewDevicePopup();
-        if (ret && ret->initAnchored(290, 200)) {
+        if (ret && ret->init()) {
             ret->autorelease();
             return ret;
         }
@@ -114,7 +121,10 @@ public:
     }
 };
 
-bool MySupportPopup::setup() {
+bool MySupportPopup::init() {
+    if (!PopupWithCorners::init(358, 270, "GJ_square02.png"))
+        return false;
+
     m_noElasticity = true;
 
     this->setTitle("Supporter Status");
@@ -231,7 +241,6 @@ bool MySupportPopup::setup() {
     );
     m_buttonMenu->addChildAtPosition(reloadBtn, Anchor::BottomLeft, ccp(2, 2));
 
-    m_mySupportListener.bind(this, &MySupportPopup::onLoadData);
     this->reloadData();
 
     return true;
@@ -260,137 +269,141 @@ void MySupportPopup::reloadData() {
 
     m_errorLabel->setString("");
     if (auto key = getProKey()) {
-        m_mySupportListener.setFilter(server::getMySupport(*key));
+        m_mySupportListener.spawn(
+            server::getMySupport(*key),
+            [this](Result<pro::server::MySupport> result) {
+                this->onLoadData(std::move(result));
+            }
+        );
     }
     else {
         this->setError("Supporter Key not Found");
     }
 }
-void MySupportPopup::onLoadData(ServerRequest<MySupport>::Event* event) {
-    if (auto res = event->getValue()) {
-        if (res->isErr()) {
-            log::error("Error loading user data: {}", res->unwrapErr());
-            this->setError("Error loading data");
-            return;
-        }
-        this->setError("");
-        auto data = res->unwrap();
-
-        m_playerName->setString(data.gdInfo.username.c_str());
-        m_playerName->setColor(pro::getSupporterColor(data.supportedAmount));
-        m_playerName->limitLabelWidth(m_playerInfo->getContentWidth() - m_playerInfo->getContentHeight() * 1.5f, .5f, .1f);
-        m_playerName->setVisible(true);
-
-        data.gdInfo.update(m_playerIcon);
-        m_playerIcon->setVisible(true);
-
-        m_showMeToggle->toggle(data.showingPublicly);
-        m_showMeToggle->setVisible(true);
-
-        m_supporterSince->setString(fmt::format("Supporter since {:%d/%m/%Y}", data.supportedOn).c_str());
-        m_supporterSince->setVisible(true);
-
-        for (auto device : data.devices) {
-            auto node = CCMenu::create();
-            node->ignoreAnchorPointForPosition(false);
-            node->setContentSize({
-                m_devicesList->getContentWidth(),
-                m_devicesList->getContentHeight() / server::MAX_DEVICE_COUNT
-            });
-
-            float offset = 5;
-
-            auto nameLoading = LoadingSpinner::create(10);
-            nameLoading->setID(fmt::format("loading-{}", device.deviceID));
-            nameLoading->setVisible(false);
-            node->addChildAtPosition(nameLoading, Anchor::Left, ccp(offset + 5, 0));
-            
-            auto nameInput = TextInput::create(100, "Unnamed");
-            nameInput->setScale(.6f);
-            nameInput->setID(fmt::format("input-{}", device.deviceID));
-            nameInput->setString(device.deviceName);
-            nameInput->setTextAlign(TextInputAlign::Left);
-            node->addChildAtPosition(nameInput, Anchor::Left, ccp(offset, 0), ccp(0, .5f));
-
-            offset += nameInput->getScaledContentWidth() + 5;
-            offset += 5;
-
-            auto updateNameSpr = CCSprite::createWithSpriteFrameName("GJ_updateBtn_001.png");
-            updateNameSpr->setScale(.3f);
-            auto updateNameBtn = CCMenuItemSpriteExtra::create(
-                updateNameSpr, this, menu_selector(MySupportPopup::onUpdateDeviceName)
-            );
-            updateNameBtn->setID(fmt::format("update-name-btn-{}", device.deviceID));
-            updateNameBtn->setUserObject(CCString::create(device.deviceID));
-            node->addChildAtPosition(updateNameBtn, Anchor::Left, ccp(offset, 0));
-
-            offset += 20;
-
-            auto platform = CCLabelBMFont::create(
-                PlatformID::toString(device.devicePlatform.m_value),
-                "goldFont.fnt"
-            );
-            platform->setScale(.35f);
-            node->addChildAtPosition(platform, Anchor::Left, ccp(offset, 5), ccp(0, .5f));
-
-            auto date = CCLabelBMFont::create(
-                fmt::format("Activated on {:%d/%m/%Y}", device.activatedOn).c_str(),
-                "bigFont.fnt"
-            );
-            date->setScale(.3f);
-            node->addChildAtPosition(date, Anchor::Left, ccp(offset, -5), ccp(0, .5f));
-
-            offset += 50;
-
-            if (getDeviceSalt() == device.deviceID) {
-                auto thisDeviceLabel = CCLabelBMFont::create("(This device)", "bigFont.fnt");
-                thisDeviceLabel->setColor({ 0, 255, 155 });
-                thisDeviceLabel->setScale(.3f);
-                node->addChildAtPosition(thisDeviceLabel, Anchor::Left, ccp(offset, 5), ccp(0, .5f));
-            }
-
-            // If there's only one device, refuse to deactivate as that would 
-            // lock the user out of their supporter status
-            if (data.devices.size() > 1) {
-                auto deleteSpr = CCSprite::createWithSpriteFrameName("GJ_resetBtn_001.png");
-                deleteSpr->setScale(.5f);
-                auto deleteBtn = CCMenuItemSpriteExtra::create(
-                    deleteSpr, this, menu_selector(MySupportPopup::onDeleteDevice)
-                );
-                deleteBtn->setUserObject(CCString::create(device.deviceID));
-                node->addChildAtPosition(deleteBtn, Anchor::Right, ccp(-12, 0));
-            }
-
-            m_devicesList->addChild(node);
-        }
-        if (data.devices.size() < server::MAX_DEVICE_COUNT) {
-            auto menu = CCMenu::create();
-            menu->ignoreAnchorPointForPosition(false);
-            menu->setContentSize({
-                m_devicesList->getContentWidth(),
-                m_devicesList->getContentHeight() / server::MAX_DEVICE_COUNT
-            });
-
-            auto addAnotherSpr = ButtonSprite::create("Activate New Device", "bigFont.fnt", "GJ_button_05.png", .75f);
-            addAnotherSpr->setScale(.35f);
-            auto addAnotherBtn = CCMenuItemSpriteExtra::create(
-                addAnotherSpr, this, menu_selector(MySupportPopup::onActivateNewDevice)
-            );
-            menu->addChildAtPosition(addAnotherBtn, Anchor::Center);
-
-            m_devicesList->addChild(menu);
-        }
-        m_devicesList->updateLayout();
-        handleTouchPriority(this);
+void MySupportPopup::onLoadData(Result<pro::server::MySupport> result) {
+    if (result.isErr()) {
+        log::error("Error loading user data: {}", std::move(result).unwrapErr());
+        this->setError("Error loading data");
+        return;
     }
-    else if (event->isCancelled()) {
-        this->setError("Request Cancelled");
+    this->setError("");
+    auto data = std::move(result).unwrap();
+
+    m_playerName->setString(data.gdInfo.username.c_str());
+    m_playerName->setColor(pro::getSupporterColor(data.supportedAmount));
+    m_playerName->limitLabelWidth(m_playerInfo->getContentWidth() - m_playerInfo->getContentHeight() * 1.5f, .5f, .1f);
+    m_playerName->setVisible(true);
+
+    data.gdInfo.update(m_playerIcon);
+    m_playerIcon->setVisible(true);
+
+    m_showMeToggle->toggle(data.showingPublicly);
+    m_showMeToggle->setVisible(true);
+
+    m_supporterSince->setString(fmt::format("Supporter since {:%d/%m/%Y}", data.supportedOn).c_str());
+    m_supporterSince->setVisible(true);
+
+    for (auto device : data.devices) {
+        auto node = CCMenu::create();
+        node->ignoreAnchorPointForPosition(false);
+        node->setContentSize({
+            m_devicesList->getContentWidth(),
+            m_devicesList->getContentHeight() / server::MAX_DEVICE_COUNT
+        });
+
+        float offset = 5;
+
+        auto nameLoading = LoadingSpinner::create(10);
+        nameLoading->setID(fmt::format("loading-{}", device.deviceID));
+        nameLoading->setVisible(false);
+        node->addChildAtPosition(nameLoading, Anchor::Left, ccp(offset + 5, 0));
+        
+        auto nameInput = TextInput::create(100, "Unnamed");
+        nameInput->setScale(.6f);
+        nameInput->setID(fmt::format("input-{}", device.deviceID));
+        nameInput->setString(device.deviceName);
+        nameInput->setTextAlign(TextInputAlign::Left);
+        node->addChildAtPosition(nameInput, Anchor::Left, ccp(offset, 0), ccp(0, .5f));
+
+        offset += nameInput->getScaledContentWidth() + 5;
+        offset += 5;
+
+        auto updateNameSpr = CCSprite::createWithSpriteFrameName("GJ_updateBtn_001.png");
+        updateNameSpr->setScale(.3f);
+        auto updateNameBtn = CCMenuItemSpriteExtra::create(
+            updateNameSpr, this, menu_selector(MySupportPopup::onUpdateDeviceName)
+        );
+        updateNameBtn->setID(fmt::format("update-name-btn-{}", device.deviceID));
+        updateNameBtn->setUserObject(CCString::create(device.deviceID));
+        node->addChildAtPosition(updateNameBtn, Anchor::Left, ccp(offset, 0));
+
+        offset += 20;
+
+        auto platform = CCLabelBMFont::create(
+            PlatformID::toString(device.devicePlatform.m_value).data(),
+            "goldFont.fnt"
+        );
+        platform->setScale(.35f);
+        node->addChildAtPosition(platform, Anchor::Left, ccp(offset, 5), ccp(0, .5f));
+
+        auto date = CCLabelBMFont::create(
+            fmt::format("Activated on {:%d/%m/%Y}", device.activatedOn).c_str(),
+            "bigFont.fnt"
+        );
+        date->setScale(.3f);
+        node->addChildAtPosition(date, Anchor::Left, ccp(offset, -5), ccp(0, .5f));
+
+        offset += 50;
+
+        if (getDeviceSalt() == device.deviceID) {
+            auto thisDeviceLabel = CCLabelBMFont::create("(This device)", "bigFont.fnt");
+            thisDeviceLabel->setColor({ 0, 255, 155 });
+            thisDeviceLabel->setScale(.3f);
+            node->addChildAtPosition(thisDeviceLabel, Anchor::Left, ccp(offset, 5), ccp(0, .5f));
+        }
+
+        // If there's only one device, refuse to deactivate as that would 
+        // lock the user out of their supporter status
+        if (data.devices.size() > 1) {
+            auto deleteSpr = CCSprite::createWithSpriteFrameName("GJ_resetBtn_001.png");
+            deleteSpr->setScale(.5f);
+            auto deleteBtn = CCMenuItemSpriteExtra::create(
+                deleteSpr, this, menu_selector(MySupportPopup::onDeleteDevice)
+            );
+            deleteBtn->setUserObject(CCString::create(device.deviceID));
+            node->addChildAtPosition(deleteBtn, Anchor::Right, ccp(-12, 0));
+        }
+
+        m_devicesList->addChild(node);
     }
+    if (data.devices.size() < server::MAX_DEVICE_COUNT) {
+        auto menu = CCMenu::create();
+        menu->ignoreAnchorPointForPosition(false);
+        menu->setContentSize({
+            m_devicesList->getContentWidth(),
+            m_devicesList->getContentHeight() / server::MAX_DEVICE_COUNT
+        });
+
+        auto addAnotherSpr = ButtonSprite::create("Activate New Device", "bigFont.fnt", "GJ_button_05.png", .75f);
+        addAnotherSpr->setScale(.35f);
+        auto addAnotherBtn = CCMenuItemSpriteExtra::create(
+            addAnotherSpr, this, menu_selector(MySupportPopup::onActivateNewDevice)
+        );
+        menu->addChildAtPosition(addAnotherBtn, Anchor::Center);
+
+        m_devicesList->addChild(menu);
+    }
+    m_devicesList->updateLayout();
+    handleTouchPriority(this);
 }
 
 void MySupportPopup::onReload(CCObject*) {
-    server::clearCaches();
-    this->reloadData();
+    m_reloadListener.spawn(
+        server::clearCaches(),
+        [this]() {
+            this->reloadData();
+        }
+    );
 }
 void MySupportPopup::onClose(CCObject* sender) {
     PopupWithCorners::onClose(sender);
@@ -402,12 +415,15 @@ void MySupportPopup::onShowMe(CCObject* sender) {
     if (auto key = pro::getProKey()) {
         m_showMeToggleLoading->setVisible(true);
         m_showMeToggle->setVisible(false);
-        server::updateSupporter(*key, UpdateSupporter {
-            .showPublicly = !static_cast<CCMenuItemToggler*>(sender)->isToggled()
-        }).listen([popup = Ref(this)](auto) {
-            popup->m_showMeToggle->setVisible(true);
-            popup->m_showMeToggleLoading->setVisible(false);
-        });
+        m_updateSupportListener.spawn(
+            server::updateSupporter(*key, UpdateSupporter {
+                .showPublicly = !static_cast<CCMenuItemToggler*>(sender)->isToggled()
+            }),
+            [popup = Ref(this)](auto) {
+                popup->m_showMeToggle->setVisible(true);
+                popup->m_showMeToggleLoading->setVisible(false);
+            }
+        );
     }
 }
 void MySupportPopup::onDevicesInfo(CCObject*) {
@@ -437,24 +453,27 @@ void MySupportPopup::onDeleteDevice(CCObject* sender) {
             if (auto key = getProKey(); key && btn2) {
                 popup->m_devicesList->removeAllChildren();
                 popup->m_devicesLoading->setVisible(true);
-                server::deactivateLicense(*key, id).listen([popup, id](auto) {
-                    if (id == getDeviceSalt()) {
-                        createQuickPopup(
-                            "Deactivated!",
-                            "<cp>This device has been deactivated!</c>\n"
-                            "<cy>Please restart</c> to clean up any leftover resources.",
-                            "OK", "Restart",
-                            [](auto*, bool btn2) {
-                                if (btn2) {
-                                    game::restart(true);
+                popup->m_updateSupportListener.spawn(
+                    server::deactivateLicense(*key, id),
+                    [popup, id](auto) {
+                        if (id == getDeviceSalt()) {
+                            createQuickPopup(
+                                "Deactivated!",
+                                "<cp>This device has been deactivated!</c>\n"
+                                "<cy>Please restart</c> to clean up any leftover resources.",
+                                "OK", "Restart",
+                                [](auto*, bool btn2) {
+                                    if (btn2) {
+                                        game::restart(true);
+                                    }
                                 }
-                            }
-                        );
+                            );
+                        }
+                        else {
+                            popup->reloadData();
+                        }
                     }
-                    else {
-                        popup->reloadData();
-                    }
-                });
+                );
             }
         }
     );
@@ -473,16 +492,19 @@ void MySupportPopup::onUpdateDeviceName(CCObject* sender) {
         updateBtn->setVisible(false);
         input->setVisible(false);
 
-        server::updateDeviceInfo(*token, id, UpdateDeviceInfo {
-            .deviceName = input->getString()
-        }).listen([spinner, updateBtn, input](Result<UpdatedDeviceInfo>* res) {
-            spinner->setVisible(false);
-            updateBtn->setVisible(true);
-            input->setVisible(true);
-            if (*res) {
-                input->setString((**res).deviceName);
+        m_updateDeviceListener.spawn(
+            server::updateDeviceInfo(*token, id, UpdateDeviceInfo {
+                .deviceName = input->getString()
+            }),
+            [spinner, updateBtn, input](Result<UpdatedDeviceInfo> res) {
+                spinner->setVisible(false);
+                updateBtn->setVisible(true);
+                input->setVisible(true);
+                if (res.isOk()) {
+                    input->setString(std::move(res).unwrap().deviceName);
+                }
             }
-        });
+        );
     }
 }
 void MySupportPopup::onActivateNewDevice(CCObject*) {
@@ -491,7 +513,7 @@ void MySupportPopup::onActivateNewDevice(CCObject*) {
 
 MySupportPopup* MySupportPopup::create() {
     auto ret = new MySupportPopup();
-    if (ret && ret->initAnchored(358, 270, "GJ_square02.png")) {
+    if (ret && ret->init()) {
         ret->autorelease();
         return ret;
     }

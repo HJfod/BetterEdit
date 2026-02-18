@@ -58,22 +58,8 @@ public:
     bool tick();
 };
 
-class JsScriptLoggedEvent : public Event {
-public:
-    std::shared_ptr<JsScript> script;
-    JsScriptLoggedEvent(std::shared_ptr<JsScript> script);
-};
-class JsScriptLoggedFilter : public EventFilter<JsScriptLoggedEvent> {
-protected:
-    std::shared_ptr<JsScript> m_script;
-
-public:
-    using Callback = void(JsScriptLoggedEvent*);
-
-    JsScriptLoggedFilter() = default;
-    JsScriptLoggedFilter(std::shared_ptr<JsScript> script);
-
-    ListenerResult handle(std::function<Callback> fn, JsScriptLoggedEvent* ev);
+struct JsScriptLoggedEvent : public Event<JsScriptLoggedEvent, bool(), std::shared_ptr<JsScript>> {
+    using Event::Event;
 };
 
 class ScriptManager final {
