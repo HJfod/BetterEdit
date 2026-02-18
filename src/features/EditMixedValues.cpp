@@ -42,7 +42,9 @@ struct MixedValuesConfig final {
     Type (*getDefault)(GameObject*);
     Type (*get)(GameObject*);
     Type (*set)(GameObject*, Type, Direction);
-    void (*useNextFreeValues)(GameObject*, std::set<T>&) = nullptr;
+    char const* placeholderInputText = nullptr;
+    std::function<void(CCObject*)> nextFreeFunction{};
+    CCPoint nextFreeBtnOffset = ccp(0, 0);
 };
 
 template <class T>
@@ -88,7 +90,7 @@ protected:
             this->addChildAtPosition(m_title, Anchor::Top, ccp(0, -10));
         }
 
-        m_input = TextInput::create(50, "Num");
+        m_input = TextInput::create(50, m_config.placeholderInputText ? m_config.placeholderInputText : "Num");
         m_input->setCallback([this](std::string const& text) {
             this->override(numFromString<T>(text).unwrapOr(0), false);
         });
@@ -114,7 +116,7 @@ protected:
         m_arrowRightBtn->setID("arrow-right-button"_spr);
         this->addChildAtPosition(m_arrowRightBtn, Anchor::Right, ccp(-15, -10));
 
-        if (m_config.useNextFreeValues) {
+        if (m_config.nextFreeFunction) {
             auto nextFreeSpr = CCSprite::createWithSpriteFrameName("GJ_plus2Btn_001.png");
             nextFreeSpr->setScale(.8f);
             m_nextFreeBtn = CCMenuItemSpriteExtra::create(
@@ -122,7 +124,7 @@ protected:
             );
             m_nextFreeBtn->setTag(1);
             m_nextFreeBtn->setID("next-free-button"_spr);
-            this->addChildAtPosition(m_nextFreeBtn, Anchor::TopRight, ccp(-6, -10));
+            this->addChildAtPosition(m_nextFreeBtn, Anchor::TopRight, ccp(-6, -10) + m_config.nextFreeBtnOffset);
         }
         
         auto unmixSpr = ButtonSprite::create("Unmix", "goldFont.fnt", "GJ_button_05.png", .8f);
@@ -151,18 +153,10 @@ protected:
         }
         this->updateLabel();
     }
-    void onNextFree(CCObject*) {
-        std::set<T> usedLayers;
-        for (auto obj : CCArrayExt<GameObject*>(LevelEditorLayer::get()->m_objects)) {
-            m_config.useNextFreeValues(obj, usedLayers);
-        }
-        T nextFree;
-        for (nextFree = m_config.limits.min; nextFree < m_config.limits.max; nextFree += 1) {
-            if (!usedLayers.contains(nextFree)) {
-                break;
-            }
-        }
-        this->override(nextFree);
+    void onNextFree(CCObject* sender) {
+        // m_config.nextFreeFunction will never be an empty object because the
+        // button for the callback is only created if the function is present
+        m_config.nextFreeFunction(sender);
     }
 
     bool isMixed() const {
@@ -263,6 +257,11 @@ public:
             m_unmixBtn->setVisible(false);
             m_input->setString(fmt::format("{}", m_config.get(m_targets.front())));
         }
+
+        // Show placeholder text if no value is set and custom placeholder exists
+        if (m_input->getString() == "0" && m_config.placeholderInputText) {
+            m_input->setString("");
+        }
     }
 };
 
@@ -285,10 +284,7 @@ class $modify(SetGroupIDLayer) {
                     obj->m_editorLayer = value;
                     return value;
                 },
-                .useNextFreeValues = +[](GameObject* obj, std::set<short>& values) {
-                    values.insert(obj->m_editorLayer);
-                    values.insert(obj->m_editorLayer2);
-                },
+                .nextFreeFunction = [this](CCObject* sender) { this->onNextFreeEditorLayer1(sender); }
             },
             "Editor L", "GJ_arrow_02_001.png"
         )->replace(m_editorLayerInput, m_mainLayer->querySelector("editor-layer-menu"));
@@ -306,10 +302,7 @@ class $modify(SetGroupIDLayer) {
                     obj->m_editorLayer2 = value;
                     return value;
                 },
-                .useNextFreeValues = +[](GameObject* obj, std::set<short>& values) {
-                    values.insert(obj->m_editorLayer);
-                    values.insert(obj->m_editorLayer2);
-                },
+                .nextFreeFunction = [this](CCObject* sender) { this->onNextFreeEditorLayer2(sender); }
             },
             "Editor L2", "GJ_arrow_03_001.png"
         )->replace(m_editorLayer2Input, m_mainLayer->querySelector("editor-layer-2-menu"));
@@ -361,7 +354,8 @@ class $modify(SetGroupIDLayer) {
                     .set = +[](GameObject* obj, int value, Direction) {
                         static_cast<EffectGameObject*>(obj)->m_ordValue = value;
                         return value;
-                    }
+                    },
+                    .placeholderInputText = "ORD"
                 },
                 nullptr, "GJ_arrow_02_001.png"
             )->replace(m_orderInput, m_mainLayer->querySelector("channel-order-menu"));
@@ -382,7 +376,10 @@ class $modify(SetGroupIDLayer) {
                     .set = +[](GameObject* obj, int value, Direction) {
                         static_cast<EffectGameObject*>(obj)->m_channelValue = value;
                         return value;
-                    }
+                    },
+                    .placeholderInputText = "CH",
+                    .nextFreeFunction = [this](CCObject* sender) { this->onNextFreeOrderChannel(sender); },
+                    .nextFreeBtnOffset = ccp(-128, -30)
                 },
                 nullptr, "GJ_arrow_02_001.png"
             )->replace(m_channelInput, m_mainLayer->querySelector("channel-menu"));
