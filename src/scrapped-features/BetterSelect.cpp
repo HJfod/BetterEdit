@@ -1,3 +1,5 @@
+#ifdef BETTEREDIT_INCLUDE_SCRAPPED_WARP
+
 #include <Geode/modify/EditorUI.hpp>
 #include <Geode/modify/GameObject.hpp>
 #include <Geode/modify/GJTransformControl.hpp>
@@ -208,3 +210,5 @@ class $modify(EditorUI) {
         }
     }
 };
+
+#endif

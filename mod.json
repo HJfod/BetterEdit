@@ -608,14 +608,6 @@
 			"enable-if": "saved:developer-mode",
 			"enable-if-description": "This Feature is Heavily WIP!"
 		},
-		"better-warp-tools": {
-			"type": "bool",
-			"default": false,
-			"name": "??? WIP #2",
-			"description": "Coming soon!",
-			"enable-if": "saved:has-pro && saved:developer-mode",
-			"enable-if-description": "This Feature is Supporter-Only & Heavily WIP!"
-		},
 		"trigger-previews": {
 			"type": "bool",
 			"default": false,
