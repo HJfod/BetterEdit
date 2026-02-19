@@ -1,13 +1,13 @@
 # BetterEdit 6
 
-## v6.10.0-beta.2
- * Make all <cp>Supporter</c> features <cg>free for everyone</c>! Thank you all for helping me out of a bad situation <3
- * Support for Geode 2.2081. Keybinds are now settings
- * Some features are still unfinished, but I will be cleaning them up over the coming days! Please report any issues to me over Discord @hjfod or through GitHub issues :)
-
 ## v6.10.0-beta.1
- * Add <cj>Next Free Offset</c> to color selection page
- * Fix visuals glitches with color selection page
+ * Make all <cp>Supporter</c> features <cg>free for everyone</c>! Thank you all for helping me out of a bad situation <3
+ * Support for Geode 2.2081
+ * Some features are still unfinished, but I will be cleaning them up over the coming days! Please report any issues to me over Discord <co>@hjfod</c> or through <ca>GitHub issues</c> :)
+ * <cp>Color Selection</c> page improvements: add <cj>Next Free Offset</c>, fix visual glitches, and remember last page you were on (thank you to <cy>NinKaz</c>!)
+ * Fix visual glitches with the <co>Edit Group</c> popup (thank you to <cy>NinKaz</c>!)
+ * Fix <co>Scale</c> and <cj>Rotate</c> controls sometimes not being clickable (thank you to <cy>NinKaz</c>!)
+ * Other minor fixes and improvements (thank you to <cj>Cvolton</c>!)
 
 ## v6.10.0-alpha.12
  * Add option to disable <ca>New Mouse Controls</c> (for Mac users who want to use their trackpad)
