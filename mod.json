@@ -1,5 +1,5 @@
 {
-	"geode": "5.0.0-beta.2",
+	"geode": "5.0.0-beta.3",
 	"version": "6.10.0",
 	"gd": {
 		"win": "2.2081",
@@ -265,295 +265,335 @@
 			"name": "View Mode",
 			"description": "Toggle the View Tab",
 			"category": "editor",
-			"default": "4"
+			"default": ["Four"],
+			"migrate-from": "hjfod.betteredit/view-mode"
 		},
 		"keybind-rotate-45-ccw": {
 			"type": "keybind",
 			"name": "Rotate 45 CCW",
 			"description": "Rotate the Selected Object(s) 45 Degrees Counter-Clockwise",
 			"category": "editor",
-			"default": "Shift+Q"
+			"default": ["Shift+Q"],
+			"migrate-from": "hjfod.betteredit/rotate-45-ccw"
 		},
         "keybind-rotate-45-cw": {
 			"type": "keybind",
         	"name": "Rotate 45 CW",
         	"description": "Rotate the Selected Object(s) 45 Degrees Clockwise",
 			"category": "editor",
-			"default": "Shift+E"
+			"default": ["Shift+E"],
+			"migrate-from": "hjfod.betteredit/rotate-45-cw"
 		},
         "keybind-rotate-snap": {
 			"type": "keybind",
         	"name": "Rotate Snap",
         	"description": "Rotate the Selected Object(s) to Match Adjacent Slopes",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/rotate-snap"
 		},
         "keybind-show-scale": {
 			"type": "keybind",
         	"name": "Toggle Scale Control",
         	"description": "Toggle the object scaling controls",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/show-scale"
 		},
         "keybind-show-scale-xy": {
 			"type": "keybind",
         	"name": "Toggle Scale X/Y Control",
         	"description": "Toggle the object scaling by X/Y controls",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/show-scale-xy"
 		},
         "keybind-save-level": {
 			"type": "keybind",
         	"name": "Save Level",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/save-level"
 		},
-        "keybind-pause-resume-playtest": {
+		"keybind-pause-resume-playtest": {
 			"type": "keybind",
         	"name": "Pause/Resume Playtest",
         	"description": "Pauses or resumes the current playtest. Does not start playtesting",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/pause-resume-playtest"
 		},
         "keybind-build-helper": {
 			"type": "keybind",
         	"name": "Build Helper",
         	"description": "Executes the <cy>Build Helper</c> feature, aka remaps Groud and Color IDs of the selected objects to unused ones",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/build-helper"
 		},
         "keybind-create-loop": {
 			"type": "keybind",
         	"name": "Create loop",
         	"description": "Executes the <cy>Create Loop</c> feature, aka makes a Spawn Trigger loop",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/create-loop"
 		},
         "keybind-align-x": {
 			"type": "keybind",
         	"name": "Align X",
         	"description": "Executes the <cy>Align X</c> feature, aka aligns all of the selected objects along the X axis",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/align-x"
 		},
         "keybind-align-y": {
 			"type": "keybind",
         	"name": "Align Y",
         	"description": "Executes the <cy>Align Y</c> feature, aka aligns all of the selected objects along the Y axis",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/align-y"
 		},
         "keybind-toggle-link-controls": {
 			"type": "keybind",
         	"name": "Toggle Link Controls",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/toggle-link-controls"
 		},
-
-        "open-edit-object": {
+        "keybind-open-edit-object": {
 			"type": "keybind",
         	"name": "Edit Object",
         	"description": "Open the <cb>Edit Object</c> popup for the selected objects",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/open-edit-object"
 		},
         "keybind-open-edit-group": {
 			"type": "keybind",
         	"name": "Edit Group",
         	"description": "Open the <co>Edit Group</c> popup for the selected objects",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/open-edit-group"
 		},
         "keybind-open-edit-special": {
 			"type": "keybind",
         	"name": "Edit Special",
         	"description": "Open the <cj>Edit Special</c> popup for the selected objects",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/open-edit-special"
 		},
         "keybind-copy-values": {
 			"type": "keybind",
         	"name": "Copy Values",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/copy-values"
 		},
         "keybind-paste-state": {
 			"type": "keybind",
         	"name": "Paste State",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/paste-state"
 		},
         "keybind-paste-color": {
 			"type": "keybind",
         	"name": "Paste Color",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/paste-color"
 		},
-
-        "enlarge-grid-size": {
+        "keybind-enlarge-grid-size": {
 			"type": "keybind",
         	"name": "Increase Grid Size",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/enlarge-grid-size"
 		},
         "keybind-ensmallen-grid-size": {
 			"type": "keybind",
         	"name": "Decrease Grid Size",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/ensmallen-grid-size"
 		},
-
-        "select-all": {
+        "keybind-select-all": {
 			"type": "keybind",
         	"name": "Select All",
         	"description": "Select All Object(s)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/select-all"
 		},
         "keybind-select-all-left": {
 			"type": "keybind",
         	"name": "Select All Left",
         	"description": "Select All Object(s) Left of the Screen",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/select-all-left"
 		},
         "keybind-select-all-right": {
 			"type": "keybind",
         	"name": "Select All Right",
         	"description": "Select All Object(s) Right of the Screen",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/select-all-right"
 		},
         "keybind-show-ui": {
 			"type": "keybind",
         	"name": "Show UI",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/show-ui"
 		},
         "keybind-hide-ui": {
 			"type": "keybind",
         	"name": "Hide UI",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/hide-ui"
 		},
         "keybind-group-summary": {
 			"type": "keybind",
         	"name": "Open Group Summary",
         	"description": "Opens up <co>Group Summary</c>, aka a list showing which groups are in use",
 			"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/group-summary"
 		},
         "keybind-move-obj-half-left": {
 			"type": "keybind",
         	"name": "Move Object Half Left",
         	"description": "Move Selected Object(s) half of a Block left (15 Units)",
         	"category": "editor",
-			"default": "Ctrl+Alt+A"
+			"default": ["Ctrl+Alt+A"],
+			"migrate-from": "hjfod.betteredit/move-obj-half-left"
 		},
         "keybind-move-obj-half-right": {
 			"type": "keybind",
         	"name": "Move Object Half Right",
         	"description": "Move Selected Object(s) half of a Block right (15 Units)",
         	"category": "editor",
-			"default": "Ctrl+Alt+D"
+			"default": ["Ctrl+Alt+D"],
+			"migrate-from": "hjfod.betteredit/move-obj-half-right"
 		},
         "keybind-move-obj-half-up": {
 			"type": "keybind",
         	"name": "Move Object Half Up",
         	"description": "Move Selected Object(s) half of a Block up (15 Units)",
         	"category": "editor",
-			"default": "Ctrl+Alt+W"
+			"default": ["Ctrl+Alt+W"],
+			"migrate-from": "hjfod.betteredit/move-obj-half-up"
 		},
         "keybind-move-obj-half-down": {
 			"type": "keybind",
         	"name": "Move Object Half Down",
         	"description": "Move Selected Object(s) half of a Block down (15 Units)",
         	"category": "editor",
-			"default": "Ctrl+Alt+S"
+			"default": ["Ctrl+Alt+S"],
+			"migrate-from": "hjfod.betteredit/move-obj-half-down"
 		},
         "keybind-move-obj-quarter-left": {
 			"type": "keybind",
         	"name": "Move Object Quarter Left",
         	"description": "Move Selected Object(s) quarter of a Block left (7.5 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-quarter-left"
 		},
         "keybind-move-obj-quarter-right": {
 			"type": "keybind",
         	"name": "Move Object Quarter Right",
         	"description": "Move Selected Object(s) quarter of a Block right (7.5 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-quarter-right"
 		},
         "keybind-move-obj-quarter-up": {
 			"type": "keybind",
         	"name": "Move Object Quarter Up",
         	"description": "Move Selected Object(s) quarter of a Block up (7.5 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-quarter-up"
 		},
         "keybind-move-obj-quarter-down": {
 			"type": "keybind",
         	"name": "Move Object Quarter Down",
         	"description": "Move Selected Object(s) quarter of a Block down (7.5 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-quarter-down"
 		},
         "keybind-move-obj-eighth-left": {
 			"type": "keybind",
         	"name": "Move Object Eighth Left",
         	"description": "Move Selected Object(s) eighth of a Block left (3.75 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-eighth-left"
 		},
         "keybind-move-obj-eighth-right": {
 			"type": "keybind",
         	"name": "Move Object Eighth Right",
         	"description": "Move Selected Object(s) eighth of a Block right (3.75 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-eighth-right"
 		},
         "keybind-move-obj-eighth-up": {
 			"type": "keybind",
         	"name": "Move Object Eighth Up",
         	"description": "Move Selected Object(s) eighth of a Block up (3.75 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-eighth-up"
 		},
         "keybind-move-obj-eighth-down": {
 			"type": "keybind",
         	"name": "Move Object Eighth Down",
         	"description": "Move Selected Object(s) eighth of a Block down (3.75 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-eighth-down"
 		},
         "keybind-move-obj-big-left": {
 			"type": "keybind",
         	"name": "Move Object Big Left",
         	"description": "Move Selected Object(s) 5 Blocks left (150 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-big-left"
 		},
         "keybind-move-obj-big-right": {
 			"type": "keybind",
         	"name": "Move Object Big Right",
         	"description": "Move Selected Object(s) 5 Blocks right (150 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-big-right"
 		},
         "keybind-move-obj-big-up": {
 			"type": "keybind",
         	"name": "Move Object Big Up",
         	"description": "Move Selected Object(s) 5 Blocks up (150 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-big-up"
 		},
         "keybind-move-obj-big-down": {
 			"type": "keybind",
         	"name": "Move Object Big Down",
         	"description": "Move Selected Object(s) 5 Blocks down (150 Units)",
         	"category": "editor",
-			"default": ""
+			"default": [],
+			"migrate-from": "hjfod.betteredit/move-obj-big-down"
 		},
 		"wip-section": {
 			"type": "title",
