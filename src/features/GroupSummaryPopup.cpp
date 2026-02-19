@@ -324,8 +324,9 @@ void GroupSummaryPopup::loadPage(size_t page) {
         itemContainer->ignoreAnchorPointForPosition(false);
         itemContainer->setContentSize(itemSize);
 
-        auto itemBG = CCScale9Sprite::create("square02b_small.png");
-        itemBG->setContentSize(itemSize);
+        auto itemBG = NineSlice::create("square02b_001.png");
+        itemBG->setScale(.5f);
+        itemBG->setContentSize(itemSize / itemBG->getScale());
         itemBG->setColor(ccc3(0, 0, 0));
         itemBG->setOpacity(90);
         itemContainer->addChildAtPosition(itemBG, Anchor::Center);
@@ -365,9 +366,11 @@ void GroupSummaryPopup::loadPage(size_t page) {
                     triggers->getScale()
             );
             triggers->setLayout(
-                RowLayout::create()
+                SimpleRowLayout::create()
                     ->setGap(2.5f)
-                    ->setAxisAlignment(AxisAlignment::Start)
+                    ->setMainAxisAlignment(MainAxisAlignment::Start)
+                    ->setMainAxisScaling(AxisScaling::Fit)
+                    ->setCrossAxisScaling(AxisScaling::Grow)
             );
         }
 
