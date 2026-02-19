@@ -513,7 +513,7 @@ class $modify(GroupSummaryEditorUI, EditorUI) {
         if (!EditorUI::init(lel))
             return false;
 
-        if (!HAS_PRO() || !Mod::get()->getSettingValue<bool>("group-summary")) {
+        if (!Mod::get()->getSettingValue<bool>("group-summary")) {
             return true;
         }
 

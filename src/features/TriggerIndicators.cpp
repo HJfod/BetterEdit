@@ -524,7 +524,7 @@ class $modify(DrawGridLayer) {
     void draw() {
         DrawGridLayer::draw();
 
-        if (!HAS_PRO() || !Mod::get()->getSavedValue<bool>("show-trigger-indicators", true)) {
+        if (!Mod::get()->getSavedValue<bool>("show-trigger-indicators", true)) {
             return;
         }
 

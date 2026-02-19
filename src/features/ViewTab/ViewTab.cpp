@@ -233,7 +233,7 @@ struct $modify(ViewTabUI, EditorUI) {
         // todo: show this one as disabled if there are too many objects
         auto showAll = this->createViewToggleMSV(
             "v-indicators-all.png"_spr,
-            "trigger-indicators-show-all", HAS_PRO(),
+            "trigger-indicators-show-all", false,
             [clusterOutlines](bool enabled) {
                 be::enableButton(clusterOutlines, enabled);
             }
@@ -244,7 +244,7 @@ struct $modify(ViewTabUI, EditorUI) {
         );
         std::array<BEMenuItemToggler*, 4> indToggles { ttt, showAll, clusterOutlines, blocky };
         auto indToggle = this->createViewToggleMSV(
-            "v-indicators.png"_spr, "show-trigger-indicators", HAS_PRO(),
+            "v-indicators.png"_spr, "show-trigger-indicators", true,
             [indToggles, clusterOutlines, showAll](bool enabled) {
                 for (auto toggle : indToggles) {
                     be::enableButton(toggle, enabled);
@@ -256,20 +256,6 @@ struct $modify(ViewTabUI, EditorUI) {
         btns->addObject(indToggle);
         for (auto toggle : indToggles) {
             btns->addObject(toggle);
-        }
-
-        if (!HAS_PRO()) {
-            be::enableButton(indToggle, false, true);
-            indToggle->setUserObject(CCString::create("<cj>Trigger Indicators</c>"));
-            indToggle->setTarget(this, menu_selector(ViewTabUI::onProOnlyFeature));
-            indToggle->setEnabled(false);
-            
-            for (auto toggle : indToggles) {
-                be::enableButton(toggle, false, true);
-                toggle->setEnabled(false);
-                toggle->setUserObject(CCString::create("<cj>Trigger Indicators</c>"));
-                toggle->setTarget(this, menu_selector(ViewTabUI::onProOnlyFeature));
-            }
         }
 
         auto buttonBar = EditButtonBar::create(
