@@ -23,7 +23,6 @@ You can install BetterEdit through [Geode](https://geode-sdk.org). After install
 **BetterEdit needs the following mods to also be installed:**
 
  * [NodeIDs](https://geode-sdk.org/mods/geode.node-ids)
- * [Custom Keybinds (Windows only)](https://geode-sdk.org/mods/geode.custom-keybinds)
  * [GMD API](https://geode-sdk.org/mods/hjfod.gmd-api)
  * [Level ID API](https://geode-sdk.org/mods/cvolton.level-id-api)
 
