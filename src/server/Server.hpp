@@ -2,7 +2,7 @@
 
 #include <Geode/DefaultInclude.hpp>
 #include <Geode/binding/SimplePlayer.hpp>
-#include <Geode/utils/Async.hpp>
+#include <Geode/utils/async.hpp>
 #include <optional>
 #include <chrono>
 
