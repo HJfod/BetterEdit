@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.10.0
+ * Make all <cp>Supporter</c> features <cg>free for everyone</c>! Thank you all for helping me out of a bad situation <3
+
 ## v6.10.0-beta.1
  * Add <cj>Next Free Offset</c> to color selection page
  * Fix visuals glitches with color selection page
