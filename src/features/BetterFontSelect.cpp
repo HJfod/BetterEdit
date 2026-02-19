@@ -19,6 +19,9 @@ class $modify(BetterSelectFontLayer, SelectFontLayer) {
     void onSelect(CCObject* sender) {
         int s = static_cast<CCNode*>(sender)->getTag();
         GameManager::get()->m_levelEditorLayer->updateLevelFont(s);
+        if (auto EUI = EditorUI::get()) {
+            EUI->resetSelectedObjectsColor();
+        }
 
         for (size_t i = 0; i < SelFont::buttons.size(); i++) {
             if (i != static_cast<size_t>(s)) {
