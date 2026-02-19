@@ -1,7 +1,9 @@
 # BetterEdit 6
 
-## v6.10.0
+## v6.10.0-beta.2
  * Make all <cp>Supporter</c> features <cg>free for everyone</c>! Thank you all for helping me out of a bad situation <3
+ * Support for Geode 2.2081. Keybinds are now settings
+ * Some features are still unfinished, but I will be cleaning them up over the coming days! Please report any issues to me over Discord @hjfod or through GitHub issues :)
 
 ## v6.10.0-beta.1
  * Add <cj>Next Free Offset</c> to color selection page
