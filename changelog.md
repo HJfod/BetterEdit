@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.10.0-beta.2
+ * Mark <cy>Editor Tab API</c> as incompatible. Please disable the mod to use BetterEdit! This does mean that the other editor mods by Alphalaneous are currently incompatible with BetterEdit; we will sort this out soon so the mods work together but <co>this is a quick fix</c>!
+
 ## v6.10.0-beta.1
  * Make all <cp>Supporter</c> features <cg>free for everyone</c>! Thank you all for helping me out of a bad situation <3
  * Support for Geode 2.2081

@@ -21,6 +21,9 @@
 		"hjfod.gmd-api": "1.5.0",
 		"cvolton.level-id-api": "2.0.0"
 	},
+	"incompatibilities": {
+		"alphalaneous.editortab_api": "2.0.0"
+	},
 	"resources": {
 		"files": [
 			"scripts/*.js",
