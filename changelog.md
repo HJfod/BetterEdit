@@ -2,6 +2,8 @@
 
 ## v6.10.0-beta.2
  * Mark <cy>Editor Tab API</c> as incompatible. Please disable the mod to use BetterEdit! This does mean that the other editor mods by Alphalaneous are currently incompatible with BetterEdit; we will sort this out soon so the mods work together but <co>this is a quick fix</c>!
+ * Add option to disable the <cp>Changelog</c> showing with every new update
+ * Allow <cj>configuring autosave rate</c> more precisely
 
 ## v6.10.0-beta.1
  * Make all <cp>Supporter</c> features <cg>free for everyone</c>! Thank you all for helping me out of a bad situation <3

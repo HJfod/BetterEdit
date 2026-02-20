@@ -7,14 +7,10 @@
 using namespace geode::prelude;
 
 static std::chrono::seconds getAutoSaveInterval() {
-    auto rate = Mod::get()->template getSettingValue<std::string>("auto-save-rate");
-    switch (hash(rate.c_str())) {
-        case hash("Every 10 Minutes"): return std::chrono::minutes(10);
-        case hash("Every 20 Minutes"): return std::chrono::minutes(20);
-        case hash("Every Hour"): return std::chrono::hours(1);
-        default:
-        case hash("Never"): return std::chrono::seconds(0);
+    if (!Mod::get()->getSettingValue<bool>("enable-auto-save")) {
+        return std::chrono::seconds(0);
     }
+    return std::chrono::minutes(Mod::get()->getSettingValue<int64_t>("auto-save-rate"));
 }
 
 class $modify(AutoSaveUI, EditorUI) {

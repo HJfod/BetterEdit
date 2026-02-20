@@ -42,16 +42,37 @@
 		]
 	},
 	"settings": {
+		"meta-section": {
+			"type": "title",
+			"name": "BetterEdit Settings"
+		},
+		"enable-changelog-popup": {
+			"type": "bool",
+			"name": "Show Changelog at Startup",
+			"description": "Show the <cj>Changelog</c> for new updates when starting up BetterEdit. Important updates that everyone should know about might override this behaviour, but if you disable this, you at least won't get changelogs for every single new Alpha version :) You can still always view the Changelog through the <cg>BetterEdit popup</c> in the <cj>Editor Pause Menu</c>",
+			"default": true
+		},
 		"level-section": {
 			"type": "title",
 			"name": "Level Settings"
 		},
+		"enable-auto-save": {
+			"type": "bool",
+			"name": "Enable Auto-Save",
+			"description": "Automatically saves the level in the editor at the specified rate, as well as creates a backup. The backups created by autosave get automatically deleted after 3 new ones have been created to avoid using too much disk space",
+			"default": true
+		},
 		"auto-save-rate": {
-			"type": "string",
-			"default": "Every 10 Minutes",
-			"name": "Auto-save",
-			"one-of": ["Every 10 Minutes", "Every 20 Minutes", "Every Hour", "Never"],
-			"description": "Automatically saves the level in the editor at the specified rate, as well as creates a backup. The backups created by autosave get automatically deleted after 3 new ones have been created to avoid using too much disk space"
+			"type": "int",
+			"default": 10,
+			"min": 1,
+			"max": 60,
+			"name": "Auto-Save Rate (minutes)",
+			"description": "How often the level should be auto-saved.",
+			"control": {
+				"big-arrows": true
+			},
+			"enable-if": "enable-auto-save"
 		},
 		"quick-save": {
 			"type": "bool",
@@ -157,7 +178,7 @@
 		},
 		"redesigned-uis-section": {
 			"type": "title",
-			"name": "Redesigned/improved UIs"
+			"name": "Redesigned/Improved UIs"
 		},
 		"view-menu": {
 			"type": "bool",
@@ -194,11 +215,6 @@
 			"description": "If you're using the <cr>New Color Menu</c>, this makes the color channel buttons a bit larger",
 			"enable-if": "new-color-menu"
 		},
-		"pro-section": {
-			"type": "title",
-			"name": "Supporter Settings",
-			"description": "These settings are for features currently only available to <cp>Supporters</c>, but will be made free in the next major update!"
-		},
 		"group-summary": {
 			"type": "bool",
 			"default": true,
@@ -209,7 +225,7 @@
 		"trigger-indicator-section": {
 			"type": "title",
 			"name": "Trigger Indicators",
-			"description": "<cj>Trigger Indicators</c> draw lines between triggers and their target objects. This feauture is currently only available to <cp>Supporters</c>, but will be made free in the next update!"
+			"description": "<cj>Trigger Indicators</c> draw lines between triggers and their target objects"
 		},
 		"trigger-indicator-colors": {
 			"type": "string",

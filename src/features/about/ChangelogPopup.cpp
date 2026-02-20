@@ -49,7 +49,7 @@ static std::string parseChangelog(std::optional<VersionInfo> const& since) {
 }
 
 bool ChangelogPopup::init(std::optional<VersionInfo> const& since) {
-    if (!Popup::init(340, 225, "GJ_square02.png"))
+    if (!Popup::init(340, 230, "GJ_square02.png"))
         return false;
 
     m_noElasticity = true;
@@ -59,20 +59,37 @@ bool ChangelogPopup::init(std::optional<VersionInfo> const& since) {
 
     auto full = parseChangelog(since);
 
-    auto textArea = MDTextArea::create(full, ccp(250, 140));
-    m_mainLayer->addChildAtPosition(textArea, Anchor::Center);
-
     if (since) {
-        auto note = CCLabelBMFont::create(
-            "View the full changelog history\nin the BetterEdit About menu!",
-            "bigFont.fnt"
+        full =
+            "> View the full changelog history in the "
+            "<cg>BetterEdit popup</c> from the editor pause layer!\n\n" + full;
+        
+        auto toggleMenu = CCMenu::create();
+        toggleMenu->setContentWidth(230);
+
+        auto toggleLabel = CCLabelBMFont::create("Show Changelog on Startup", "bigFont.fnt");
+        toggleLabel->setScale(.4f);
+        toggleMenu->addChildAtPosition(toggleLabel, Anchor::Left, ccp(25, 0), ccp(0, .5f));
+        
+        m_showToggle = CCMenuItemToggler::createWithStandardSprites(
+            this, menu_selector(ChangelogPopup::onToggleShow), .5f
         );
-        note->setColor({ 55, 255, 155 });
-        note->setScale(.35f);
-        m_mainLayer->addChildAtPosition(note, Anchor::Bottom, ccp(0, 25));
+        m_showToggle->m_notClickable = true;
+        m_showToggle->toggle(Mod::get()->getSettingValue<bool>("enable-changelog-popup"));
+        toggleMenu->addChildAtPosition(m_showToggle, Anchor::Left, ccp(10, 0));
+
+        m_mainLayer->addChildAtPosition(toggleMenu, Anchor::Bottom, ccp(0, 22));
     }
 
+    auto textArea = MDTextArea::create(full, ccp(250, 150));
+    m_mainLayer->addChildAtPosition(textArea, Anchor::Center);
+
     return true;
+}
+
+void ChangelogPopup::onToggleShow(CCObject*) {
+    Mod::get()->setSettingValue("enable-changelog-popup", !m_showToggle->m_toggled);
+    m_showToggle->toggle(Mod::get()->getSettingValue<bool>("enable-changelog-popup"));
 }
 
 ChangelogPopup* ChangelogPopup::create(std::optional<VersionInfo> const& since) {
