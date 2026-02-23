@@ -1,7 +1,10 @@
 # BetterEdit 6
 
+## v6.10.0-beta.3
+ * <cy>Editor Tab API</c> now works with <cg>BetterEdit</c>! :)
+
 ## v6.10.0-beta.2
- * Mark <cy>Editor Tab API</c> as incompatible. Please disable the mod to use BetterEdit! This does mean that the other editor mods by Alphalaneous are currently incompatible with BetterEdit; we will sort this out soon so the mods work together but <co>this is a quick fix</c>!
+ * Mark <cy>Editor Tab API</c> as incompatible. Please disable the mod to use <cg>BetterEdit</c>! This does mean that the other editor mods by Alphalaneous are currently incompatible with BetterEdit; we will sort this out soon so the mods work together but <co>this is a quick fix</c>!
  * Add option to disable the <cp>Changelog</c> showing with every new update
  * Allow <cj>configuring autosave rate</c> more precisely
 
@@ -10,7 +13,7 @@
  * Support for Geode 2.2081
  * Some features are still unfinished, but I will be cleaning them up over the coming days! Please report any issues to me over Discord <co>@hjfod</c> or through <ca>GitHub issues</c> :)
  * <cp>Color Selection</c> page improvements: add <cj>Next Free Offset</c>, fix visual glitches, and remember last page you were on (thank you to <cy>NinKaz</c>!)
- * Fix visual glitches with the <co>Edit Group</c> popup (thank you to <cy>NinKaz</c>!)
+ * Fix visual glitches with the <co>Edit Group</c> popup (thank you to <co>Fryy_55</c>!)
  * Fix <co>Scale</c> and <cj>Rotate</c> controls sometimes not being clickable (thank you to <cy>NinKaz</c>!)
  * Other minor fixes and improvements (thank you to <cj>Cvolton</c>!)
 

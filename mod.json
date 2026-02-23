@@ -1,6 +1,6 @@
 {
-	"geode": "5.0.0-beta.3",
-	"version": "6.10.0-beta.2",
+	"geode": "5.0.1",
+	"version": "6.10.0-beta.3",
 	"gd": {
 		"win": "2.2081",
 		"mac": "2.2081",
@@ -19,10 +19,8 @@
 	"dependencies": {
         "geode.node-ids": "1.21.0",
 		"hjfod.gmd-api": "1.5.0",
-		"cvolton.level-id-api": "2.0.0"
-	},
-	"incompatibilities": {
-		"alphalaneous.editortab_api": "2.0.0"
+		"cvolton.level-id-api": "2.0.0",
+		"alphalaneous.editortab_api": "2.0.3"
 	},
 	"resources": {
 		"files": [

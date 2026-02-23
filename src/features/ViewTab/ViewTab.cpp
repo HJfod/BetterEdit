@@ -13,6 +13,7 @@
 #include <utils/Editor.hpp>
 #include <utils/HolyUB.hpp>
 #include <features/supporters/Pro.hpp>
+#include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
 
 using namespace geode::prelude;
 
@@ -43,34 +44,27 @@ struct $modify(ViewTabUI, EditorUI) {
     };
 
     static void onModify(auto& self) {
-        (void)self.setHookPriority("EditorUI::selectObject",  3000);
-        (void)self.setHookPriority("EditorUI::selectObjects", 3000);
+        (void)self.setHookPriority("EditorUI::selectObject",  Priority::VeryLate);
+        (void)self.setHookPriority("EditorUI::selectObjects", Priority::VeryLate);
+        (void)self.setHookPriority("EditorUI::toggleMode", Priority::Early);
     }
 
-    void updateModeSprite(CCNode* node, int tag, const char* spr) {
+    void updateModeSprite(CCNode* node, ZStringView id, const char* spr) {
         // resetUI resets the button sprites so we may have to change them back 
         // to squarish ones again
         if (node) {
-            auto bg = m_selectedMode == tag ? "GJ_button_02.png" : "GJ_button_01.png";
+            auto bg = alpha::editor_tabs::getCurrentMode() == Ok(id) ? "GJ_button_02.png" : "GJ_button_01.png";
             auto btn = static_cast<CCMenuItemSpriteExtra*>(node);
-            if (auto bspr = typeinfo_cast<ButtonSprite*>(btn->getNormalImage())) {
-                // remove GD's texture
-                bspr->setTexture(nullptr);
-                bspr->setTextureRect({ 0, 0, 0, 0 });
-                bspr->updateBGImage(bg);
-            }
-            else {
-                btn->setNormalImage(ButtonSprite::create(
-                    CCSprite::createWithSpriteFrameName(spr), 50, true, 50, bg, .6f
-                ));
-            }
+            btn->setNormalImage(ButtonSprite::create(
+                CCSprite::createWithSpriteFrameName(spr), 50, true, 50, bg, .6f
+            ));
         }
     }
     void updateModeSprites() {
-        this->updateModeSprite(m_buildModeBtn, 2, "tab-create.png"_spr);
-        this->updateModeSprite(m_deleteModeBtn, 1, "tab-delete.png"_spr);
-        this->updateModeSprite(m_editModeBtn, 3, "tab-edit.png"_spr);
-        this->updateModeSprite(m_fields->viewModeBtn, 4, "tab-view.png"_spr);
+        this->updateModeSprite(m_buildModeBtn, alpha::editor_tabs::BUILD, "tab-create.png"_spr);
+        this->updateModeSprite(m_deleteModeBtn, alpha::editor_tabs::DELETE, "tab-delete.png"_spr);
+        this->updateModeSprite(m_editModeBtn, alpha::editor_tabs::EDIT, "tab-edit.png"_spr);
+        this->updateModeSprite(m_fields->viewModeBtn, "view"_spr, "tab-view.png"_spr);
     }
 
     ButtonSprite* createViewToggleSpr(const char* frame, bool selected) {
@@ -114,9 +108,11 @@ struct $modify(ViewTabUI, EditorUI) {
     }
 
     void updateViewTab() {
-        if (auto bbar = static_cast<EditButtonBar*>(this->getChildByID("view-tab"_spr))) {
-            for (auto toggle : CCArrayExt<BEMenuItemToggler*>(bbar->m_buttonArray)) {
-                toggle->toggle();
+        if (auto tabs = alpha::editor_tabs::nodeForTab("view"_spr)) {
+            if (auto bbar = static_cast<EditButtonBar*>(tabs.unwrap().data())) {
+                for (auto toggle : CCArrayExt<BEMenuItemToggler*>(bbar->m_buttonArray)) {
+                    toggle->toggle();
+                }
             }
         }
     }
@@ -129,6 +125,8 @@ struct $modify(ViewTabUI, EditorUI) {
         if (!Mod::get()->template getSettingValue<bool>("view-menu")) {
             return true;
         }
+
+        alpha::editor_tabs::changeModeSprites(false);
         
         auto winSize = CCDirector::get()->getWinSize();
         
@@ -142,9 +140,108 @@ struct $modify(ViewTabUI, EditorUI) {
             }
         }
 
+        alpha::editor_tabs::addTab(
+            "view"_spr, "view"_spr,
+            [this, winSize] {
+                // Create buttons
+                std::vector<Ref<CCNode>> btns;
+
+                // For some reason using a class that inherits from CCMenuItemToggler 
+                // for the view toggles was causing super weird crashes, so will have 
+                // to make due with this :/
+
+                btns.push_back(this->createViewToggle(
+                    "v-rotation.png"_spr,
+                    [] { return GameManager::get()->getGameVariable("0118"); },
+                    [this](bool) {
+                        fakeEditorPauseLayer(m_editorLayer)->togglePreviewAnim(nullptr);
+                    }
+                ));
+                btns.push_back(this->createViewToggleGV("v-particles.png"_spr, "0117", [this](bool) {
+                    m_editorLayer->updatePreviewParticles();
+                }));
+                btns.push_back(this->createViewToggleGV("v-shaders.png"_spr, "0158"));
+                btns.push_back(this->createViewToggleMSV("v-ldm.png"_spr, "hide-ldm", false, [this](bool) {
+                    for (auto obj : CCArrayExt<GameObjectExtra*>(m_editorLayer->m_objects)) {
+                        obj->updateVisibility();
+                    }
+                }));
+                btns.push_back(this->createViewToggleGV("v-preview-mode.png"_spr, "0036", [this](bool) {
+                    // Let's not be funny and ruin everyone's levels
+                    if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
+                        // Why was this being called separately? `onStopPlaytest` already calls it
+                        // m_editorLayer->resetMovingObjects();
+                        this->onStopPlaytest(m_playtestBtn);
+                    }
+                    m_editorLayer->updateEditorMode();
+                }));
+                btns.push_back(this->createViewToggle(
+                    "v-bpm-lines.png"_spr,
+                    [] { return GameManager::get()->m_showSongMarkers; },
+                    [](bool enable) {
+                        GameManager::get()->m_showSongMarkers = enable;
+                    }
+                ));
+                btns.push_back(this->createViewToggleMSV("v-position-line.png"_spr, "pos-line"));
+                btns.push_back(this->createViewToggleGV("v-duration-lines.png"_spr, "0058"));
+                btns.push_back(this->createViewToggleGV("v-effect-lines.png"_spr, "0043"));
+                btns.push_back(this->createViewToggleGV("v-ground.png"_spr, "0037", [this](bool enable) {
+                    m_editorLayer->m_groundLayer->setVisible(enable);
+                }));
+                btns.push_back(this->createViewToggleGV("v-grid.png"_spr, "0038"));
+                btns.push_back(this->createViewToggleMSV("v-dash-lines.png"_spr, "show-dash-lines"));
+                btns.push_back(this->createViewToggleGV("v-hitboxes.png"_spr, "0045"));
+
+                auto ttt = this->createViewToggleMSV(
+                    "v-indicators-trigger-to-trigger.png"_spr,
+                    "trigger-indicators-trigger-to-trigger"
+                );
+                auto clusterOutlines = this->createViewToggleMSV(
+                    "v-indicators-cluster-outline.png"_spr,
+                    "trigger-indicators-cluster-outlines"
+                );
+                // todo: show this one as disabled if there are too many objects
+                auto showAll = this->createViewToggleMSV(
+                    "v-indicators-all.png"_spr,
+                    "trigger-indicators-show-all", false,
+                    [clusterOutlines](bool enabled) {
+                        be::enableButton(clusterOutlines, enabled);
+                    }
+                );
+                auto blocky = this->createViewToggleMSV(
+                    "v-indicators-blocky.png"_spr,
+                    "trigger-indicators-blocky"
+                );
+                std::array<BEMenuItemToggler*, 4> indToggles { ttt, showAll, clusterOutlines, blocky };
+                auto indToggle = this->createViewToggleMSV(
+                    "v-indicators.png"_spr, "show-trigger-indicators", true,
+                    [indToggles, clusterOutlines, showAll](bool enabled) {
+                        for (auto toggle : indToggles) {
+                            be::enableButton(toggle, enabled);
+                        }
+                        // todo: come up with some more robust system for this
+                        be::enableButton(clusterOutlines, showAll->isToggled());
+                    }
+                );
+                btns.push_back(indToggle);
+                for (auto toggle : indToggles) {
+                    btns.push_back(toggle);
+                }
+                return alpha::editor_tabs::createEditButtonBar(btns);
+            },
+            [] {
+                return CCSprite::createWithSpriteFrameName("tab-view.png"_spr);
+            },
+            [this](bool shown, CCNode*) {
+                if (shown) {
+                    this->updateViewTab();
+                }
+            }
+        );
+
         if (auto menu = this->getChildByID("toolbar-categories-menu")) {
             m_fields->viewModeBtn = CCMenuItemSpriteExtra::create(
-                CCNode::create(), this, menu_selector(EditorUI::toggleMode)
+                CCNode::create(), this, menu_selector(ViewTabUI::onToggleView)
             );
             m_fields->viewModeBtn->setID("view-button"_spr);
             m_fields->viewModeBtn->setTag(4);
@@ -162,137 +259,38 @@ struct $modify(ViewTabUI, EditorUI) {
             );
         }
 
-    #ifdef GEODE_IS_DESKTOP
         this->addEventListener(
             KeybindSettingPressedEventV3(Mod::get(), "keybind-view-mode"),
             [=, this](Keybind const&, bool down, bool, double) {
                 if (down && m_editorLayer->m_playbackMode == PlaybackMode::Not) {
-                    this->toggleMode(m_fields->viewModeBtn);
+                    this->onToggleView(nullptr);
                 }
             }
         );
-    #endif
-
-        // Create buttons
-        auto btns = CCArray::create();
-
-        // For some reason using a class that inherits from CCMenuItemToggler 
-        // for the view toggles was causing super weird crashes, so will have 
-        // to make due with this :/
-
-        btns->addObject(this->createViewToggle(
-            "v-rotation.png"_spr,
-            [] { return GameManager::get()->getGameVariable("0118"); },
-            [this](bool) {
-                fakeEditorPauseLayer(m_editorLayer)->togglePreviewAnim(nullptr);
-            }
-        ));
-        btns->addObject(this->createViewToggleGV("v-particles.png"_spr, "0117", [this](bool) {
-            m_editorLayer->updatePreviewParticles();
-        }));
-        btns->addObject(this->createViewToggleGV("v-shaders.png"_spr, "0158"));
-        btns->addObject(this->createViewToggleMSV("v-ldm.png"_spr, "hide-ldm", false, [this](bool) {
-            for (auto obj : CCArrayExt<GameObjectExtra*>(m_editorLayer->m_objects)) {
-                obj->updateVisibility();
-            }
-        }));
-        btns->addObject(this->createViewToggleGV("v-preview-mode.png"_spr, "0036", [this](bool) {
-            // Let's not be funny and ruin everyone's levels
-            if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
-                // Why was this being called separately? `onStopPlaytest` already calls it
-                // m_editorLayer->resetMovingObjects();
-                this->onStopPlaytest(m_playtestBtn);
-            }
-            m_editorLayer->updateEditorMode();
-        }));
-        btns->addObject(this->createViewToggle(
-            "v-bpm-lines.png"_spr,
-            [] { return GameManager::get()->m_showSongMarkers; },
-            [](bool enable) {
-                GameManager::get()->m_showSongMarkers = enable;
-            }
-        ));
-        btns->addObject(this->createViewToggleMSV("v-position-line.png"_spr, "pos-line"));
-        btns->addObject(this->createViewToggleGV("v-duration-lines.png"_spr, "0058"));
-        btns->addObject(this->createViewToggleGV("v-effect-lines.png"_spr, "0043"));
-        btns->addObject(this->createViewToggleGV("v-ground.png"_spr, "0037", [this](bool enable) {
-            m_editorLayer->m_groundLayer->setVisible(enable);
-        }));
-        btns->addObject(this->createViewToggleGV("v-grid.png"_spr, "0038"));
-        btns->addObject(this->createViewToggleMSV("v-dash-lines.png"_spr, "show-dash-lines"));
-        btns->addObject(this->createViewToggleGV("v-hitboxes.png"_spr, "0045"));
-
-        auto ttt = this->createViewToggleMSV(
-            "v-indicators-trigger-to-trigger.png"_spr,
-            "trigger-indicators-trigger-to-trigger"
-        );
-        auto clusterOutlines = this->createViewToggleMSV(
-            "v-indicators-cluster-outline.png"_spr,
-            "trigger-indicators-cluster-outlines"
-        );
-        // todo: show this one as disabled if there are too many objects
-        auto showAll = this->createViewToggleMSV(
-            "v-indicators-all.png"_spr,
-            "trigger-indicators-show-all", false,
-            [clusterOutlines](bool enabled) {
-                be::enableButton(clusterOutlines, enabled);
-            }
-        );
-        auto blocky = this->createViewToggleMSV(
-            "v-indicators-blocky.png"_spr,
-            "trigger-indicators-blocky"
-        );
-        std::array<BEMenuItemToggler*, 4> indToggles { ttt, showAll, clusterOutlines, blocky };
-        auto indToggle = this->createViewToggleMSV(
-            "v-indicators.png"_spr, "show-trigger-indicators", true,
-            [indToggles, clusterOutlines, showAll](bool enabled) {
-                for (auto toggle : indToggles) {
-                    be::enableButton(toggle, enabled);
-                }
-                // todo: come up with some more robust system for this
-                be::enableButton(clusterOutlines, showAll->isToggled());
-            }
-        );
-        btns->addObject(indToggle);
-        for (auto toggle : indToggles) {
-            btns->addObject(toggle);
-        }
-
-        auto buttonBar = EditButtonBar::create(
-            btns,
-            ccp(winSize.width / 2 - 5, CCDirector::get()->getScreenBottom() + m_toolbarHeight - 6),
-            m_tabsArray->count(), false,
-            GameManager::get()->getIntGameVariable("0049"),
-            GameManager::get()->getIntGameVariable("0050")
-        );
-        buttonBar->setID("view-tab"_spr);
-        // Need to set a tag too so GD doesn't accidentally grab this tab 
-        // when doing getChildByTag for its tabs
-        buttonBar->setTag(-1);
-        buttonBar->setVisible(m_selectedMode == 4);
-        this->addChild(buttonBar, 10);
 
         this->updateViewTab();
 
+        alpha::editor_tabs::addModeSwitchCallback([this](ZStringView) {
+            this->updateModeSprites();
+        });
+
         m_fields->onUIHide = UIShowEvent(this).listen([this](bool show) {
-            m_fields->viewModeBtn->setVisible(show);
-            this->getChildByID("view-tab"_spr)->setVisible(show && m_selectedMode == 4);
             m_buildModeBtn->getParent()->getChildByTag(4)->setVisible(show);
         });
 
         return true;
     }
 
-    void toggleMode(CCObject* sender) {
-        EditorUI::toggleMode(sender);
-        if (auto viewBtnBar = this->getChildByID("view-tab"_spr)) {
-            // this->resetUI();
-            this->updateModeSprites();
-            
-            viewBtnBar->setVisible(m_selectedMode == 4);
-        }
+    void onToggleView(CCObject*) {
+        alpha::editor_tabs::switchMode("view"_spr);
+        this->updateModeSprites();
     }
 
+    $override
+    void toggleMode(CCObject* sender) {
+        EditorUI::toggleMode(sender);
+        this->updateModeSprites();
+    }
 
     #ifdef GEODE_IS_MACOS // toggleMode is inlined into onPlaytest on macOS
     $override
@@ -300,10 +298,7 @@ struct $modify(ViewTabUI, EditorUI) {
         auto playbackMode = m_editorLayer->m_playbackMode;
         EditorUI::onPlaytest(sender);
         if (!m_isPaused && playbackMode != PlaybackMode::Playing) {
-            if (auto viewBtnBar = this->getChildByID("view-tab"_spr)) {
-                this->updateModeSprites();
-                viewBtnBar->setVisible(m_selectedMode == 4);
-            }
+            this->updateModeSprites();
         }
     }
     #endif
@@ -329,12 +324,6 @@ struct $modify(ViewTabUI, EditorUI) {
             }
         }
         EditorUI::selectObjects(objs, ignoreFilters);
-    }
-
-    void onProOnlyFeature(CCObject* sender) {
-        pro::showProOnlyFeaturePopup(
-            static_cast<CCString*>(static_cast<CCNode*>(sender)->getUserObject())->getCString()
-        );
     }
 };
 

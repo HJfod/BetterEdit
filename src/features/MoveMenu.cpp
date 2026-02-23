@@ -4,6 +4,7 @@
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/utils/cocos.hpp>
 #include <utils/Editor.hpp>
+#include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
 
 using namespace geode::prelude;
 
@@ -200,7 +201,7 @@ public:
         m_editorUI->m_editButtonBar->setVisible(false);
 
         // If we're not showing, we don't need to update the menu layout, just return
-        if (!show) {
+        if (!show || alpha::editor_tabs::getCurrentMode() != Ok(alpha::editor_tabs::EDIT)) {
             this->setVisible(false);
             return;
         }
@@ -307,7 +308,7 @@ public:
         this->updatePage();
         m_bottomRow->updateLayout();
 
-        this->setVisible(m_editorUI->m_selectedMode == 3);
+        this->setVisible(true);
         this->setScale(m_editorUI->m_editButtonBar->getScale());
     }
 };
@@ -344,6 +345,10 @@ class $modify(MoreButtonsUI, EditorUI) {
         // Create the custom edit menu
         (void)CustomEditMenu::get(this, true);
 
+        alpha::editor_tabs::addTabSwitchCallback([this](ZStringView) {
+            CustomEditMenu::get(this)->updateMenu();
+        });
+
         return true;
     }
 
@@ -359,25 +364,6 @@ class $modify(MoreButtonsUI, EditorUI) {
         this->moveObjectCall(static_cast<EditCommand>(sender->getTag()));
     }
 
-    $override
-    void toggleMode(CCObject* sender) {
-        EditorUI::toggleMode(sender);
-        if (auto menu = CustomEditMenu::get(this)) {
-            menu->updateMenu();
-        }
-    }
-    #ifdef GEODE_IS_MACOS // toggleMode is inlined into onPlaytest on macOS
-    $override
-    void onPlaytest(CCObject* sender) {
-        auto playbackMode = m_editorLayer->m_playbackMode;
-        EditorUI::onPlaytest(sender);
-        if (!m_isPaused && playbackMode != PlaybackMode::Playing) {
-            if (auto menu = CustomEditMenu::get(this)) {
-                menu->updateMenu();
-            }
-        }
-    }
-    #endif
     $override
     void resetUI() {
         EditorUI::resetUI();
