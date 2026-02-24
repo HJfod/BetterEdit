@@ -25,6 +25,7 @@ You can install BetterEdit through [Geode](https://geode-sdk.org). After install
  * [NodeIDs](https://geode-sdk.org/mods/geode.node-ids)
  * [GMD API](https://geode-sdk.org/mods/hjfod.gmd-api)
  * [Level ID API](https://geode-sdk.org/mods/cvolton.level-id-api)
+ * [Editor Tab API](https://geode-sdk.org/mods/alphalaneous.editortab_api)
 
 ## :beetle: Bug reports & feature suggestions
 
