@@ -13,16 +13,16 @@ body:
     attributes:
       label: BetterEdit version
       description: The version of BetterEdit you're using
-      placeholder: Latest
+      placeholder: The version number (such as v6.10.0-beta.5)
     validations:
       required: true
 
   - type: textarea
-    id: feature-desc
+    id: crashlog-desc
     attributes:
       label: Description
-      description: What should the feature do? How should it work? Why is it needed?
-      placeholder: Feature description
+      description: What were you doing before the crash happened? Does it happen every time or is it random?
+      placeholder: Crash description
     validations:
       required: true
 
@@ -62,6 +62,8 @@ body:
       - label: Mac
       - label: Android (32-bit)
       - label: Android (64-bit)
+      - label: iOS
+      - label: iOS (Jitless)
       - label: Linux
     validations:
       required: true

@@ -61,10 +61,14 @@ struct $modify(ViewTabUI, EditorUI) {
         }
     }
     void updateModeSprites() {
-        this->updateModeSprite(m_buildModeBtn, alpha::editor_tabs::BUILD, "tab-create.png"_spr);
-        this->updateModeSprite(m_deleteModeBtn, alpha::editor_tabs::DELETE, "tab-delete.png"_spr);
-        this->updateModeSprite(m_editModeBtn, alpha::editor_tabs::EDIT, "tab-edit.png"_spr);
-        this->updateModeSprite(m_fields->viewModeBtn, "view"_spr, "tab-view.png"_spr);
+        // This is just to make sure the view tab is actually enabled so we 
+        // don't change these when it's disabled
+        if (alpha::editor_tabs::nodeForTab("view"_spr)) {
+            this->updateModeSprite(m_buildModeBtn, alpha::editor_tabs::BUILD, "tab-create.png"_spr);
+            this->updateModeSprite(m_deleteModeBtn, alpha::editor_tabs::DELETE, "tab-delete.png"_spr);
+            this->updateModeSprite(m_editModeBtn, alpha::editor_tabs::EDIT, "tab-edit.png"_spr);
+            this->updateModeSprite(m_fields->viewModeBtn, "view"_spr, "tab-view.png"_spr);
+        }
     }
 
     ButtonSprite* createViewToggleSpr(const char* frame, bool selected) {

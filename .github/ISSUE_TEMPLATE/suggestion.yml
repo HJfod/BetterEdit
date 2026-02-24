@@ -12,8 +12,8 @@ body:
     id: feature-desc
     attributes:
       label: Feature description
-      description: A clear and concise description of what the bug is - is something not working as expected? Does something look off? Is the mod conflicting with another mod?
-      placeholder: Bug description
+      description: What should the feature do? How should it work? Why is it needed?
+      placeholder: Feature description
     validations:
       required: true
 

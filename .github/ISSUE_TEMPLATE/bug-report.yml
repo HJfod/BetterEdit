@@ -14,7 +14,7 @@ body:
     attributes:
       label: BetterEdit version
       description: The version of BetterEdit you're using
-      placeholder: Latest
+      placeholder: The version number (such as v6.10.0-beta.3)
     validations:
       required: true
 
@@ -22,7 +22,7 @@ body:
     id: bug-desc
     attributes:
       label: Bug description
-      description: A clear and concise description of what the bug is - is something not working as expected? Does something look off? Is the mod conflicting with another mod?
+      description: What is the bug? Is something not working as expected? Does something look off? Is the mod conflicting with another mod?
       placeholder: Bug description
     validations:
       required: true
@@ -48,6 +48,8 @@ body:
       - label: Mac
       - label: Android (32-bit)
       - label: Android (64-bit)
+      - label: iOS
+      - label: iOS (Jitless)
       - label: Linux
     validations:
       required: true
