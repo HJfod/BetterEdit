@@ -346,7 +346,9 @@ class $modify(MoreButtonsUI, EditorUI) {
         (void)CustomEditMenu::get(this, true);
 
         alpha::editor_tabs::addTabSwitchCallback([this](ZStringView) {
-            CustomEditMenu::get(this)->updateMenu();
+            if (auto menu = CustomEditMenu::get(this)) {
+                menu->updateMenu();
+            }
         });
 
         return true;

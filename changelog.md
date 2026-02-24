@@ -1,5 +1,9 @@
 # BetterEdit 6
 
+## v6.10.0-beta.4
+ * Fix crash when disabling <cg>New Edit Menu</c>
+ * Make sure to update <cy>Editor Tab API</c> aswell as it also received a crash fix :)
+
 ## v6.10.0-beta.3
  * <cy>Editor Tab API</c> now works with <cg>BetterEdit</c>! :)
 
