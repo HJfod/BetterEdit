@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.10.0-beta.6
+ * Make <cj>Trigger Indicators</c> a setting and have them be disabled by default
+
 ## v6.10.0-beta.5
  * Fix editor buttons being wrong when having <cc>View Tab</c> disabled
 

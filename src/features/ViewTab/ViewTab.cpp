@@ -18,6 +18,7 @@
 using namespace geode::prelude;
 
 class $modify(GameObjectExtra, GameObject) {
+    $override
     void updateVisibility() {
         this->setVisible(m_bVisible || !this->shouldHide());
     }
@@ -77,45 +78,65 @@ struct $modify(ViewTabUI, EditorUI) {
             top, 50, 0, 50, .8f, true, (selected ? "GJ_button_02.png" : "GJ_button_01.png"), true
         );
     }
-    BEMenuItemToggler* createViewToggle(const char* frame, auto get, auto set) {
-        auto off = createViewToggleSpr(frame, false);
-        auto on  = createViewToggleSpr(frame, true);
-        auto toggler = BEMenuItemToggler::create(off, on, get, set);
-        return toggler;
-    }
-    BEMenuItemToggler* createViewToggleGV(const char* frame, const char* gv, std::function<void(bool)> postSet = nullptr) {
-        auto off = createViewToggleSpr(frame, false);
-        auto on  = createViewToggleSpr(frame, true);
-        auto toggler = BEMenuItemToggler::create(off, on, [gv]() {
-            return GameManager::get()->getGameVariable(gv);
-        }, [this, gv, postSet](bool enabled) {
-            GameManager::get()->setGameVariable(gv, enabled);
-            postSet ? postSet(enabled) : m_editorLayer->updateOptions();
-        });
-        return toggler;
-    }
-    BEMenuItemToggler* createViewToggleMSV(
-        const char* frame, const char* modSavedValue,
-        bool defaultValue = false, std::function<void(bool)> postSet = nullptr
+    BEMenuItemToggler* createViewToggle(
+        const char* frame,
+        std::function<bool()> get,
+        std::function<void(bool)> set,
+        std::function<bool()> shouldEnable = nullptr
     ) {
         auto off = createViewToggleSpr(frame, false);
         auto on  = createViewToggleSpr(frame, true);
-        auto toggler = BEMenuItemToggler::create(off, on, [modSavedValue, defaultValue]() {
-            return Mod::get()->template getSavedValue<bool>(modSavedValue, defaultValue);
-        }, [modSavedValue, postSet](bool enabled) {
-            Mod::get()->setSavedValue(modSavedValue, enabled);
-            if (postSet) {
-                postSet(enabled);
-            }
-        });
+        auto toggler = BEMenuItemToggler::create(off, on, get, set, shouldEnable);
         return toggler;
+    }
+    BEMenuItemToggler* createViewToggleGV(
+        const char* frame, const char* gv,
+        std::function<bool()> shouldEnable = nullptr
+    ) {
+        return this->createViewToggle(
+            frame,
+            [gv]() { return GameManager::get()->getGameVariable(gv); },
+            [this, gv](bool enabled) {
+                GameManager::get()->setGameVariable(gv, enabled);
+                m_editorLayer->updateOptions();
+            },
+            shouldEnable
+        );
+    }
+    BEMenuItemToggler* createViewToggleMSV(
+        const char* frame, const char* modSavedValue,
+        bool defaultValue = false, std::function<bool()> shouldEnable = nullptr
+    ) {
+        return this->createViewToggle(
+            frame,
+            [modSavedValue, defaultValue]() {
+                return Mod::get()->template getSavedValue<bool>(modSavedValue, defaultValue);
+            },
+            [modSavedValue](bool enabled) {
+                Mod::get()->setSavedValue(modSavedValue, enabled);
+            },
+            shouldEnable
+        );
+    }
+    BEMenuItemToggler* createViewToggleMS(
+        const char* frame, const char* modSettingKey,
+        std::function<bool()> shouldEnable = nullptr
+    ) {
+        return this->createViewToggle(
+            frame,
+            [modSettingKey]() { return Mod::get()->getSettingValue<bool>(modSettingKey); },
+            [modSettingKey](bool enabled) {
+                Mod::get()->setSettingValue(modSettingKey, enabled);
+            },
+            shouldEnable
+        );
     }
 
     void updateViewTab() {
         if (auto tabs = alpha::editor_tabs::nodeForTab("view"_spr)) {
             if (auto bbar = static_cast<EditButtonBar*>(tabs.unwrap().data())) {
                 for (auto toggle : CCArrayExt<BEMenuItemToggler*>(bbar->m_buttonArray)) {
-                    toggle->toggle();
+                    toggle->updateState();
                 }
             }
         }
@@ -161,24 +182,34 @@ struct $modify(ViewTabUI, EditorUI) {
                         fakeEditorPauseLayer(m_editorLayer)->togglePreviewAnim(nullptr);
                     }
                 ));
-                btns.push_back(this->createViewToggleGV("v-particles.png"_spr, "0117", [this](bool) {
-                    m_editorLayer->updatePreviewParticles();
-                }));
+                btns.push_back(this->createViewToggle(
+                    "v-particles.png"_spr,
+                    [] { return GameManager::get()->getGameVariable("0117"); },
+                    [this](bool) { m_editorLayer->updatePreviewParticles(); }
+                ));
                 btns.push_back(this->createViewToggleGV("v-shaders.png"_spr, "0158"));
-                btns.push_back(this->createViewToggleMSV("v-ldm.png"_spr, "hide-ldm", false, [this](bool) {
-                    for (auto obj : CCArrayExt<GameObjectExtra*>(m_editorLayer->m_objects)) {
-                        obj->updateVisibility();
+                btns.push_back(this->createViewToggle(
+                    "v-ldm.png"_spr,
+                    [] { return Mod::get()->getSavedValue("hide-ldm", false); },
+                    [this](bool) {
+                        for (auto obj : CCArrayExt<GameObjectExtra*>(m_editorLayer->m_objects)) {
+                            obj->updateVisibility();
+                        }
                     }
-                }));
-                btns.push_back(this->createViewToggleGV("v-preview-mode.png"_spr, "0036", [this](bool) {
-                    // Let's not be funny and ruin everyone's levels
-                    if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
-                        // Why was this being called separately? `onStopPlaytest` already calls it
-                        // m_editorLayer->resetMovingObjects();
-                        this->onStopPlaytest(m_playtestBtn);
+                ));
+                btns.push_back(this->createViewToggle(
+                    "v-preview-mode.png"_spr,
+                    [] { return GameManager::get()->getGameVariable("0036"); },
+                    [this](bool) {
+                        // Let's not be funny and ruin everyone's levels
+                        if (m_editorLayer->m_playbackMode != PlaybackMode::Not) {
+                            // Why was this being called separately? `onStopPlaytest` already calls it
+                            // m_editorLayer->resetMovingObjects();
+                            this->onStopPlaytest(m_playtestBtn);
+                        }
+                        m_editorLayer->updateEditorMode();
                     }
-                    m_editorLayer->updateEditorMode();
-                }));
+                ));
                 btns.push_back(this->createViewToggle(
                     "v-bpm-lines.png"_spr,
                     [] { return GameManager::get()->m_showSongMarkers; },
@@ -189,48 +220,46 @@ struct $modify(ViewTabUI, EditorUI) {
                 btns.push_back(this->createViewToggleMSV("v-position-line.png"_spr, "pos-line"));
                 btns.push_back(this->createViewToggleGV("v-duration-lines.png"_spr, "0058"));
                 btns.push_back(this->createViewToggleGV("v-effect-lines.png"_spr, "0043"));
-                btns.push_back(this->createViewToggleGV("v-ground.png"_spr, "0037", [this](bool enable) {
-                    m_editorLayer->m_groundLayer->setVisible(enable);
-                }));
+                btns.push_back(this->createViewToggle(
+                    "v-ground.png"_spr,
+                    [] { return GameManager::get()->getGameVariable("0037"); },
+                    [this](bool enable) {
+                        m_editorLayer->m_groundLayer->setVisible(enable);
+                    }
+                ));
                 btns.push_back(this->createViewToggleGV("v-grid.png"_spr, "0038"));
                 btns.push_back(this->createViewToggleMSV("v-dash-lines.png"_spr, "show-dash-lines"));
                 btns.push_back(this->createViewToggleGV("v-hitboxes.png"_spr, "0045"));
 
-                auto ttt = this->createViewToggleMSV(
+                // todo: toggling any of these currently does not update the rest of the buttons
+                auto indToggle = this->createViewToggleMS("v-indicators.png"_spr, "trigger-indicators");
+                btns.push_back(indToggle);
+                btns.push_back(this->createViewToggleMSV(
                     "v-indicators-trigger-to-trigger.png"_spr,
-                    "trigger-indicators-trigger-to-trigger"
-                );
-                auto clusterOutlines = this->createViewToggleMSV(
-                    "v-indicators-cluster-outline.png"_spr,
-                    "trigger-indicators-cluster-outlines"
-                );
+                    "trigger-indicators-trigger-to-trigger",
+                    false,
+                    [indToggle] { return indToggle->isToggled(); }
+                ));
                 // todo: show this one as disabled if there are too many objects
                 auto showAll = this->createViewToggleMSV(
                     "v-indicators-all.png"_spr,
-                    "trigger-indicators-show-all", false,
-                    [clusterOutlines](bool enabled) {
-                        be::enableButton(clusterOutlines, enabled);
-                    }
+                    "trigger-indicators-show-all",
+                    false,
+                    [indToggle] { return indToggle->isToggled(); }
                 );
-                auto blocky = this->createViewToggleMSV(
+                btns.push_back(showAll);
+                btns.push_back(this->createViewToggleMSV(
+                    "v-indicators-cluster-outline.png"_spr,
+                    "trigger-indicators-cluster-outlines",
+                    false,
+                    [indToggle, showAll] { return indToggle->isToggled() && showAll->isToggled(); }
+                ));
+                btns.push_back(this->createViewToggleMSV(
                     "v-indicators-blocky.png"_spr,
-                    "trigger-indicators-blocky"
-                );
-                std::array<BEMenuItemToggler*, 4> indToggles { ttt, showAll, clusterOutlines, blocky };
-                auto indToggle = this->createViewToggleMSV(
-                    "v-indicators.png"_spr, "show-trigger-indicators", true,
-                    [indToggles, clusterOutlines, showAll](bool enabled) {
-                        for (auto toggle : indToggles) {
-                            be::enableButton(toggle, enabled);
-                        }
-                        // todo: come up with some more robust system for this
-                        be::enableButton(clusterOutlines, showAll->isToggled());
-                    }
-                );
-                btns.push_back(indToggle);
-                for (auto toggle : indToggles) {
-                    btns.push_back(toggle);
-                }
+                    "trigger-indicators-blocky",
+                    false,
+                    [indToggle] { return indToggle->isToggled(); }
+                ));
                 return alpha::editor_tabs::createEditButtonBar(btns);
             },
             [] {

@@ -1,6 +1,6 @@
 {
-	"geode": "5.0.1",
-	"version": "6.10.0-beta.5",
+	"geode": "5.5.3",
+	"version": "6.10.0-beta.6",
 	"gd": {
 		"win": "2.2081",
 		"mac": "2.2081",
@@ -225,13 +225,19 @@
 			"name": "Trigger Indicators",
 			"description": "<cj>Trigger Indicators</c> draw lines between triggers and their target objects"
 		},
+		"trigger-indicators": {
+			"type": "bool",
+			"name": "Enable Trigger Indicators",
+			"default": false,
+			"description": "Enables <cj>Trigger Indicators</c>, which draws lines between triggers and their target objects. This is the same as the vanilla \"Trace In/Out\" feature, except that implemented a little differently. This does not effect the Trace feature in any way"
+		},
 		"trigger-indicator-colors": {
 			"type": "string",
 			"one-of": ["None", "Selected Only", "All"],
 			"default": "Selected Only",
 			"name": "Trigger Indicators: Dynamic Colors",
 			"description": "Control whether <cj>Trigger Indicators</c> should be colored based on the trigger, or if they should just be white",
-			"enable-if-description": "This feature is Supporter-only, but will be free soon!"
+			"enable-if": "trigger-indicators"
 		},
 		"trigger-indicator-thickness": {
 			"type": "float",
@@ -244,7 +250,7 @@
 			},
 			"name": "Trigger Indicators: Line Thickness",
 			"description": "Control the width of the <cj>Trigger Indicators</c> lines",
-			"enable-if-description": "This feature is Supporter-only, but will be free soon!"
+			"enable-if": "trigger-indicators"
 		},
 		"trigger-indicator-opacity": {
 			"type": "float",
@@ -259,14 +265,14 @@
 			},
 			"name": "Trigger Indicators: Line Opacity",
 			"description": "Control the opacity of the <cj>Trigger Indicators</c> lines",
-			"enable-if-description": "This feature is Supporter-only, but will be free soon!"
+			"enable-if": "trigger-indicators"
 		},
 		"trigger-indicator-tickheads": {
 			"type": "bool",
 			"default": false,
 			"name": "Trigger Indicators: Arrow Heads",
 			"description": "If true, <cj>Trigger Indicators</c> have arrowheads at the end",
-			"enable-if-description": "This feature is Supporter-only, but will be free soon!"
+			"enable-if": "trigger-indicators"
 		},
 		"keybinds-section": {
 			"type": "title",

@@ -65,7 +65,5 @@ else()
 		-Wno-extra-semi
 		# QuickJS
 		-Wno-format-nonliteral
-		# wolfSSL
-		-Wmicrosoft-static-assert
 	)
 endif()

@@ -1,18 +1,20 @@
 #pragma once
 
 #include <Geode/binding/CCMenuItemSpriteExtra.hpp>
+#include "Editor.hpp"
 
 class BEMenuItemToggler : public CCMenuItemSpriteExtra {
 public:
     std::function<bool()> m_getter;
     std::function<void(bool)> m_setter;
+    std::function<bool()> m_shouldEnable;
     CCNode* m_offNode = nullptr;
     CCNode* m_onNode = nullptr;
     bool m_toggled = false;
 
-    static BEMenuItemToggler* create(CCNode* offNode, CCNode* onNode, auto getter, auto setter) {
+    static BEMenuItemToggler* create(CCNode* offNode, CCNode* onNode, auto getter, auto setter, auto shouldEnable) {
         auto ret = new BEMenuItemToggler();
-        if (ret && ret->init(offNode, onNode, getter, setter)) {
+        if (ret && ret->init(offNode, onNode, getter, setter, shouldEnable)) {
             ret->autorelease();
             return ret;
         }
@@ -20,7 +22,7 @@ public:
         return nullptr;
     }
 
-    bool init(CCNode* offNode, CCNode* onNode, auto getter, auto setter) {
+    bool init(CCNode* offNode, CCNode* onNode, auto getter, auto setter, auto shouldEnable) {
         if (!CCMenuItemSpriteExtra::init(offNode, nullptr, nullptr, nullptr)) {
             return false;
         }
@@ -31,12 +33,16 @@ public:
         m_onNode->retain();
         m_getter = getter;
         m_setter = setter;
+        m_shouldEnable = shouldEnable;
+
+        this->updateState();
 
         return true;
     }
 
-    void toggle() {
+    void updateState() {
         this->toggle(m_getter());
+        if (m_shouldEnable) be::enableButton(this, m_shouldEnable());
     }
     void toggle(bool toggled) {
         m_toggled = toggled;

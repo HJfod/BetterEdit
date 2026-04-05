@@ -365,12 +365,12 @@ class $modify(SnappableScaleControl, GJScaleControl) {
             scaleY = roundf(scaleY / snap) * snap;
         }
 
-        if (m_scaleButtonType == 0) {
+        if (m_scaleButtonType == ScaleButtonType::X) {
             m_delegate->scaleXChanged(scaleX, m_scaleLocked);
             m_sliderX->setValue(this->valueFromScale(scaleX));
             inputX->setString(numToString(scaleX, 3));
         }
-        else if (m_scaleButtonType == 1) {
+        else if (m_scaleButtonType == ScaleButtonType::Y) {
             m_delegate->scaleYChanged(scaleY, m_scaleLocked);
             m_sliderY->setValue(this->valueFromScale(scaleY));
             inputY->setString(numToString(scaleY, 3));
