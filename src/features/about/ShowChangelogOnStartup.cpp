@@ -18,9 +18,14 @@ class $modify(LevelEditorLayer) {
             // Check if new updates have been installed
             auto lastShown = Mod::get()->getSavedValue<VersionInfo>("last-shown-changelog");
             if (lastShown < Mod::get()->getVersion()) {
-                auto popup = ChangelogPopup::create(lastShown);
-                popup->m_scene = this;
-                popup->show();
+                // Create the popup (two) frame(s) later to hopefully avoid touch issues
+                Loader::get()->queueInMainThread([this, lastShown] {
+                    Loader::get()->queueInMainThread([this, lastShown] {
+                        auto popup = ChangelogPopup::create(lastShown);
+                        popup->m_scene = this;
+                        popup->show();
+                    });
+                });
             }
         }
 
