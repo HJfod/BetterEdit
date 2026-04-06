@@ -344,7 +344,7 @@
         "keybind-build-helper": {
 			"type": "keybind",
         	"name": "Build Helper",
-        	"description": "Executes the <cy>Build Helper</c> feature, aka remaps Groud and Color IDs of the selected objects to unused ones",
+        	"description": "Executes the <cy>Build Helper</c> feature, aka remaps Group and Color IDs of the selected objects to unused ones",
         	"category": "editor",
 			"default": [],
 			"migrate-from": "hjfod.betteredit/build-helper"
