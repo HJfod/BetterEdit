@@ -188,8 +188,8 @@ static void drawCachedIndicators(IndicatorDrawOptions const& options) {
     // Preserve previous blend func
     GLint previousGlSrc;
     GLint previousGlDst;
-    glGetIntegerv(GL_BLEND_SRC, &previousGlSrc);
-    glGetIntegerv(GL_BLEND_DST, &previousGlDst);
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &previousGlSrc);
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &previousGlDst);
 
     // Turn off blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -251,7 +251,7 @@ static void drawCachedIndicators(IndicatorDrawOptions const& options) {
         ccDrawColor4B(255, 255, 255, 255);
         ccDrawFilledCircle(node.first, 3, 2 * std::numbers::pi_v<float>, 10);
     }
-    
+
     // Reset blending to whatever it was before
     glBlendFunc(previousGlSrc, previousGlDst);
 }
