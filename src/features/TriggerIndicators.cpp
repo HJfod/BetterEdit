@@ -184,12 +184,21 @@ static void drawCachedIndicators(IndicatorDrawOptions const& options) {
             BATCHED_LINES.push_back(Line(line.to, line.to + CCPoint::forAngle(angle + tickAngle) * tickLength));
         }
     };
+
+    // Preserve previous blend func
+    GLint previousGlSrc;
+    GLint previousGlDst;
+    glGetIntegerv(GL_BLEND_SRC, &previousGlSrc);
+    glGetIntegerv(GL_BLEND_DST, &previousGlDst);
+
+    // Turn off blending
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     for (auto const& batch : LINES_TO_DRAW) {
         // This preserves the capacity
         BATCHED_LINES.clear();
 
         glLineWidth(batch.lineThickness);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         ccDrawColor4B(batch.color);
 
         for (auto const& [line, targetIsTrigger] : batch.lines) {
@@ -242,6 +251,9 @@ static void drawCachedIndicators(IndicatorDrawOptions const& options) {
         ccDrawColor4B(255, 255, 255, 255);
         ccDrawFilledCircle(node.first, 3, 2 * std::numbers::pi_v<float>, 10);
     }
+    
+    // Reset blending to whatever it was before
+    glBlendFunc(previousGlSrc, previousGlDst);
 }
 
 static float getDistanceBetweenRectsSq(CCRect const& rect1, CCRect const& rect2) {

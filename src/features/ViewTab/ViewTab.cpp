@@ -99,6 +99,7 @@ struct $modify(ViewTabUI, EditorUI) {
             [this, gv](bool enabled) {
                 GameManager::get()->setGameVariable(gv, enabled);
                 m_editorLayer->updateOptions();
+                static_cast<ViewTabUI*>(EditorUI::get())->updateViewTab();
             },
             shouldEnable
         );
@@ -114,6 +115,7 @@ struct $modify(ViewTabUI, EditorUI) {
             },
             [modSavedValue](bool enabled) {
                 Mod::get()->setSavedValue(modSavedValue, enabled);
+                static_cast<ViewTabUI*>(EditorUI::get())->updateViewTab();
             },
             shouldEnable
         );
@@ -127,6 +129,7 @@ struct $modify(ViewTabUI, EditorUI) {
             [modSettingKey]() { return Mod::get()->getSettingValue<bool>(modSettingKey); },
             [modSettingKey](bool enabled) {
                 Mod::get()->setSettingValue(modSettingKey, enabled);
+                static_cast<ViewTabUI*>(EditorUI::get())->updateViewTab();
             },
             shouldEnable
         );
