@@ -45,10 +45,6 @@ target_link_libraries(${PROJECT_NAME} wolfssl)
 target_compile_definitions(wolfssl PUBLIC WOLFSSL_PUB_PEM_TO_DER)
 target_compile_definitions(${PROJECT_NAME} PUBLIC WOLFSSL_PUB_PEM_TO_DER)
 
-# Include QuickJS for scripting
-CPMAddPackage("gh:HJfod/quickjs#3073f11")
-target_link_libraries(${PROJECT_NAME} qjs)
-
 # Bad code will NOT be deployed!
 if(MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4)

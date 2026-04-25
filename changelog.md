@@ -1,5 +1,8 @@
 # BetterEdit 6
 
+## v6.10.0
+ * Scrap the WIP features as they were never going to be finished :(
+
 ## v6.10.0-beta.6
  * Make <cj>Trigger Indicators</c> a setting and have them be disabled by default
  * Fix <cj>Trigger Indicators</c> sometimes causing some objects to have a gray outline

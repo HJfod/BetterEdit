@@ -1,6 +1,6 @@
 {
-	"geode": "5.5.3",
-	"version": "6.10.0-beta.6",
+	"geode": "5.6.1",
+	"version": "6.10.0",
 	"gd": {
 		"win": "2.2081",
 		"mac": "2.2081",
@@ -23,10 +23,6 @@
 		"alphalaneous.editortab_api": "2.0.3"
 	},
 	"resources": {
-		"files": [
-			"scripts/*.js",
-			"scripts/*.mjs"
-		],
 		"spritesheets": {
 			"UISheet": [
 				"resources/*.png"
@@ -612,27 +608,6 @@
         	"category": "editor",
 			"default": [],
 			"migrate-from": "hjfod.betteredit/move-obj-big-down"
-		},
-		"wip-section": {
-			"type": "title",
-			"name": "WIP Features",
-			"description": "These settings are for features that are currently Work-In-Progress. This means that <cr>these features may be unstable and unusable</c>, and are only included for testing purposes. <ca>Developer Mode</c> is required to enable them."
-		},
-		"run-script-button": {
-			"type": "bool",
-			"default": false,
-			"name": "??? WIP #1",
-			"description": "Coming soon!",
-			"enable-if": "saved:developer-mode",
-			"enable-if-description": "This Feature is Heavily WIP!"
-		},
-		"trigger-previews": {
-			"type": "bool",
-			"default": false,
-			"name": "??? WIP #4",
-			"description": "Coming soon!",
-			"enable-if": "saved:developer-mode",
-			"enable-if-description": "This Feature is Heavily WIP!"
 		}
 	},
 	"tags": ["editor", "enhancement", "utility", "customization"]
