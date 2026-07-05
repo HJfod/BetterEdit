@@ -1,5 +1,8 @@
 # <span style="display: flex; align-items: center; gap: .25em"><img src="logo.png" width="50"> BetterEdit</span>
 
+> [!WARNING]
+> **BetterEdit is no longer being developed!** I have [retired from GD modding](https://hjfod.github.io/blog/so-long-and-thanks-for-all-the-fish.html). I'd recommend using alternatives like [Tinker](https://geode-sdk.org/mods/alphalaneous.tinker) instead. Thank you for the years of love and support <3
+
 <span>
   <a href="LICENSE"><img alt="License Badge" src="https://img.shields.io/github/license/HJfod/BetterEdit?label=license&style=flat-square" /></a>
   &ensp;&macr;&ensp;
