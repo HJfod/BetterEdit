@@ -1,5 +1,6 @@
 
 #include <Geode/modify/EditorUI.hpp>
+#include <Geode/modify/CCEGLView.hpp>
 #include <Geode/loader/Mod.hpp>
 #include <Geode/binding/LevelEditorLayer.hpp>
 #include <Geode/utils/cocos.hpp>
@@ -12,6 +13,38 @@
 using namespace geode::prelude;
 
 #ifdef GEODE_IS_DESKTOP
+
+#ifdef GEODE_IS_WINDOWS
+
+class $modify(MouseScrollWindowsFix, CCEGLView){
+    static void onModify(auto& self) {
+        // The static version inlines the actual callback, so i uninline it by hooking it
+        (void)Mod::get()->hook((void*)(base::getCocos() + 0x76390), &MouseScrollWindowsFix::onGLFWMouseScrollCallbackStatic, "onGLFWMouseScrollCallbackStatic");
+
+        (void)self.setHookPriority("cocos2d::CCEGLView::onGLFWMouseScrollCallback", Priority::Replace);
+    }
+
+    static MouseScrollWindowsFix* get() {
+        return static_cast<MouseScrollWindowsFix*>(CCEGLView::get());
+    }
+
+    // 
+    $override
+    void onGLFWMouseScrollCallback(GLFWwindow* window, double xpos, double ypos) {
+        if (!Mod::get()->getSettingValue<bool>("enable-fixed-mouse-controls")) {
+            return CCEGLView::onGLFWMouseScrollCallback(window, xpos, ypos);
+        }
+
+        auto sensitivity = Mod::get()->getSettingValue<double>("mouse-scroll-sensitivity");
+        CCDirector::get()->getMouseDispatcher()->dispatchScrollMSG(-ypos * sensitivity, xpos * sensitivity);
+	}
+
+    static void onGLFWMouseScrollCallbackStatic(GLFWwindow* window, double xpos, double ypos) {
+        MouseScrollWindowsFix::get()->CCEGLView::onGLFWMouseScrollCallback(window, xpos, ypos);
+    }
+};
+
+#endif
 
 class $modify(EditorUI) {
     $override
@@ -60,27 +93,26 @@ class $modify(EditorUI) {
         }
         // otherwise move screen
         else {
-            constexpr float mult = 2.f;
-
-            // move horizontally on shift
-            if (CCKeyboardDispatcher::get()->getShiftKeyPressed()) {
-                objLayer->setPositionX(
-                    objLayer->getPositionX() - y * mult
-                );
+            // move normally if x doesnt exist
+            if (std::fabs(x) < std::numeric_limits<float>::epsilon()) {
+                // move horizontally on shift
+                if (CCKeyboardDispatcher::get()->getShiftKeyPressed()) {
+                    objLayer->setPositionX(
+                        objLayer->getPositionX() - y
+                    );
+                }
+                // otherwise move as is in vanilla
+                else {
+                    objLayer->setPositionY(
+                        objLayer->getPositionY() + y
+                    );
+                }
             }
-            // otherwise move as is in vanilla
+            // use both axes, ignore shift
             else {
-                // add support for the horizontal trackpad scrolling on mac
-                // causes the editor to move sideways when scrolling on windows
-            #ifdef GEODE_IS_MACOS
-                objLayer->setPositionX(
-                    objLayer->getPositionX() + y * mult
+                objLayer->setPosition(
+                    objLayer->getPosition() + ccp(x, y)
                 );
-            #else
-                objLayer->setPositionY(
-                    objLayer->getPositionY() + y * mult
-                );
-            #endif
             }
 
             // call original but make it not do anything other than update 
